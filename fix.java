@@ -168,3 +168,108 @@ try {
 } catch (error) {
   console.error('Error:', error.message);
 }
+import React, { useState } from 'react';
+
+const JSONAutoFixEditor = () => {
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [error, setError] = useState('');
+  const [fixes, setFixes] = useState([]);
+
+  const fixJSON = () => {
+    try {
+      const fixer = new JSONAutoFixer();
+      const result = fixer.fix(input);
+      setOutput(JSON.stringify(result, null, 2));
+      setFixes(fixer.getFixesApplied());
+      setError('');
+    } catch (err) {
+      setError(err.message);
+      setOutput('');
+      setFixes([]);
+    }
+  };
+
+  const validateJSON = () => {
+    try {
+      JSON.parse(input);
+      setError('JSON is valid!');
+      setOutput(input);
+      setFixes([]);
+    } catch (err) {
+      setError(`Invalid JSON: ${err.message}`);
+    }
+  };
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <h2>JSON Auto-Fix Tool</h2>
+      
+      <div style={{ marginBottom: '20px' }}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Paste your JSON here..."
+          style={{
+            width: '100%',
+            height: '200px',
+            fontFamily: 'monospace',
+            fontSize: '14px'
+          }}
+        />
+      </div>
+      
+      <div style={{ marginBottom: '20px' }}>
+        <button onClick={validateJSON} style={{ marginRight: '10px' }}>
+          Validate JSON
+        </button>
+        <button onClick={fixJSON} style={{ marginRight: '10px' }}>
+          Auto Fix JSON
+        </button>
+        <button onClick={() => setInput('')}>
+          Clear
+        </button>
+      </div>
+      
+      {error && (
+        <div style={{
+          padding: '10px',
+          backgroundColor: error.includes('valid') ? '#d4edda' : '#f8d7da',
+          border: `1px solid ${error.includes('valid') ? '#c3e6cb' : '#f5c6cb'}`,
+          borderRadius: '4px',
+          marginBottom: '20px'
+        }}>
+          {error}
+        </div>
+      )}
+      
+      {fixes.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h4>Fixes Applied:</h4>
+          <ul>
+            {fixes.map((fix, index) => (
+              <li key={index}>{fix}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {output && (
+        <div>
+          <h4>Fixed JSON:</h4>
+          <pre style={{
+            backgroundColor: '#f8f9fa',
+            padding: '15px',
+            borderRadius: '4px',
+            border: '1px solid #e9ecef',
+            overflow: 'auto'
+          }}>
+            {output}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default JSONAutoFixEditor;
