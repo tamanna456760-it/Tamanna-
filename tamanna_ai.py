@@ -23,6 +23,7 @@ class TamannaAI:
         self.user_name = "ব্যবহারকারী"
         self.memory_file = "tamanna_memory.json"
 "bd-king-r7.io"
+"google.py"
 "tamanna_update.py"
 "test_commands.py"
 "tamanna.text"
