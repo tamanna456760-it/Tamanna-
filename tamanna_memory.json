@@ -395,3 +395,108 @@ project = tamanna.create_from_template(
         "deployment": "vercel"
     }
 )
+# Configure automatic version control
+git_config = {
+    "enabled": True,
+    "auto_commit": True,
+    "commit_pattern": "feat: {feature} | {timestamp}",
+    "auto_push": True,
+    "branch_protection": True,
+    "pr_auto_create": True
+}
+
+tamanna.configure_git(git_config)
+# Real-time file system monitoring
+monitoring_config = {
+    "enabled": True,
+    "watch_paths": ["./src", "./config", "./docs"],
+    "ignore_patterns": ["*.log", "tmp/*", "node_modules/"],
+    "auto_backup": True,
+    "change_notifications": True
+}
+
+tamanna.configure_file_monitoring(monitoring_config)
+# Configure automatic deployment
+deploy_config = {
+    "environments": {
+        "development": {
+            "provider": "localhost",
+            "auto_deploy": True
+        },
+        "staging": {
+            "provider": "heroku",
+            "auto_deploy": True,
+            "url": "https://staging.myapp.herokuapp.com"
+        },
+        "production": {
+            "provider": "aws",
+            "auto_deploy": False,  # Manual approval
+            "url": "https://myapp.com"
+        }
+    },
+    "ci_cd": {
+        "auto_test": True,
+        "auto_build": True,
+        "security_scan": True
+    }
+}
+
+tamanna.configure_deployment(deploy_config)
+# Enable analytics
+analytics_config = {
+    "code_quality": True,
+    "performance_metrics": True,
+    "usage_statistics": True,
+    "error_tracking": True
+}
+
+tamanna.enable_analytics(analytics_config)
+
+# Get project insights
+insights = tamanna.get_project_insights()
+print(f"Code Quality Score: {insights.quality_score}")
+print(f"Performance Metrics: {insights.performance}")
+print(f"Security Issues: {insights.security_issues}")
+# Auto security setup
+security_config = {
+    "code_scanning": True,
+    "dependency_vulnerabilities": True,
+    "secrets_detection": True,
+    "ssl_auto_setup": True,
+    "firewall_rules": True
+}
+
+tamanna.configure_security(security_config)
+# Generate full e-commerce solution
+ecommerce = tamanna.generate_project(
+    type="ecommerce_platform",
+    name="ShopSmart",
+    features=[
+        "user_authentication",
+        "product_catalog", 
+        "shopping_cart",
+        "payment_gateway",
+        "order_management",
+        "inventory_tracking",
+        "customer_reviews",
+        "analytics_dashboard"
+    ],
+    tech_stack=["react", "nodejs", "mongodb", "redis", "stripe"],
+    deploy_config=["docker", "aws", "cdn"]
+)
+# Create real-time chat app
+chat_app = tamanna.generate_project(
+    type="realtime_chat",
+    name="ChatFlow", 
+    features=[
+        "websocket_messaging",
+        "group_chats",
+        "file_sharing",
+        "message_history",
+        "typing_indicators",
+        "online_status",
+        "ai_chat_bot"
+    ],
+    tech_stack=["vuejs", "socketio", "python", "postgresql"],
+    deploy_config=["heroku", "websocket_server"]
+)
