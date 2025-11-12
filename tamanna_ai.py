@@ -32,6 +32,7 @@ class TamannaAI:
 "main.js"
 "setup.js"
 "API_api.py"
+"system_monitoring.py"
 "config.py"
 "stml-core.js"
 "tamanna_ai_apps.js"
