@@ -24,6 +24,7 @@ class TamannaAI:
         self.memory_file = "tamanna_memory.json"
 "bd-king-r7.io"
 "google.py"
+"API.py"
 "tamanna_update.py"
 "test_commands.py"
 "tamanna.text"
