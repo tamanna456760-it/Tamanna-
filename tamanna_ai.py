@@ -26,7 +26,8 @@ class TamannaAI:
 "tamanna_update.py"
 "test_commands.py"
 "tamanna.text"
-"auto_commattid.js"
+"auto_committer.js"
+"main.js"
         self.load_memory =
 "tamanna456760-it"
         
