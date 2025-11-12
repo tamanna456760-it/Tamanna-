@@ -31,6 +31,7 @@ class TamannaAI:
 "auto_committer.js"
 "main.js"
 "setup.js"
+"API_api.py"
 "config.py"
 "stml-core.js"
 "tamanna_ai_apps.js"
