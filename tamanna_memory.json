@@ -270,3 +270,51 @@
     "maintenance": ["htop", "nethogs", "iotop", "glances"]
   }
 }
+# Create a web application
+builder.create_web_app(
+    name="E-Commerce Platform",
+    frontend="react",
+    backend="nodejs",
+    database="mongodb"
+)
+
+# Create API service
+builder.create_api_service(
+    name="User Management API",
+    framework="fastapi",
+    authentication="jwt",
+    database="postgresql"
+)
+
+# Create data science project
+builder.create_data_science_project(
+    name="Sales Predictor",
+    ml_framework="tensorflow",
+    analysis_tools="pandas,seaborn"
+)
+# Enable auto-sync
+builder.enable_auto_sync(
+    git_auto_commit=True,
+    cloud_backup=True,
+    real_time_monitoring=True
+)
+# Smart code generation with AI
+code = tamanna.generate_code(
+    requirement="Create a user authentication system with JWT tokens",
+    language="python",
+    framework="fastapi",
+    best_practices=True,
+    security=True
+)
+
+# Auto-create multiple files
+files = tamanna.create_file_structure([
+    {
+        "path": "src/auth/",
+        "files": ["__init__.py", "models.py", "routes.py", "utils.py"]
+    },
+    {
+        "path": "src/database/",
+        "files": ["connection.py", "models.py", "queries.py"]
+    }
+])
