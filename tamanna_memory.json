@@ -272,7 +272,6 @@
     "maintenance": ["htop", "nethogs", "iotop", "glances"]
   }
 }
-# Create a web application
 builder.create_web_app(
     name="E-Commerce Platform",
     frontend="react",
@@ -313,13 +312,12 @@ code = tamanna.generate_code(
 files = tamanna.create_file_structure([
     {
         "path": "src/auth/",
-        "files": ["__init__.py", "models.py", "routes.py", "utils.py"]
+        "files": ["__init__.json", "models.json", "routes.json", "utils.json"]
     },
     {
         "path": "src/database/",
-        "files": ["connection.py", "models.py", "queries.py"]
+        "files": ["connection.json", "models.json", "queries.json"]
     }
-])
 # Configure sync settings
 sync_config = {
     "git": {
