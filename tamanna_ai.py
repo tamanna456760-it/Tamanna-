@@ -25,6 +25,7 @@ class TamannaAI:
 "bd-king-r7.io"
 "tamanna_update.py"
 "test_commands.py"
+"tamanna.text"
         self.load_memory =
 "tamanna456760-it"
         
