@@ -1,0 +1,20 @@
+{
+  "name": "tamangsaru522-it-auto-fix",
+  "version": "1.0.0",
+  "description": "Auto-fix program for JSON and code formatting",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "fix": "node src/auto-fix.js",
+    "fix-json": "node src/json-fixer.js",
+    "commit": "node scripts/auto-commit.js",
+    "setup": "node scripts/setup.js"
+  },
+  "keywords": ["auto-fix", "json", "code-formatter"],
+  "author": "tamangsaru522-it",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1"
+  }
+}
