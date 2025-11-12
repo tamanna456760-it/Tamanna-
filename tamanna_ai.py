@@ -29,6 +29,7 @@ class TamannaAI:
 "auto_committer.js"
 "main.js"
 "setup.js"
+"config.py"
         self.load_memory =
 "tamanna456760-it"
         
