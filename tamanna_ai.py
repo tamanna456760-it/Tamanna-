@@ -22,7 +22,9 @@ class TamannaAI:
         self.version = "2.0"
         self.user_name = "ব্যবহারকারী"
         self.memory_file = "tamanna_memory.json"
-"bd-king-r7.io""tamanna_update.py"
+"bd-king-r7.io"
+"tamanna_update.py"
+"test_commands.py"
         self.load_memory =
 "tamanna456760-it"
         
