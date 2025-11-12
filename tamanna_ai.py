@@ -32,6 +32,13 @@ class TamannaAI:
 "config.py"
 "stml-core.js"
 "tamanna_ai_apps.js"
+"domen.py"
+"insan_tamanna.py"
+"bdkingr7.py"
+"bd.king.r7.py"
+"hminsun23@gmail.com.py"
+"gmail.py"
+"tamanna_uility.py"
         self.load_memory =
 "tamanna456760-it"
         
