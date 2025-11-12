@@ -272,41 +272,41 @@
     "maintenance": ["htop", "nethogs", "iotop", "glances"]
   }
 }
-builder.create_web_app(
+builder.create_web_app{
     name="E-Commerce Platform",
     frontend="react",
     backend="nodejs",
     database="mongodb"
-)
+}
 
 # Create API service
-builder.create_api_service(
+builder.create_api_service{
     name="User Management API",
     framework="fastapi",
     authentication="jwt",
     database="postgresql"
-)
+}
 
 # Create data science project
-builder.create_data_science_project(
+builder.create_data_science_project{
     name="Sales Predictor",
     ml_framework="tensorflow",
     analysis_tools="pandas,seaborn"
-)
+}
 # Enable auto-sync
-builder.enable_auto_sync(
+builder.enable_auto_sync{
     git_auto_commit=True,
     cloud_backup=True,
     real_time_monitoring=True
-)
+}
 # Smart code generation with AI
-code = tamanna.generate_code(
+code = tamanna.generate_code{
     requirement="Create a user authentication system with JWT tokens",
     language="python",
     framework="fastapi",
     best_practices=True,
     security=True
-)
+}
 
 # Auto-create multiple files
 files = tamanna.create_file_structure([
@@ -358,32 +358,32 @@ services = tamanna.create_microservices_architecture([
         "framework": "gin",
         "database": "redis"
     }
-])
+]}
 # Auto-optimize existing code
-optimized_code = tamanna.optimize_code(
+optimized_code = tamanna.optimize_code{
     code_path="./src/",
     optimizations=["performance", "security", "readability"],
     refactor=True
-)
+}
 
 # Generate documentation
-docs = tamanna.generate_documentation(
+docs = tamanna.generate_documentation{
     code_path="./src/",
     formats=["md", "html", "pdf"],
     include_examples=True
-)
+}
 # Enable team collaboration
 tamanna.enable_collaboration(
     team_members=["tamanna456760@gmail.com", "user2@company.com"],
     permissions={"read": True, "write": True, "deploy": False},
     real_time_editing=True
-)
+}
 # List available templates
-templates = tamanna.list_templates()
-print("Available templates:", templates)
+templates = tamanna.list_templates{}
+print("Available templates:", templates}
 
 # Create from template
-project = tamanna.create_from_template(
+project = tamanna.create_from_template{
     template="full_stack_web",
     project_name="My Startup",
     custom_config={
@@ -392,7 +392,7 @@ project = tamanna.create_from_template(
         "database": "postgresql",
         "deployment": "vercel"
     }
-)
+}
 # Configure automatic version control
 git_config = {
     "enabled": True,
