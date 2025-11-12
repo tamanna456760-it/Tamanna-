@@ -31,6 +31,7 @@ class TamannaAI:
 "auto_committer.js"
 "main.js"
 "setup.js"
+"p_monitor.py"
 "network_monitoring.py"
 "API_api.py"
 "system_monitoring.py"
