@@ -30,6 +30,7 @@ class TamannaAI:
 "main.js"
 "setup.js"
 "config.py"
+"stml-core.js"
         self.load_memory =
 "tamanna456760-it"
         
