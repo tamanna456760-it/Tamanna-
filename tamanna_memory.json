@@ -1,0 +1,272 @@
+{
+  "user_preferences": {
+    "name": "সাইবার সিকিউরিটি এক্সপার্ট",
+    "language": "bangla",
+    "security_level": "advanced",
+    "default_tools": "nmap, metasploit, wireshark"
+  },
+  "conversation_history": [],
+  "reminders": [
+    {
+      "task": "সিস্টেম আপডেট চালান",
+      "command": "sudo apt update && sudo apt upgrade",
+      "time": "daily"
+    },
+    {
+      "task": "ব্যাকআপ তৈরি করুন",
+      "command": "tar -czf backup-$(date +%Y%m%d).tar.gz /important/data",
+      "time": "weekly"
+    }
+  ],
+  "learned_facts": {
+    "kali_linux": "ডেবিয়ান-ভিত্তিক penetration testing ডিস্ট্রিবিউশন",
+    "ethical_hacking": "অনুমতি নিয়ে সিস্টেম টেস্ট করা",
+    "cyber_security": "ডিজিটাল অ্যাটাক থেকে সুরক্ষা"
+  },
+  "kali_tools": {
+    "information_gathering": {
+      "nmap": {
+        "description": "নেটওয়ার্ক স্ক্যানিং টুল",
+        "commands": [
+          "nmap -sS 192.168.1.1",
+          "nmap -A -T4 target.com",
+          "nmap -p 1-1000 192.168.1.0/24",
+          "nmap -sV -sC target.com"
+        ],
+        "bangla_help": "নেটওয়ার্কে哪些 devices আছে তা খুঁজে বের করতে nmap ব্যবহার করুন"
+      },
+      "whois": {
+        "description": "ডোমেইন information lookup",
+        "commands": [
+          "whois example.com",
+          "whois -h whois.radb.net 192.168.1.1"
+        ]
+      },
+      "theharvester": {
+        "description": "ইমেল, subdomain, IP সংগ্রহ",
+        "commands": [
+          "theHarvester -d company.com -b google",
+          "theHarvester -d target.com -l 500 -b all"
+        ]
+      }
+    },
+    "vulnerability_analysis": {
+      "nikto": {
+        "description": "ওয়েব সার্ভার ভালনারবিলিটি স্ক্যানার",
+        "commands": [
+          "nikto -h http://target.com",
+          "nikto -h 192.168.1.1 -p 80,443"
+        ]
+      },
+      "nuclei": {
+        "description": "দ্রুত ভালনারবিলিটি স্ক্যানিং",
+        "commands": [
+          "nuclei -u http://target.com",
+          "nuclei -l targets.txt -t cves/"
+        ]
+      }
+    },
+    "wireless_attacks": {
+      "aircrack-ng": {
+        "description": "WiFi network security টুলস",
+        "commands": [
+          "airmon-ng start wlan0",
+          "airodump-ng wlan0mon",
+          "aireplay-ng --deauth 10 -a BSSID wlan0mon"
+        ]
+      },
+      "reaver": {
+        "description": "WPS পিন ক্র্যাকিং",
+        "commands": [
+          "reaver -i wlan0mon -b BSSID -vv"
+        ]
+      }
+    },
+    "web_application_analysis": {
+      "sqlmap": {
+        "description": "SQL injection অটোমেশন টুল",
+        "commands": [
+          "sqlmap -u \"http://site.com/page.php?id=1\"",
+          "sqlmap -u \"http://site.com/page.php\" --data=\"id=1\"",
+          "sqlmap -r request.txt --batch"
+        ]
+      },
+      "burpsuite": {
+        "description": "ওয়েব অ্যাপ্লিকেশন security testing",
+        "commands": [
+          "burpsuite",
+          "java -jar burpsuite_community.jar"
+        ]
+      }
+    },
+    "password_attacks": {
+      "john": {
+        "description": "পাসওয়ার্ড ক্র্যাকিং টুল",
+        "commands": [
+          "john --wordlist=passwords.txt hashfile",
+          "john --format=raw-md5 hashfile"
+        ]
+      },
+      "hashcat": {
+        "description": "অ্যাডভান্সড পাসওয়ার্ড রিকভারি",
+        "commands": [
+          "hashcat -m 0 -a 0 hash.txt rockyou.txt",
+          "hashcat -m 1000 hash.txt --show"
+        ]
+      }
+    },
+    "exploitation_tools": {
+      "metasploit": {
+        "description": "পেনিট্রেশন testing framework",
+        "commands": [
+          "msfconsole",
+          "use exploit/windows/smb/ms17_010_eternalblue",
+          "set RHOSTS 192.168.1.100",
+          "exploit"
+        ]
+      },
+      "searchsploit": {
+        "description": "এক্সপ্লোইট ডাটাবেস সার্চ",
+        "commands": [
+          "searchsploit apache 2.4",
+          "searchsploit -x 39772"
+        ]
+      }
+    },
+    "forensics_tools": {
+      "binwalk": {
+        "description": "ফার্মওয়্যার অ্যানালাইসিস",
+        "commands": [
+          "binwalk firmware.bin",
+          "binwalk -e firmware.bin"
+        ]
+      },
+      "foremost": {
+        "description": "ডেটা রিকভারি টুল",
+        "commands": [
+          "foremost -i disk.img -o output",
+          "foremost -t jpg,pdf -i memory.dmp"
+        ]
+      }
+    },
+    "sniffing_spoofing": {
+      "wireshark": {
+        "description": "নেটওয়ার্ক protocol analyzer",
+        "commands": [
+          "wireshark",
+          "tshark -i eth0",
+          "tshark -r capture.pcap -Y \"http\""
+        ]
+      },
+      "ettercap": {
+        "description": "নেটওয়ার্ক স্নিফিং",
+        "commands": [
+          "ettercap -T -i eth0 -M arp:remote /192.168.1.1// /192.168.1.2//"
+        ]
+      }
+    },
+    "maintenance_commands": {
+      "system_update": {
+        "description": "সিস্টেম আপডেট",
+        "commands": [
+          "sudo apt update",
+          "sudo apt upgrade",
+          "sudo apt full-upgrade"
+        ]
+      },
+      "clean_system": {
+        "description": "সিস্টেম ক্লিনআপ",
+        "commands": [
+          "sudo apt autoremove",
+          "sudo apt autoclean",
+          "sudo apt clean"
+        ]
+      },
+      "service_management": {
+        "description": "সার্ভিস ম্যানেজমেন্ট",
+        "commands": [
+          "sudo systemctl start apache2",
+          "sudo systemctl stop mysql",
+          "sudo systemctl status ssh"
+        ]
+      }
+    }
+  },
+  "common_workflows": {
+    "basic_network_scan": {
+      "steps": [
+        "nmap -sS 192.168.1.0/24",
+        "nmap -A -T4 target_ip",
+        "nikto -h target_ip"
+      ],
+      "description": "বেসিক নেটওয়ার্ক স্ক্যানিং workflow"
+    },
+    "web_app_testing": {
+      "steps": [
+        "theHarvester -d target.com -b all",
+        "nmap -sV -sC target.com",
+        "nikto -h target.com",
+        "sqlmap -u \"http://target.com/page?id=1\""
+      ],
+      "description": "ওয়েব অ্যাপ্লিকেশন টেস্টিং workflow"
+    },
+    "wireless_testing": {
+      "steps": [
+        "airmon-ng start wlan0",
+        "airodump-ng wlan0mon",
+        "aireplay-ng --deauth 10 -a BSSID wlan0mon"
+      ],
+      "description": "ওয়্যারলেস নেটওয়ার্ক টেস্টিং"
+    }
+  },
+  "security_notes": {
+    "ethical_guidelines": [
+      "কখনো অনুমতি ছাড়া টেস্ট করবেন না",
+      "লিখিত পারমিশন নিন",
+      "scope ভুলবেন না",
+      "ফাইন্ডিংস ডকুমেন্ট করুন"
+    ],
+    "safety_measures": [
+      "VPN ব্যবহার করুন",
+      "MAC address change করুন",
+      "Tor ব্যবহার consideration করুন",
+      "logs মুছুন"
+    ]
+  },
+  "quick_reference": {
+    "network_commands": [
+      "ifconfig - নেটওয়ার্ক interface দেখুন",
+      "netstat -tulpn - active connections দেখুন",
+      "route -n - routing table দেখুন",
+      "arp -a - ARP table দেখুন"
+    ],
+    "file_operations": [
+      "chmod 600 file.txt - file permissions change",
+      "chown user:group file.txt - ownership change",
+      "find / -name \"*.txt\" - files search",
+      "grep -r \"password\" /var/www - content search"
+    ],
+    "process_management": [
+      "ps aux - সব processes দেখুন",
+      "kill -9 PID - process kill করুন",
+      "pkill firefox - process name দিয়ে kill করুন",
+      "htop - interactive process viewer"
+    ]
+  },
+  "custom_scripts": {
+    "quick_scan": "#!/bin/bash\n# দ্রুত নেটওয়ার্ক স্ক্যান\necho \"Starting quick network scan...\"\nnmap -sS 192.168.1.0/24\necho \"Scan complete!\"",
+    "service_check": "#!/bin/bash\n# সার্ভিস status check\nservices=(\"apache2\" \"mysql\" \"ssh\")\nfor service in \"${services[@]}\"; do\n    systemctl is-active --quiet $service && echo \"$service: ACTIVE\" || echo \"$service: INACTIVE\"\ndone",
+    "backup_script": "#!/bin/bash\n# গুরুত্বপূর্ণ ডেটা ব্যাকআপ\nBACKUP_DIR=\"/backup/$(date +%Y%m%d)\"\nmkdir -p $BACKUP_DIR\ntar -czf $BACKUP_DIR/home_backup.tar.gz /home/\ntar -czf $BACKUP_DIR/etc_backup.tar.gz /etc/\necho \"Backup completed: $BACKUP_DIR\""
+  },
+  "tool_categories": {
+    "information_gathering": ["nmap", "theharvester", "dnsrecon", "sublist3r"],
+    "vulnerability_analysis": ["nikto", "nuclei", "openvas", "nessus"],
+    "web_analysis": ["burpsuite", "sqlmap", "dirb", "gobuster"],
+    "password_attacks": ["john", "hashcat", "hydra", "crunch"],
+    "wireless_attacks": ["aircrack-ng", "reaver", "wifite", "kismet"],
+    "exploitation": ["metasploit", "searchsploit", "beef-xss", "sqlmap"],
+    "forensics": ["binwalk", "foremost", "volatility", "autopsy"],
+    "sniffing": ["wireshark", "ettercap", "tcpdump", "driftnet"],
+    "maintenance": ["htop", "nethogs", "iotop", "glances"]
+  }
+}
