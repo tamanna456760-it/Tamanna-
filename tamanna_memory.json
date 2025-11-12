@@ -1,3 +1,5 @@
+
+
 {
   "user_preferences": {
     "name": "সাইবার সিকিউরিটি এক্সপার্ট",
@@ -318,3 +320,78 @@ files = tamanna.create_file_structure([
         "files": ["connection.py", "models.py", "queries.py"]
     }
 ])
+# Configure sync settings
+sync_config = {
+    "git": {
+        "auto_commit": True,
+        "auto_push": True,
+        "commit_message": "Auto-update: {timestamp}"
+    },
+    "cloud": {
+        "enabled": True,
+        "providers": ["aws_s3", "google_drive"],
+        "encryption": True
+    },
+    "monitoring": {
+        "file_watcher": True,
+        "real_time": True,
+        "notifications": True
+    }
+}
+
+tamanna.configure_sync(sync_config)
+# Create polyglot microservices
+services = tamanna.create_microservices_architecture([
+    {
+        "name": "user-service",
+        "language": "python",
+        "framework": "fastapi",
+        "database": "postgresql"
+    },
+    {
+        "name": "product-service", 
+        "language": "nodejs",
+        "framework": "express",
+        "database": "mongodb"
+    },
+    {
+        "name": "payment-service",
+        "language": "go",
+        "framework": "gin",
+        "database": "redis"
+    }
+])
+# Auto-optimize existing code
+optimized_code = tamanna.optimize_code(
+    code_path="./src/",
+    optimizations=["performance", "security", "readability"],
+    refactor=True
+)
+
+# Generate documentation
+docs = tamanna.generate_documentation(
+    code_path="./src/",
+    formats=["md", "html", "pdf"],
+    include_examples=True
+)
+# Enable team collaboration
+tamanna.enable_collaboration(
+    team_members=["tamanna456760@gmail.com", "user2@company.com"],
+    permissions={"read": True, "write": True, "deploy": False},
+    real_time_editing=True
+)
+# List available templates
+templates = tamanna.list_templates()
+print("Available templates:", templates)
+
+# Create from template
+project = tamanna.create_from_template(
+    template="full_stack_web",
+    project_name="My Startup",
+    custom_config={
+        "frontend": "nextjs",
+        "backend": "django",
+        "database": "postgresql",
+        "deployment": "vercel"
+    }
+)
