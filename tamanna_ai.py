@@ -13,7 +13,9 @@ import speech_recognition as sr
 import pyttsx3
 import threading
 import time
-
+import json
+import subprocess
+import os
 class TamannaAI:
     def __init__(self):
         self.name = "তামান্না AI"
@@ -338,6 +340,118 @@ def main():
             break
         else:
             print("দয়া করে 'টেক্সট' বা 'ভয়েস' নির্বাচন করুন")
+Tamanna AI - Kali Linux Cybersecurity Assistant
+সাইবার সিকিউরিটি ফোকাসড AI সহকারী
+"""
+class KaliTamannaAI(TamannaAI):
+    def __init__(self):
+        super().__init__()
+        self.name = "তামান্না AI - সাইবার সিকিউরিটি"
+        self.memory_file = "tamanna_memory.json"
+        self.load_memory()
+        
+    def execute_command(self, command: str) -> str:
+        """কমান্ড execute করুন এবং output return করুন"""
+        try:
+            result = subprocess.run(
+                command, 
+                shell=True, 
+                capture_output=True, 
+                text=True, 
+                timeout=30
+            )
+            if result.returncode == 0:
+                return result.stdout[:500]  # Limit output length
+            else:
+                return f"Error: {result.stderr}"
+        except subprocess.TimeoutExpired:
+            return "Command timed out"
+        except Exception as e:
+            return f"Execution error: {str(e)}"
+    
+    def get_tool_help(self, tool_name: str) -> str:
+        """টুলের সাহায্য তথ্য দিন"""
+        tools = self.memory.get("kali_tools", {})
+        
+        for category, tool_list in tools.items():
+            if tool_name in tool_list:
+                tool_info = tool_list[tool_name]
+                response = f"🛠️ {tool_name.upper()} টুল:\n"
+                response += f"বিবরণ: {tool_info.get('description', 'N/A')}\n\n"
+                response += "কমান্ডস:\n"
+                for cmd in tool_info.get('commands', [])[:3]:
+                    response += f"• {cmd}\n"
+                return response
+        
+        return f"{tool_name} টুল সম্পর্কে তথ্য পাওয়া যায়নি"
+    
+    def process_kali_command(self, command: str) -> str:
+        """Kali Linux specific commands process করুন"""
+        cmd_lower = command.lower()
+        
+        # টুল সাহায্য
+        if "টুল" in cmd_lower and "সাহায্য" in cmd_lower:
+            for tool in ["nmap", "sqlmap", "metasploit", "wireshark", "aircrack"]:
+                if tool in cmd_lower:
+                    return self.get_tool_help(tool)
+        
+        # কমান্ড execute
+        elif "রান" in cmd_lower or "চালাও" in cmd_lower:
+            # Extract command from text
+            if "nmap" in cmd_lower:
+                return self.execute_command("nmap --help | head -20")
+            elif "সিস্টেম আপডেট" in cmd_lower:
+                return self.execute_command("sudo apt update")
+        
+        # Workflow suggestions
+        elif "নেটওয়ার্ক স্ক্যান" in cmd_lower:
+            workflow = self.memory["common_workflows"]["basic_network_scan"]
+            response = "🌐 নেটওয়ার্ক স্ক্যান workflow:\n"
+            for step in workflow["steps"]:
+                response += f"• {step}\n"
+            return response
+        
+        elif "ওয়েব টেস্টিং" in cmd_lower:
+            workflow = self.memory["common_workflows"]["web_app_testing"]
+            response = "🕸️ ওয়েব অ্যাপ টেস্টিং workflow:\n"
+            for step in workflow["steps"]:
+                response += f"• {step}\n"
+            return response
+        
+        # টুল ক্যাটেগরি
+        elif "সব টুল" in cmd_lower or "টুলস" in cmd_lower:
+            categories = self.memory["tool_categories"]
+            response = "🛠️ Kali Linux টুল ক্যাটেগরি:\n"
+            for category, tools in categories.items():
+                response += f"\n{category.replace('_', ' ').title()}:\n"
+                response += f"{', '.join(tools[:3])}..."
+            return response
+        
+        return "কমান্ড বুঝতে পারিনি। 'টুল সাহায্য' বলুন বিশেষ টুল জানতে।"
+    
+    def enhanced_process_command(self, command: str) -> str:
+        """এনহ্যান্সড command processing with Kali tools"""
+        # First try Kali-specific commands
+        kali_response = self.process_kali_command(command)
+        if "কমান্ড বুঝতে পারিনি" not in kali_response:
+            return kali_response
+        
+        # Fall back to original processing
+        return super().process_command(command)
+
+def main():
+    """Kali Linux version of Tamanna AI"""
+    ai = KaliTamannaAI()
+    
+    print("\n" + "="*70)
+    print("🔐 তামান্না AI - সাইবার সিকিউরিটি এডিশন")
+    print("="*70)
+    print("বিশেষ কমান্ডস: 'টুল সাহায্য', 'নেটওয়ার্ক স্ক্যান', 'সব টুলস'")
+    
+    user_name = input("\nআপনার নাম দিন: ").strip() or "হ্যাকার"
+    ai.set_user_name(user_name)
+    
+    ai.text_mode()
 
 if __name__ == "__main__":
     main()
