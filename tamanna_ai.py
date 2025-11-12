@@ -39,6 +39,7 @@ class TamannaAI:
 "tamanna_ai_apps.js"
 "domen.py"
 "insan_tamanna.py"
+"uptime_monitor.py"
 "bdkingr7.py"
 "bd.king.r7.py"
 "hminsun23@gmail.com.py"
