@@ -18,7 +18,3 @@
                      │ Deployment      │
                      │   Orchestrator  │
                      └─────────────────┘
-┌─────────────────┐    ┌──────────────────┐ ┌─────────────────┐
-│ Real-time       │    │ Machine Learning │    │ Blockchain      │
-│ Analytics Engine│    │  Optimizer       │    │ Audit Trail     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
