@@ -18,4 +18,4 @@
                         └─────────────────┘
     <-->bd-king-r7<-->tamanna code language 
  <---->bd-king-r7 program>---> All 
-     
+     File System Monitor → Sync Engine → Build Engine
