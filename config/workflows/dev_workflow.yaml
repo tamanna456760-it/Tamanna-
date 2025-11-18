@@ -1,0 +1,25 @@
+# config/workflows/dev_workflow.yaml
+name: "Development Auto-Sync-Build"
+description: "Automated sync and build for development environment"
+
+triggers:
+  - file_change:
+      paths: ["./src", "./config"]
+      ignore: ["*.tmp", "*.log"]
+  - manual: true
+
+sync:
+  environments: ["local"]
+  strategy: "immediate"
+  conflict_resolution: "developer_choice"
+
+build:
+  languages: ["python", "javascript"]
+  triggers: ["after_sync"]
+  tests: true
+  notifications: true
+
+deployment:
+  auto_deploy: true
+  environment: "local"
+  health_checks: true
