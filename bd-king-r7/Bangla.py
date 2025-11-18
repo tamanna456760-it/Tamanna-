@@ -5,3 +5,16 @@ code = '''
 নির্ধারণ বয়স = 25
 লেখো "আমার নাম " + নাম + " এবং বয়স " + বয়স
 '''
+# Mixed Bangla + English
+code = '''
+set x = 10
+নির্ধারণ y = 5
+
+print "Addition: " + (x + y)
+লেখো "গুণ: " + (x * y)
+
+যদি x > y:
+    print "x is bigger"
+নাহলে:
+    লেখো "y is bigger"
+'''
