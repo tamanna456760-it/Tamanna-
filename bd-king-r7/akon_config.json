@@ -1,11 +1,11 @@
 {
   "watch_directories": [
     "./src",
-    "./akon_files",
+    "./hm_files",
     "./tamanna_scripts"
   ],
   "build_directory": "./build",
-  "file_extensions": [".akon", ".tmn", ".py"],
+  "file_extensions": [".hm", ".tmn", ".py"],
   "auto_build": true,
   "sync_delay": 0.5,
   "log_level": "INFO"
