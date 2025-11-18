@@ -1,0 +1,29 @@
+# Tamanna System Configuration
+নির্ধারণ system_name = "Tamanna Code Language"
+নির্ধারণ version = "1.0.0"
+নির্ধারণ platform = "multi"
+
+# Color Settings
+নির্ধারণ color_scheme = "7-colors"
+নির্ধারণ syntax_highlighting = true
+
+# Build Settings  
+নির্ধারণ auto_build = true
+নির্ধারণ build_directory = "./build"
+নির্ধারণ dist_directory = "./dist"
+
+# Network Settings
+নির্ধারণ default_port = 8080
+নির্ধারণ enable_network = true
+
+# Platform Specific
+যদি platform == "windows":
+    নির্ধারণ shell = "cmd"
+নাহলে যদি platform == "linux":
+    নির্ধারণ shell = "bash"
+নাহলে যদি platform == "android":
+    নির্ধারণ shell = "termux"
+নাহলে:
+    নির্ধারণ shell = "unknown"
+
+লেখো "কনফিগারেশন লোড হয়েছে: " + system_name
