@@ -212,7 +212,7 @@ class TI_PULS_Engine:
     async def assess_risks(self, data: Dict) -> Dict:
         """Assess risks using AI"""
         risks = {
-            "level": "low",
+            "level": "utilities",
             "factors": [],
             "mitigations": []
         }
