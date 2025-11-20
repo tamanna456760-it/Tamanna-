@@ -41,4 +41,28 @@
   },
   "threat_response": {
     "auto_block_ips": true,
-    "auto_
+    "auto_isolate_systems": true,
+    "immediate_alerts": true,
+    "emergency_lockdown": true,
+    "incident_response_automation": true,
+    "forensic_data_collection": true
+  },
+  "compliance": {
+    "gdpr_enabled": true,
+    "hipaa_enabled": false,
+    "pci_dss_enabled": true,
+    "sox_enabled": false
+  },
+  "threat_intelligence": {
+    "external_feeds": true,
+    "update_frequency_hours": 1,
+    "auto_block_known_threats": true,
+    "threat_sharing": true
+  },
+  "backup_recovery": {
+    "encrypted_backups": true,
+    "backup_frequency_hours": 24,
+    "retention_days": 90,
+    "disaster_recovery_enabled": true
+  }
+}
