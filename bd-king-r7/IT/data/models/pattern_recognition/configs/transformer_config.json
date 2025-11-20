@@ -1,0 +1,32 @@
+{
+  "architecture": {
+    "sequence_length": 100,
+    "num_features": 20,
+    "num_classes": 12,
+    "d_model": 256,
+    "num_heads": 8,
+    "num_layers": 6,
+    "dff": 512,
+    "dropout_rate": 0.1,
+    "positional_encoding": true,
+    "use_pre_norm": true
+  },
+  "training": {
+    "batch_size": 16,
+    "epochs": 200,
+    "learning_rate": 0.001,
+    "warmup_steps": 4000,
+    "optimizer": "adam",
+    "loss": "categorical_crossentropy",
+    "metrics": ["accuracy"],
+    "early_stopping": true,
+    "patience": 25,
+    "gradient_clipping": true,
+    "clip_value": 1.0
+  },
+  "attention_analysis": {
+    "visualize_attention": true,
+    "save_attention_maps": true,
+    "attention_threshold": 0.1
+  }
+}
