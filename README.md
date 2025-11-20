@@ -1,1 +1,1 @@
-tamanna456760-ui
+tamanna456760-it
