@@ -1,0 +1,83 @@
+{
+  "model_id": "pattern_recognition_v1",
+  "name": "Advanced Pattern Recognition",
+  "model_type": "neural_network",
+  "description": "Neural network for detecting patterns in BD-King-R7 transaction data",
+  "version": "1.0.0",
+  "framework": "tensorflow",
+  "architecture": {
+    "type": "sequential",
+    "layers": [
+      {
+        "type": "dense",
+        "units": 128,
+        "activation": "relu",
+        "input_shape": [50]
+      },
+      {
+        "type": "dropout",
+        "rate": 0.3
+      },
+      {
+        "type": "dense", 
+        "units": 64,
+        "activation": "relu"
+      },
+      {
+        "type": "dense",
+        "units": 32,
+        "activation": "relu"
+      },
+      {
+        "type": "dense",
+        "units": 10,
+        "activation": "softmax"
+      }
+    ]
+  },
+  "training_config": {
+    "optimizer": "adam",
+    "loss": "categorical_crossentropy",
+    "metrics": ["accuracy", "precision", "recall"],
+    "batch_size": 32,
+    "epochs": 100,
+    "validation_split": 0.2,
+    "early_stopping": true
+  },
+  "data_sources": [
+    "/data/transactions",
+    "/data/inventory",
+    "/data/customer_behavior"
+  ],
+  "input_features": [
+    "transaction_amount",
+    "time_of_day", 
+    "day_of_week",
+    "customer_segment",
+    "product_category",
+    "location",
+    "device_type",
+    "session_duration",
+    "previous_transactions",
+    "seasonal_factor"
+  ],
+  "output_classes": [
+    "normal",
+    "suspicious", 
+    "fraudulent",
+    "premium_customer",
+    "new_customer",
+    "repeat_customer",
+    "high_value",
+    "low_value",
+    "seasonal_peak",
+    "anomaly"
+  ],
+  "performance_requirements": {
+    "min_accuracy": 0.95,
+    "min_precision": 0.90,
+    "min_recall": 0.85,
+    "max_inference_time": 100,
+    "model_size_limit": 100000000
+  }
+}
