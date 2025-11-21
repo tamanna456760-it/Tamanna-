@@ -1,0 +1,31 @@
+{
+  "architecture": {
+    "input_dim": 100,
+    "latent_dim": 100,
+    "generator_layers": [128, 256, 512],
+    "discriminator_layers": [512, 256, 128],
+    "activation": "leaky_relu",
+    "output_activation": "tanh",
+    "dropout_rate": 0.3,
+    "batch_normalization": true,
+    "use_spectral_norm": false
+  },
+  "training": {
+    "batch_size": 32,
+    "epochs": 1000,
+    "generator_lr": 0.0002,
+    "discriminator_lr": 0.0002,
+    "discriminator_steps": 1,
+    "label_smoothing": true,
+    "gradient_penalty": true,
+    "gp_weight": 10.0,
+    "use_wasserstein": false
+  },
+  "anomaly_detection": {
+    "threshold_percentile": 95,
+    "confidence_window": 100,
+    "min_confidence": 0.1,
+    "use_discriminator_confidence": true,
+    "anomaly_score_method": "confidence_based"
+  }
+}
