@@ -17,5 +17,5 @@ Advanced AI-powered analytics and prediction system with real-time capabilities.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/bd-king-r7-ai.git
+git clone https://github.com/tamanna456760-it/bd-king-r7-ai.git
 cd bd-king-r7-ai
