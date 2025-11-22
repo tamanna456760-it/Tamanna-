@@ -1,61 +1,41 @@
-name: Git Auto Build & Workflow (Safe Mode)
+name: BD-KING-R7 AI Auto Build & Sync
 
 on:
   push:
     branches: [ "main" ]
+  schedule:
+    - cron: "*/10 * * * *"   # প্রতি 10 মিনিটে auto update
   workflow_dispatch:
 
 jobs:
-  build:
+  auto:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # Node optional
-    - name: Setup Node.js (optional)
-      if: exists('package.json')
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
-
-    # Python optional
-    - name: Setup Python (optional)
-      if: exists('requirements.txt')
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
 
-    - name: Install Dependencies (safe)
+    - name: Install Dependencies (if any)
       run: |
-        echo "Installing dependencies if available..."
-
-        if [ -f package.json ]; then
-          npm install || true
-        fi
-
         if [ -f requirements.txt ]; then
-          pip install -r requirements.txt || true
+          pip install -r requirements.txt
         fi
 
-    - name: Build Project (safe)
+    - name: Run Build Script
       run: |
-        echo "Building project safely..."
-
-        if [ -f package.json ]; then
-          npm run build || true
-        fi
-
         if [ -f build.py ]; then
-          python build.py || true
+          python build.py
         fi
 
-    - name: Auto Commit Build Files
+    - name: Auto Commit Build
       run: |
         git config user.name "tamanna456760-it"
         git config user.email "tamanna456760@gmail.com"
-
         git add .
-        git commit -m "Auto Build Update (safe)" || echo "No files changed"
-        git push || echo "Push skipped"
+        git commit -m "BD-KING-R7 Auto Build Update" || echo "No changes"
+        git push || echo "Push failed"
