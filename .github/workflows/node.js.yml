@@ -1,0 +1,62 @@
+name: Git Auto Build & Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # OPTIONAL: Node.js project হলে
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+      continue-on-error: true
+
+    # OPTIONAL: Python project হলে
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+      continue-on-error: true
+
+    # Dependencies install
+    - name: Install Dependencies
+      run: |
+        echo "Installing dependencies..."
+        if [ -f package.json ]; then
+            npm install
+        fi
+        if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+        fi
+
+    # Build Step
+    - name: Build Project
+      run: |
+        echo "Building project..."
+        if [ -f package.json ]; then
+            npm run build || echo "No build script found"
+        fi
+        if [ -f build.py ]; then
+            python build.py || echo "No python build"
+        fi
+
+    # Auto Commit Build Files
+    - name: Auto Commit Build
+      run: |
+        git config user.name "tamanna456760-it"
+        git config user.email "tamanna456760@gmail.com"
+
+        git add .
+        git commit -m "Auto Build Update" || echo "No changes"
+        git push
