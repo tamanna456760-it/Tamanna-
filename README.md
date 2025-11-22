@@ -1,4 +1,9 @@
+---
+type: Journal
+---
+
 # tamanna456760-it auto sync
+
 # BD-KING-R7 AI System 🤖
 
 Advanced AI-powered analytics and prediction system with real-time capabilities.
