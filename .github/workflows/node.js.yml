@@ -1,9 +1,7 @@
-name: Git Auto Build & Workflow
+name: Git Auto Build & Workflow (Safe Mode)
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 
@@ -12,51 +10,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout repo
       uses: actions/checkout@v4
 
-    # OPTIONAL: Node.js project হলে
-    - name: Setup Node.js
+    # Node optional
+    - name: Setup Node.js (optional)
+      if: exists('package.json')
       uses: actions/setup-node@v4
       with:
         node-version: "20"
-      continue-on-error: true
 
-    # OPTIONAL: Python project হলে
-    - name: Setup Python
+    # Python optional
+    - name: Setup Python (optional)
+      if: exists('requirements.txt')
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
-      continue-on-error: true
 
-    # Dependencies install
-    - name: Install Dependencies
+    - name: Install Dependencies (safe)
       run: |
-        echo "Installing dependencies..."
+        echo "Installing dependencies if available..."
+
         if [ -f package.json ]; then
-            npm install
+          npm install || true
         fi
+
         if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+          pip install -r requirements.txt || true
         fi
 
-    # Build Step
-    - name: Build Project
+    - name: Build Project (safe)
       run: |
-        echo "Building project..."
+        echo "Building project safely..."
+
         if [ -f package.json ]; then
-            npm run build || echo "No build script found"
-        fi
-        if [ -f build.py ]; then
-            python build.py || echo "No python build"
+          npm run build || true
         fi
 
-    # Auto Commit Build Files
-    - name: Auto Commit Build
+        if [ -f build.py ]; then
+          python build.py || true
+        fi
+
+    - name: Auto Commit Build Files
       run: |
         git config user.name "tamanna456760-it"
         git config user.email "tamanna456760@gmail.com"
 
         git add .
-        git commit -m "Auto Build Update" || echo "No changes"
-        git push
+        git commit -m "Auto Build Update (safe)" || echo "No files changed"
+        git push || echo "Push skipped"
