@@ -1,0 +1,215 @@
+{
+  "problem_fix_guide": {
+    "metadata": {
+      "project": "Messenger AI GitHub Integration",
+      "version": "1.0",
+      "last_updated": "2024-01-20"
+    },
+    "common_problems": [
+      {
+        "id": "PROB_001",
+        "problem": "Webhook verification failing",
+        "symptoms": [
+          "Facebook returns 'Error, wrong validation token'",
+          "Webhook subscription fails",
+          "403 Forbidden errors"
+        ],
+        "causes": [
+          "Verify token mismatch",
+          "Incorrect webhook URL",
+          "SSL certificate issues"
+        ],
+        "solutions": [
+          {
+            "step": 1,
+            "action": "Check environment variables",
+            "code": "console.log('Verify Token:', process.env.FACEBOOK_VERIFY_TOKEN);"
+          },
+          {
+            "step": 2,
+            "action": "Verify webhook endpoint",
+            "code": "// Ensure your endpoint is accessible via GET method\napp.get('/webhook', (req, res) => {\n  if (req.query['hub.verify_token'] === process.env.FACEBOOK_VERIFY_TOKEN) {\n    return res.send(req.query['hub.challenge']);\n  }\n  res.status(403).send('Error, wrong validation token');\n});"
+          },
+          {
+            "step": 3,
+            "action": "Test SSL configuration",
+            "code": "// Use ngrok for local development\n// ngrok http 3000"
+          }
+        ],
+        "prevention": "Use consistent verify tokens and ensure HTTPS"
+      },
+      {
+        "id": "PROB_002",
+        "problem": "Message sending/receiving issues",
+        "symptoms": [
+          "Messages not delivered to Facebook",
+          "AI responses not sending",
+          "Timeout errors"
+        ],
+        "causes": [
+          "Invalid Page Access Token",
+          "Incorrect Graph API calls",
+          "Rate limiting"
+        ],
+        "solutions": [
+          {
+            "step": 1,
+            "action": "Validate Page Access Token",
+            "code": "const axios = require('axios');\n\nasync function validateToken(token) {\n  try {\n    const response = await axios.get(`https://graph.facebook.com/v19.0/me?access_token=${token}`);\n    console.log('Token valid:', response.data);\n  } catch (error) {\n    console.error('Token invalid:', error.response.data);\n  }\n}"
+          },
+          {
+            "step": 2,
+            "action": "Fix message sending function",
+            "code": "async function sendMessage(recipientId, messageText) {\n  const messageData = {\n    recipient: { id: recipientId },\n    message: { text: messageText }\n  };\n\n  try {\n    const response = await axios.post(\n      `https://graph.facebook.com/v19.0/me/messages?access_token=${process.env.FACEBOOK_PAGE_ACCESS_TOKEN}`,\n      messageData\n    );\n    console.log('Message sent:', response.data);\n  } catch (error) {\n    console.error('Error sending message:', error.response.data);\n  }\n}"
+          }
+        ],
+        "prevention": "Regular token validation and error handling"
+      },
+      {
+        "id": "PROB_003",
+        "problem": "GitHub sync issues",
+        "symptoms": [
+          "Code not pushing to GitHub",
+          "Authentication failures",
+          "Merge conflicts"
+        ],
+        "causes": [
+          "Invalid GitHub token",
+          "SSH key issues",
+          "Remote URL incorrect"
+        ],
+        "solutions": [
+          {
+            "step": 1,
+            "action": "Check remote configuration",
+            "code": "git remote -v\ngit status"
+          },
+          {
+            "step": 2,
+            "action": "Reset and re-sync",
+            "code": "git fetch origin\ngit reset --hard origin/main\ngit push origin main"
+          },
+          {
+            "step": 3,
+            "action": "Fix authentication",
+            "code": "// Use personal access token\ngit remote set-url origin https://token@github.com/username/repo.git"
+          }
+        ],
+        "prevention": "Use SSH keys and regular syncs"
+      },
+      {
+        "id": "PROB_004",
+        "problem": "Environment variables not loading",
+        "symptoms": [
+          "process.env variables undefined",
+          "Configuration errors",
+          "Deployment failures"
+        ],
+        "causes": [
+          ".env file missing",
+          "Wrong variable names",
+          "Deployment config missing"
+        ],
+        "solutions": [
+          {
+            "step": 1,
+            "action": "Check .env file structure",
+            "code": "// .env file content:\nFACEBOOK_PAGE_ACCESS_TOKEN=your_actual_token_here\nFACEBOOK_VERIFY_TOKEN=your_verify_token_here\nPORT=3000"
+          },
+          {
+            "step": 2,
+            "action": "Add dotenv configuration",
+            "code": "require('dotenv').config();\n\nconsole.log('Token loaded:', process.env.FACEBOOK_PAGE_ACCESS_TOKEN ? 'Yes' : 'No');"
+          },
+          {
+            "step": 3,
+            "action": "Deployment environment setup",
+            "code": "// Heroku: heroku config:set FACEBOOK_PAGE_ACCESS_TOKEN=your_token\n// Vercel: Add in project settings\n// Netlify: Environment variables in site configuration"
+          }
+        ],
+        "prevention": "Use .env.example template and validate on startup"
+      },
+      {
+        "id": "PROB_005",
+        "problem": "Deployment failures",
+        "symptoms": [
+          "Build errors on deployment",
+          "Application crashes",
+          "Port binding issues"
+        ],
+        "causes": [
+          "Missing dependencies",
+          "Incorrect start script",
+          "Port not available"
+        ],
+        "solutions": [
+          {
+            "step": 1,
+            "action": "Check package.json configuration",
+            "code": "{\n  \"name\": \"messenger-ai-bot\",\n  \"version\": \"1.0.0\",\n  \"scripts\": {\n    \"start\": \"node server.js\",\n    \"dev\": \"nodemon server.js\"\n  },\n  \"dependencies\": {\n    \"express\": \"^4.18.0\",\n    \"axios\": \"^1.0.0\",\n    \"dotenv\": \"^16.0.0\"\n  },\n  \"engines\": {\n    \"node\": \">=14.0.0\"\n  }\n}"
+          },
+          {
+            "step": 2,
+            "action": "Fix port binding",
+            "code": "const PORT = process.env.PORT || 3000;\napp.listen(PORT, () => {\n  console.log(`Server running on port ${PORT}`);\n});"
+          },
+          {
+            "step": 3,
+            "action": "Add proper error handling",
+            "code": "process.on('unhandledRejection', (err) => {\n  console.error('Unhandled Promise Rejection:', err);\n  process.exit(1);\n});\n\nprocess.on('uncaughtException', (err) => {\n  console.error('Uncaught Exception:', err);\n  process.exit(1);\n});"
+          }
+        ],
+        "prevention": "Test locally before deployment, use process managers"
+      }
+    ],
+    "quick_fix_scripts": {
+      "webhook_test": "curl -X GET \"https://your-app.com/webhook?hub.verify_token=YOUR_TOKEN&hub.challenge=CHALLENGE\"",
+      "token_validation": "node -e \"require('dotenv').config(); console.log('Token exists:', !!process.env.FACEBOOK_PAGE_ACCESS_TOKEN)\"",
+      "git_sync_fix": "git add . && git commit -m 'Fix: Resolve sync issues' && git push origin main",
+      "dependency_check": "npm install && npm audit fix"
+    },
+    "validation_checklist": [
+      {
+        "category": "GitHub Setup",
+        "checks": [
+          "Repository initialized and connected",
+          ".gitignore includes .env and node_modules",
+          "README.md with setup instructions",
+          "Package.json with correct scripts"
+        ]
+      },
+      {
+        "category": "Facebook App",
+        "checks": [
+          "Webhook URL configured correctly",
+          "Page Access Token generated",
+          "Verify Token matches environment variable",
+          "App subscribed to correct page events"
+        ]
+      },
+      {
+        "category": "Local Development",
+        "checks": [
+          ".env file with all required variables",
+          "Dependencies installed (npm install)",
+          "Server starts without errors",
+          "Webhook verification successful"
+        ]
+      },
+      {
+        "category": "Deployment",
+        "checks": [
+          "Environment variables set in deployment platform",
+          "Build process completes successfully",
+          "Application responds to health checks",
+          "SSL certificate valid"
+        ]
+      }
+    ],
+    "emergency_contacts": {
+      "facebook_developer_docs": "https://developers.facebook.com/docs/messenger-platform/",
+      "github_help": "https://docs.github.com/en",
+      "nodejs_deployment": "https://nodejs.org/en/docs/guides/"
+    }
+  }
+}
