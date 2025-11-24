@@ -1,0 +1,130 @@
+{
+  "Progress": {
+    "completedLearningItems": [
+      {
+        "title": "learn.wwl.describe-cloud-service-types.introduction",
+        "type": "unit",
+        "completedAt": "2025-10-13T15:32:44.776804Z"
+      }
+    ],
+    "learningPathPasses": [],
+    "moduleAssessments": []
+  },
+  "XP": {
+    "xp": {
+      "docsId": "5adab363-6906-4862-a5ba-ad79f14b90a9",
+      "totalXp": 100,
+      "currentLevel": 1,
+      "currentLevelLow": 0,
+      "currentLevelHigh": 1799,
+      "currentLevelPointsEarned": 100,
+      "nextLevel": 2,
+      "pointsUntilNextLevel": 1700,
+      "achievementCategories": {
+        "Unknown": 0,
+        "Modules": 0,
+        "Courses": 0,
+        "Qna": 0,
+        "Challenges": 0,
+        "Events": 0,
+        "LearningPaths": 0,
+        "Plans": 0,
+        "Special": 0
+      }
+    },
+    "achievements": []
+  },
+  "Attachments": true,
+  "VerifiableCredentials": {
+    "docsId": "5adab363-6906-4862-a5ba-ad79f14b90a9",
+    "userCredentials": []
+  },
+  "Q&A": {
+    "docsId": "5adab363-6906-4862-a5ba-ad79f14b90a9",
+    "questions": [],
+    "answers": [],
+    "comments": []
+  },
+  "TechProfile": {
+    "email": "",
+    "locale": "en-us",
+    "country": "",
+    "isInstructor": false,
+    "isChallengeAdmin": false,
+    "isQnaModerator": false,
+    "source": "docs",
+    "authenticationModes": [
+      {
+        "id": "00037FFE7D63F3B1",
+        "type": "MSA",
+        "tenantId": "9188040d-6c67-4c5b-b112-36a304b66dad",
+        "upn": "hminsun23@gmail.com",
+        "oid": "00000000-0000-0000-c349-e99f7dcba6f4",
+        "dateAcceptedPrivacyNotice": "2025-05-07T04:29:32.278301+00:00",
+        "dateAdded": "2025-05-07T04:29:32.278301+00:00"
+      }
+    ],
+    "transcriptSettings": {
+      "publicLink": {
+        "showModules": true,
+        "showLegalName": true,
+        "showMCID": true,
+        "showContactEmail": true
+      },
+      "print": {
+        "showModules": true,
+        "showLegalName": true,
+        "showMCID": true,
+        "showContactEmail": true
+      }
+    },
+    "certificationSettings": {
+      "print": {
+        "showLegalName": true,
+        "showMCID": true,
+        "showContactEmail": true
+      }
+    },
+    "qnaEmailPreferences": {
+      "allEmail": true,
+      "autoFollowAsked": true,
+      "autoFollowAnswered": true,
+      "autoFollowCommented": true,
+      "autoFollowTagged": true,
+      "emailEventSettings": {
+        "newMention": "instant",
+        "newModeration": "instant",
+        "answerPosted": "instant",
+        "answerAccepted": "instant",
+        "commentPosted": "instant",
+        "newPrivateMessage": "instant",
+        "questionUpdated": "off",
+        "questionPosted": "off",
+        "unansweredQuestions": "off",
+        "newFollower": "off",
+        "answerUpdated": "off"
+      }
+    },
+    "sharingId": "28598EF26A0FD3EC",
+    "legalName": {
+      "first": "",
+      "middle": "",
+      "last": ""
+    },
+    "userId": "5adab363-6906-4862-a5ba-ad79f14b90a9",
+    "userName": "HMINSANALI-1974",
+    "displayName": "HM INSAN ALI",
+    "isPrivate": false,
+    "affiliations": [],
+    "followerCount": 0,
+    "followingCount": 0,
+    "answersAccepted": 0,
+    "reputationPoints": 0,
+    "createdOn": "5/7/2025 4:29:32 AM"
+  },
+  "NextSteps": null,
+  "Lists": null,
+  "Certifications": null,
+  "SkillAssessment": null,
+  "Assessments": null
+}
