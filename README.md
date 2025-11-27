@@ -51,7 +51,19 @@ Kali Linux Essentials:
 • sqlmap -u "http://site.com?id=1" (SQL injection টেস্ট)
 • nikto -h http://target.com (ওয়েব স্ক্যান)
 
-সিকিউরিটি টিপস:
-• সবসময় অনুমতি নিন
-• Scope মেনে চলুন
-• ফলাফল ডকুমেন্ট করুন
+# সিকিউরিটি টিপস:
+• - সবসময় অনুমতি নিন
+• - Scope মেনে চলুন
+• - ফলাফল ডকুমেন্ট করুন
+# bd-king-r7 terminal
+┌──(POWER_ADMIN㉿bd-king-r7.powerhub)-[/power/systems]
+└─14:23:45⚡ status
+
+- 🏥 BD-King-R7 SYSTEM STATUS - 2024-01-15 14:23:45
+
+# ⚡ POWER SYSTEMS:
+  - Core Power: 95% | Stability: 99.8%
+  - AI Processing: 75% load | Efficiency: 92%
+  - Security Grid: MAXIMUM | Threats: 0
+  - Communication: 10GBps | Latency: 1ms
+  - Quantum Core: 99.9% coherence | Qubits: 2048
