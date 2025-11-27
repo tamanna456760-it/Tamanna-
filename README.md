@@ -37,3 +37,21 @@ This repository is automatically synced using a bash script.
 - 🤖 AI CODE MOD → OPTIMIZATION | File: system_component_5.py | Success: ✅
 - ⚡ POWER EVOLUTION → Stage: 1 | Upgrade: EFFICIENCY_BOOST | Gain: 15%
 - 🏗️  AI FILE BUILD → POWER_MODULE | Name: bd_king_ai_generated_01856992843_0 | Status: DEPLOYED
+# তামান্না AI - Kali Linux Quick Reference
+ =======================================
+
+বেসিক কমান্ডস:
+• 'টুল সাহায্য nmap' - Nmap টুলের সাহায্য
+• 'নেটওয়ার্ক স্ক্যান' - স্ক্যান workflow দেখুন
+• 'ওয়েব টেস্টিং' - ওয়েব টেস্ট workflow
+• 'সব টুলস' - সব টুল ক্যাটেগরি দেখুন
+
+Kali Linux Essentials:
+• nmap -sS 192.168.1.0/24 (নেটওয়ার্ক স্ক্যান)
+• sqlmap -u "http://site.com?id=1" (SQL injection টেস্ট)
+• nikto -h http://target.com (ওয়েব স্ক্যান)
+
+সিকিউরিটি টিপস:
+• সবসময় অনুমতি নিন
+• Scope মেনে চলুন
+• ফলাফল ডকুমেন্ট করুন
