@@ -19,3 +19,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run PowerHub Helper
         run: python bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad
+auto_install.bad
+auto_sync.bad
+bd-king-r7_ultra_synce.bad
+warking_helper.bad
