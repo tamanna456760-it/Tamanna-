@@ -1,4 +1,4 @@
-#!/bd-king-r7/it//bd-king-r7/powerhub_helper/powerhub
+#!/bd-king-r7/it//bd-king-r7/powerhub/powerhub_helper
 # -*- coding: utf-8 -*-
 
 """
