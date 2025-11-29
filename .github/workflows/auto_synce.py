@@ -1,3 +1,4 @@
+#tamanna/bd-king-r7/it/
 """
 TI-PULS AI Engine - Core Intelligence Module
 """
