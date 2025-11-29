@@ -84,3 +84,11 @@ Kali Linux Essentials:
   - Security Grid: MAXIMUM | Threats: 0
   - Communication: 10GBps | Latency: 1ms
   - Quantum Core: 99.9% coherence | Qubits: 2048
+# BD-KING-R7 PowerHub + Tamanna AI
+
+## Setup (VS Code / Local)
+
+1. Copy repository, open terminal in project root.
+2. Install dependencies:
+   ```bash
+   npm install
