@@ -38,5 +38,5 @@ jobs:
         git config user.name "tamanna456760-it"
         git config user.email "tamanna456760@gmail.com"
         git add .
-        git commit -m "BD-KING-R7 Auto Build & Sync" || echo "No changes""bd-king-r7"
+        git commit -m "BD-KING-R7 Auto Build & Sync" || echo "run changes""bd-king-r7"
         git push || echo "Push failed"
