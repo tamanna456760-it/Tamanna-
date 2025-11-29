@@ -1,0 +1,48 @@
+name: Auto Sync Mirror
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: {}
+
+jobs:
+  mirror:
+    name: Mirror to external repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout all history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+
+      - name: Add mirror remote
+        env:
+          MIRROR_REPO: ${{ secrets.MIRROR_REPO }} # e.g. git@github.com:you/backup-repo.git
+        run: |
+          if [ -z "$MIRROR_REPO" ]; then
+            echo "MIRROR_REPO not set — skipping mirror push"
+            exit 0
+          fi
+          git remote remove mirror 2>/dev/null || true
+          git remote add mirror "$MIRROR_REPO"
+          # ensure we can push with SSH key if using git@ style URL
+          echo "Mirror remote set to $MIRROR_REPO"
+
+      - name: Add SSH key for push (if using SSH)
+        if: startsWith(secrets.MIRROR_REPO, 'git@')
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.MIRROR_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+      - name: Push mirror (force)
+        run: |
+          git push --mirror mirror --force
