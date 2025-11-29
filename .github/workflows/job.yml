@@ -18,4 +18,4 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run PowerHub Helper
-        run: python tamanna/bd-king-r7/it/bd-king-r7/powerhub/bd-king-r7_powerhub.bad
+        run: python bd-king-r7/it/bd-king-r7/powerhub/bd-king-r7_helper/bd-king-r7_powerhub.bad
