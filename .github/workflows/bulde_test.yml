@@ -1,0 +1,120 @@
+name: Build · Test · Deploy
+
+# Triggers: on push to main (or any branch), and nightly cron
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 0 * * *" # daily at 00:00 UTC (adjust as needed)
+
+jobs:
+  build:
+    name: Install → Build → Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # --- Example: Node project setup (uncomment if needed) ---
+      - name: Setup Node.js
+        if: "!contains(join(matrix.os,','), '')" # harmless always-true placeholder
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (node)
+        if: fileExists('package.json')
+        run: |
+          npm ci
+
+      - name: Build (node)
+        if: fileExists('package.json') && contains(fromJson('["build","compile"]'), steps.build) == false
+        run: |
+          if npm run -s | grep -q 'build'; then npm run build; else echo "no build script"; fi
+
+      # --- Example: Python project setup (uncomment if needed) ---
+      - name: Setup Python
+        if: fileExists('requirements.txt') || fileExists('pyproject.toml')
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (python)
+        if: fileExists('requirements.txt')
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          if [ -f pytest.ini ] || [ -d tests ]; then
+            if command -v pytest >/dev/null 2>&1; then
+              pytest -q
+            else
+              echo "pytest not installed — skipping tests"
+            fi
+          else
+            echo "No tests detected — skipping"
+          fi
+
+      - name: Lint (optional)
+        run: |
+          if [ -f package.json ] && grep -q eslint package.json; then
+            npm run lint || true
+          fi
+          if [ -f pyproject.toml ] || [ -f setup.cfg ]; then
+            command -v flake8 >/dev/null 2>&1 && flake8 || true
+          fi
+
+      - name: Archive build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: |
+            dist/
+            build/
+            ./**/*.war
+            ./**/target/
+
+  deploy:
+    name: Deploy to remote server (optional)
+    runs-on: ubuntu-latest
+    needs: build
+    if: secrets.REMOTE_HOST != '' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup rsync & ssh-agent
+        run: |
+          sudo apt-get update && sudo apt-get install -y rsync openssh-client
+
+      - name: Add SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync files to remote server
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+        run: |
+          # customize rsync filter to exclude .git, node_modules, env files
+          rsync -avz --delete --exclude='.git' --exclude='node_modules' --exclude='.env' ./ $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH
+
+      - name: Run remote deploy commands (optional)
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_SSH_OPTS: "-o StrictHostKeyChecking=yes"
+        run: |
+          ssh -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST "cd ${{ secrets.REMOTE_PATH }} && if [ -f release.sh ]; then bash release.sh; fi"
