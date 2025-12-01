@@ -1,5 +1,5 @@
 #!/bin/bash
-# BD-KING-E7 PowerHub Auto-Sync Ritual
+# BD-KING-R7 PowerHub Auto-Sync Ritual
 # Author: HM INSAN ALI (Sovereign Architect)
 
 POWER_LOG="/var/log/bdking_powerhub.log"
