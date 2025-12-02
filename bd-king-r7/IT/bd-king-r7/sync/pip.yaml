@@ -1,1 +1,7 @@
 pip install wheel setuptools build
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "Hello World"
