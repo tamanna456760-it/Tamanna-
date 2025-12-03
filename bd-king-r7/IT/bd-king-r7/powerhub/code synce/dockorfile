@@ -1,0 +1,19 @@
+# builder
+FROM python:3.11-slim AS builder
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY pyproject.toml poetry.lock* /app/
+RUN pip install --upgrade pip setuptools wheel
+# optional: use pip install -r requirements.txt if you prefer
+COPY requirements.txt /app/
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+
+# final
+FROM python:3.11-slim
+WORKDIR /app
+COPY --from=builder /wheels /wheels
+RUN pip install --no-cache /wheels/*
+COPY . /app
+ENV PORT=8080
+EXPOSE 8080
+CMD ["python", "app/main.py"]
