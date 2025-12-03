@@ -1,0 +1,126 @@
+name: CI / CD PowerHub
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ${{ secrets.REGISTRY_HOST }}/bd-king-r7-powerhub
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Lint (flake8)
+        run: |
+          pip install flake8
+          flake8 || true
+      - name: Run tests (pytest)
+        run: |
+          pip install pytest
+          pytest -q
+
+  build-and-push:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY_HOST }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASS }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:latest
+          cache-to: type=inline
+
+      - name: Create release (tag)
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release ${{ github.run_number }}
+          body: "Automated release for run ${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact (tar)
+        uses: actions/upload-artifact@v4
+        with:
+          name: powerhub-artifact
+          path: |
+            ./**
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout (for deployment scripts)
+        uses: actions/checkout@v4
+
+      - name: Deploy files to server via rsync over SSH
+        uses: burnett01/rsync-deployments@v4
+        with:
+          switches: -avz --delete
+          path: .
+          remote_path: /opt/powerhub
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
+
+      - name: Restart systemd service
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull ${{ env.IMAGE_NAME }}:latest || true
+            # optional: run docker-compose down/up
+            if [ -f /opt/powerhub/docker-compose.yml ]; then
+              cd /opt/powerhub
+              docker-compose pull || true
+              docker-compose up -d --remove-orphans
+            else
+              sudo systemctl daemon-reload
+              sudo systemctl restart powerhub.service || true
+            # health check
+            for i in 1 2 3 4 5; do
+              code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/health || echo 000)
+              if [ "$code" = "200" ]; then
+                echo "health ok"
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "health check failed"
+            exit 1
+
+      - name: Notify via Telegram (optional)
+        uses: appleboy/telegram-action@v0.1.2
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "Deployed bd-king-r7 PowerHub: ${{ github.run_id }} by ${{ github.actor }}"
