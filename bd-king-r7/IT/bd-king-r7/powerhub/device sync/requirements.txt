@@ -1,0 +1,4 @@
+flask
+requests
+bd-king-r7 powerhub sync
+auto run
