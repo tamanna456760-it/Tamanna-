@@ -31,4 +31,27 @@ def watch_and_sync():
 
 if __name__ == "__main__":
     log("Starting BD-KING-R7 Sync System...")
-    watch_and_sync()
+    watch_and_sync
+    import os, json, time, subprocess
+
+def load_config():
+    with open("config.json") as f:
+        return json.load(f)
+
+def sync_repo(repo, msg):
+    try:
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", msg], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("[SYNC] Completed")
+    except Exception as e:
+        print(f"[SYNC ERROR] {e}")
+
+def main():
+    cfg = load_config()
+    while True:
+        sync_repo(cfg["git_repo"], cfg["auto_commit_message"])
+        time.sleep(cfg["scan_interval_sec"])
+
+if __name__ == "__main__":
+    main()
