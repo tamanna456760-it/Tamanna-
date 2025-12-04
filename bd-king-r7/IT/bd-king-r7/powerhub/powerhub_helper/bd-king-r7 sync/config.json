@@ -11,3 +11,13 @@
 
   "scan_interval_sec": 10
 }
+{
+  "sync_folders": [
+    "projects/",
+    "powerhub/"
+  ],
+  "sync_mode": "git",
+  "git_repo": "https://github.com/your-username/your-repo.git",
+  "scan_interval_sec": 10,
+  "auto_commit_message": "BD-KING-R7 Auto Sync"
+}
