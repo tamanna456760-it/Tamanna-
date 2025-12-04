@@ -24,4 +24,4 @@ def sync_get(key):
 
 # Example usage
 print(sync_set("power_level", 9999))
-print(sync_get("power_level",9999))
+print(sync_get("power_level", 9999))
