@@ -1,0 +1,13 @@
+{
+  "sync_folders": [
+    "/home/user/Documents",
+    "/home/user/Projects"
+  ],
+
+  "sync_mode": "git", 
+  "git_repo": "https://github.com/@tamanna456760-it/tamanna456760-it.git",
+
+  "auto_commit_message": "Auto sync from BD-KING-R7 PowerHub",
+
+  "scan_interval_sec": 10
+}
