@@ -1,0 +1,54 @@
+{
+  "max_concurrent_decisions": 50,
+  "decision_timeout": 30,
+  "real_time_processing": true,
+  "emergency_override": true,
+  "resource_limits": {
+    "max_cpu_percent": 80,
+    "max_memory_percent": 85,
+    "max_gpu_percent": 90,
+    "max_network_bandwidth": "1Gbps"
+  },
+  "confidence_thresholds": {
+    "critical": 0.95,
+    "high": 0.85,
+    "medium": 0.70,
+    "low": 0.50
+  },
+  "live_monitoring": {
+    "enabled": true,
+    "update_interval": 1.0,
+    "alert_thresholds": {
+      "decision_backlog": 10,
+      "error_rate": 0.05,
+      "resource_usage": 0.8,
+      "response_time": 5.0
+    }
+  },
+  "power_management": {
+    "boost_levels": {
+      "high": {"threads": 30, "processes": 12},
+      "maximum": {"threads": 50, "processes": 20},
+      "emergency": {"threads": 100, "processes": 30}
+    },
+    "auto_boost": true,
+    "boost_threshold": 0.8
+  },
+  "decision_engines": {
+    "real_time": {
+      "max_execution_time": 5,
+      "priority": "highest",
+      "preemption": true
+    },
+    "strategic": {
+      "max_execution_time": 300,
+      "requires_approval": false,
+      "impact_analysis": true
+    },
+    "emergency": {
+      "max_execution_time": 10,
+      "override_all": true,
+      "immediate_execution": true
+    }
+  }
+}

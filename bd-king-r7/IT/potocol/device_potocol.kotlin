@@ -1,0 +1,23 @@
+// build.gradle (Module)
+dependencies {
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+}
+
+// MainActivity.kt
+package com.example.offline
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val root = layoutInflater.inflate(android.R.layout.simple_list_item_1, null)
+        setContentView(root)
+
+        // No network calls—pure offline
+        Snackbar.make(root, "Offline mode: no cloud used.", Snackbar.LENGTH_LONG).show()
+    }
+}

@@ -1,0 +1,66 @@
+{
+  "collection_interval": 5,
+  "metrics_retention_days": 30,
+  "alert_rules": {
+    "cpu_threshold": 85.0,
+    "memory_threshold": 90.0,
+    "disk_threshold": 95.0,
+    "response_time_threshold": 2.0,
+    "error_rate_threshold": 1.0,
+    "network_bandwidth_threshold": 80.0
+  },
+  "health_checks": {
+    "system_health_interval": 60,
+    "application_health_interval": 30,
+    "network_health_interval": 120,
+    "security_health_interval": 300
+  },
+  "notifications": {
+    "enabled": true,
+    "channels": ["email", "slack", "webhook"],
+    "critical_alerts_immediate": true,
+    "email_settings": {
+      "smtp_server": "smtp.company.com",
+      "port": 587,
+      "username": "monitoring@company.com"
+    },
+    "slack_webhook": "https://hooks.slack.com/services/...",
+    "webhook_endpoints": ["https://api.company.com/alerts"]
+  },
+  "performance_analysis": {
+    "enabled": true,
+    "analysis_interval": 300,
+    "trend_detection": true,
+    "anomaly_detection": true,
+    "bottleneck_identification": true
+  },
+  "dashboards": {
+    "auto_refresh": true,
+    "refresh_interval": 30,
+    "default_time_range": "1h",
+    "custom_widgets": true
+  },
+  "metrics_export": {
+    "prometheus_enabled": true,
+    "prometheus_port": 8000,
+    "influxdb_enabled": false,
+    "elasticsearch_enabled": false
+  },
+  "custom_monitors": {
+    "max_custom_monitors": 50,
+    "allow_external_metrics": true,
+    "complex_conditions": true
+  },
+  "alert_management": {
+    "auto_resolution": true,
+    "escalation_rules": true,
+    "alert_grouping": true,
+    "maintenance_windows": true
+  },
+  "reporting": {
+    "auto_reports": true,
+    "report_schedules": ["daily", "weekly", "monthly"],
+    "report_formats": ["pdf", "html", "json"],
+    "custom_reporting": true
+  }
+}

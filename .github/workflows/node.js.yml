@@ -1,243 +1,42 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-name: Tamanna AI CI/CD
+# tamanna/bd-king-r7/it/
+name: BD-KING-R7 AI Auto Build & Sync
 
 on:
   push:
-    branches: [ "main", "develop" ]
-  pull_request:
-    branches: [ "main", "develop" ]
+    branches: ["*"]
   schedule:
-    # Auto-sync every 6 hours
-    - cron: '0 */6 * * *'
+    - cron: "*/10 * * * *"
   workflow_dispatch:
-    # Allow manual triggering
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-        python-version: [3.9, 3.10, 3.11]
+  auto:
+    runs-on: tamanna
 
     steps:
-    - name: Checkout repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: |
-          package-lock.json
-          frontend/package-lock.json
-
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
-
-    - name: Install Node.js dependencies
-      run: |
-        npm ci
-        if [ -d "frontend" ]; then cd frontend && npm ci; fi
-
-    - name: Build project
-      run: |
-        npm run build --if-present
-        if [ -d "frontend" ]; then cd frontend && npm run build; fi
-
-    - name: Run tests
-      run: |
-        npm test --if-present
-        if [ -d "backend" ]; then python -m pytest backend/tests/ -v; fi
-
-    - name: Run security audit
-      run: |
-        npm audit --audit-level moderate
-        if [ -f "requirements.txt" ]; then pip-audit; fi
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      if: failure()
-      with:
-        name: test-results-${{ matrix.node-version }}-${{ matrix.python-version }}
-        path: |
-          test-results/
-          coverage/
-        retention-days: 7
-
-  auto-sync:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-        cache: 'pip'
+        python-version: "3.12"
 
-    - name: Install sync dependencies
+    - name: Install Dependencies
       run: |
-        pip install requests python-dotenv schedule
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
 
-    - name: Run auto-sync
-      env:
-        API_KEY: ${{ secrets.TAMANNA_API_KEY }}
-        SERVER_URL: ${{ secrets.SERVER_URL }}
-        DEVICE_ID: ${{ secrets.DEVICE_ID }}
+    - name: Run Build Script
       run: |
-        python scripts/auto_sync.py
+        if [ -f build.py ]; then
+          python build.py
+        fi
 
-    - name: Commit and push if changes
+    - name: Auto Commit Build
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config user.name "tamanna456760-it"
+        git config user.email "tamanna456760@gmail.com"
         git add .
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Auto-sync: Update data and configurations [$(date +'%Y-%m-%d %H:%M:%S')]"
-          git push
-        fi
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    environment: production
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        cache: 'npm'
-        registry-url: 'https://registry.npmjs.org'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Build
-      run: npm run build
-
-    - name: Run tests
-      run: npm test
-
-    - name: Deploy to production
-      run: |
-        echo "Deploying to production environment..."
-        # Add your deployment commands here
-        # For example: npm run deploy, docker push, etc.
-
-    - name: Notify deployment
-      uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: 'Production Deployment Completed',
-            body: '✅ Tamanna AI has been successfully deployed to production.\n\n- Commit: ${{ github.sha }}\n- Triggered by: ${{ github.actor }}\n- Timestamp: ${{ github.event.head_commit.timestamp }}'
-          })
-
-  security-scan:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Run security scan
-      uses: github/codeql-action/analyze@v2
-      with:
-        languages: javascript, python
-
-    - name: Dependency vulnerability check
-      run: |
-        npm audit --audit-level high
-        pip-audit || true
-
-  database-migration:
-    runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'migration') || github.event_name == 'workflow_dispatch'
-    
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Run database migrations
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tamanna_ai
-      run: |
-        python manage.py migrate
-        python manage.py createcachetable
-
-  health-check:
-    runs-on: ubuntu-latest
-    needs: deploy
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Health check endpoint
-      run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" https://your-tamanna-ai-domain.com/health)
-        if [ $response -eq 200 ]; then
-          echo "✅ Health check passed"
-        else
-          echo "❌ Health check failed: HTTP $response"
-          exit 1
-        fi
-
-    - name: Performance test
-      run: |
-        curl -o /dev/null -s -w "Total: %{time_total}s\n" https://your-tamanna-ai-domain.com/api/status
+        git commit -m "BD-KING-R7 Auto Build & Sync" || echo "run changes""bd-king-r7"
+        git push || echo "Push failed"

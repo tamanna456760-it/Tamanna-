@@ -1,0 +1,39 @@
+{
+  "application": "Auto Run Configuration",
+  "version": "1.0",
+  "settings": {
+    "autoStart": true,
+    "delay": 5000,
+    "retryAttempts": 3
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "name": "System Check",
+      "enabled": true,
+      "command": "system-check.exe"
+    },
+    {
+      "id": 2,
+      "name": "Backup Data",
+      "enabled": false,
+      "command": "backup-tool.exe"
+    }
+  ],
+  "dependencies": [
+    "node_modules",
+    "config_files",
+    "log_directory"
+  ]
+}
+{
+  "autorun": {
+    "scripts": [
+      "initialize.js",
+      "main.js",
+      "cleanup.js"
+    ],
+    "environment": "production",
+    "permissions": "full"
+  }
+}

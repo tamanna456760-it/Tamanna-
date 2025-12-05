@@ -1,0 +1,89 @@
+image: python:3.11
+
+pipelines:
+  default:
+    - step:
+        name: "BD-KING-R7 Auto Builder"
+        caches:
+          - pip
+        script:
+          # -------------------------------
+          # 1️⃣ Update system
+          # -------------------------------
+          - apt-get update -y
+
+          # -------------------------------
+          # 2️⃣ Install extra tools if needed
+          # -------------------------------
+          - apt-get install -y bash
+
+          # -------------------------------
+          # 3️⃣ Install Python dependencies
+          # -------------------------------
+          - |
+            if [ -f "requirements.txt" ]; then
+              echo "Installing requirements..."
+              pip install -r requirements.txt
+            else
+              echo "run requirements.txt found — skipping."
+            fi
+
+          # -------------------------------
+          # 4️⃣ Make .bad files executable
+          # -------------------------------
+          - chmod -R +x bd-king-r7/it || true
+
+          # -------------------------------
+          # 5️⃣ AUTO RUN BD-KING-R7 SCRIPTS
+          # (detect Python or Shell mode)
+          # -------------------------------
+
+          # PowerHub Helper
+          - |
+            if [ -f "bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad" ]; then
+              echo "Running PowerHub Helper..."
+              python bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad \
+              || bash bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad \
+              || true
+            fi
+
+          # Auto Install
+          - |
+            if [ -f "bd-king-r7/it/auto_install.bad" ]; then
+              echo "Running Auto Install..."
+              python bd-king-r7/it/auto_install.bad \
+              || bash bd-king-r7/it/auto_install.bad \
+              || true
+            fi
+
+          # Auto Sync
+          - |
+            if [ -f "bd-king-r7/it/auto_sync.bad" ]; then
+              echo "Running Auto Sync..."
+              python bd-king-r7/it/auto_sync.bad \
+              || bash bd-king-r7/it/auto_sync.bad \
+              || true
+            fi
+
+          # Ultra Sync
+          - |
+            if [ -f "bd-king-r7/it/bd-king-r7_ultra_synce.bad" ]; then
+              echo "Running Ultra Sync..."
+              python bd-king-r7/it/bd-king-r7_ultra_synce.bad \
+              || bash bd-king-r7/it/bd-king-r7_ultra_synce.bad \
+              || true
+            fi
+
+          # Warking Helper
+          - |
+            if [ -f "bd-king-r7/it/warking_helper.bad" ]; then
+              echo "Running Warking Helper..."
+              python bd-king-r7/it/warking_helper.bad \
+              || bash bd-king-r7/it/warking_helper.bad \
+              || true
+            fi
+
+          # -------------------------------
+          # 6️⃣ FINISH BUILD
+          # -------------------------------
+          - echo "BD-KING-R7 Build Finished Successfully!"

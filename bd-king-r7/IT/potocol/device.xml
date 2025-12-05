@@ -1,0 +1,10 @@
+// AndroidManifest.xml: <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+// In Activity (Android 12+ requires runtime permission)
+val scanner = BluetoothAdapter.getDefaultAdapter().bluetoothLeScanner
+val callback = object : ScanCallback() {
+    override fun onScanResult(callbackType: Int, result: ScanResult) {
+        Log.d("BLE", "Device: ${result.device.address} RSSI: ${result.rssi}")
+    }
+}
+scanner.startScan(callback)
+// Remember to stopScan(callback) when done

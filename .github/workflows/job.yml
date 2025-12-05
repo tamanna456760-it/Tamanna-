@@ -1,0 +1,54 @@
+name: Auto Sync to Repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 3️⃣ Install dependencies if requirements.txt exists
+      - name: Install dependencies
+        if: ${{ exists('requirements.txt') }}
+        run: pip install -r requirements.txt
+
+      # 4️⃣ Run your PowerHub Helper
+      - name: Run PowerHub Helper
+        if: ${{ exists('bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad') }}
+        run: |
+          echo "Running bd-king-r7 PowerHub Helper..."
+          # If the .bad file is Python code:
+          python bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad || true
+          # Otherwise, if it's a script for custom shell execution:
+          chmod +x bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad
+          ./bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad
+
+      # 5️⃣ Optional: run other scripts
+      - name: Run Auto Install
+        if: ${{ exists('bd-king-r7/it/auto_install.bad') }}
+        run: bash bd-king-r7/it/auto_install.bad || python bd-king-r7/it/auto_install.bad || true
+
+      - name: Run Auto Sync
+        if: ${{ exists('bd-king-r7/it/auto_sync.bad') }}
+        run: bash bd-king-r7/it/auto_sync.bad || python bd-king-r7/it/auto_sync.bad || true
+
+      - name: Run Ultra Sync
+        if: ${{ exists('bd-king-r7/it/bd-king-r7_ultra_synce.bad') }}
+        run: bash bd-king-r7/it/bd-king-r7_ultra_synce.bad || python bd-king-r7/it/bd-king-r7_ultra_synce.bad || true
+
+      - name: Run Warking Helper
+        if: ${{ exists('bd-king-r7/it/warking_helper.bad') }}
+        run: bash bd-king-r7/it/warking_helper.bad || python bd-king-r7/it/warking_helper.bad || true

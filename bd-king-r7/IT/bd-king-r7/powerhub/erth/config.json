@@ -1,0 +1,9 @@
+{
+  "server_host": "0.0.0.0",
+  "server_port": 5000,
+  "sync_scan_interval": 5,
+  "git_repo": "",
+  "auto_commit_message": "Auto-sync: BD-KING-R7 PowerHub Master",
+  "device_id": "earth-master-001",
+  "storage_file": "powerhub_store.json"
+}
