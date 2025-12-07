@@ -1,3 +1,3 @@
 ---
 
-# 🧩 Auto Sync Script (example)
+# 🧩 Auto Sync Script <~>
