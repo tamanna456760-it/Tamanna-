@@ -1,0 +1,100 @@
+// File: LDTamanna.c
+// Sovereign heartbeat driver for Tamanna system — LDTamanna.sys
+// Build: KMDF, Target: x64, WDK + Visual Studio (or your toolchain)
+// Author intent: Minimal, safe, extendable
+
+#include <ntddk.h>
+#include <wdf.h>
+
+#define DEVICE_NAME         L"\\Device\\LDTamanna"
+#define SYMLINK_NAME        L"\\DosDevices\\LDTamanna"
+
+// IOCTL: Tamanna heartbeat ping
+#define IOCTL_TAMANNA_PING \
+    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+DRIVER_INITIALIZE DriverEntry;
+EVT_WDF_DRIVER_DEVICE_ADD LDTamannaEvtDeviceAdd;
+EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL LDTamannaEvtIoDeviceControl;
+
+_Use_decl_annotations_
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+    WDF_DRIVER_CONFIG config;
+    WDF_DRIVER_CONFIG_INIT(&config, LDTamannaEvtDeviceAdd);
+
+    // Create KMDF driver object
+    NTSTATUS status = WdfDriverCreate(DriverObject, RegistryPath, WDF_NO_OBJECT_ATTRIBUTES, &config, WDF_NO_HANDLE);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("LDTamanna.sys: WdfDriverCreate failed: 0x%08X\n", status));
+        return status;
+    }
+
+    KdPrint(("LDTamanna.sys: DriverEntry success — sovereign heartbeat ready.\n"));
+    return STATUS_SUCCESS;
+}
+
+_Use_decl_annotations_
+NTSTATUS LDTamannaEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
+    UNREFERENCED_PARAMETER(Driver);
+
+    WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_UNKNOWN);
+    WdfDeviceInitSetExclusive(DeviceInit, FALSE);
+
+    // Create device
+    WDFDEVICE device;
+    NTSTATUS status = WdfDeviceCreate(&DeviceInit, WDF_NO_OBJECT_ATTRIBUTES, &device);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("LDTamanna.sys: WdfDeviceCreate failed: 0x%08X\n", status));
+        return status;
+    }
+
+    // Create symbolic link for easy user-mode access (optional)
+    DECLARE_UNICODE_STRING_SIZE(symLink, 64);
+    RtlInitUnicodeString(&symLink, SYMLINK_NAME);
+    status = WdfDeviceCreateSymbolicLink(device, &symLink);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("LDTamanna.sys: CreateSymbolicLink failed: 0x%08X\n", status));
+        return status;
+    }
+
+    // Default I/O queue (sequential for simplicity)
+    WDF_IO_QUEUE_CONFIG qcfg;
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&qcfg, WdfIoQueueDispatchSequential);
+    qcfg.EvtIoDeviceControl = LDTamannaEvtIoDeviceControl;
+
+    WDFQUEUE queue;
+    status = WdfIoQueueCreate(device, &qcfg, WDF_NO_OBJECT_ATTRIBUTES, &queue);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("LDTamanna.sys: WdfIoQueueCreate failed: 0x%08X\n", status));
+        return status;
+    }
+
+    KdPrint(("LDTamanna.sys: DeviceAdd success — queue bound.\n"));
+    return STATUS_SUCCESS;
+}
+
+_Use_decl_annotations_
+VOID LDTamannaEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request,
+                                 size_t OutputBufferLength, size_t InputBufferLength,
+                                 ULONG IoControlCode) {
+    UNREFERENCED_PARAMETER(Queue);
+    UNREFERENCED_PARAMETER(InputBufferLength);
+
+    NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
+    size_t bytesWritten = 0;
+
+    if (IoControlCode == IOCTL_TAMANNA_PING) {
+        const CHAR msg[] = "Tamanna heartbeat: sovereign alive.\n";
+        PVOID outBuf = NULL;
+        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(msg), &outBuf, NULL);
+        if (NT_SUCCESS(status)) {
+            RtlCopyMemory(outBuf, msg, sizeof(msg));
+            bytesWritten = sizeof(msg);
+            status = STATUS_SUCCESS;
+        } else {
+            KdPrint(("LDTamanna.sys: OutputBuffer retrieve failed: 0x%08X\n", status));
+        }
+    }
+
+    WdfRequestCompleteWithInformation(Request, status, bytesWritten);
+}
