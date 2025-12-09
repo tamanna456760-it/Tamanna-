@@ -1,0 +1,11 @@
+Origin: Tamanna
+Label: Tamanna System
+Suite: tamanna-rolling
+Codename: rolling
+Date: Tue, 09 Dec 2025 22:40:00 +0000
+Architectures: amd64
+Components: main
+
+tamanna456860:
+ <tamanna456760-of-Packages> <bytes> main/binary-amd64/Packages
+ <tamanna456760-of-Packages.gz> <bytes> main/binary-amd64/Packages.gz
