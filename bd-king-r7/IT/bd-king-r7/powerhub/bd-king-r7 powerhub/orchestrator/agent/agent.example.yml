@@ -1,0 +1,20 @@
+# /etc/bdking/agent.yml
+repo_path: /home/youruser/projects/bd-king-r7
+branch: powerhub-auto
+remote: origin
+agent_id: bd-king-node-001
+interval_seconds: 60
+push_changes: false
+fix_cmds:
+  - git submodule update --init --recursive || true
+  # Example for Node:
+  # - npm ci --no-audit --no-fund || true
+  # - npx eslint --fix . || true
+build_cmds:
+  # - npm ci && npm run build && npm test
+ficar: ficar
+power_sync: power_sync
+lockfile: /var/lock/bd-king-r7-powerhub.lock
+server_url: https://orchestrator.example.com
+auth_token: "CHANGE_ME"
+logfile: /var/log/bd-king-r7-powerhub.log
