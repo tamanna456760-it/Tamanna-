@@ -1,0 +1,12 @@
+[Unit]
+Description=Tamanna sync-and-add service (one-shot)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=youruser
+Group=youruser
+ExecStart=/opt/tamanna-sync/sync_and_add.sh
+TimeoutStartSec=120
+Nice=10
