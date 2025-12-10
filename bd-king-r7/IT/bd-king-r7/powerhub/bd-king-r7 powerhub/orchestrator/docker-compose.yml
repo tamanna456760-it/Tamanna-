@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  orchestrator:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ORCHESTRATOR_TOKEN=${ORCHESTRATOR_TOKEN:-change-this-token}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///reports.db}
+    volumes:
+      - ./data:/app
