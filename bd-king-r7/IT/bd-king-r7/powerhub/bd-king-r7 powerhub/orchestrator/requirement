@@ -1,0 +1,5 @@
+Flask==2.2.5
+SQLAlchemy==1.4.57
+gunicorn==20.1.0
+requests==2.31.0
+python-dotenv==1.0.0
