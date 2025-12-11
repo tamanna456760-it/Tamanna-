@@ -16,7 +16,12 @@
   "tracked_metrics": {
     "code_quality": {
       "enabled": true,
-      "metrics": ["complexity", "maintainability", "duplication", "documentation"],
+      "metrics": [
+        "complexity",
+        "maintainability",
+        "duplication",
+        "documentation"
+      ],
       "thresholds": {
         "cyclomatic_complexity": 15,
         "maintainability_index": 65,
@@ -26,13 +31,23 @@
     },
     "security": {
       "enabled": true,
-      "checks": ["vulnerabilities", "secrets_detection", "dependency_scan", "code_injection"],
+      "checks": [
+        "vulnerabilities",
+        "secrets_detection",
+        "dependency_scan",
+        "code_injection"
+      ],
       "alert_level": "high",
       "auto_quarantine": true
     },
     "performance": {
       "enabled": true,
-      "metrics": ["execution_time", "memory_usage", "cpu_utilization", "io_operations"],
+      "metrics": [
+        "execution_time",
+        "memory_usage",
+        "cpu_utilization",
+        "io_operations"
+      ],
       "thresholds": {
         "max_memory_mb": 512,
         "max_execution_seconds": 30,
@@ -76,7 +91,11 @@
     "channels": ["console", "log_file", "email", "webhook"],
     "severity_levels": {
       "critical": ["security_breach", "system_failure", "data_loss"],
-      "high": ["vulnerability_detected", "performance_degradation", "high_complexity"],
+      "high": [
+        "vulnerability_detected",
+        "performance_degradation",
+        "high_complexity"
+      ],
       "medium": ["code_smell", "duplication", "coverage_drop"],
       "low": ["style_violation", "minor_optimization"]
     },
@@ -143,14 +162,14 @@
       }
     },
     "ci_cd": {
-      "jenkins": {"enabled": false},
-      "gitlab_ci": {"enabled": true},
-      "github_actions": {"enabled": true},
-      "circleci": {"enabled": false}
+      "jenkins": { "enabled": false },
+      "gitlab_ci": { "enabled": true },
+      "github_actions": { "enabled": true },
+      "circleci": { "enabled": false }
     },
     "issue_tracking": {
-      "jira": {"enabled": true, "project_key": "CODE"},
-      "github_issues": {"enabled": true}
+      "jira": { "enabled": true, "project_key": "CODE" },
+      "github_issues": { "enabled": true }
     }
   },
   "custom_rules": {

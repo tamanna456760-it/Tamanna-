@@ -1,15 +1,22 @@
 # device_binding.py — run in VS Code
-import os, hashlib, json, platform, uuid
+import hashlib
+import json
+import os
+import platform
+import uuid
+
 
 def device_fingerprint():
     base = f"{platform.system()}|{platform.machine()}|{uuid.getnode()}"
     return hashlib.sha256(base.encode()).hexdigest()
+
 
 def seal_payload(payload: dict, secret: str):
     fp = device_fingerprint()
     data = json.dumps(payload, sort_keys=True)
     sig = hashlib.sha256((fp + secret + data).encode()).hexdigest()
     return {"payload": payload, "fingerprint": fp, "signature": sig}
+
 
 def verify_seal(sealed: dict, secret: str):
     fp = device_fingerprint()
@@ -18,6 +25,7 @@ def verify_seal(sealed: dict, secret: str):
     data = json.dumps(sealed["payload"], sort_keys=True)
     sig = hashlib.sha256((fp + secret + data).encode()).hexdigest()
     return sig == sealed["signature"]
+
 
 if __name__ == "__main__":
     secret = os.environ.get("LOCAL_SECRET", "change-me")

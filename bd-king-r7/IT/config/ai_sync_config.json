@@ -11,12 +11,7 @@
       "**/*.html",
       "**/*.css"
     ],
-    "ignore_patterns": [
-      "node_modules/**",
-      "dist/**",
-      "build/**",
-      "*.log"
-    ]
+    "ignore_patterns": ["node_modules/**", "dist/**", "build/**", "*.log"]
   },
   "code_fixing": {
     "auto_fix": true,

@@ -10,7 +10,11 @@
     "commit": "node scripts/auto-commit.js",
     "setup": "node scripts/setup.js"
   },
-  "keywords": ["auto-fix", "json", "code-formatter"],
+  "keywords": [
+    "auto-fix",
+    "json",
+    "code-formatter"
+  ],
   "author": "tamangsaru522-it",
   "license": "MIT",
   "dependencies": {

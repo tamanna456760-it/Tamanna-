@@ -1,64 +1,59 @@
-import express from 'express'
-import { body, validationResult } from 'express-validator'
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
+import express from "express";
+import { body, validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
-const router = express.Router()
+const router = express.Router();
 
 // Mock user database (in production, use real database)
-const users = new Map()
+const users = new Map();
 
 // JWT secret
-const JWT_SECRET = process.env.JWT_SECRET || 'bdking-r7-super-secret-key-2024'
+const JWT_SECRET = process.env.JWT_SECRET || "bdking-r7-super-secret-key-2024";
 
 // Validation rules
 const registerValidation = [
-  body('email')
+  body("email")
     .isEmail()
     .normalizeEmail()
-    .withMessage('Valid email is required'),
-  body('password')
+    .withMessage("Valid email is required"),
+  body("password")
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long'),
-  body('name')
-    .isLength({ min: 2 })
-    .trim()
-    .withMessage('Name is required')
-]
+    .withMessage("Password must be at least 6 characters long"),
+  body("name").isLength({ min: 2 }).trim().withMessage("Name is required"),
+];
 
 const loginValidation = [
-  body('email')
+  body("email")
     .isEmail()
     .normalizeEmail()
-    .withMessage('Valid email is required'),
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required')
-]
+    .withMessage("Valid email is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+];
 
 // Register endpoint
-router.post('/register', registerValidation, async (req, res) => {
+router.post("/register", registerValidation, async (req, res) => {
   try {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
-        error: 'Validation failed',
-        details: errors.array()
-      })
+        error: "Validation failed",
+        details: errors.array(),
+      });
     }
 
-    const { email, password, name } = req.body
+    const { email, password, name } = req.body;
 
     // Check if user already exists
     if (users.has(email)) {
       return res.status(409).json({
-        error: 'User already exists',
-        message: 'A user with this email already exists'
-      })
+        error: "User already exists",
+        message: "A user with this email already exists",
+      });
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
     const user = {
@@ -67,123 +62,117 @@ router.post('/register', registerValidation, async (req, res) => {
       password: hashedPassword,
       name,
       createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString()
-    }
+      lastLogin: new Date().toISOString(),
+    };
 
-    users.set(email, user)
+    users.set(email, user);
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    )
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.status(201).json({
-      message: 'User registered successfully',
+      message: "User registered successfully",
       token,
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        createdAt: user.createdAt
-      }
-    })
-
+        createdAt: user.createdAt,
+      },
+    });
   } catch (error) {
-    console.error('Register route error:', error)
+    console.error("Register route error:", error);
     res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to register user'
-    })
+      error: "Internal server error",
+      message: "Failed to register user",
+    });
   }
-})
+});
 
 // Login endpoint
-router.post('/login', loginValidation, async (req, res) => {
+router.post("/login", loginValidation, async (req, res) => {
   try {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
-        error: 'Validation failed',
-        details: errors.array()
-      })
+        error: "Validation failed",
+        details: errors.array(),
+      });
     }
 
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
     // Find user
-    const user = users.get(email)
+    const user = users.get(email);
     if (!user) {
       return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid email or password'
-      })
+        error: "Authentication failed",
+        message: "Invalid email or password",
+      });
     }
 
     // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password)
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid email or password'
-      })
+        error: "Authentication failed",
+        message: "Invalid email or password",
+      });
     }
 
     // Update last login
-    user.lastLogin = new Date().toISOString()
-    users.set(email, user)
+    user.lastLogin = new Date().toISOString();
+    users.set(email, user);
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    )
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.json({
-      message: 'Login successful',
+      message: "Login successful",
       token,
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        lastLogin: user.lastLogin
-      }
-    })
-
+        lastLogin: user.lastLogin,
+      },
+    });
   } catch (error) {
-    console.error('Login route error:', error)
+    console.error("Login route error:", error);
     res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to login'
-    })
+      error: "Internal server error",
+      message: "Failed to login",
+    });
   }
-})
+});
 
 // Verify token endpoint
-router.post('/verify', (req, res) => {
+router.post("/verify", (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '')
+    const token = req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json({
-        error: 'No token provided',
-        valid: false
-      })
+        error: "No token provided",
+        valid: false,
+      });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET)
+    const decoded = jwt.verify(token, JWT_SECRET);
     res.json({
       valid: true,
-      user: decoded
-    })
+      user: decoded,
+    });
   } catch (error) {
     res.status(401).json({
-      error: 'Invalid token',
-      valid: false
-    })
+      error: "Invalid token",
+      valid: false,
+    });
   }
-})
+});
 
-export default router
+export default router;

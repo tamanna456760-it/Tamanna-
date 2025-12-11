@@ -3,7 +3,7 @@ access_control:
   allowed_users:
     - "dev-team@company.com"
     - "ci-system@company.com"
-  
+
   environment_permissions:
     local: ["developers"]
     staging: ["developers", "qa"]

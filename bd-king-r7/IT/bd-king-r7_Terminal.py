@@ -6,14 +6,13 @@ Advanced Power Management & Control Terminal
 
 import os
 import sys
-import time
 import threading
-import json
-import readline
-import subprocess
+import time
 from datetime import datetime
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+
 
 class BDKingTerminal:
     def __init__(self):
@@ -25,29 +24,33 @@ class BDKingTerminal:
         self.command_history = []
         self.power_systems = {}
         self.terminal_mode = "POWER_MANAGEMENT"
-        
+
         self.initialize_terminal()
-        
+
     def initialize_terminal(self):
         """Initialize terminal system"""
         print(f"\n🚀 INITIALIZING {self.terminal_name} {self.version}")
         print("🔧 Loading Power Systems...")
         time.sleep(1)
-        
+
         # Initialize power systems
         self.power_systems = {
-            'core_power': {'status': 'ONLINE', 'level': 95, 'stability': 99.8},
-            'ai_processing': {'status': 'ACTIVE', 'load': 75, 'efficiency': 92},
-            'security_grid': {'status': 'ARMED', 'level': 'MAXIMUM', 'threats': 0},
-            'communication': {'status': 'SYNCED', 'bandwidth': '10GBps', 'latency': '1ms'},
-            'quantum_core': {'status': 'ENTANGLED', 'coherence': 99.9, 'qubits': 2048}
+            "core_power": {"status": "ONLINE", "level": 95, "stability": 99.8},
+            "ai_processing": {"status": "ACTIVE", "load": 75, "efficiency": 92},
+            "security_grid": {"status": "ARMED", "level": "MAXIMUM", "threats": 0},
+            "communication": {
+                "status": "SYNCED",
+                "bandwidth": "10GBps",
+                "latency": "1ms",
+            },
+            "quantum_core": {"status": "ENTANGLED", "coherence": 99.9, "qubits": 2048},
         }
-        
+
         print("✅ Terminal Systems Ready")
         print("⚡ Power Grid: STABLE")
         print("🔒 Security: ACTIVE")
         print("🤖 AI Core: OPERATIONAL\n")
-        
+
     def display_prompt(self):
         """Display terminal prompt"""
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -59,22 +62,21 @@ class BDKingTerminal:
         print(f"          BD-King-R7 POWER TERMINAL {self.version}")
         print("          Type 'help' for available commands")
         print("=" * 70)
-        
+
         while True:
             try:
                 command = input(self.display_prompt()).strip()
-                
+
                 if not command:
                     continue
-                    
-                self.command_history.append({
-                    'timestamp': datetime.now(),
-                    'command': command,
-                    'user': self.user
-                })
-                
+
+                self.command_history.append(
+                    {"timestamp": datetime.now(), "command": command,
+                     "user": self.user}
+                )
+
                 self.process_command(command)
-                
+
             except KeyboardInterrupt:
                 print("\n\n⚠️  Use 'exit' or 'shutdown' to close terminal safely")
             except EOFError:
@@ -89,28 +91,28 @@ class BDKingTerminal:
         args = cmd_parts[1:] if len(cmd_parts) > 1 else []
 
         command_map = {
-            'help': self.cmd_help,
-            'exit': self.cmd_exit,
-            'shutdown': self.cmd_shutdown,
-            'clear': self.cmd_clear,
-            'status': self.cmd_status,
-            'power': self.cmd_power,
-            'system': self.cmd_system,
-            'scan': self.cmd_scan,
-            'ai': self.cmd_ai,
-            'security': self.cmd_security,
-            'network': self.cmd_network,
-            'quantum': self.cmd_quantum,
-            'history': self.cmd_history,
-            'log': self.cmd_log,
-            'diagnostic': self.cmd_diagnostic,
-            'optimize': self.cmd_optimize,
-            'deploy': self.cmd_deploy,
-            'update': self.cmd_update,
-            'backup': self.cmd_backup,
-            'restore': self.cmd_restore,
-            'monitor': self.cmd_monitor,
-            'analyze': self.cmd_analyze
+            "help": self.cmd_help,
+            "exit": self.cmd_exit,
+            "shutdown": self.cmd_shutdown,
+            "clear": self.cmd_clear,
+            "status": self.cmd_status,
+            "power": self.cmd_power,
+            "system": self.cmd_system,
+            "scan": self.cmd_scan,
+            "ai": self.cmd_ai,
+            "security": self.cmd_security,
+            "network": self.cmd_network,
+            "quantum": self.cmd_quantum,
+            "history": self.cmd_history,
+            "log": self.cmd_log,
+            "diagnostic": self.cmd_diagnostic,
+            "optimize": self.cmd_optimize,
+            "deploy": self.cmd_deploy,
+            "update": self.cmd_update,
+            "backup": self.cmd_backup,
+            "restore": self.cmd_restore,
+            "monitor": self.cmd_monitor,
+            "analyze": self.cmd_analyze,
         }
 
         if main_cmd in command_map:
@@ -199,27 +201,29 @@ class BDKingTerminal:
     def cmd_power(self, args):
         """Power management commands"""
         if not args:
-            print("""
+            print(
+                """
 ⚡ POWER MANAGEMENT:
   power status    - Current power status
   power adjust <1-100> - Adjust power level
   power balance   - Balance power distribution
   power backup    - Backup systems status
   power optimize  - Optimize power usage
-            """)
+            """
+            )
             return
 
         subcommand = args[0].lower()
-        
-        if subcommand == 'status':
+
+        if subcommand == "status":
             self.show_power_status()
-        elif subcommand == 'adjust' and len(args) > 1:
+        elif subcommand == "adjust" and len(args) > 1:
             self.adjust_power_level(args[1])
-        elif subcommand == 'balance':
+        elif subcommand == "balance":
             self.balance_power()
-        elif subcommand == 'backup':
+        elif subcommand == "backup":
             self.show_backup_power()
-        elif subcommand == 'optimize':
+        elif subcommand == "optimize":
             self.optimize_power()
         else:
             print("❌ Invalid power command")
@@ -263,44 +267,46 @@ class BDKingTerminal:
     def cmd_scan(self, args):
         """Run system scan"""
         print("🔍 Starting comprehensive system scan...")
-        
+
         scan_results = {
-            'Security': self.run_security_scan(),
-            'Performance': self.run_performance_scan(),
-            'Network': self.run_network_scan(),
-            'Power': self.run_power_scan(),
-            'AI Systems': self.run_ai_scan()
+            "Security": self.run_security_scan(),
+            "Performance": self.run_performance_scan(),
+            "Network": self.run_network_scan(),
+            "Power": self.run_power_scan(),
+            "AI Systems": self.run_ai_scan(),
         }
-        
+
         print("\n📊 SCAN RESULTS:")
         for category, result in scan_results.items():
-            status = "✅ PASS" if result['status'] == 'OK' else "⚠️ WARNING"
+            status = "✅ PASS" if result["status"] == "OK" else "⚠️ WARNING"
             print(f"  {category}: {status} - {result['message']}")
 
     def cmd_ai(self, args):
         """AI system commands"""
         if not args:
-            print("""
+            print(
+                """
 🤖 AI SYSTEM COMMANDS:
   ai status       - AI system status
   ai optimize     - Optimize AI performance
   ai deploy <module> - Deploy AI module
   ai train        - Start AI training
   ai analyze      - Run AI analysis
-            """)
+            """
+            )
             return
 
         subcommand = args[0].lower()
-        
-        if subcommand == 'status':
+
+        if subcommand == "status":
             self.show_ai_status()
-        elif subcommand == 'optimize':
+        elif subcommand == "optimize":
             self.optimize_ai()
-        elif subcommand == 'deploy' and len(args) > 1:
+        elif subcommand == "deploy" and len(args) > 1:
             self.deploy_ai_module(args[1])
-        elif subcommand == 'train':
+        elif subcommand == "train":
             self.start_ai_training()
-        elif subcommand == 'analyze':
+        elif subcommand == "analyze":
             self.run_ai_analysis()
         else:
             print("❌ Invalid AI command")
@@ -309,15 +315,15 @@ class BDKingTerminal:
         """Security system commands"""
         print("🛡️ SECURITY SYSTEMS ACTIVATED")
         print("🔒 Running security protocols...")
-        
+
         security_status = {
-            'Firewall': 'ACTIVE',
-            'Intrusion Detection': 'SCANNING',
-            'Encryption': 'AES-512 QUANTUM',
-            'Access Control': 'MULTI-FACTOR',
-            'Threat Level': 'LOW'
+            "Firewall": "ACTIVE",
+            "Intrusion Detection": "SCANNING",
+            "Encryption": "AES-512 QUANTUM",
+            "Access Control": "MULTI-FACTOR",
+            "Threat Level": "LOW",
         }
-        
+
         for system, status in security_status.items():
             print(f"  {system}: {status}")
 
@@ -370,7 +376,7 @@ class BDKingTerminal:
         """Show command history"""
         print("\n📜 COMMAND HISTORY:")
         for i, entry in enumerate(self.command_history[-10:], 1):
-            time_str = entry['timestamp'].strftime("%H:%M:%S")
+            time_str = entry["timestamp"].strftime("%H:%M:%S")
             print(f"  {i:2d}. {time_str} - {entry['command']}")
 
     def cmd_log(self, args):
@@ -380,9 +386,9 @@ class BDKingTerminal:
             f"{datetime.now().strftime('%H:%M:%S')} - POWER: Core systems online",
             f"{datetime.now().strftime('%H:%M:%S')} - AI: Neural networks initialized",
             f"{datetime.now().strftime('%H:%M:%S')} - SECURITY: Quantum encryption active",
-            f"{datetime.now().strftime('%H:%M:%S')} - NETWORK: All interfaces up"
+            f"{datetime.now().strftime('%H:%M:%S')} - NETWORK: All interfaces up",
         ]
-        
+
         print("\n📋 SYSTEM LOGS:")
         for log in log_entries:
             print(f"  {log}")
@@ -390,36 +396,36 @@ class BDKingTerminal:
     def cmd_diagnostic(self, args):
         """Run system diagnostics"""
         print("🩺 RUNNING SYSTEM DIAGNOSTICS...")
-        
+
         diagnostics = {
-            'Power Systems': self.diagnose_power(),
-            'AI Core': self.diagnose_ai(),
-            'Security': self.diagnose_security(),
-            'Network': self.diagnose_network(),
-            'Quantum Systems': self.diagnose_quantum()
+            "Power Systems": self.diagnose_power(),
+            "AI Core": self.diagnose_ai(),
+            "Security": self.diagnose_security(),
+            "Network": self.diagnose_network(),
+            "Quantum Systems": self.diagnose_quantum(),
         }
-        
+
         print("\n📊 DIAGNOSTIC RESULTS:")
         for system, result in diagnostics.items():
-            icon = "✅" if result['healthy'] else "❌"
+            icon = "✅" if result["healthy"] else "❌"
             print(f"  {icon} {system}: {result['message']}")
 
     def cmd_optimize(self, args):
         """Optimize system performance"""
         print("⚡ OPTIMIZING SYSTEM PERFORMANCE...")
-        
+
         optimizations = [
             "Optimizing power distribution... ✅",
             "Tuning AI algorithms... ✅",
             "Enhancing security protocols... ✅",
             "Balancing network load... ✅",
-            "Calibrating quantum systems... ✅"
+            "Calibrating quantum systems... ✅",
         ]
-        
+
         for opt in optimizations:
             print(f"  {opt}")
             time.sleep(0.5)
-            
+
         print("🎯 SYSTEM OPTIMIZATION COMPLETE")
 
     def cmd_deploy(self, args):
@@ -427,22 +433,22 @@ class BDKingTerminal:
         if not args:
             print("❌ Specify module to deploy")
             return
-            
+
         module = args[0]
         print(f"🚀 DEPLOYING MODULE: {module}")
-        
+
         deployment_steps = [
             f"Initializing {module}...",
             "Loading dependencies...",
             "Configuring systems...",
             "Activating module...",
-            "Running diagnostics..."
+            "Running diagnostics...",
         ]
-        
+
         for step in deployment_steps:
             print(f"  {step} ✅")
             time.sleep(0.3)
-            
+
         print(f"✅ {module.upper()} DEPLOYED SUCCESSFULLY")
 
     def cmd_update(self, args):
@@ -456,19 +462,19 @@ class BDKingTerminal:
     def cmd_backup(self, args):
         """Create system backup"""
         print("💾 CREATING SYSTEM BACKUP...")
-        
+
         backup_steps = [
             "Backing up power configurations...",
             "Saving AI models...",
             "Archiving security protocols...",
             "Compressing quantum states...",
-            "Verifying backup integrity..."
+            "Verifying backup integrity...",
         ]
-        
+
         for step in backup_steps:
             print(f"  {step} ✅")
             time.sleep(0.4)
-            
+
         print("✅ BACKUP COMPLETED SUCCESSFULLY")
 
     def cmd_restore(self, args):
@@ -480,38 +486,40 @@ class BDKingTerminal:
     def cmd_monitor(self, args):
         """Real-time monitoring"""
         if not args:
-            print("""
+            print(
+                """
 📊 MONITORING COMMANDS:
   monitor all     - All systems monitoring
   monitor power   - Power systems only
   monitor ai      - AI systems only
   monitor network - Network only
   monitor quantum - Quantum systems only
-            """)
+            """
+            )
             return
-            
+
         monitor_type = args[0].lower()
         self.start_monitoring(monitor_type)
 
     def cmd_analyze(self, args):
         """Run system analysis"""
         print("🔍 RUNNING DEEP SYSTEM ANALYSIS...")
-        
+
         analysis_results = {
-            'Performance': f"{np.random.randint(85, 99)}% optimal",
-            'Security': "No vulnerabilities detected",
-            'Efficiency': f"{np.random.randint(88, 98)}% efficient",
-            'Stability': "System stable",
-            'Recommendations': "Continue current operations"
+            "Performance": f"{np.random.randint(85, 99)}% optimal",
+            "Security": "No vulnerabilities detected",
+            "Efficiency": f"{np.random.randint(88, 98)}% efficient",
+            "Stability": "System stable",
+            "Recommendations": "Continue current operations",
         }
-        
+
         print("\n📈 ANALYSIS RESULTS:")
         for category, result in analysis_results.items():
             print(f"  {category}: {result}")
 
     def cmd_clear(self, args):
         """Clear terminal"""
-        os.system('clear' if os.name == 'posix' else 'cls')
+        os.system("clear" if os.name == "posix" else "cls")
 
     def cmd_exit(self, args):
         """Exit terminal"""
@@ -551,7 +559,7 @@ class BDKingTerminal:
         try:
             new_level = int(level)
             if 1 <= new_level <= 100:
-                self.power_systems['core_power']['level'] = new_level
+                self.power_systems["core_power"]["level"] = new_level
                 print(f"✅ Power level adjusted to {new_level}%")
             else:
                 print("❌ Power level must be between 1-100")
@@ -563,11 +571,12 @@ class BDKingTerminal:
         print("⚖️ BALANCING POWER DISTRIBUTION...")
         time.sleep(1)
         print("✅ Power distribution optimized")
-        self.power_systems['core_power']['stability'] = 99.9
+        self.power_systems["core_power"]["stability"] = 99.9
 
     def show_backup_power(self):
         """Show backup power status"""
-        print("""
+        print(
+            """
 🔋 BACKUP POWER SYSTEMS:
 
 🪫 BATTERIES:
@@ -584,7 +593,8 @@ class BDKingTerminal:
   Main Grid: STABLE
   Backup Grid: READY
   Quantum Grid: SYNCED
-        """)
+        """
+        )
 
     def optimize_power(self):
         """Optimize power usage"""
@@ -593,13 +603,13 @@ class BDKingTerminal:
             "Reducing AI idle consumption...",
             "Optimizing cooling systems...",
             "Balancing load distribution...",
-            "Enhancing power conversion..."
+            "Enhancing power conversion...",
         ]
-        
+
         for opt in optimizations:
             print(f"  {opt} ✅")
             time.sleep(0.3)
-            
+
         print("✅ POWER OPTIMIZATION COMPLETE")
 
     def show_ai_status(self):
@@ -629,7 +639,7 @@ class BDKingTerminal:
         """Optimize AI systems"""
         print("🧠 OPTIMIZING AI SYSTEMS...")
         time.sleep(1)
-        self.power_systems['ai_processing']['efficiency'] = 96.5
+        self.power_systems["ai_processing"]["efficiency"] = 96.5
         print("✅ AI systems optimized")
 
     def deploy_ai_module(self, module):
@@ -658,105 +668,120 @@ class BDKingTerminal:
         print(f"📊 STARTING {monitor_type.upper()} MONITORING...")
         print("🔄 Real-time data streaming activated")
         print("💡 Press Ctrl+C to stop monitoring")
-        
+
         try:
             while True:
-                if monitor_type == 'all':
+                if monitor_type == "all":
                     self.display_all_monitoring()
-                elif monitor_type == 'power':
+                elif monitor_type == "power":
                     self.display_power_monitoring()
-                elif monitor_type == 'ai':
+                elif monitor_type == "ai":
                     self.display_ai_monitoring()
-                elif monitor_type == 'network':
+                elif monitor_type == "network":
                     self.display_network_monitoring()
-                elif monitor_type == 'quantum':
+                elif monitor_type == "quantum":
                     self.display_quantum_monitoring()
-                    
+
                 time.sleep(2)
                 print("-" * 50)
-                
+
         except KeyboardInterrupt:
             print("\n🛑 Monitoring stopped")
 
     def display_all_monitoring(self):
         """Display all systems monitoring"""
-        print(f"\n📊 COMPREHENSIVE MONITORING - {datetime.now().strftime('%H:%M:%S')}")
-        print(f"⚡ Power: {self.power_systems['core_power']['level']}% | Stability: {self.power_systems['core_power']['stability']}%")
-        print(f"🤖 AI Load: {self.power_systems['ai_processing']['load']}% | Efficiency: {self.power_systems['ai_processing']['efficiency']}%")
-        print(f"🔒 Security: {self.power_systems['security_grid']['level']} | Threats: {self.power_systems['security_grid']['threats']}")
-        print(f"🌐 Network: {self.power_systems['communication']['bandwidth']} | Latency: {self.power_systems['communication']['latency']}")
-        print(f"🔮 Quantum: {self.power_systems['quantum_core']['coherence']}% | Qubits: {self.power_systems['quantum_core']['qubits']}")
+        print(
+            f"\n📊 COMPREHENSIVE MONITORING - {datetime.now().strftime('%H:%M:%S')}")
+        print(
+            f"⚡ Power: {self.power_systems['core_power']['level']}% | Stability: {self.power_systems['core_power']['stability']}%"
+        )
+        print(
+            f"🤖 AI Load: {self.power_systems['ai_processing']['load']}% | Efficiency: {self.power_systems['ai_processing']['efficiency']}%"
+        )
+        print(
+            f"🔒 Security: {self.power_systems['security_grid']['level']} | Threats: {self.power_systems['security_grid']['threats']}"
+        )
+        print(
+            f"🌐 Network: {self.power_systems['communication']['bandwidth']} | Latency: {self.power_systems['communication']['latency']}"
+        )
+        print(
+            f"🔮 Quantum: {self.power_systems['quantum_core']['coherence']}% | Qubits: {self.power_systems['quantum_core']['qubits']}"
+        )
 
     def display_power_monitoring(self):
         """Display power monitoring"""
         print(f"\n⚡ POWER MONITORING - {datetime.now().strftime('%H:%M:%S')}")
         print(f"Core Level: {self.power_systems['core_power']['level']}%")
         print(f"Stability: {self.power_systems['core_power']['stability']}%")
-        print(f"Distribution: AI-35% | Security-20% | Network-15% | Quantum-25%")
+        print("Distribution: AI-35% | Security-20% | Network-15% | Quantum-25%")
 
     def display_ai_monitoring(self):
         """Display AI monitoring"""
         print(f"\n🤖 AI MONITORING - {datetime.now().strftime('%H:%M:%S')}")
-        print(f"Processing Load: {self.power_systems['ai_processing']['load']}%")
-        print(f"Efficiency: {self.power_systems['ai_processing']['efficiency']}%")
-        print(f"Active Models: 247 | Training Sessions: 8")
+        print(
+            f"Processing Load: {self.power_systems['ai_processing']['load']}%")
+        print(
+            f"Efficiency: {self.power_systems['ai_processing']['efficiency']}%")
+        print("Active Models: 247 | Training Sessions: 8")
 
     def display_network_monitoring(self):
         """Display network monitoring"""
-        print(f"\n🌐 NETWORK MONITORING - {datetime.now().strftime('%H:%M:%S')}")
+        print(
+            f"\n🌐 NETWORK MONITORING - {datetime.now().strftime('%H:%M:%S')}")
         print(f"Bandwidth: {self.power_systems['communication']['bandwidth']}")
         print(f"Latency: {self.power_systems['communication']['latency']}")
-        print(f"Connections: 1,247 | Throughput: 8.5Gbps")
+        print("Connections: 1,247 | Throughput: 8.5Gbps")
 
     def display_quantum_monitoring(self):
         """Display quantum monitoring"""
-        print(f"\n🔮 QUANTUM MONITORING - {datetime.now().strftime('%H:%M:%S')}")
+        print(
+            f"\n🔮 QUANTUM MONITORING - {datetime.now().strftime('%H:%M:%S')}")
         print(f"Coherence: {self.power_systems['quantum_core']['coherence']}%")
         print(f"Qubits: {self.power_systems['quantum_core']['qubits']}")
-        print(f"Operations: 15.8 PetaQubits/sec")
+        print("Operations: 15.8 PetaQubits/sec")
 
     # Diagnostic methods
     def diagnose_power(self):
-        return {'healthy': True, 'message': 'All power systems nominal'}
-    
+        return {"healthy": True, "message": "All power systems nominal"}
+
     def diagnose_ai(self):
-        return {'healthy': True, 'message': 'AI systems operating optimally'}
-    
+        return {"healthy": True, "message": "AI systems operating optimally"}
+
     def diagnose_security(self):
-        return {'healthy': True, 'message': 'Security systems fully operational'}
-    
+        return {"healthy": True, "message": "Security systems fully operational"}
+
     def diagnose_network(self):
-        return {'healthy': True, 'message': 'Network infrastructure stable'}
-    
+        return {"healthy": True, "message": "Network infrastructure stable"}
+
     def diagnose_quantum(self):
-        return {'healthy': True, 'message': 'Quantum core coherence maintained'}
+        return {"healthy": True, "message": "Quantum core coherence maintained"}
 
     # Scan methods
     def run_security_scan(self):
-        return {'status': 'OK', 'message': 'No threats detected'}
-    
+        return {"status": "OK", "message": "No threats detected"}
+
     def run_performance_scan(self):
-        return {'status': 'OK', 'message': 'Performance optimal'}
-    
+        return {"status": "OK", "message": "Performance optimal"}
+
     def run_network_scan(self):
-        return {'status': 'OK', 'message': 'Network integrity verified'}
-    
+        return {"status": "OK", "message": "Network integrity verified"}
+
     def run_power_scan(self):
-        return {'status': 'OK', 'message': 'Power systems stable'}
-    
+        return {"status": "OK", "message": "Power systems stable"}
+
     def run_ai_scan(self):
-        return {'status': 'OK', 'message': 'AI systems functioning normally'}
+        return {"status": "OK", "message": "AI systems functioning normally"}
 
     # Utility methods
     def get_uptime(self):
         return "15 days, 7 hours, 23 minutes"
-    
+
     def get_memory_usage(self):
         return "64TB/128TB (50%)"
-    
+
     def get_cpu_load(self):
         return np.random.randint(15, 45)
-    
+
     def get_recommendations(self):
         return "System operating optimally. No actions required."
 
@@ -769,10 +794,12 @@ class BDKingTerminal:
         print("✅ Terminal shutdown complete\n")
         sys.exit(0)
 
+
 def main():
     """Main entry point for BD-King-R7 Terminal"""
     terminal = BDKingTerminal()
     terminal.start_terminal()
+
 
 if __name__ == "__main__":
     main()

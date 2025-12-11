@@ -4,7 +4,7 @@ name: Build · Test · Deploy
 # Triggers: on push to main (or any branch), and nightly cron
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
   workflow_dispatch: {}
   schedule:
     - cron: "0 0 * * *" # daily at 00:00 UTC (adjust as needed)

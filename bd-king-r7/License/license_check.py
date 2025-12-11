@@ -3,5 +3,6 @@ def check_license(code):
         return "✔ Valid format"
     return "❌ Invalid license format"
 
+
 user_code = input("Enter your BD-KING-R7 License: ")
 print(check_license(user_code))

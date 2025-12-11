@@ -1,6 +1,12 @@
 # r7_backup.py
 # Sovereign full-system backup for bd_king_r7 — snapshot + file-by-file + manifest + seals
-import os, sys, shutil, hashlib, json, datetime
+import datetime
+import hashlib
+import json
+import os
+import shutil
+import sys
+
 
 def sha256(path):
     h = hashlib.sha256()
@@ -9,20 +15,32 @@ def sha256(path):
             h.update(chunk)
     return h.hexdigest()
 
+
 def stamp():
     return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+
 def should_include(relpath):
     # Customize filters here
-    EXCLUDE_DIRS = {".git", ".cache", "__pycache__", ".venv", "node_modules", "build", "dist"}
+    EXCLUDE_DIRS = {
+        ".git",
+        ".cache",
+        "__pycache__",
+        ".venv",
+        "node_modules",
+        "build",
+        "dist",
+    }
     parts = relpath.split(os.sep)
     if any(p in EXCLUDE_DIRS for p in parts):
         return False
     return True
 
+
 def copy_file(src, dst):
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     shutil.copy2(src, dst)
+
 
 def main():
     if len(sys.argv) < 3:
@@ -47,7 +65,7 @@ def main():
         "backup_root": backup_root,
         "session": session,
         "counts": {"files": 0, "bytes": 0},
-        "entries": []
+        "entries": [],
     }
 
     # Snapshot: tar-like copy (directory mirror)
@@ -57,7 +75,8 @@ def main():
         if rel_root == ".":
             rel_root = ""
         # Apply exclude filter to dirs
-        dirs[:] = [d for d in dirs if should_include(os.path.join(rel_root, d))]
+        dirs[:] = [d for d in dirs if should_include(
+            os.path.join(rel_root, d))]
         for name in files:
             relpath = os.path.join(rel_root, name)
             if not should_include(relpath):
@@ -79,11 +98,9 @@ def main():
             size = os.path.getsize(src)
             manifest["counts"]["files"] += 1
             manifest["counts"]["bytes"] += size
-            manifest["entries"].append({
-                "path": relpath.replace("\\", "/"),
-                "size": size,
-                "sha256": h
-            })
+            manifest["entries"].append(
+                {"path": relpath.replace("\\", "/"), "size": size, "sha256": h}
+            )
 
             print(f"[AFFIRM] {relpath} [{size} bytes] -> SHA256 {h}")
 
@@ -94,7 +111,9 @@ def main():
     # Seals: a human-readable integrity chant
     total_bytes = manifest["counts"]["bytes"]
     total_files = manifest["counts"]["files"]
-    root_hash = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
+    root_hash = hashlib.sha256(
+        json.dumps(manifest, sort_keys=True).encode()
+    ).hexdigest()
     with open(seals_path, "w", encoding="utf-8") as f:
         f.write(f"BD_KING_R7_BACKUP_SESSION {session}\n")
         f.write(f"FILES {total_files}\n")
@@ -107,6 +126,7 @@ def main():
     print(f"Manifest:    {manifest_path}")
     print(f"Seals:       {seals_path}")
     print(f"Root seal:   {root_hash}")
+
 
 if __name__ == "__main__":
     main()

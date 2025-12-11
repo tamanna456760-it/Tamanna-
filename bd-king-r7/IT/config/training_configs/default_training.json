@@ -19,7 +19,7 @@
   "evaluation_metrics": [
     "accuracy",
     "precision",
-    "recall", 
+    "recall",
     "f1_score",
     "auc_roc",
     "confusion_matrix"

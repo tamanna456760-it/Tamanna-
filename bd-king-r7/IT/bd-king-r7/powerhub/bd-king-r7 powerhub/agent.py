@@ -11,19 +11,18 @@ bd-king-r7 powerhub agent
   - Posts a JSON report to orchestration server
 - Uses lockfile to avoid overlapping runs
 """
+import logging
 import os
+import signal
+import subprocess
 import sys
 import time
-import yaml
 import uuid
-import json
-import shlex
-import signal
-import logging
-import subprocess
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import requests
+import yaml
 
 LOG = logging.getLogger("bdking_agent")
 LOG.setLevel(logging.INFO)
@@ -72,8 +71,10 @@ class Agent:
         self.build_cmds = cfg.get("build_cmds", [])
         self.ficar = cfg.get("ficar", "ficar")
         self.powersync = cfg.get("power_sync", "power_sync")
-        self.lockfile = Path(cfg.get("lockfile", "/var/lock/bd-king-r7-powerhub.lock"))
-        self.logfile = Path(cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
+        self.lockfile = Path(
+            cfg.get("lockfile", "/var/lock/bd-king-r7-powerhub.lock"))
+        self.logfile = Path(
+            cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
         self.server_url = cfg.get("server_url", "").rstrip("/")
         self.agent_id = cfg.get("agent_id", str(uuid.uuid4()))
         self.auth_token = cfg.get("auth_token", "")
@@ -90,7 +91,8 @@ class Agent:
     def acquire_lock(self):
         # simple lockfile existence + writing PID (works across reboots)
         try:
-            fd = os.open(str(self.lockfile), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            fd = os.open(str(self.lockfile), os.O_CREAT |
+                         os.O_EXCL | os.O_WRONLY)
             os.write(fd, str(os.getpid()).encode())
             os.close(fd)
             self._write_log("acquired lock")
@@ -140,14 +142,17 @@ class Agent:
                 rc, out = self.git(f"checkout {self.branch}")
             else:
                 # try create from remote main or from HEAD
-                rc_main, _ = self.git(f"ls-remote --exit-code {self.remote} main")
+                rc_main, _ = self.git(
+                    f"ls-remote --exit-code {self.remote} main")
                 if rc_main == 0:
-                    rc, out = self.git(f"checkout -b {self.branch} {self.remote}/main")
+                    rc, out = self.git(
+                        f"checkout -b {self.branch} {self.remote}/main")
                 else:
                     rc, out = self.git(f"checkout -b {self.branch}")
             self._write_log("checked out branch")
             # try reset to remote branch to avoid divergence
-            rc, _ = self.git(f"ls-remote --exit-code {self.remote} {self.branch}")
+            rc, _ = self.git(
+                f"ls-remote --exit-code {self.remote} {self.branch}")
             if rc == 0:
                 self.git(f"reset --hard {self.remote}/{self.branch}")
 
@@ -179,8 +184,12 @@ class Agent:
 
             # update marker files
             uid = str(uuid.uuid4())
-            self.repo_path.joinpath(self.ficar).write_text(f"Updated at: {now_iso()}\nUUID: {uid}\n")
-            self.repo_path.joinpath(self.powersync).write_text(f"Last run: {now_iso()} BUILD_OK={build_ok}\n")
+            self.repo_path.joinpath(self.ficar).write_text(
+                f"Updated at: {now_iso()}\nUUID: {uid}\n"
+            )
+            self.repo_path.joinpath(self.powersync).write_text(
+                f"Last run: {now_iso()} BUILD_OK={build_ok}\n"
+            )
             self.git(f'add "{self.ficar}" "{self.powersync}" || true')
 
             changes_rc, changes_out = self.git("status --porcelain")
@@ -198,7 +207,8 @@ class Agent:
                     commit_sha = out.strip()
                 if self.push_changes:
                     # push (create upstream if not exists)
-                    rc, out = self.git(f"push -u {self.remote} {self.branch} || true")
+                    rc, out = self.git(
+                        f"push -u {self.remote} {self.branch} || true")
                     self._write_log(f"push rc={rc}")
             elif has_changes and not build_ok:
                 # reset staged changes so human can review

@@ -7,7 +7,12 @@
     },
     "influenza": {
       "symptoms": ["fever", "cough", "headache", "fatigue", "body_aches"],
-      "treatment": ["rest", "hydration", "antiviral_medication", "fever_reducer"],
+      "treatment": [
+        "rest",
+        "hydration",
+        "antiviral_medication",
+        "fever_reducer"
+      ],
       "urgency": "medium"
     },
     "pneumonia": {

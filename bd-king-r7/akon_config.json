@@ -1,9 +1,5 @@
 {
-  "watch_directories": [
-    "./src",
-    "./hm_files",
-    "./tamanna_scripts"
-  ],
+  "watch_directories": ["./src", "./hm_files", "./tamanna_scripts"],
   "build_directory": "./build",
   "file_extensions": [".hm", ".tmn", ".py"],
   "auto_build": true,

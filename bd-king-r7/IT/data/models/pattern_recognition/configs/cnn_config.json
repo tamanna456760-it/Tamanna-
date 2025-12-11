@@ -5,9 +5,9 @@
     "num_classes": 8,
     "rnn_type": "lstm",
     "rnn_layers": [
-      {"units": 128, "return_sequences": true},
-      {"units": 64, "return_sequences": true},
-      {"units": 32, "return_sequences": false}
+      { "units": 128, "return_sequences": true },
+      { "units": 64, "return_sequences": true },
+      { "units": 32, "return_sequences": false }
     ],
     "dense_layers": [64, 32],
     "dropout_rate": 0.3,

@@ -1,0 +1,24 @@
+name: Auto Fix and Build
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/5 * * * *" # every five minutes
+
+jobs:
+  auto-fix-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt || true; fi
+      - name: Run auto-fix script
+        run: |
+          chmod +x scripts/auto_build_and_fix.sh || true
+          bash scripts/auto_build_and_fix.sh

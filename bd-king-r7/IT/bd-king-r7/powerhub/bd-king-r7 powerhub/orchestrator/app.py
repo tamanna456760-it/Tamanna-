@@ -1,16 +1,21 @@
 # Simple orchestrator web app
-import os
 import json
+import os
 from datetime import datetime
-from flask import Flask, request, jsonify, abort, render_template_string
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
-from sqlalchemy.orm import declarative_base, sessionmaker
+
+from flask import Flask, abort, jsonify, render_template_string, request
+from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 DB_URL = os.environ.get("DATABASE_URL", "sqlite:///reports.db")
 API_TOKEN = os.environ.get("ORCHESTRATOR_TOKEN", "change-this-token")
 
-engine = create_engine(DB_URL, connect_args={"check_same_thread": False} if DB_URL.startswith("sqlite") else {})
+engine = create_engine(
+    DB_URL,
+    connect_args={"check_same_thread": False} if DB_URL.startswith("sqlite") else {
+    },
+)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 app = Flask(__name__)
@@ -72,7 +77,8 @@ def api_report():
 def index():
     session = Session()
     try:
-        rows = session.query(Report).order_by(Report.id.desc()).limit(200).all()
+        rows = session.query(Report).order_by(
+            Report.id.desc()).limit(200).all()
     finally:
         session.close()
     # very small template for quick dashboard

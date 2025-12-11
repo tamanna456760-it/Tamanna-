@@ -3,10 +3,13 @@ Simple sync server that uses the PowerHubController to serve module state,
 and provides lightweight set/get endpoints for devices to sync with master.
 """
 
-from flask import Flask, request, jsonify, send_from_directory
-from .core import create_api_app, PowerHubController
+import os
 from pathlib import Path
-import json, os
+
+from flask import jsonify, request, send_from_directory
+
+from .core import PowerHubController, create_api_app
+
 
 def run_sync_server(controller=None):
     # If controller not supplied, create one
@@ -21,12 +24,12 @@ def run_sync_server(controller=None):
         payload = request.get_json() or {}
         key = payload.get("key")
         if not key:
-            return jsonify({"error":"no_key"}), 400
+            return jsonify({"error": "no_key"}), 400
 
         modules = controller.list_modules()
         # If key is module.* return that module
         if key.startswith("module."):
-            mname = key.split(".",1)[1]
+            mname = key.split(".", 1)[1]
             m = modules.get(mname)
             if not m:
                 return jsonify({"exists": False})
@@ -41,16 +44,18 @@ def run_sync_server(controller=None):
         key = payload.get("key")
         value = payload.get("value")
         if not key:
-            return jsonify({"error":"no_key"}), 400
+            return jsonify({"error": "no_key"}), 400
 
         # allow setting module state via sync
         if key.startswith("module."):
-            mname = key.split(".",1)[1]
+            mname = key.split(".", 1)[1]
             enabled = value.get("enabled") if isinstance(value, dict) else None
-            metadata = value.get("metadata") if isinstance(value, dict) else None
-            m = controller.set_module(mname, enabled=enabled, metadata=metadata)
+            metadata = value.get("metadata") if isinstance(
+                value, dict) else None
+            m = controller.set_module(
+                mname, enabled=enabled, metadata=metadata)
             if not m:
-                return jsonify({"error":"module_not_found"}), 404
+                return jsonify({"error": "module_not_found"}), 404
             return jsonify({"synced": True, "module": m})
 
         # No generic persistent store here, so just echo back
@@ -66,6 +71,7 @@ def run_sync_server(controller=None):
     host = os.environ.get("PH_HOST", "0.0.0.0")
     port = int(os.environ.get("PH_PORT", "5000"))
     app.run(host=host, port=port, debug=False)
+
 
 if __name__ == "__main__":
     run_sync_server()

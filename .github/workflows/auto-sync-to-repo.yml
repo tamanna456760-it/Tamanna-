@@ -3,7 +3,7 @@ name: Auto Sync Mirror
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
   workflow_dispatch: {}
 
 jobs:

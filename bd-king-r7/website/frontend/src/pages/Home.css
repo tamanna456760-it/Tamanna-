@@ -6,15 +6,23 @@
 }
 
 .hero::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(110, 68, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(0, 255, 157, 0.1) 0%, transparent 50%);
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(110, 68, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(0, 255, 157, 0.1) 0%,
+      transparent 50%
+    );
 }
 
 .hero-content {
@@ -79,7 +87,7 @@
   border-radius: 50%;
   filter: blur(1px);
   animation: float 6s ease-in-out infinite;
-  box-shadow: 
+  box-shadow:
     0 0 60px rgba(0, 255, 157, 0.3),
     0 0 120px rgba(110, 68, 255, 0.2);
 }
@@ -115,13 +123,22 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
 }
 
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Features Section */

@@ -1,3 +1,3 @@
 @info
-#bd-king-r7 outo run
+# bd-king-r7 outo run
 tamanna all file run

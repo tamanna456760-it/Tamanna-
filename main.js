@@ -1,6 +1,6 @@
-const { program } = require('./cli');
-const JSONFixer = require('./json-fixer');
-const AutoCommitter = require('./auto-committer');
+const { program } = require("./cli");
+const JSONFixer = require("./json-fixer");
+const AutoCommitter = require("./auto-committer");
 
 class TamangsaruAutoFix {
   constructor() {
@@ -10,20 +10,20 @@ class TamangsaruAutoFix {
 
   async run() {
     console.log(`🚀 ${this.name} v${this.version}`);
-    
-    const command = process.argv[2] || 'help';
-    
-    switch(command) {
-      case 'fix':
+
+    const command = process.argv[2] || "help";
+
+    switch (command) {
+      case "fix":
         await this.fixAll();
         break;
-      case 'fix-json':
+      case "fix-json":
         await this.fixJSON();
         break;
-      case 'commit':
+      case "commit":
         await this.autoCommit();
         break;
-      case 'setup':
+      case "setup":
         await this.setup();
         break;
       default:
@@ -32,36 +32,36 @@ class TamangsaruAutoFix {
   }
 
   async fixAll() {
-    console.log('🔧 Running comprehensive auto-fix...');
-    
+    console.log("🔧 Running comprehensive auto-fix...");
+
     const jsonFixer = new JSONFixer();
     const committer = new AutoCommitter();
-    
+
     // Fix JSON files
-    await jsonFixer.fixDirectory('.');
-    
+    await jsonFixer.fixDirectory(".");
+
     // Auto commit changes
-    await committer.commit('fix: auto-fix code and JSON formatting');
-    
-    console.log('✅ Auto-fix completed!');
+    await committer.commit("fix: auto-fix code and JSON formatting");
+
+    console.log("✅ Auto-fix completed!");
   }
 
   async fixJSON() {
-    console.log('📝 Fixing JSON files...');
+    console.log("📝 Fixing JSON files...");
     const fixer = new JSONFixer();
-    await fixer.fixDirectory('.');
+    await fixer.fixDirectory(".");
   }
 
   async autoCommit() {
-    const message = process.argv[3] || 'chore: auto-commit changes';
+    const message = process.argv[3] || "chore: auto-commit changes";
     const committer = new AutoCommitter();
     await committer.commit(message);
   }
 
   async setup() {
-    console.log('⚙️ Setting up tamangsaru522-it auto-fix environment...');
+    console.log("⚙️ Setting up tamangsaru522-it auto-fix environment...");
     // Setup git hooks and configuration
-    require('../scripts/setup').run();
+    require("../scripts/setup").run();
   }
 
   showHelp() {

@@ -40,7 +40,11 @@
   },
   "machine_learning": {
     "time_series_models": ["arima", "prophet", "lstm"],
-    "anomaly_detection_methods": ["isolation_forest", "autoencoder", "statistical"],
+    "anomaly_detection_methods": [
+      "isolation_forest",
+      "autoencoder",
+      "statistical"
+    ],
     "classification_models": ["random_forest", "xgboost", "neural_network"],
     "regression_models": ["linear", "gradient_boosting", "svr"]
   },

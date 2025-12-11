@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>BD-KING-R7 PowerHub</title>
     <link rel="stylesheet" href="style.css" />
-</head>
-<body>
+  </head>
+  <body>
     <h1>BD-KING-R7 PowerHub</h1>
     <p>Select a power mode:</p>
 
@@ -19,11 +19,18 @@
     <pre id="output"></pre>
 
     <script>
-        function getPower(type) {
-            fetch(`/power/${type}`)
-              .then(r => r.json())
-              .then(d => document.getElementById("output").textContent = JSON.stringify(d, null, 2));
-        }
+      function getPower(type) {
+        fetch(`/power/${type}`)
+          .then((r) => r.json())
+          .then(
+            (d) =>
+              (document.getElementById("output").textContent = JSON.stringify(
+                d,
+                null,
+                2,
+              )),
+          );
+      }
     </script>
-</body>
+  </body>
 </html>

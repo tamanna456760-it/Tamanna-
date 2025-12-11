@@ -1,4 +1,4 @@
-document.getElementById("input").addEventListener("keydown", e => {
+document.getElementById("input").addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     let msg = e.target.value;
     let chat = document.getElementById("chat-box");
