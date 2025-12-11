@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("bd-king-agent")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ee83ac696b604ecae03f80c1bb5f222f7b832c01")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+01d3621459e2193cff549564b6fd3269f0147774")]
 [assembly: System.Reflection.AssemblyProductAttribute("bd-king-agent")]
 [assembly: System.Reflection.AssemblyTitleAttribute("bd-king-agent")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

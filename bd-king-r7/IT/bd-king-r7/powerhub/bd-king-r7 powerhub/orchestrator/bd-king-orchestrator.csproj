@@ -10,4 +10,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+  <!-- Exclude agent sources which are a separate worker project to avoid duplicate compilation units -->
+  <ItemGroup>
+    <Compile Remove="agent\\**\\*.cs" />
+  </ItemGroup>
 </Project>

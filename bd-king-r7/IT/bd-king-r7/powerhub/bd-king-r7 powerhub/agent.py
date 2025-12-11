@@ -64,7 +64,7 @@ class Agent:
         self.repo_path = Path(cfg["repo_path"]).expanduser()
         self.branch = cfg.get("branch", "powerhub-auto")
         self.remote = cfg.get("remote", "origin")
-        self.user = cfg.get("user", os.getlogin())
+        self.user = cfg.get("user") or os.environ.get("USER", "nobody")
         self.interval = int(cfg.get("interval_seconds", 60))
         self.push_changes = bool(cfg.get("push_changes", False))
         self.fix_cmds = cfg.get("fix_cmds", [])

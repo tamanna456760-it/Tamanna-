@@ -1,14 +1,15 @@
-[Unit]
-Description=bd-king-r7 powerhub agent
-After=network-online.target
-Wants=network-online.target
+FROM python:3.12-slim
 
-[Service]
-Type=simple
-User=youruser
-Group=youruser
-ExecStart=/usr/bin/env python3 /opt/bd-king-r7-powerhub/agent.py
-Restart=on-failure
-RestartSec=15
-StandardOutput=append:/var/log/bd-king-r7-powerhub.log
-StandardError=inherit
+WORKDIR /app
+
+# install runtime deps
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy app
+COPY . .
+
+ENV ORCHESTRATOR_TOKEN=change-this-token
+
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
