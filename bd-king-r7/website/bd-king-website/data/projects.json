@@ -1,0 +1,26 @@
+[
+  {
+    "Id": "tamanna-ai",
+    "Title": "Tamanna AI",
+    "Short": "The supervisory AI that orchestrates agents and auto-fixes code.",
+    "Content": "<p>Tamanna AI provides automated pipelines, configurable fixers, and reporting. It is designed to minimize manual work while keeping humans in the loop for failed builds.</p>",
+    "Languages": ["Python", "C", "Shell"],
+    "Tags": ["automation", "ai", "orchestrator"]
+  },
+  {
+    "Id": "bd-king-r7-ai",
+    "Title": "bd-king-r7 AI",
+    "Short": "AI components specific to the bd-king-r7 powerhub product.",
+    "Content": "<p>Provides firmware build automation, test harness orchestration, and power management simulation tooling.</p>",
+    "Languages": ["C", "C++", "Rust"],
+    "Tags": ["firmware", "power", "ci"]
+  },
+  {
+    "Id": "tamanna-system",
+    "Title": "Tamanna System",
+    "Short": "Full automation system: agents, orchestrator, dashboard.",
+    "Content": "<p>Agents run per-host tasks; the orchestrator stores run records and provides a dashboard. Start with push disabled and a dedicated automation branch.</p>",
+    "Languages": ["C#", "Python", "Bash"],
+    "Tags": ["system", "ops"]
+  }
+]
