@@ -4,7 +4,7 @@
   FILE_GUID                      = 7c6f4f5a-7a3e-4fd0-9f5a-efitmn000002
   MODULE_TYPE                    = UEFI_APPLICATION
   ENTRY_POINT                    = TamannaMain
-  VERSION_STRING                 = 1.1
+  VERSION_STRING                 = 1.0.1
 
 [Sources]
   TamannaMain.c
