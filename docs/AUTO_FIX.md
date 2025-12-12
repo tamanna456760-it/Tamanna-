@@ -12,3 +12,5 @@ CI: `.github/workflows/auto_fix_build.yml` runs the auto-fix script on push and 
 Notes:
 - The script will attempt to auto-format and auto-fix many files but some files (e.g., shell snippets saved as .py) may produce parsing errors that require manual review.
 - If native build dependencies are missing (e.g., PortAudio headers for `pyaudio`), install them in the environment before running `pip install -r requirements.txt`.
+	- Example (Debian/Ubuntu): `sudo apt-get install -y libportaudio2 portaudio19-dev`
+	- We've moved `pyaudio` to `requirements-optional.txt` to avoid blocking installs; add it explicitly if you need audio features.

@@ -1,0 +1,3 @@
+## Optional native packages
+# `pyaudio` requires PortAudio C headers (Ubuntu: libportaudio2 portaudio19-dev)
+pyaudio==0.2.11
