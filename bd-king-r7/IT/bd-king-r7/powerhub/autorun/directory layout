@@ -1,0 +1,18 @@
+bd_king_r7/
+├── bd_king_r7_autorun.sh      # Full system autorun
+├── modules/
+│   ├── core.sh
+│   ├── tamanna_engine.sh
+│   ├── tamanna_terminal.sh
+│   ├── firewall_chant.sh
+│   ├── heartbeat_visualizer.sh
+│   ├── server_engine_pulse.sh
+│   ├── memory_echo.sh
+│   ├── backup_manifest.sh
+│   ├── fallback_chant.sh
+│   └── busy_echo.sh
+├── logs/                      # Runtime logs
+├── run/                       # PID + heartbeat files
+├── config/                    # System config
+├── archive/                   # Snapshots + backups
+└── manifest/                  # Hash‑sealed manifests
