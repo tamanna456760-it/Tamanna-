@@ -1,35 +1,27 @@
 from flask import Flask, jsonify
 import subprocess
+import threading
 
 app = Flask(__name__)
+building = False
 
 def run_cmd(cmd):
     try:
-        output = subprocess.check_output(
+        return subprocess.check_output(
             cmd, shell=True, stderr=subprocess.STDOUT, text=True
         )
-        return output
     except subprocess.CalledProcessError as e:
         return e.output
 
-@app.route("/connect")
-def connect():
-    return jsonify({"log": "✔ Connected to local system & git repo"})
-
-@app.route("/fix")
-def fix():
-    output = run_cmd("git status")
-    return jsonify({"log": "✔ Files scanned\n" + output})
-
-@app.route("/save")
-def save():
-    output = run_cmd("git add . && git commit -m 'Auto save by Tamanna System'")
-    return jsonify({"log": output})
-
 @app.route("/build")
 def build():
-    output = run_cmd("echo Building project... && ls")
-    return jsonify({"log": output})
+    global building
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    if building:
+        return jsonify({"log": "⏳ Build already running, please wait..."})
+
+    building = True
+    output = run_cmd("echo Building... && ls")
+    building = False
+
+    return jsonify({"log": "✔ Build completed successfully\n" + output})
