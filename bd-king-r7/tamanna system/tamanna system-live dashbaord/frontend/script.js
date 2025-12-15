@@ -30,3 +30,24 @@ function saveCode() {
 function buildSystem() {
     callAPI("build");
 }
+let busy = false;
+
+function callAPI(endpoint) {
+    if (busy && endpoint === "build") {
+        log("⏳ Build already in progress...");
+        return;
+    }
+
+    if (endpoint === "build") busy = true;
+
+    fetch("http://localhost:5000/" + endpoint)
+        .then(res => res.json())
+        .then(data => {
+            log(data.log);
+            busy = false;
+        })
+        .catch(() => {
+            log("❌ Backend not running");
+            busy = false;
+        });
+}
