@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Device, Location  Snapshot</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f4f8;
+  padding: 20px;
+}
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  max-width: 500px;
+  margin: 20px auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+h2 {
+  text-align: center;
+}
+.info {
+  margin: 10px 0;
+}
+img {
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+  background: black;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>📱 Device, Location & Auto Snapshot</h2>
+
+  <div class="info"><b>Browser:</b> <span id="browser"></span></div>
+  <div class="info"><b>Platform:</b> <span id="platform"></span></div>
+  <div class="info"><b>Screen:</b> <span id="screen"></span></div>
+  <div class="info"><b>Time:</b> <span id="time"></span></div>
+
+  <div class="info"><b>Country:</b> <span id="country">Loading...</span></div>
+  <div class="info"><b>City:</b> <span id="city">Loading...</span></div>
+  <div class="info"><b>Coordinates:</b> <span id="coords">Loading...</span></div>
+
+  <div class="info"><b>Snapshot:</b></div>
+  <img id="snapshot" alt="Ваше фото появится здесь">
+</div>
+
+<script>
+
+document.getElementById("browser").textContent = navigator.userAgent;
+document.getElementById("platform").textContent = navigator.platform;
+document.getElementById("screen").textContent = screen.width + " x " + screen.height;
+
+
+function updateTime() {
+  document.getElementById("time").textContent = new Date().toLocaleTimeString();
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+
+if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(
+	async position => {
+	  const lat = position.coords.latitude;
+	  const lon = position.coords.longitude;
+	  document.getElementById("coords").textContent = lat.toFixed(5) + ", " + lon.toFixed(5);
+	  try {
+		const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+		const data = await response.json();
+		document.getElementById("country").textContent = data.address.country || "Unknown";
+		document.getElementById("city").textContent = data.address.city || data.address.town || data.address.village || "Unknown";
+	  } catch {
+		document.getElementById("country").textContent = "Error";
+		document.getElementById("city").textContent = "Error";
+	  }
+	},
+	() => {
+	  document.getElementById("country").textContent = "Denied";
+	  document.getElementById("city").textContent = "Denied";
+	  document.getElementById("coords").textContent = "Denied";
+	}
+  );
+} else {
+  document.getElementById("country").textContent = "Not supported";
+}
+
+
+const snapshot = document.getElementById("snapshot");
+
+async function takeSnapshot() {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+	try {
+	  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+	  const video = document.createElement("video");
+	  video.srcObject = stream;
+	  video.play();
+
+	 
+	  video.addEventListener("loadeddata", () => {
+		const canvas = document.createElement("canvas");
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		const ctx = canvas.getContext("2d");
+		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+		snapshot.src = canvas.toDataURL("image/png");
+
+		
+		stream.getTracks().forEach(track => track.stop());
+	  });
+	} catch {
+	  snapshot.alt = "Camera access denied or not available";
+	}
+  } else {
+	snapshot.alt = "Camera not supported";
+  }
+}
+
+
+takeSnapshot();
+</script>
+
+</body>
+</html>
