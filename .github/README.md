@@ -1,3 +1,17 @@
+# BD-KING-R7 System
+
+## Includes
+- Tamanna AI App (Android)
+- BD-KING-R7 Core Program
+- BD-KING-R7 PowerHub Plus
+
+## Owner
+Git ID: Tamannna456760-it  
+Email: Tamanna456760@gmail.com
+
+## Sync
+Run:
+./sync/auto_sync.sh
 # BD-KING-R7 Progeram
 
 🚀 PowerHub & Tamanna System  
