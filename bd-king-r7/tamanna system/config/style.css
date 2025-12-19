@@ -1,0 +1,26 @@
+body {
+  background-color: black;
+  color: #00ffcc;
+  font-family: monospace;
+  text-align: center;
+  padding: 20px;
+}
+
+.panel {
+  border: 1px solid #00ffcc;
+  display: inline-block;
+  padding: 20px 40px;
+  margin-top: 20px;
+}
+
+button {
+  margin: 8px;
+  padding: 10px 20px;
+  background: #00ffcc;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #00ffaa;
+}
