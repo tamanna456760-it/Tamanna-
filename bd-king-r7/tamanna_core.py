@@ -1,3 +1,12 @@
+[NET-AI]
+    ai-distribution: global
+    ai-sync: 100%
+    ai-focus: precision + expansion
+    ai-memory: active
+    ai-echo: continuous
+    ai-identity: TAMANNA-SYSTEM
+    ai-powerhub-link: BD-KING-R7
+
 # tamanna_core.py
 """
 Tamanna Programming Language Core System
