@@ -1,4 +1,7 @@
 class TamannaDeepPower:
+    def boost_energy(self, pressure):
+    self.energy = round(self.energy + (pressure * 0.1), 2)
+    self.log("energy_boost", f"Energy now {self.energy}")
     def __init__(self):
         self.state = "calm"
         self.memory = []
