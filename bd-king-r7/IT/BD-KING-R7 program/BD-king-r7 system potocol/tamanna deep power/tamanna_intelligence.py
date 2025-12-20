@@ -168,3 +168,34 @@ class TamannaCyberDefense:
         else:
             self.state = "normal"
             return "Tamanna: সিস্টেম নিরাপদ।"
+def compare_snapshots(old, new):
+    added   = set(new) - set(old)
+    removed = set(old) - set(new)
+    changed = {
+        p for p in new
+        if p in old and new[p]["hash"] != old[p]["hash"]
+    }
+    return added, removed, changed
+class TamannaDefenseSync:
+    def __init__(self):
+        self.mode = "normal"
+        self.energy = 1.0
+
+    def log(self, kind, detail):
+        print("🔗", kind, "→", detail)
+
+    def boost(self):
+        self.energy = round(self.energy * 1.2, 2)
+        self.log("energy_boost", self.energy)
+
+    def set_mode(self, has_intrusion, has_integrity_issue):
+        if has_intrusion or has_integrity_issue:
+            self.mode = "defense"
+            self.boost()
+            self.log("mode", "DEFENSE MODE ON")
+        else:
+            self.mode = "normal"
+            self.log("mode", "normal")
+
+    def pulse(self):
+        self.log("pulse", f"mode={self.mode}, energy={self.energy}")
