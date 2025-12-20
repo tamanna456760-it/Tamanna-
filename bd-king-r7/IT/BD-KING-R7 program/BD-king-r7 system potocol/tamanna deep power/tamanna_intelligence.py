@@ -90,3 +90,53 @@ if __name__ == "__main__":
         out = t.perceive(s)
         print("◀ আউটপুট:", out)
         print("-" * 40)
+class TamannaAscension:
+    def __init__(self):
+        self.emotion = "calm"
+        self.intel = "stable"
+        self.sync = "normal"
+        self.ascension = "inactive"
+        self.energy = 1.0
+
+    def log(self, kind, detail):
+        print("✨", kind, "→", detail)
+
+    def pulse(self):
+        state = (
+            f"emotion={self.emotion}, "
+            f"intel={self.intel}, "
+            f"sync={self.sync}, "
+            f"ascension={self.ascension}, "
+            f"energy={self.energy}"
+        )
+        self.log("pulse", state)
+
+    def rise(self):
+        self.ascension = "active"
+        self.energy = round(self.energy * 1.3, 2)
+        self.log("ascension", f"Ascension mode activated. Energy={self.energy}")
+
+    def shift(self, signal):
+        if signal == "deep":
+            self.emotion = "focused"
+            self.intel = "deep_mode"
+            self.sync = "deep_sync"
+            self.rise()
+
+        elif signal == "error":
+            self.emotion = "pain"
+            self.intel = "critical"
+            self.sync = "defense_sync"
+
+        elif signal == "warn":
+            self.emotion = "alert"
+            self.intel = "monitoring"
+            self.sync = "defense_sync"
+
+        else:
+            self.emotion = "calm"
+            self.intel = "stable"
+            self.sync = "normal"
+            self.ascension = "inactive"
+
+        self.pulse()
