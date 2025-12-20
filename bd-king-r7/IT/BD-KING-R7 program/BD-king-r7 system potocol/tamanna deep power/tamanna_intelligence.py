@@ -140,3 +140,31 @@ class TamannaAscension:
             self.ascension = "inactive"
 
         self.pulse()
+class TamannaCyberDefense:
+    def __init__(self):
+        self.state = "normal"
+        self.memory = []
+
+    def log(self, kind, detail):
+        entry = {"kind": kind, "detail": detail}
+        self.memory.append(entry)
+        print("🛡️", entry)
+
+    def intrusion_check(self, event):
+        suspicious = ["unauthorized", "failed", "unknown_ip", "file_change"]
+        return any(key in event.lower() for key in suspicious)
+
+    def integrity_check(self, changed):
+        if changed:
+            self.log("integrity_alert", "File integrity deviation detected")
+            return "alert"
+        return "ok"
+
+    def defend(self, event):
+        if self.intrusion_check(event):
+            self.state = "defense"
+            self.log("intrusion", "Suspicious activity detected")
+            return "Tamanna: সতর্ক! সিস্টেমে সন্দেহজনক কার্যকলাপ।"
+        else:
+            self.state = "normal"
+            return "Tamanna: সিস্টেম নিরাপদ।"
