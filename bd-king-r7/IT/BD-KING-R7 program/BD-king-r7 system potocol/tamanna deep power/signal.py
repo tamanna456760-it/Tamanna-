@@ -9,3 +9,6 @@ def tamanna_defense(event):
         return "Tamanna: সতর্ক! সন্দেহজনক কার্যকলাপ ধরা পড়েছে."
     else:
         return "Tamanna: সব ঠিক আছে, সিস্টেম শান্ত."
+        print(tamanna_defense("failed_login from unknown IP"))
+Tamanna: সতর্ক! সন্দেহজনক কার্যকলাপ ধরা পড়েছে.
+
