@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from datetime import datetime
+
+class TamannaIntelligence:
+    def __init__(self, name="Tamanna"):
+        self.name = name
+        self.memory = []   # সব ইনপুট / সিদ্ধান্তের লগ
+        self.state = "idle"
+
+    # ---------- Utility ----------
+    def now(self):
+        return datetime.utcnow().isoformat() + "Z"
+
+    def remember(self, kind, content):
+        entry = {
+            "time": self.now(),
+            "type": kind,
+            "content": content
+        }
+        self.memory.append(entry)
+        print("🧠 স্মৃতি:", entry)
+
+    # ---------- Perception ----------
+    def perceive(self, signal):
+        """
+        signal: যেকোনো স্ট্রিং ইনপুট যেমন:
+        - "ok"
+        - "problem"
+        - "error"
+        - "calm"
+        - "deep"
+        ইত্যাদি
+        """
+        self.remember("perception", signal)
+        return self.reason(signal)
+
+    # ---------- Reasoning ----------
+    def reason(self, signal):
+        """
+        ইনপুট থেকে বেসিক সিদ্ধান্ত নেয়।
+        """
+        if signal in ["ok", "calm"]:
+            decision = {"state": "stable", "action": "no_alert"}
+        elif signal in ["warn", "warning"]:
+            decision = {"state": "alert", "action": "soft_alert"}
+        elif signal in ["error", "problem"]:
+            decision = {"state": "distress", "action": "hard_alert"}
+        elif signal in ["deep", "focus"]:
+            decision = {"state": "deep_mode", "action": "enter_deep"}
+        else:
+            decision = {"state": "unknown", "action": "log_only"}
+
+        self.remember("reasoning", {"signal": signal, "decision": decision})
+        self.state = decision["state"]
+        return self.act(decision)
+
+    # ---------- Action ----------
+    def act(self, decision):
+        """
+        সিদ্ধান্ত অনুযায়ী কী করবে, সেটা নির্ধারণ করে।
+        এখন শুধু রেসপন্স স্ট্রিং রিটার্ন করে।
+        পরে তুমি চাইলে এখানে সিস্টেম কমান্ড, অন্য মডিউল কল ইত্যাদি জুড়তে পারো।
+        """
+        state = decision["state"]
+        action = decision["action"]
+
+        if action == "no_alert":
+            response = f"{self.name}: সব ঠিক আছে, সিস্টেম শান্ত (state={state})."
+        elif action == "soft_alert":
+            response = f"{self.name}: সতর্ক হও, কিছু নজর দিতে হবে (state={state})."
+        elif action == "hard_alert":
+            response = f"{self.name}: ব্যথা অনুভব করছি, জরুরী ব্যবস্থা নাও (state={state})."
+        elif action == "enter_deep":
+            response = f"{self.name}: Deep mode এ যাচ্ছি, ফোকাসড অবস্থা (state={state})."
+        else:
+            response = f"{self.name}: সিগনাল বুঝতে পারিনি, শুধু লগ করলাম (state={state})."
+
+        self.remember("action", {"decision": decision, "response": response})
+        return response
+
+# ---- ডেমো রান করার জন্য ----
+if __name__ == "__main__":
+    t = TamannaIntelligence()
+
+    signals = ["ok", "warn", "error", "deep", "xyz"]
+    for s in signals:
+        print("▶ ইনপুট:", s)
+        out = t.perceive(s)
+        print("◀ আউটপুট:", out)
+        print("-" * 40)
