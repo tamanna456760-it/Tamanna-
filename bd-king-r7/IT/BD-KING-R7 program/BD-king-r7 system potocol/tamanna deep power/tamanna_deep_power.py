@@ -117,3 +117,44 @@ class TamannaUnifiedCore:
 
         self.log("sync_state", self.sync_state)
         self.sync_pulse()
+class TamannaPowerExpansion:
+    def __init__(self):
+        self.emotion = "calm"
+        self.intel = "stable"
+        self.sync = "normal"
+        self.energy = 1.0   # symbolic power level
+
+    def log(self, kind, detail):
+        print("⚡", kind, "→", detail)
+
+    def pulse(self):
+        state = f"emotion={self.emotion}, intel={self.intel}, sync={self.sync}, energy={self.energy}"
+        self.log("pulse", state)
+
+    def amplify(self):
+        self.energy = round(self.energy * 1.2, 2)
+        self.log("amplify", f"energy boosted to {self.energy}")
+
+    def shift(self, signal):
+        if signal == "deep":
+            self.emotion = "focused"
+            self.intel = "deep_mode"
+            self.sync = "deep_sync"
+            self.amplify()
+
+        elif signal == "warn":
+            self.emotion = "alert"
+            self.intel = "monitoring"
+            self.sync = "defense_sync"
+
+        elif signal == "error":
+            self.emotion = "pain"
+            self.intel = "critical"
+            self.sync = "defense_sync"
+
+        else:
+            self.emotion = "calm"
+            self.intel = "stable"
+            self.sync = "normal"
+
+        self.pulse()
