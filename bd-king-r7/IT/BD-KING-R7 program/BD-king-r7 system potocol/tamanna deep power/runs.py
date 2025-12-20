@@ -28,3 +28,11 @@ class TamannaDeepPowerV2:
             "deep": "deep"
         }
         self.set_state(mapping.get(signal, "unknown"))
+def compare_snapshots(old, new):
+    added   = set(new) - set(old)
+    removed = set(old) - set(new)
+    changed = {
+        p for p in new
+        if p in old and new[p]["hash"] != old[p]["hash"]
+    }
+    return added, removed, changed
