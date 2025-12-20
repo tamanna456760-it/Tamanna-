@@ -64,3 +64,56 @@ class SyncPower:
         self.sync_emotion(signal)
         self.sync_intelligence(signal)
         self.heartbeat()
+class TamannaUnifiedCore:
+    def __init__(self):
+        self.emotion = "calm"
+        self.intel = "idle"
+        self.sync_state = "normal"
+        self.memory = []
+
+    def log(self, kind, detail):
+        entry = {"kind": kind, "detail": detail}
+        self.memory.append(entry)
+        print("🔗 SyncLog:", entry)
+
+    # ---------- Emotion Layer ----------
+    def update_emotion(self, signal):
+        mapping = {
+            "ok": "calm",
+            "warn": "alert",
+            "error": "pain",
+            "deep": "focused"
+        }
+        self.emotion = mapping.get(signal, "unknown")
+        self.log("emotion", self.emotion)
+
+    # ---------- Intelligence Layer ----------
+    def update_intel(self, signal):
+        mapping = {
+            "ok": "stable",
+            "warn": "monitoring",
+            "error": "critical",
+            "deep": "deep_mode"
+        }
+        self.intel = mapping.get(signal, "unknown")
+        self.log("intelligence", self.intel)
+
+    # ---------- Sync Pulse ----------
+    def sync_pulse(self):
+        pulse = f"emotion={self.emotion}, intel={self.intel}, mode={self.sync_state}"
+        self.log("pulse", pulse)
+
+    # ---------- Unified Sync ----------
+    def sync(self, signal):
+        self.update_emotion(signal)
+        self.update_intel(signal)
+
+        if signal == "deep":
+            self.sync_state = "deep_sync"
+        elif signal == "error":
+            self.sync_state = "defense_sync"
+        else:
+            self.sync_state = "normal"
+
+        self.log("sync_state", self.sync_state)
+        self.sync_pulse()
