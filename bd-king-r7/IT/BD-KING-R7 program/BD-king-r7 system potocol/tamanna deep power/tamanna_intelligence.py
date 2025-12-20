@@ -199,3 +199,44 @@ class TamannaDefenseSync:
 
     def pulse(self):
         self.log("pulse", f"mode={self.mode}, energy={self.energy}")
+def boost_energy(self, pressure):
+    self.energy = round(self.energy + (pressure * 0.1), 2)
+    self.log("energy_boost", f"Energy now {self.energy}")
+class TamannaShield:
+    def __init__(self):
+        self.state = "calm"
+        self.events = []
+
+    def log(self, kind, detail):
+        entry = {"kind": kind, "detail": detail}
+        self.events.append(entry)
+        print("🛡️", entry)
+
+    def is_suspicious(self, event_text):
+        bad_words = [
+            "failed_login",
+            "unknown_ip",
+            "unauthorized",
+            "bruteforce",
+            "file_change",
+            "config_change"
+        ]
+        event_text = event_text.lower()
+        return any(w in event_text for w in bad_words)
+
+    def observe(self, event_text):
+        if self.is_suspicious(event_text):
+            self.state = "alert"
+            self.log("intrusion", f"সন্দেহজনক ইভেন্ট: {event_text}")
+            return "Tamanna: সতর্ক! হ্যাকার টাইপ কার্যকলাপ ধরা পড়েছে."
+        else:
+            self.log("normal_event", event_text)
+            return "Tamanna: ইভেন্ট ঠিক আছে, সিস্টেম শান্ত."
+def compare_snapshots(old, new):
+    added   = set(new) - set(old)
+    removed = set(old) - set(new)
+    changed = {
+        p for p in new
+        if p in old and new[p]["hash"] != old[p]["hash"]
+    }
+    return added, removed, changed
