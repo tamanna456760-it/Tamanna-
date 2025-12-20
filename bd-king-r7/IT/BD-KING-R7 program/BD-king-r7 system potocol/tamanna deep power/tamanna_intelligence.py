@@ -240,3 +240,69 @@ def compare_snapshots(old, new):
         if p in old and new[p]["hash"] != old[p]["hash"]
     }
     return added, removed, changed
+class TamannaDefenseSync:
+    def __init__(self):
+        self.mode = "normal"
+        self.energy = 1.0
+
+    def log(self, kind, detail):
+        print("🔗", kind, "→", detail)
+
+    def boost(self):
+        self.energy = round(self.energy * 1.2, 2)
+        self.log("energy_boost", self.energy)
+
+    def set_mode(self, has_intrusion, has_integrity_issue):
+        if has_intrusion or has_integrity_issue:
+            self.mode = "defense"
+            self.boost()
+            self.log("mode", "DEFENSE MODE ON")
+        else:
+            self.mode = "normal"
+            self.log("mode", "normal")
+
+    def pulse(self):
+        self.log("pulse", f"mode={self.mode}, energy={self.energy}")
+def boost_energy(self, pressure):
+    self.energy = round(self.energy + (pressure * 0.1), 2)
+    self.log("energy_boost", f"Energy now {self.energy}")
+class TamannaUltraDefense:
+    def __init__(self):
+        self.energy = 1.0
+        self.mode = "shield"
+        self.pressure = 0
+
+    def log(self, kind, detail):
+        print("🛡️", kind, "→", detail)
+
+    def add_pressure(self, event):
+        weights = {
+            "failed_login": 1,
+            "unknown_ip": 2,
+            "unauthorized": 3,
+            "file_change": 5,
+            "config_change": 7
+        }
+        for key, val in weights.items():
+            if key in event.lower():
+                self.pressure += val
+                self.log("pressure_add", f"+{val} → total {self.pressure}")
+
+    def update_mode(self):
+        if self.pressure <= 3:
+            self.mode = "shield"
+        elif self.pressure <= 10:
+            self.mode = "barrier"
+        else:
+            self.mode = "fortress"
+        self.log("mode_update", self.mode)
+
+    def boost_energy(self):
+        self.energy = round(self.energy + (self.pressure * 0.1), 2)
+        self.log("energy_boost", self.energy)
+
+    def defend(self, event):
+        self.add_pressure(event)
+        self.update_mode()
+        self.boost_energy()
+        return f"Tamanna: Mode={self.mode}, Energy={self.energy}, Pressure={self.pressure}"
