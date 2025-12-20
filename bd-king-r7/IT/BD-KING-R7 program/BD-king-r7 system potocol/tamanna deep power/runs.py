@@ -140,3 +140,5 @@ def compare_snapshots(old, new):
         if p in old and new[p]["hash"] != old[p]["hash"]
     }
     return added, removed, changed
+bus.send("Monitor", "DefenseCore", {"alert": True, "reason": "failed_login"})
+bus.send("Monitor", "EmotionCore", {"state": "alert"})
