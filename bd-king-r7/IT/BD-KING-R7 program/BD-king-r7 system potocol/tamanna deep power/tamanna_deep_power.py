@@ -26,3 +26,41 @@ class TamannaDeepPower:
             self.set_state("healing")
         else:
             self.set_state("unknown")
+class SyncPower:
+    def __init__(self):
+        self.emotion = "calm"
+        self.intel_state = "idle"
+        self.memory = []
+
+    def log(self, kind, detail):
+        entry = {"kind": kind, "detail": detail}
+        self.memory.append(entry)
+        print("🔗 SyncLog:", entry)
+
+    def heartbeat(self):
+        self.log("heartbeat", f"emotion={self.emotion}, intel={self.intel_state}")
+
+    def sync_emotion(self, signal):
+        mapping = {
+            "ok": "calm",
+            "warn": "alert",
+            "error": "pain",
+            "deep": "focused"
+        }
+        self.emotion = mapping.get(signal, "unknown")
+        self.log("emotion_update", self.emotion)
+
+    def sync_intelligence(self, signal):
+        mapping = {
+            "ok": "stable",
+            "warn": "monitoring",
+            "error": "critical",
+            "deep": "deep_mode"
+        }
+        self.intel_state = mapping.get(signal, "unknown")
+        self.log("intel_update", self.intel_state)
+
+    def sync(self, signal):
+        self.sync_emotion(signal)
+        self.sync_intelligence(signal)
+        self.heartbeat()
