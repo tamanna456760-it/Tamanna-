@@ -1,0 +1,30 @@
+$domain = "bd-king-r7.com"
+
+Write-Host "==============================================" 
+Write-Host "   BD-KING-R7 DOMAIN DIAGNOSTIC"
+Write-Host "   Checking: $domain"
+Write-Host "==============================================`n"
+
+Write-Host "🔍 Checking DNS resolution..."
+try {
+    $dns = Resolve-DnsName $domain -ErrorAction Stop
+    Write-Host "✅ DNS found an IP address:"
+    $dns | Select-Object Name,IPAddress
+}
+catch {
+    Write-Host "❌ DNS could NOT resolve the domain."
+    Write-Host "   This means:"
+    Write-Host "   - Domain is not registered"
+    Write-Host "   - OR DNS records missing"
+    Write-Host "   - OR nameservers not configured"
+}
+
+Write-Host "`n🔍 Checking ping..."
+if (Test-Connection -Count 1 -Quiet $domain) {
+    Write-Host "✅ Ping successful."
+}
+else {
+    Write-Host "❌ Ping failed — no server reachable."
+}
+
+Write-Host "`n✅ Diagnostic complete."
