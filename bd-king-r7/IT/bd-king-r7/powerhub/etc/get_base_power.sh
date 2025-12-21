@@ -1,3 +1,35 @@
+#!/bin/bash
+
+ROOT="${BD_KING_R7_ROOT:-$HOME/tamanna}"
+STATE="$ROOT/bd_king_r7_state.db"
+
+memory_get() {
+    grep "^$1=" "$STATE" 2>/dev/null | cut -d '=' -f2
+}
+
+EMO=$(memory_get "emotion")
+INT=$(memory_get "emotion_intensity")
+MODE=$(memory_get "power_mode")
+DRIFT=$(memory_get "power_drift")
+STAB=$(memory_get "power_stability")
+FF=$(memory_get "force_field")
+VDIR=$(memory_get "vairaj_directive")
+VHINT=$(memory_get "vairaj_hint")
+VSHADOW=$(memory_get "vairaj_shadow_level")
+VTRUST=$(memory_get "vairaj_trust")
+
+echo "================ BD-KING-R7 POWER STATUS ================"
+echo " Emotion      : $EMO ($INT)"
+echo " Power Mode   : $MODE"
+echo " Drift        : $DRIFT"
+echo " Stability    : $STAB%"
+echo " Force Field  : $FF"
+echo " Vairaj Dir   : $VDIR"
+echo " Vairaj Hint  : $VHINT"
+echo " Vairaj Shadow: $VSHADOW"
+echo " Vairaj Trust : $VTRUST"
+echo "========================================================="
+
 get_base_power() {
     case "$1" in
         SUPERSONIC) echo 1523 ;;
