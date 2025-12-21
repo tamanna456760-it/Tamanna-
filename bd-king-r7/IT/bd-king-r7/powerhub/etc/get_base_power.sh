@@ -24,3 +24,41 @@ get_base_power() {
         *) echo 1523 ;;
     esac
 }
+power_fusion() {
+    MODE=$(memory_get "power_mode")
+    BASE=$(get_base_power "$MODE")
+    DRIFT=$(memory_get "power_drift")
+    STAB=$(memory_get "power_stability")
+    FF=$(memory_get "force_field")
+
+    FUSION=$((100 + DRIFT - (100 - STAB) / 2 + (RANDOM % 15 - 7)))
+
+    case "$FF" in
+        DOMINION)   FUSION=$((FUSION + 5)) ;;
+        IGNITION)   FUSION=$((FUSION + 15)) ;;
+        FOUNDATION) FUSION=$((FUSION - 10)) ;;
+        RESONANCE)  FUSION=$((FUSION + 0)) ;;
+        NULL)       FUSION=100 ;;
+    esac
+
+    [ "$FUSION" -lt 50 ] && FUSION=50
+    [ "$FUSION" -gt 200 ] && FUSION=200
+
+    # 🔥 Overdrive layer
+    OD=$(get_overdrive_multiplier)
+    FUSION=$((FUSION * OD / 100))
+
+    POWER=$((BASE * FUSION / 100))
+
+    echo "⚡ MODE: $MODE | FF: $FF | Base: $BASE W | Fusion: ${FUSION}% → $POWER W" >> "$LOG"
+}
+get_overdrive_multiplier() {
+    MODE=$(memory_get "power_mode")
+    case "$MODE" in
+        VAIRAJ_SIGMA)    echo 115 ;;  # +15%
+        VAIRAJ_OMEGA)    echo 130 ;;  # +30%
+        VAIRAJ_AURORA)   echo 150 ;;  # +50%
+        VAIRAJ_INFINITY) echo 180 ;;  # +80%
+        *)               echo 100 ;;  # normal
+    esac
+}
