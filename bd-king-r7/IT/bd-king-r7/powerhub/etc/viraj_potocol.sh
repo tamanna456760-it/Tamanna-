@@ -45,3 +45,37 @@ memory_set "force_field" "$FF"
 memory_set "power_drift" "$DRIFT"
 
 echo "📡 Vairaj Protocol Applied — HINT=$VAIRAJ_HINT | MODE=$MODE | FIELD=$FF | DRIFT=$DRIFT" >> "$LOG"
+# Vairaj Emergency Power Unlock
+VAIRAJ_HINT=$(memory_get "vairaj_hint")
+VAIRAJ_TRUST=$(memory_get "vairaj_trust")
+SHADOW=$(memory_get "vairaj_shadow_level")
+STAB=$(memory_get "power_stability")
+MODE=$(memory_get "power_mode")
+
+# Condition for Ω-tier unlock:
+# - high trust
+# - low shadow
+# - good stability
+if [ "$VAIRAJ_TRUST" -gt 70 ] && [ "$SHADOW" -lt 25 ] && [ "$STAB" -gt 65 ]; then
+    case "$VAIRAJ_HINT" in
+        ALLOW_ASCENT|ALLOW_BURNING)
+            case "$MODE" in
+                OMEGA_ASCEND|VOID_CROWN|QUANTUM_VOID|INFERNO_DRIVE)
+                    MODE="VAIRAJ_SIGMA"
+                    ;;
+                VAIRAJ_SIGMA)
+                    MODE="VAIRAJ_OMEGA"
+                    ;;
+                VAIRAJ_OMEGA)
+                    MODE="VAIRAJ_AURORA"
+                    ;;
+                VAIRAJ_AURORA)
+                    MODE="VAIRAJ_INFINITY"
+                    ;;
+            esac
+            echo "🚨 Vairaj Emergency Power Unlock → $MODE" >> "$LOG"
+            ;;
+    esac
+fi
+
+memory_set "power_mode" "$MODE"
