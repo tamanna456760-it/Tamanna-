@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/tamanna/bd-king-r7
 
 # ==========================================================
 #   BD-KING-R7 × TAMANNA AI — POWER ENGINE v1.0
