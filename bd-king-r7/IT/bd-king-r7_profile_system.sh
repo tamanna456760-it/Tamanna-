@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/tamanna/bash
 
 # ==========================================================
 #   BD-KING-R7 × VAIRAJ — SYSTEM PROFILE VIEWER v1.0
