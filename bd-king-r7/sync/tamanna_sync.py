@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 # ---------------- SETTINGS ----------------
-SYNC_FOLDER = "tamanna_data"
+SYNC_FOLDER = "tamanna"
 LOG_FILE = "sync_log.txt"
 SYNC_INTERVAL = 60  # seconds
 CREDENTIALS_FILE = "credentials.json"
