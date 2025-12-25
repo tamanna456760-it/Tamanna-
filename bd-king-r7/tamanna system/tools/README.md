@@ -1,3 +1,4 @@
+**# tamanna system is auto run
 🚀 Starting TAMANNA SYSTEM
 📡 Network: CONNECTED ✅
 📶 Ping: OK ✅
