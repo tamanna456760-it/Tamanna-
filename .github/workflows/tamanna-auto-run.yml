@@ -1,0 +1,42 @@
+name: Tamanna AI Auto Run
+
+on:
+  push:
+    branches: [ "main" ]
+
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+
+  workflow_dispatch:
+
+jobs:
+  run-tamanna:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout repo
+      uses: actions/checkout@v4
+
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: 📦 Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: ⚡ Run Tamanna AI Head
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      run: |
+        echo "$GOOGLE_CREDENTIALS" > credentials.json
+        python run.py
+
+    - name: 🔄 Auto Commit Updates
+      run: |
+        git config --global user.name "tamanna-ai-bot"
+        git config --global user.email "tamanna-ai@users.noreply.github.com"
+        git add .
+        git commit -m "🤖 Tamanna AI auto sync" || echo "No changes"
+        git push
