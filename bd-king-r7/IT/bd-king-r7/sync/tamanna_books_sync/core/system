@@ -1,0 +1,13 @@
+tamanna_ai_head/
+│
+├── core/
+│   ├── book_sync.py
+│   ├── drive_sync.py
+│   ├── power_engine.py
+│
+├── tamanna_ai_books/
+│
+├── credentials.json
+├── token.pickle
+├── run.py
+└── requirements.txt
