@@ -1,0 +1,54 @@
+name: BD-KING-R7 POWERHUB ULTRA
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: powerhub
+  cancel-in-progress: true
+
+jobs:
+  powerhub:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: ⬇️ Checkout
+      uses: actions/checkout@v4
+
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: ⚡ Cache pip (SPEED BOOST)
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+    - name: 📦 Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: 🧪 Pre-check (Power Scan)
+      run: |
+        python -m compileall .
+        echo "✔ Power scan passed"
+
+    - name: 🚀 Run POWERHUB CORE
+      run: |
+        python run.py
+
+    - name: 🔁 Auto Commit (SMART)
+      run: |
+        git config user.name "tamanna-bot"
+        git config user.email.tamanna456760@gmail.com.reply.github.com"
+        git status --porcelain | grep . && \
+        git add . && \
+        git commit -m "⚡ POWERHUB auto run" && \
+        git push || echo "No changes to push"
