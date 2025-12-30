@@ -1,0 +1,13 @@
+{"time":"2025-12-30T14:00:00Z","system":"BD-KING-R7","level":"info","event":"system_init","status":"ready"}
+{"time":"2025-12-30T14:00:01Z","system":"BD-KING-R7","level":"info","event":"system_start"}
+{"time":"2025-12-30T14:00:03Z","system":"BD-KING-R7","level":"info","event":"manifest_loaded","file":"manifest.json"}
+{"time":"2025-12-30T14:00:05Z","system":"BD-KING-R7","level":"info","event":"module_loaded","module":"core"}
+{"time":"2025-12-30T14:00:06Z","system":"BD-KING-R7","level":"info","event":"module_loaded","module":"sync"}
+{"time":"2025-12-30T14:00:07Z","system":"BD-KING-R7","level":"info","event":"module_loaded","module":"logger"}
+{"time":"2025-12-30T14:00:10Z","system":"BD-KING-R7","level":"info","event":"auto_sync_check","files_checked":14}
+{"time":"2025-12-30T14:00:20Z","system":"BD-KING-R7","level":"info","event":"auto_sync_check","files_checked":14}
+{"time":"2025-12-30T14:00:30Z","system":"BD-KING-R7","level":"info","event":"system_heartbeat","status":"alive"}
+{"time":"2025-12-30T14:01:00Z","system":"BD-KING-R7","level":"info","event":"system_heartbeat","status":"alive"}
+{"time":"2025-12-30T14:01:30Z","system":"BD-KING-R7","level":"warning","event":"slow_response","module":"sync"}
+{"time":"2025-12-30T14:02:00Z","system":"BD-KING-R7","level":"info","event":"system_heartbeat","status":"alive"}
+{"time":"2025-12-30T14:02:30Z","system":"BD-KING-R7","level":"error","event":"file_missing","file":"backup/latest.zip"}
