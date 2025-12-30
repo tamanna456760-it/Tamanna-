@@ -6,9 +6,9 @@ import subprocess
 # 1️⃣ Folder Structure Setup
 # --------------------------
 folders = [
-    "Tamanna_System/boot_tools",
-    "Tamanna_System/logs",
-    "Tamanna_System/sync/backup"
+    "Tamanna/bd-king-r7/boot/tools",
+    "Tamanna/bd-king-r7/boot/tools/logs",
+    "Tamanna/bd-king-r7/boot/tools/sync/backup"
 ]
 
 for folder in folders:
