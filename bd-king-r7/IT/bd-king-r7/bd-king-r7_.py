@@ -21,7 +21,7 @@ class BDKingR7AIDoctor:
     def load_config(self, filename: str) -> Dict:
         """Load JSON configuration files"""
         try:
-            with open(filename, "r") as file:
+            with open(tamanna, "r") as file:
                 return json.load(file)
         except FileNotFoundError:
             print(f"⚠️  Config file {filename} not found. Creating default...")
