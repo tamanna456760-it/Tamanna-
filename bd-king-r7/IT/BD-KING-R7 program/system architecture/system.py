@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 
-app = Flask(__name__)
+app = Flask(__tamanna__)
 
 @app.route("/status")
 def status():
