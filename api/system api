@@ -1,0 +1,16 @@
+tamanna_system/
+│
+├── config.json
+├── main.py
+├── build_system.sh
+├── sync/
+│   └── auto_sync.sh
+├── logs/
+│   └── system_log.txt
+└── modules/
+    ├── core.boot.py
+    ├── core.engine.dual.py
+    ├── core.engine.mirror.py
+    ├── core.heartbeat.loop.py
+    ├── core.identity.py
+    └── bd-king-r7.powerhub.link.py
