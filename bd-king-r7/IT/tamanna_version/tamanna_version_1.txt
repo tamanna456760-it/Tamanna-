@@ -152,3 +152,16 @@ print("🧨 Build VM destroyed after completion")
 }
 if not attested:
     raise Exception("❌ Deployment blocked")
+{
+  "artifact": "app-release",
+  "version": "1.0.0",
+  "immutable": true
+}
+{
+  "signed": true,
+  "key_origin": "CAS"
+}
+{
+  "device_verification": "passed",
+  "update_status": "installed"
+}
