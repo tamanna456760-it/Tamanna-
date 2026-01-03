@@ -132,3 +132,5 @@ Build requests secret
   "identity_provider": "Google",
   "trust_level": "high"
 }
+print("🔧 Ephemeral build started")
+print("🧨 Build VM destroyed after completion")
