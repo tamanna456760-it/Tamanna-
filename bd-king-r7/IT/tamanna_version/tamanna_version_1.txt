@@ -150,3 +150,5 @@ print("🧨 Build VM destroyed after completion")
   "tamanna": "tamanna456760-it:abcd...",
   "timestamp": "2026-01-03T18:00Z"
 }
+if not attested:
+    raise Exception("❌ Deployment blocked")
