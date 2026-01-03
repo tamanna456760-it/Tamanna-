@@ -134,3 +134,19 @@ Build requests secret
 }
 print("🔧 Ephemeral build started")
 print("🧨 Build VM destroyed after completion")
+{
+  "tests": {
+    "unit": "pass",
+    "integration": "pass",
+    "policy": "pass"
+  }
+}
+{
+  "vulnerabilities": 0,
+  "risk_level": "low"
+}
+{
+  "attested": true,
+  "tamanna": "tamanna456760-it:abcd...",
+  "timestamp": "2026-01-03T18:00Z"
+}
