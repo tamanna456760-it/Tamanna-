@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IT TAMANNA AI Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="dashboard">
+  <h1>🤖⚡ IT TAMANNA AI DASHBOARD</h1>
+  
+  <div class="section">
+    <h2>System Status</h2>
+    <pre id="status">Loading...</pre>
+    <button onclick="updateStatus()">Refresh Status</button>
+  </div>
+
+  <div class="section">
+    <h2>File Sync</h2>
+    <button onclick="syncFiles()">Sync Files</button>
+    <pre id="syncLog"></pre>
+  </div>
+
+  <div class="section">
+    <h2>AI Features</h2>
+    <button onclick="aiRate()">AI Rate</button>
+    <button onclick="aiSummary()">AI Summary</button>
+    <button onclick="aiSuggest()">AI Suggest</button>
+    <pre id="aiLog"></pre>
+  </div>
+
+  <div class="section">
+    <h2>Snapshots</h2>
+    <button onclick="saveSnapshot()">Save Snapshot</button>
+    <pre id="snapLog"></pre>
+  </div>
+
+  <div class="section">
+    <h2>Run Python File</h2>
+    <input type="text" id="runFile" placeholder="filename.py">
+    <button onclick="runPython()">Run</button>
+    <pre id="runLog"></pre>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
