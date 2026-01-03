@@ -81,3 +81,22 @@
 
 
 ====================  END OF VERSION CODE v1.0.0-MASTER  ====================
+Developer (Verified ID)
+        |
+        v
+Cloud Build (Ephemeral VM)
+        |
+   Automated Tests
+        |
+   Vulnerability Scan
+        |
+   Attestation Created
+        |
+Binary Authorization Check
+        |
+Artifact Registry (Signed)
+        |
+CAS (Signing)
+        |
+Android / Client Update
+   (Verification enforced)
