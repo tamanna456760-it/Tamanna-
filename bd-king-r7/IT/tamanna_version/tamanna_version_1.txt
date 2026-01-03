@@ -127,3 +127,8 @@ Build requests secret
 → Secret issued (minutes only)
 → Secret expires
 
+{
+  "developer_id": "verified",
+  "identity_provider": "Google",
+  "trust_level": "high"
+}
