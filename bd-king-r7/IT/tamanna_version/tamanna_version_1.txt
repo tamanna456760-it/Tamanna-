@@ -100,3 +100,30 @@ CAS (Signing)
         |
 Android / Client Update
    (Verification enforced)
+
+# Verify that an image has a valid attestation
+gcloud container binauthz attestations list \
+  --artifact-url=LOCATION-docker.pkg.dev/PROJECT/REPO/IMAGE
+
+# Access a signing key securely (no plaintext)
+gcloud secrets versions access latest \
+  --secret="update-signing-key"
+
+"Show me update pipeline anomalies in the last 24 hours
+where unsigned artifacts were attempted."
+
+Build → Test → Deploy
+
+Verify Identity
+→ Ephemeral Build
+→ Automated Security Tests
+→ AI Risk Analysis
+→ Attestation
+→ Policy Enforcement
+→ Cryptographic Signing
+→ Distribution
+Build requests secret
+→ Identity verified
+→ Secret issued (minutes only)
+→ Secret expires
+
