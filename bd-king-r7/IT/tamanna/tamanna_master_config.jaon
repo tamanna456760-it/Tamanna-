@@ -1,0 +1,8 @@
+{
+  "backup_paths": ["/srv/bd_king_r7/tamanna", "/srv/bd_king_r7/panels", "/etc/letsencrypt", "/srv/bd_king_r7/gmail_exports"],
+  "archive_root": "/srv/bd_king_r7/archives",
+  "repos": ["/srv/bd_king_r7/tamanna", "/srv/bd_king_r7/panels"],
+  "git_remote": "origin",
+  "git_branch": "main",
+  "health_url": "http://localhost:8000/health"
+}
