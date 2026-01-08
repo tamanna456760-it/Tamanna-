@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  tamanna_core:
+    image: yourregistry/tamanna_core:latest
+    container_name: tamanna_core
+    restart: unless-stopped
+    environment:
+      - TAMANNA_ENV=production
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./tamanna:/app
+      - /var/log/tamanna:/var/log/tamanna
+
+  ai_panel:
+    image: yourregistry/ai_panel:latest
+    container_name: ai_panel
+    restart: unless-stopped
+    depends_on:
+      - tamanna_core
+    volumes:
+      - ./panels/ai:/app
+
+  master_panel:
+    image: yourregistry/master_panel:latest
+    container_name: master_panel
+    restart: unless-stopped
+    volumes:
+      - ./panels/master:/app
+
+  file_saver:
+    image: alpine:latest
+    container_name: file_saver
+    command: ["sh", "-c", "while true; do sleep 3600; done"]
+    volumes:
+      - ./archives:/archives
+      - ./data:/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable
+    container_name: bd_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./ssl:/etc/ssl/private
