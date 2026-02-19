@@ -1,3 +1,80 @@
+name: Tamanna Auto Run
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Run Python files
+      run: |
+        for f in $(find . -type f -name "*.py"); do
+          echo "Running $f"
+          python3 "$f" || echo "Python failed: $f"
+        done
+
+    - name: Run NodeJS files
+      run: |
+        for f in $(find . -type f -name "*.js"); do
+          echo "Running $f"
+          node "$f" || echo "NodeJS failed: $f"
+        done
+
+    - name: Run Shell scripts
+      run: |
+        find . -type f -name "*.sh" -exec chmod +x {} \;
+        for f in $(find . -type f -name "*.sh"); do
+          echo "Running $f"
+          sh "$f" || echo "Shell failed: $f"
+        done
+
+    - name: Compile & run C files
+      run: |
+        for f in $(find . -type f -name "*.c"); do
+          out="${f%.c}"
+          gcc "$f" -o "$out" && ./"$out" || echo "C failed: $f"
+        done
+
+    - name: Compile & run Java files
+      run: |
+        for f in $(find . -type f -name "*.java"); do
+          cls=$(basename "$f" .java)
+          javac "$f" && java "$cls" || echo "Java failed: $f"
+        done
+
+    - name: GitHub Push (optional)
+      if: ${{ secrets.GITHUB_TOKEN != '' }}
+      run: |
+        git config user.name "TamannaBot"
+        git config user.email "tamanna-bot@example.com"
+        git add .
+        git commit -m "Auto update via workflow" || echo "Nothing to commit"
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 name: Auto Sync to Repo
 
 on:
