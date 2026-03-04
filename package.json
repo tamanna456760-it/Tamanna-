@@ -1,4 +1,19 @@
 {
+  "name": "tamanna-ultimate-system",
+  "version": "2.0.0",
+  "scripts": {
+    "start": "node auto.js",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "build": "npm run lint && npm run format"
+  },
+  "devDependencies": {
+    "chokidar": "^3.5.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  }
+}
+{
   "name": "tamangsaru522-it-auto-fix",
   "version": "1.0.0",
   "description": "Auto-fix program for JSON and code formatting",
