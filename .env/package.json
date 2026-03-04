@@ -1,4 +1,16 @@
 {
+  "name": "ai-github-sync",
+  "version": "1.0.0",
+  "main": "ai-sync.js",
+  "scripts": {
+    "start": "node ai-sync.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "simple-git": "^3.20.0",
+    "node-fetch": "^3.4.1",
+    "fs-extra": "^11.1.1"
+{
   "name": "env-run",
   "version": "1.0.0",
   "main": "run.js",
