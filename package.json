@@ -11,9 +11,6 @@
     "chokidar": "^3.5.3",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5"
-  }
-}
-{
   "name": "tamangsaru522-it-auto-fix",
   "version": "1.0.0",
   "description": "Auto-fix program for JSON and code formatting",
