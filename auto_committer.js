@@ -1,3 +1,32 @@
+const chokidar = require("chokidar");
+const { exec } = require("child_process");
+
+console.log("🚀 Tamanna Ultimate Auto Dev System Running...");
+
+const watcher = chokidar.watch(".", {
+  ignored: /node_modules|\.git/,
+  persistent: true
+});
+
+watcher.on("change", (path) => {
+  console.log(`\n📂 File changed: ${path}`);
+
+  exec("npm run lint", () => {
+    console.log("🛠 Code Auto Fixed");
+  });
+
+  exec("npm run format", () => {
+    console.log("🎨 Code Formatted");
+  });
+
+  exec("npm run build", () => {
+    console.log("🏗 Build Complete");
+  });
+
+  exec("git add . && git commit -m 'auto update' && git push", () => {
+    console.log("🔁 Git Auto Synced");
+  });
+});
 const { exec } = require("child_process");
 const util = require("util");
 const chalk = require("chalk");
