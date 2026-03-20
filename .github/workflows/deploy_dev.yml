@@ -1,0 +1,78 @@
+name: Deploy Dev Environment
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:  # allows manual trigger
+
+jobs:
+  deploy_dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install autopep8 pyyaml
+
+      # 4️⃣ Run Problem Fixer (auto code fix)
+      - name: Run Problem Fixer
+        run: |
+          python problem_fixer.py
+
+      # 5️⃣ Save all Python file names
+      - name: Save File Names
+        run: |
+          python - <<EOF
+          import os
+          file_names = []
+          for root, dirs, files in os.walk("."):
+              for file in files:
+                  if file.endswith(".py"):
+                      file_names.append(os.path.join(root, file))
+          with open("all_file_names.txt", "w") as f:
+              for name in file_names:
+                  f.write(name + "\\n")
+          EOF
+
+      # 6️⃣ Run main.py (central runner)
+      - name: Run Main Runner
+        run: |
+          python main.py
+
+      # 7️⃣ Run Dev Tests (optional)
+      - name: Run Dev Tests
+        run: |
+          if [ -d "tests" ]; then
+            pip install pytest
+            pytest tests/ --maxfail=1 --disable-warnings -q
+          fi
+
+      # 8️⃣ Commit auto changes (fixes, file names)
+      - name: Commit auto changes
+        run: |
+          git config --global user.name "tamanna456760-it"
+          git config --global user.email "tamanna456760@gmail.com"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto fix & sync dev"
+          git push || echo "No changes to push"
+
+      # 9️⃣ Deploy to Dev Server
+      - name: Deploy to Dev Server
+        run: |
+          # Example: SSH deploy
+          # ssh user@dev-server "cd /path/to/project && git pull && ./restart_server.sh"
+          echo "Add your dev deployment commands here"
