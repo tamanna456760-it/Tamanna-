@@ -40,3 +40,4 @@ config.yaml
 
 # Optional: Ignore Dependabot lock updates
 dependabot.yml
+master_sync.yml
