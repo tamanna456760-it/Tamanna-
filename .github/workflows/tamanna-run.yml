@@ -1,0 +1,66 @@
+name: Run Tamanna AI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  run-ai:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "18"
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install Node Dependencies
+      run: |
+        if [ -f "package.json" ]; then
+          npm install
+        fi
+
+    - name: Install Python Dependencies
+      run: |
+        if [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
+        fi
+
+    - name: Run Tamanna AI
+      run: |
+        echo "🚀 Running Tamanna AI..."
+        if [ -f "main.py" ]; then
+          python3 main.py
+        elif [ -f "index.js" ]; then
+          node index.js
+        elif [ -f "start.sh" ]; then
+          bash start.sh
+        else
+          echo "⚠️ No runnable entry file found."
+        fi
+
+    - name: Save Output Logs
+      run: |
+        echo "📝 Saving logs..."
+        mkdir -p logs
+        echo "Run completed at $(date)" >> logs/run.log
+
+    - name: Commit Logs
+      run: |
+        git config --global user.name "Tamanna Runner"
+        git config --global user.email "auto@tamanna.ai"
+        git add logs/run.log
+        git commit -m "AI Run Log Update" || true
+        git push || true

@@ -1,0 +1,34 @@
+name: Run Tamanna AI HEAD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  run-head:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Run Tamanna HEAD
+      run: |
+        python3 tamanna_head.py
+
+    - name: Commit Manifest
+      run: |
+        git config --global user.name "Tamanna HEAD"
+        git config --global user.email "auto@tamanna.ai"
+        git add tamanna_meta/manifest.json
+        git commit -m "Updated Tamanna HEAD manifest" || true
+        git push || true

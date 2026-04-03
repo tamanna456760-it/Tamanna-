@@ -1,0 +1,52 @@
+name: Tamanna Auto Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "18"
+
+    - name: Install Node Dependencies
+      run: |
+        if [ -f "package.json" ]; then
+          npm install
+        fi
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install Python Dependencies
+      run: |
+        if [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
+        fi
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: "temurin"
+        java-version: "17"
+
+    - name: Maven Build
+      run: |
+        if [ -f "pom.xml" ]; then
+          mvn -B package --file pom.xml
+        fi
+
+    - name: Auto Sync Complete
+      run: echo "Tamanna Auto‑Sync Completed Successfully!"

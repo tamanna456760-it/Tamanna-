@@ -1,0 +1,12 @@
+[Unit]
+Description=bd-king-r7 powerhub sync-and-fix service (oneshot)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=youruser
+Group=youruser
+ExecStart=/opt/bd-king-r7-powerhub/sync_and_fix.sh
+TimeoutStartSec=300
+Nice=10

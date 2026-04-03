@@ -14,7 +14,7 @@
   },
   "medical_databases": {
     "symptoms": "symptoms_db.json",
-    "diseases": "diseases_db.json", 
+    "diseases": "diseases_db.json",
     "medications": "medications_db.json",
     "emergency_protocols": "emergency_db.json"
   },

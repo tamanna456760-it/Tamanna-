@@ -1,0 +1,12 @@
+[ User Phone / PC ]
+        |
+        v
+[ Tamanna Web App ]
+ (HTML + CSS + JS)
+        |
+        v
+[ Local Server ]
+ (Node.js / Python)
+        |
+        v
+[ Router / Wi-Fi Network ]

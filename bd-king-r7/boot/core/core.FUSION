@@ -1,0 +1,13 @@
+[CORE.FUSION]
+    fusion-mode: enabled
+    fusion-strength: 9x
+    fusion-link:
+        - dual-engine
+        - mirror-engine
+        - heartbeat-loop
+        - ficar-power
+        - ai-power
+    fusion-stability: reinforced
+    fusion-sync: locked
+    fusion-echo: continuous
+    fusion-expansion: infinite-loop

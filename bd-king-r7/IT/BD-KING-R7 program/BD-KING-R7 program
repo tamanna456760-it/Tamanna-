@@ -1,0 +1,27 @@
+BD-KING-R7/
+│
+├── src/                  # Main program code
+│   ├── engine/
+│   ├── autosync/
+│   ├── license/
+│   ├── helper/
+│   └── config/
+│
+├── scripts/              # Bash / Python automation scripts
+│   ├── tamanna_autofix.sh
+│   ├── autosync.sh
+│   └── license_generator.py
+│
+├── workflows/            # GitHub Actions
+│   ├── autosync.yml
+│   └── autobuild.yml
+│
+├── docs/                 # Documentation
+│   ├── README.md
+│   ├── INSTALL.md
+│   ├── LICENSE.md
+│   └── CHANGELOG.md
+│
+├── tests/                # Unit tests
+│
+└── tools/                # Utility tools

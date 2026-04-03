@@ -1,0 +1,15 @@
+@page
+@model ProjectModel
+@if (Model.Item == null)
+{
+    <h3>Project not found</h3>
+    <p>Check Data/projects.json for defined entries.</p>
+}
+else
+{
+    <h2>@Model.Item.Title</h2>
+    <p>@Model.Item.Short</p>
+    <article class="content">@Html.Raw(Model.Item.Content)</article>
+    <p><strong>Languages:</strong> @string.Join(", ", Model.Item.Languages)</p>
+    <p><strong>Tags:</strong> @string.Join(", ", Model.Item.Tags)</p>
+}

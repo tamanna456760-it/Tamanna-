@@ -1,0 +1,9 @@
+tamanna_web/
+│
+├── app.py
+├── users.py
+├── templates/
+│   ├── login.html
+│   ├── register.html
+│   └── dashboard.html
+└── README.md

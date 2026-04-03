@@ -1,0 +1,228 @@
+// File: TamannaMain.c
+// Target: UEFI x64 application (Tamanna.efi)
+
+#include <Uefi.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/BaseLib.h>
+#include <Library/PrintLib.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/SimpleTextIn.h>
+#include <Guid/FileInfo.h>
+
+static EFI_FILE_PROTOCOL* OpenRootOnEsp(void) {
+    EFI_STATUS status;
+    UINTN handleCount = 0;
+    EFI_HANDLE* handles = NULL;
+    EFI_FILE_PROTOCOL* root = NULL;
+
+    status = gBS->LocateHandleBuffer(ByProtocol, &gEfiSimpleFileSystemProtocolGuid,
+                                     NULL, &handleCount, &handles);
+    if (EFI_ERROR(status)) return NULL;
+
+    for (UINTN i = 0; i < handleCount; i++) {
+        EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* sfs = NULL;
+        status = gBS->HandleProtocol(handles[i], &gEfiSimpleFileSystemProtocolGuid, (VOID**)&sfs);
+        if (EFI_ERROR(status) || !sfs) continue;
+        EFI_FILE_PROTOCOL* volRoot = NULL;
+        status = sfs->OpenVolume(sfs, &volRoot);
+        if (EFI_ERROR(status) || !volRoot) continue;
+
+        // Heuristic: prefer the first FAT volume (common for ESP). We could inspect FileSystemInfo but keep it simple.
+        root = volRoot;
+        break;
+    }
+
+    if (handles) FreePool(handles);
+    return root;
+}
+
+static VOID DrawHeartbeat(UINTN pulsesMs) {
+    EFI_GRAPHICS_OUTPUT_PROTOCOL* gop = NULL;
+    if (EFI_ERROR(gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID**)&gop)) || !gop) {
+        return;
+    }
+
+    UINTN width = gop->Mode->Info->HorizontalResolution;
+    UINTN height = gop->Mode->Info->VerticalResolution;
+    UINTN barH = height / 40;
+    UINTN barY = (height / 2) - (barH / 2);
+
+    for (UINTN t = 0; t < pulsesMs / 16; t++) {
+        // Pulse alpha between 64..255
+        UINT8 alpha = (UINT8)(64 + ((t * 7) % 192));
+        EFI_GRAPHICS_OUTPUT_BLT_PIXEL red = {255, 32, 32, alpha};
+
+        UINTN barW = (width / 3) + (width / 6) * ((t * 13) % 5); // simple pulse width variation
+        UINTN barX = (width - barW) / 2;
+
+        gop->Blt(gop, &red, EfiBltVideoFill, 0, 0, barX, barY, barW, barH, 0);
+        gBS->Stall(16000);
+    }
+}
+
+static VOID LogToFile(EFI_FILE_PROTOCOL* root, CHAR16* path, CHAR16* message) {
+    if (!root) return;
+    EFI_FILE_PROTOCOL* file = NULL;
+    // Open or create
+    if (EFI_ERROR(root->Open(root, &file, path, EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE, 0))) {
+        return;
+    }
+    // Seek to end
+    EFI_FILE_INFO* info = NULL;
+    UINTN infoSize = 0;
+    file->GetInfo(file, &gEfiFileInfoGuid, &infoSize, NULL);
+    info = AllocateZeroPool(infoSize);
+    if (info && !EFI_ERROR(file->GetInfo(file, &gEfiFileInfoGuid, &infoSize, info))) {
+        file->SetPosition(file, info->FileSize);
+    }
+    if (info) FreePool(info);
+
+    CHAR16 line[256];
+    UnicodeSPrint(line, sizeof(line), L"%s\r\n", message);
+    UINTN writeBytes = StrLen(line) * sizeof(CHAR16);
+    file->Write(file, &writeBytes, line);
+    file->Flush(file);
+    file->Close(file);
+}
+
+static VOID ReadManifest(EFI_FILE_PROTOCOL* root, CHAR16* path) {
+    if (!root) return;
+    EFI_FILE_PROTOCOL* file = NULL;
+    if (EFI_ERROR(root->Open(root, &file, path, EFI_FILE_MODE_READ, 0))) {
+        Print(L"[Tamanna] No manifest at %s\n", path);
+        return;
+    }
+    // Read file size
+    EFI_FILE_INFO* info = NULL;
+    UINTN infoSize = 0;
+    file->GetInfo(file, &gEfiFileInfoGuid, &infoSize, NULL);
+    info = AllocateZeroPool(infoSize);
+    if (!info || EFI_ERROR(file->GetInfo(file, &gEfiFileInfoGuid, &infoSize, info))) {
+        Print(L"[Tamanna] Manifest info read failed.\n");
+        if (info) FreePool(info);
+        file->Close(file);
+        return;
+    }
+
+    UINTN bytes = (UINTN)info->FileSize;
+    CHAR8* buf = AllocateZeroPool(bytes + 1);
+    if (!buf) {
+        Print(L"[Tamanna] Out of memory.\n");
+        FreePool(info); file->Close(file); return;
+    }
+    UINTN read = bytes;
+    EFI_STATUS st = file->Read(file, &read, buf);
+    file->Close(file);
+    FreePool(info);
+
+    if (EFI_ERROR(st) || read == 0) {
+        Print(L"[Tamanna] Empty manifest.\n");
+        FreePool(buf);
+        return;
+    }
+
+    // Print first 256 bytes as a teaser
+    UINTN preview = (read < 256) ? read : 256;
+    CHAR16 previewW[300];
+    for (UINTN i = 0; i < preview; i++) previewW[i] = (CHAR16)buf[i];
+    previewW[preview] = L'\0';
+    Print(L"[Tamanna] Manifest preview: %s\n", previewW);
+    FreePool(buf);
+}
+
+static VOID WaitForOptionalKey(UINTN ms) {
+    EFI_INPUT_KEY key;
+    for (UINTN t = 0; t < ms / 25; t++) {
+        if (!EFI_ERROR(gST->ConIn->ReadKeyStroke(gST->ConIn, &key))) {
+            Print(L"[Tamanna] Key detected.\n");
+            return;
+        }
+        gBS->Stall(25000);
+    }
+}
+
+static VOID TryChainload(CHAR16* path) {
+    EFI_STATUS status;
+    EFI_FILE_PROTOCOL* root = OpenRootOnEsp();
+    if (!root) {
+        Print(L"[Tamanna] No filesystem for chainload.\n");
+        return;
+    }
+
+    EFI_FILE_PROTOCOL* file = NULL;
+    status = root->Open(root, &file, path, EFI_FILE_MODE_READ, 0);
+    if (EFI_ERROR(status) || !file) {
+        Print(L"[Tamanna] Chainload target not found: %s\n", path);
+        root->Close(root);
+        return;
+    }
+
+    // Read entire file into memory as EFI image
+    EFI_FILE_INFO* info = NULL;
+    UINTN infoSize = 0;
+    file->GetInfo(file, &gEfiFileInfoGuid, &infoSize, NULL);
+    info = AllocateZeroPool(infoSize);
+    if (EFI_ERROR(file->GetInfo(file, &gEfiFileInfoGuid, &infoSize, info))) {
+        Print(L"[Tamanna] Chainload info read failed.\n");
+        file->Close(file); root->Close(root); if (info) FreePool(info); return;
+    }
+
+    UINTN size = (UINTN)info->FileSize;
+    VOID* imageBuf = AllocatePool(size);
+    if (!imageBuf) {
+        Print(L"[Tamanna] Chainload OOM.\n");
+        FreePool(info); file->Close(file); root->Close(root); return;
+    }
+
+    UINTN read = size;
+    status = file->Read(file, &read, imageBuf);
+    file->Close(file);
+    FreePool(info);
+
+    if (EFI_ERROR(status) || read != size) {
+        Print(L"[Tamanna] Chainload read failed.\n");
+        FreePool(imageBuf); root->Close(root); return;
+    }
+
+    EFI_HANDLE imageHandle = NULL;
+    status = gBS->LoadImage(FALSE, gImageHandle, NULL, imageBuf, size, &imageHandle);
+    FreePool(imageBuf);
+    root->Close(root);
+
+    if (EFI_ERROR(status)) {
+        Print(L"[Tamanna] LoadImage failed: %r\n", status);
+        return;
+    }
+
+    status = gBS->StartImage(imageHandle, NULL, NULL);
+    Print(L"[Tamanna] StartImage result: %r\n", status);
+}
+
+EFI_STATUS
+EFIAPI
+TamannaMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable) {
+    Print(L"Tamanna EFI: Sovereign heartbeat online.\n");
+
+    EFI_FILE_PROTOCOL* root = OpenRootOnEsp();
+    if (root) {
+        LogToFile(root, L"\\EFI\\Tamanna\\tamanna.log", L"Boot: heartbeat start");
+        ReadManifest(root, L"\\EFI\\Tamanna\\manifest.txt");
+        LogToFile(root, L"\\EFI\\Tamanna\\tamanna.log", L"Boot: manifest read complete");
+        root->Close(root);
+    } else {
+        Print(L"[Tamanna] ESP root not available.\n");
+    }
+
+    DrawHeartbeat(1200);
+    WaitForOptionalKey(2000);
+
+    Print(L"[Tamanna] Attempting chainload to Windows Boot Manager...\n");
+    TryChainload(L"\\EFI\\Microsoft\\Boot\\bootmgfw.efi");
+
+    Print(L"[Tamanna] Ritual complete. Returning to firmware.\n");
+    return EFI_SUCCESS;
+}

@@ -1,0 +1,11 @@
+Origin: Tamanna
+Label: Tamanna AI
+Suite: stable
+Codename: tamanna
+Date: Tue, 09 Dec 2025 22:45:00 +0000
+Architectures: amd2000
+Components: main
+
+tamanna456760:
+ <tamanna456760-of-Packages> <bytes> main/binary-amd2000/Packages
+ <tamanna456760-of-Packages.gz> <bytes> main/binary-amd2000/Packages.gz

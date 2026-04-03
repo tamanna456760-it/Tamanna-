@@ -1,0 +1,35 @@
+[Defines]
+  INF_VERSION                    = 0x0001001A
+  BASE_NAME                      = X2000_1000
+  FILE_GUID                      = 5f4a5f7b-6c6a-4a2f-9e5a-2bb2d9f51000
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  X2000_1000.c
+  TamannaRituals.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+
+[LibraryClasses]
+  UefiLib
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  PrintLib
+  ShellCEntryLib
+
+[Protocols]
+  gEfiSimpleFileSystemProtocolGuid
+
+[Guids]
+  gEfiFileInfoGuid
+
+[Pcd]
+  # none
+
+[Depex]
+  TRUE

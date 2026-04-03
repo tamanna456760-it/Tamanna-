@@ -111,7 +111,7 @@
       "algorithms": ["linear_regression", "gradient_boosting", "svr"],
       "target_variables": {
         "sales_volume": "continuous",
-        "inventory_level": "continuous", 
+        "inventory_level": "continuous",
         "customer_lifetime_value": "continuous",
         "transaction_amount": "continuous"
       },
@@ -163,14 +163,24 @@
       "max_length": 512,
       "temperature": 0.7,
       "top_p": 0.9,
-      "use_cases": ["response_generation", "report_summarization", "alert_messages"]
+      "use_cases": [
+        "response_generation",
+        "report_summarization",
+        "alert_messages"
+      ]
     }
   },
 
   "computer_vision_models": {
     "document_processing": {
       "model_type": "yolo_v5",
-      "detection_classes": ["invoice", "receipt", "contract", "form", "signature"],
+      "detection_classes": [
+        "invoice",
+        "receipt",
+        "contract",
+        "form",
+        "signature"
+      ],
       "ocr_engine": "tesseract_enhanced",
       "accuracy_threshold": 0.95
     },
@@ -194,7 +204,11 @@
       "algorithm": "proximal_policy_optimization",
       "state_space": {
         "system_metrics": ["cpu_usage", "memory_usage", "network_latency"],
-        "business_metrics": ["transaction_volume", "success_rate", "response_time"],
+        "business_metrics": [
+          "transaction_volume",
+          "success_rate",
+          "response_time"
+        ],
         "environmental": ["time_of_day", "day_of_week", "seasonal_factors"]
       },
       "action_space": {
@@ -234,9 +248,9 @@
         "tracking_frequency": "hourly",
         "alert_thresholds": {
           "accuracy": 0.85,
-          "precision": 0.80,
+          "precision": 0.8,
           "recall": 0.75,
-          "f1_score": 0.80
+          "f1_score": 0.8
         }
       },
       "data_quality_checks": {
@@ -264,7 +278,7 @@
     },
     "recommended_requirements": {
       "cpu": "16 cores",
-      "ram": "32GB", 
+      "ram": "32GB",
       "storage": "500GB NVMe SSD",
       "gpu": "NVIDIA RTX 3080 or better"
     },
@@ -302,12 +316,22 @@
     "threat_detection": {
       "fraud_detection": {
         "model_type": "isolation_forest",
-        "features": ["transaction_amount", "location", "time", "device_fingerprint"],
+        "features": [
+          "transaction_amount",
+          "location",
+          "time",
+          "device_fingerprint"
+        ],
         "anomaly_score_threshold": 0.65
       },
       "intrusion_detection": {
         "model_type": "lstm_autoencoder",
-        "network_features": ["packet_size", "protocol", "source_ip", "destination_ip"],
+        "network_features": [
+          "packet_size",
+          "protocol",
+          "source_ip",
+          "destination_ip"
+        ],
         "detection_window": "5 minutes"
       }
     },
@@ -333,9 +357,9 @@
     },
     "accuracy_targets": {
       "classification": 0.95,
-      "regression": 0.90,
+      "regression": 0.9,
       "anomaly_detection": 0.85,
-      "forecasting": 0.80
+      "forecasting": 0.8
     },
     "resource_utilization": {
       "max_cpu_usage": "80%",

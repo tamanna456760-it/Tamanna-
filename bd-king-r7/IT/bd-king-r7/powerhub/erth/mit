@@ -1,0 +1,20 @@
+---
+
+# How to run (recap)
+1. Save files as shown in the structure.
+2. `python3 -m venv .venv && source .venv/bin/activate`
+3. `pip install -r requirements.txt`
+4. `python manage.py`
+5. Visit `http://127.0.0.1:5000`
+
+---
+
+# Next steps I can deliver (tell me any)
+- Add authentication (API keys / JWT) for device sync.  
+- Replace file store with SQLite/Postgres.  
+- Add encrypted sync between devices (end-to-end).  
+- Build a small Android client (Termux-ready Python or React Native).  
+- Create a ZIP file of the repo ready to download.  
+- Create GitHub Actions workflows for CI and auto-deploy.  
+
+Which one do you want next?

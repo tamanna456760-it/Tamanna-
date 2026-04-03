@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Sync System</title>
+</head>
+<body>
+
+<h2>Data Sync Example</h2>
+
+<input type="text" id="dataInput" placeholder="Enter Data">
+<button onclick="sendData()">Send</button>
+<button onclick="getData()">Sync</button>
+
+<p id="output"></p>
+
+<script>
+async function sendData() {
+  const data = document.getElementById("dataInput").value;
+
+  await fetch("http://localhost:3000/save", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ text: data })
+  });
+
+  alert("Data Sent!");
+}
+
+async function getData() {
+  const response = await fetch("http://localhost:3000/get");
+  const result = await response.json();
+
+  document.getElementById("output").innerText = result.text;
+}
+</script>
+
+</body>
+</html>

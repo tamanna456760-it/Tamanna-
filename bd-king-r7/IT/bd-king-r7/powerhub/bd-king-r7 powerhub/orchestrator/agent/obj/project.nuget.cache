@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "RVf5bvic1Ho=",
+  "success": true,
+  "projectFilePath": "/workspaces/Tamanna-/bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/agent/bd-king-agent.csproj",
+  "expectedPackageFiles": [
+    "/home/codespace/.nuget/packages/yamldotnet/12.0.2/yamldotnet.12.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

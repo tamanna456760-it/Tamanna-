@@ -1,0 +1,99 @@
+# bd-king-r7/it/
+name: BD-KING-R7 PowerHub Auto Builder
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours auto-build
+
+jobs:
+  powerhub-build:
+    name: PowerHub Build Helper
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Sync Source Code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2) Auto Detect Language & Install Dependencies
+      - name: Install dependencies (Node/Python/General)
+        run: |
+          echo "=== Auto Dependency Installer ==="
+
+          if [ -f package.json ]; then
+            echo "Node.js project detected"
+            sudo apt-get update
+            sudo apt-get install -y nodejs npm
+            npm install || npm ci || true
+          fi
+
+          if [ -f requirements.txt ]; then
+            echo "Python project detected"
+            sudo apt-get update
+            sudo apt-get install -y python3 python3-pip
+            pip3 install --upgrade pip
+            pip3 install -r requirements.txt || true
+          fi
+
+          sudo apt-get install -y build-essential git curl || true
+
+      # 3) Auto Build PowerHub
+      - name: PowerHub Auto Build
+        run: |
+          echo "=== Building BD-KING-R7 PowerHub ==="
+
+          if [ -f build.sh ]; then
+            echo "Running custom build.sh"
+            bash build.sh
+          fi
+
+          if [ -d powerhub ]; then
+            echo "Running PowerHub internal build"
+            cd powerhub
+            if [ -f package.json ]; then npm run build || true; fi
+            if [ -f Makefile ]; then make || true; fi
+            cd ..
+          fi
+
+          mkdir -p build_output
+          cp -r dist/* build_output/ 2>/dev/null || true
+          cp -r build/* build_output/ 2>/dev/null || true
+
+      # 4) Auto Fix Missing Code / Formatting
+      - name: Auto Fixer
+        run: |
+          echo "=== Auto Fixing Code Issues ==="
+
+          if command -v npx >/dev/null 2>&1 && [ -f package.json ]; then
+            npx eslint . --fix || true
+            npx prettier --write . || true
+          fi
+
+          if command -v autopep8 >/dev/null 2>&1; then
+            autopep8 --in-place --recursive . || true
+          fi
+
+      # 5) Auto Commit Fixed Code
+      - name: Commit & Push Fixes
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto Fix: BD-KING-R7 PowerHub Build Optimized"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      # 6) Upload Build Artifacts
+      - name: Upload Build Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: BD-KING-R7-PowerHub-Build
+          path: build_output/

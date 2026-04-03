@@ -1,7 +1,7 @@
-from api import RESTAPIClient, OpenAIClient, GitHubClient, APIManager
+from api import APIManager, RESTAPIClient
 
 # Quick API call
-response = make_api_call('https://api.github.com/users/octocat')
+response = make_api_call("https://api.github.com/users/octocat")
 print(response)
 
 # Using specific API clients
@@ -9,11 +9,11 @@ print(response)
 # repos = github.get_user_repos("octocat")
 
 # Using generic REST client
-api = RESTAPIClient('https://jsonplaceholder.typicode.com')
-posts = api.get('/posts')
+api = RESTAPIClient("https://jsonplaceholder.typicode.com")
+posts = api.get("/posts")
 if posts.success:
     for post in posts.data[:5]:
-        print(post['title'])
+        print(post["title"])
 
 # API Manager for multiple services
 manager = APIManager()

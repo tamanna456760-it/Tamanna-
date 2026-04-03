@@ -1,0 +1,14 @@
+[Unit]
+Description=bd-king-r7 powerhub agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=youruser
+Group=youruser
+ExecStart=/usr/bin/env python3 /opt/bd-king-r7-powerhub/agent.py
+Restart=on-failure
+RestartSec=15
+StandardOutput=append:/var/log/bd-king-r7-powerhub.log
+StandardError=inherit

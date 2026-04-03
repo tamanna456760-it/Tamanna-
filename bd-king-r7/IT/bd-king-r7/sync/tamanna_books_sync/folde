@@ -1,0 +1,6 @@
+tamanna_ai_books/      ← Local book storage
+credentials.json       ← Google API credentials
+token.pickle           ← Saved access token
+tamanna_book_sync.py   ← Downloads PDFs
+tamanna_drive_sync.py  ← Uploads to Drive
+cloud_auto_sync.py     ← Daily scheduler

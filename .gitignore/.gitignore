@@ -1,0 +1,43 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# GitHub Actions workflows (if you generate)
+.github/workflows/*
+
+# IntelliJ, VSCode, PyCharm settings
+.vscode/
+.idea/
+
+# Output / build folders
+build/
+dist/
+*.egg-info/
+
+# AI / Runner temporary files
+*.run.log
+*.cache/
+*.out/
+
+# Optional: Ignore secret keys or credentials
+secret_key.txt
+config.yaml
+
+# Optional: Ignore Dependabot lock updates
+dependabot.yml
+master_sync.yml

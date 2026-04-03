@@ -1,0 +1,4 @@
+WATCH_FOLDER = "files"
+LOG_FOLDER = "logs"
+SERIAL_PREFIX = "File_"
+SCAN_INTERVAL = 5

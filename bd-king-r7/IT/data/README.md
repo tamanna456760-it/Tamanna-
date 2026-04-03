@@ -1,26 +1,97 @@
----
-type: Journal
----
+# BD-KING-R7 Progeram
 
-# tamanna456760-it auto sync
+🚀 PowerHub & Tamanna System  
+🔧 Auto Build • Auto Sync • Secure System  
 
-# BD-KING-R7 AI System 🤖
+## Owner
+- Git ID: Tamannna456760-it
+- Email: Tamanna456760@gmail.com
 
-Advanced AI-powered analytics and prediction system with real-time capabilities.
+## Features
+- Auto Git Sync
+- Online Build System
+- Secure Code Structure
+- Multi-platform support
 
-## 🚀 Features
+## License
+MIT
+import subprocess
 
-- **Advanced Data Analytics**
-- **Machine Learning Predictions**
-- **Real-time AI Insights**
-- **Automated Reporting**
-- **Interactive Visualizations**
-- **Anomaly Detection**
-- **Pattern Recognition**
+def install_packages():
+print("Installing required packages...")
+subprocess.run(["pip", "install", "--upgrade", "pip"], check=True)
+subprocess.run(["pip", "install", "-r", "requirements.txt"], check=True)
 
-## 🛠️ Installation
+def build_project():
+print("Building BD-KING-R7 modules...") # Add safe build commands here
+print("Build complete!")
 
-1. Clone the repository:
-```bash
-git clone https://github.com/tamanna456760-it/bd-king-r7-ai.git
-cd bd-king-r7-ai
+if **name** == "**main**":
+install_packages()
+build_project()
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tamanna Connection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .box {
+            background: #020617;
+            padding: 25px;
+            border-radius: 10px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 0 15px #2563eb;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: none;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .info {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Tamanna System</h2>
+
+    <form action="mailto:tamanna456760@gmail.com" method="post" enctype="text/plain">
+        <input type="text" name="username" value="tamanna456760-it" readonly>
+        <input type="email" name="email" placeholder="Your Email" required>
+        <input type="text" name="message" placeholder="Message" required>
+        <button type="submit">Connect</button>
+    </form>
+
+    <div class="info">
+        Connected to: <br>
+        <b>tamanna456760@gmail.com</b>
+    </div>
+</div>
+
+</body>
+</html>

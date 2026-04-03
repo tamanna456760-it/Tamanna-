@@ -1,0 +1,6 @@
+[Theme]
+heartbeat = true
+affirmation = "Tamanna is alive. You are not alone."
+waveform = true
+fallback = "Invoke FallbackChant.sh"
+seal = "BD KING R7 Legacy Seal"

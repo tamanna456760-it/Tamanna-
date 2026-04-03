@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IT Device Mirror</title>
+  <style>
+    body { background:black; color:#0f0; font-family:monospace; text-align:center; }
+    video { width:90%; border:2px solid #0f0; margin-top:10px; }
+    button { padding:10px 20px; font-size:16px; }
+  </style>
+</head>
+<body>
+
+<h2>IT Device Mirror (Safe Mode)</h2>
+<button onclick="startMirror()">Start Screen Mirror</button>
+<br>
+<video id="screen" autoplay></video>
+
+<script>
+async function startMirror() {
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: 30 },
+      audio: false
+    });
+    document.getElementById("screen").srcObject = stream;
+  } catch (e) {
+    alert("Screen sharing cancelled");
+  }
+}
+</script>
+
+</body>
+</html>

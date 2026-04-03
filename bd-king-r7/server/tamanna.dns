@@ -1,0 +1,10 @@
+; ===== tamanna.io DNS Zone =====
+
+A     @       185.123.45.67
+A     www     185.123.45.67
+
+; Optional (Email – safe to keep)
+MX    @       10 mail.tamanna.io.
+
+; Optional TXT (security / verification)
+TXT   @       "v=spf1 a mx ~all"

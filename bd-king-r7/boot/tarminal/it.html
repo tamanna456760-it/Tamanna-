@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IT Terminal</title>
+<style>
+    body {
+        margin: 0;
+        background: #000;
+        color: #00ff00;
+        font-family: monospace;
+    }
+    .terminal {
+        padding: 15px;
+        height: 100vh;
+        box-sizing: border-box;
+    }
+    .title {
+        color: #00ffff;
+        margin-bottom: 10px;
+    }
+    .prompt {
+        color: #00ff00;
+    }
+    input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #00ff00;
+        font-family: monospace;
+        width: 90%;
+    }
+</style>
+</head>
+<body>
+
+<div class="terminal">
+    <div class="title">IT Terminal v1.0</div>
+
+    <div>
+        <span class="prompt">IT@system:~$ </span>
+        <input type="text" autofocus onkeydown="runCommand(event)">
+    </div>
+
+    <div id="output"></div>
+</div>
+
+<script>
+function runCommand(e) {
+    if (e.key === "Enter") {
+        const cmd = e.target.value;
+        const output = document.getElementById("output");
+
+        let response = "Command not found";
+
+        if (cmd === "help") {
+            response = "Commands: help, clear, whoami";
+        } else if (cmd === "whoami") {
+            response = "IT";
+        } else if (cmd === "clear") {
+            output.innerHTML = "";
+            e.target.value = "";
+            return;
+        }
+
+        output.innerHTML += `
+            <div><span class="prompt">IT@system:~$ </span>${cmd}</div>
+            <div>${response}</div>
+        `;
+        e.target.value = "";
+        output.scrollTop = output.scrollHeight;
+    }
+}
+</script>
+
+</body>
+</html>

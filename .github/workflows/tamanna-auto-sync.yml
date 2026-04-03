@@ -1,0 +1,38 @@
+name: Tamanna Auto Sync
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    name: Sync Tamanna System
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "tamanna456760@gmail.com"
+          git config --local user.name "tamanna456760-it[bot]"
+
+      - name: Auto Fix Missing Files
+        run: |
+          echo "Auto fixing Tamanna System..."
+          mkdir -p sync_output
+          cp -r * sync_output/ 2>/dev/null || true
+
+      - name: Commit Sync Changes
+        run: |
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto Sync: Tamanna system updated"
+            git push
+          else
+            echo "Nothing to sync"
+          fi

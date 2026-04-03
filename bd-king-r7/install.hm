@@ -4,10 +4,11 @@ BD-King-R7 Auto Sync Installation Script
 """
 
 import os
-import sys
-import subprocess
 import sqlite3
+import subprocess
+import sys
 from pathlib import Path
+
 
 def install_requirements():
     """Install required Python packages"""
@@ -16,40 +17,43 @@ def install_requirements():
         'schedule',
         'psutil'
     ]
-    
+
     print("Installing required packages...")
     for package in requirements:
         try:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
+            subprocess.check_call(
+                [sys.executable, '-m', 'pip', 'install', package])
             print(f"✓ Installed {package}")
         except subprocess.CalledProcessError:
             print(f"✗ Failed to install {package}")
             return False
-    
+
     return True
+
 
 def setup_database():
     """Setup SQLite database with schema"""
     try:
         db_path = Path('/data/bd_king.db')
         db_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Read and execute schema
         with open('database_schema.sql', 'r') as f:
             schema = f.read()
-        
+
         conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
         cursor.executescript(schema)
         conn.commit()
         conn.close()
-        
+
         print("✓ Database setup completed")
         return True
-        
+
     except Exception as e:
         print(f"✗ Database setup failed: {e}")
         return False
+
 
 def setup_directories():
     """Create necessary directories"""
@@ -60,12 +64,13 @@ def setup_directories():
         'backups',
         'logs'
     ]
-    
+
     for directory in directories:
         Path(directory).mkdir(parents=True, exist_ok=True)
         print(f"✓ Created directory: {directory}")
-    
+
     return True
+
 
 def create_service_file():
     """Create systemd service file for auto-start"""
@@ -84,39 +89,40 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 """
-    
+
     try:
         with open('/etc/systemd/system/bd-king-sync.service', 'w') as f:
             f.write(service_content)
-        
+
         # Reload systemd and enable service
         subprocess.run(['systemctl', 'daemon-reload'])
         subprocess.run(['systemctl', 'enable', 'bd-king-sync.service'])
-        
+
         print("✓ Systemd service created and enabled")
         return True
-        
+
     except Exception as e:
         print(f"✗ Service setup failed: {e}")
         return False
+
 
 def main():
     """Main installation function"""
     print("BD-King-R7 Auto Sync Installation")
     print("=" * 40)
-    
+
     # Check Python version
     if sys.version_info < (3, 7):
         print("✗ Python 3.7 or higher required")
         sys.exit(1)
-    
+
     steps = [
         ("Installing requirements", install_requirements),
         ("Setting up directories", setup_directories),
         ("Setting up database", setup_database),
         ("Creating service file", create_service_file)
     ]
-    
+
     all_success = True
     for step_name, step_func in steps:
         print(f"\n{step_name}...")
@@ -125,7 +131,7 @@ def main():
             print(f"✗ {step_name} failed")
         else:
             print(f"✓ {step_name} completed")
-    
+
     if all_success:
         print("\n🎉 Installation completed successfully!")
         print("\nNext steps:")
@@ -135,6 +141,7 @@ def main():
     else:
         print("\n❌ Installation completed with errors")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

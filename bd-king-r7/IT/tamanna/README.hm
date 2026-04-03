@@ -1,0 +1,11 @@
+# Tamanna System
+
+A safe, legal Python automation & cloud sync system.
+
+## Install
+pip install tamanna-system
+
+## Usage
+```python
+from tamanna_system.core import start
+start()

@@ -19,7 +19,7 @@
         "rate": 0.3
       },
       {
-        "type": "dense", 
+        "type": "dense",
         "units": 64,
         "activation": "relu"
       },
@@ -51,7 +51,7 @@
   ],
   "input_features": [
     "transaction_amount",
-    "time_of_day", 
+    "time_of_day",
     "day_of_week",
     "customer_segment",
     "product_category",
@@ -63,7 +63,7 @@
   ],
   "output_classes": [
     "normal",
-    "suspicious", 
+    "suspicious",
     "fraudulent",
     "premium_customer",
     "new_customer",
@@ -75,7 +75,7 @@
   ],
   "performance_requirements": {
     "min_accuracy": 0.95,
-    "min_precision": 0.90,
+    "min_precision": 0.9,
     "min_recall": 0.85,
     "max_inference_time": 100,
     "model_size_limit": 100000000

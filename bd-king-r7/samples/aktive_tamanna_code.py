@@ -5,47 +5,48 @@ TAMANNA CODE LANGUAGE - SYSTEM ACTIVATION
 Activating all components: TK Tokens + Colors + .hm Files + Auto-Build + Multi-Platform
 """
 
-import os
-import sys
 import time
 from pathlib import Path
+
 
 def activate_tamanna_system():
     print("🔧 ACTIVATING TAMANNA CODE LANGUAGE SYSTEM...")
     time.sleep(1)
-    
+
     # Create necessary directories
-    directories = ['samples', 'projects', 'build', 'dist', 'src']
+    directories = ["samples", "projects", "build", "dist", "src"]
     for dir_name in directories:
         Path(dir_name).mkdir(exist_ok=True)
         print(f"📁 Created directory: {dir_name}")
-    
+
     # Create main system file
     create_main_system()
-    
+
     # Create sample .hm files
     create_sample_hm_files()
-    
+
     # Create configuration
     create_configuration()
-    
+
     print("\n🎉 TAMANNA SYSTEM ACTIVATED SUCCESSFULLY!")
     print("✨ System Components:")
     print("   ✅ TK Token System")
-    print("   ✅ 7-Color Coding") 
+    print("   ✅ 7-Color Coding")
     print("   ✅ .hm File Format")
     print("   ✅ Auto-Build System")
     print("   ✅ Multi-Platform Support")
     print("   ✅ Network Capabilities")
     print("   ✅ REPL Environment")
-    
+
     print("\n🚀 Starting Tamanna REPL...")
     time.sleep(2)
-    
+
     # Start the Tamanna REPL
     from tamanna_system import TamannaSystem
+
     system = TamannaSystem()
     system.run_repl()
+
 
 def create_main_system():
     """Create the main Tamanna system file"""
@@ -152,28 +153,29 @@ if __name__ == "__main__":
     system = TamannaSystem()
     system.run_repl()
 '''
-    
-    with open('tamanna_system.py', 'w', encoding='utf-8') as f:
+
+    with open("tamanna_system.py", "w", encoding="utf-8") as f:
         f.write(main_code)
     print("📄 Created: tamanna_system.py")
 
+
 def create_sample_hm_files():
     """Create sample .hm files for immediate use"""
-    
+
     # Sample 1: Hello World
-    hello_hm = '''# আমার প্রথম তামান্না প্রোগ্রাম
+    hello_hm = """# আমার প্রথম তামান্না প্রোগ্রাম
 লেখো "স্বাগতম তামান্না ভাষায়!"
 লেখো "এই সিস্টেম এক্টিভ এবং চলছে!"
 নির্ধারণ নাম = "তামান্না ইউজার"
 লেখো "আসসালামু আলাইকুম: " + নাম
-'''
-    
-    with open('samples/hello.hm', 'w', encoding='utf-8') as f:
+"""
+
+    with open("samples/hello.hm", "w", encoding="utf-8") as f:
         f.write(hello_hm)
     print("📁 Created: samples/hello.hm")
-    
+
     # Sample 2: Calculator
-    calc_hm = '''# ক্যালকুলেটর প্রোগ্রাম
+    calc_hm = """# ক্যালকুলেটর প্রোগ্রাম
 নির্ধারণ a = 25
 নির্ধারণ b = 5
 
@@ -182,23 +184,24 @@ def create_sample_hm_files():
 লেখো "b = " + b
 লেখো "যোগ: " + (a + b)
 লেখো "গুণ: " + (a * b)
-'''
-    
-    with open('samples/calculator.hm', 'w', encoding='utf-8') as f:
+"""
+
+    with open("samples/calculator.hm", "w", encoding="utf-8") as f:
         f.write(calc_hm)
     print("📁 Created: samples/calculator.hm")
-    
+
     # Sample 3: Network Demo
-    network_hm = '''# নেটওয়ার্ক ডেমো
+    network_hm = """# নেটওয়ার্ক ডেমো
 লেখো "নেটওয়ার্ক সিস্টেম প্রস্তুত!"
 নির্ধারণ port = 8080
 লেখো "পোর্ট: " + port
 লেখো "নেটওয়ার্ক অপারেশন সফল!"
-'''
-    
-    with open('samples/network.hm', 'w', encoding='utf-8') as f:
+"""
+
+    with open("samples/network.hm", "w", encoding="utf-8") as f:
         f.write(network_hm)
     print("📁 Created: samples/network.hm")
+
 
 def create_configuration():
     """Create system configuration"""
@@ -208,19 +211,20 @@ def create_configuration():
         "status": "ACTIVE",
         "features": [
             "TK Token System",
-            "7-Color Coding", 
+            "7-Color Coding",
             ".hm File Format",
             "Auto-Build",
             "Multi-Platform",
             "Network Support",
-            "REPL Environment"
+            "REPL Environment",
         ],
-        "platforms": ["Windows", "Kali Linux", "Android", "All Systems"]
+        "platforms": ["Windows", "Kali Linux", "Android", "All Systems"],
     }
-    
-    with open('tamanna_config.json', 'w') as f:
+
+    with open("tamanna_config.json", "w") as f:
         json.dump(config, f, indent=2)
     print("⚙️  Created: tamanna_config.json")
+
 
 if __name__ == "__main__":
     activate_tamanna_system()

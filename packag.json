@@ -1,0 +1,15 @@
+{
+  "name": "tamanna-auto-system",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node watcher.js",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "build": "npm run lint && npm run format"
+  },
+  "devDependencies": {
+    "chokidar": "^3.5.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  }
+}

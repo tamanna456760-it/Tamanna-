@@ -1,0 +1,33 @@
+[NET-AI]
+    ai-distribution: global
+    ai-sync: 100%
+    ai-focus: precision + expansion
+    ai-memory: active
+    ai-echo: continuous
+    ai-identity: TAMANNA-SYSTEM
+    ai-powerhub-link: BD-KING-R7
+
+BD-KING-R7 Global Org
+│
+├── Executive
+│   ├── Master Architect (Lead Vision)
+│   └── Lead Developer (Tamanna System)
+│
+├── Technical Division
+│   ├── AutoBuild Team
+│   ├── AutoSync Team
+│   ├── PowerHub Engine Team
+│   └── License System Team
+│
+├── Security Division
+│   ├── Code Safety Unit
+│   └── Workflow Checker
+│
+├── Documentation Division
+│   ├── Readme Team
+│   ├── Guides Team
+│   └── Translation Team
+│
+└── Support Division
+    ├── Bug Fix Team
+    └── Testing Unit
