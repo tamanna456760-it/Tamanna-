@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""
+YAML MEGA FIXER – fixes indentation, quotes, booleans, nulls, comments, anchors
+Usage: python yaml_mega_fixer.py input.yml [output.yml] [--no-backup]
+"""
+
+import sys
+import os
+import shutil
+from pathlib import Path
+from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
+
+def fix_yaml_file(input_path, output_path=None, backup=True):
+    """Load, fix, and dump YAML with extreme prejudice"""
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    yaml.indent(mapping=2, sequence=4, offset=2)
+    yaml.boolean_representation = [u'true', u'false']  # Force real booleans
+    
+    # Load with error recovery
+    try:
+        with open(input_path, 'r', encoding='utf-8') as f:
+            data = list(yaml.load_all(f))  # Support multi-document
+    except YAMLError as e:
+        print(f"❌ Parse error: {e}", file=sys.stderr)
+        sys.exit(1)
+    
+    # Backup original
+    if backup:
+        backup_path = f"{input_path}.bak"
+        shutil.copy2(input_path, backup_path)
+        print(f"📀 Backup: {backup_path}")
+    
+    # Write fixed version
+    out_path = output_path or input_path
+    with open(out_path, 'w', encoding='utf-8') as f:
+        if len(data) == 1:
+            yaml.dump(data[0], f)
+        else:
+            yaml.dump_all(data, f)
+    
+    print(f"✅ FIXED: {input_path} → {out_path}")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: yaml_mega_fixer.py <input.yml> [output.yml] [--no-backup]")
+        sys.exit(1)
+    
+    input_file = sys.argv[1]
+    output_file = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith('--') else None
+    no_backup = '--no-backup' in sys.argv
+    
+    fix_yaml_file(input_file, output_file, backup=not no_backup)
+
+if __name__ == "__main__":
+    main()
