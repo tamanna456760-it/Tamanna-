@@ -39,7 +39,7 @@ class AutoCodeManager:
         if not repo_name:
             repo_name = "my_ai_codes"
             
-        self.github_url = f"https://github.com/{name}/{repo_name}.git"
+        self.github_url = f"https://github.com/{tamanna456760-it}/{tamanna-}.git"
         
         # রিপোজিটরি তৈরি
         if not os.path.exists(self.repo_path):
