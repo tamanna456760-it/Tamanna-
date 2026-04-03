@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-04-03T14:35:49.414726Z",
-  "total_files": 82,
+  "generated_at": "2026-04-03T15:49:34.985140Z",
+  "total_files": 84,
   "files": [
     {
       "path": "tamanna_ultra_cloud.sh",
@@ -144,6 +144,10 @@
       "size": 3561
     },
     {
+      "path": "auto_code_manager.py",
+      "size": 10478
+    },
+    {
       "path": "tamanna_repair.sh",
       "size": 1106
     },
@@ -242,6 +246,10 @@
     {
       "path": "git clone https:/github.com/tamanna456760-it/Journal",
       "size": 559
+    },
+    {
+      "path": "tamanna_meta/manifest.json",
+      "size": 5890
     },
     {
       "path": "Tamanna-AI-System/git_clone_update.py",
