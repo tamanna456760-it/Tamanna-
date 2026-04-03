@@ -32,8 +32,8 @@ class AutoCodeManager:
         name = input("আপনার গিটহাব ইউজারনেম: ")
         email = input("আপনার গিটহাব ইমেইল: ")
         
-        subprocess.run(["git", "config", "--global", "user.name", name])
-        subprocess.run(["git", "config", "--global", "user.email", email])
+        subprocess.run(["git", "config", "--global", "user.name", tamanna456760-it])
+        subprocess.run(["git", "config", "--global", "user.email", tamanna456760@gmail.com])
         
         repo_name = input("রিপোজিটরির নাম (enter = my_ai_codes): ")
         if not repo_name:
