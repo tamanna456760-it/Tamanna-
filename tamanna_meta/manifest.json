@@ -1,0 +1,335 @@
+{
+  "tamanna_head": true,
+  "generated_at": "2026-04-03T14:35:49.414726Z",
+  "total_files": 82,
+  "files": [
+    {
+      "path": "tamanna_ultra_cloud.sh",
+      "size": 3422
+    },
+    {
+      "path": ".prettierrc",
+      "size": 58
+    },
+    {
+      "path": "bdking_r7_tamanna_ultra.sh",
+      "size": 3239
+    },
+    {
+      "path": "tamanna_ultra_fileinfo.sh",
+      "size": 2681
+    },
+    {
+      "path": "ldtamanna.inf",
+      "size": 1088
+    },
+    {
+      "path": "tamanna_enterprise.sh",
+      "size": 3774
+    },
+    {
+      "path": "tamanna_ultimate_cloud.sh",
+      "size": 3633
+    },
+    {
+      "path": "requirements-optional.txt",
+      "size": 125
+    },
+    {
+      "path": "tamannaping.c",
+      "size": 968
+    },
+    {
+      "path": "tamanna_code_auto_comm.sh",
+      "size": 3171
+    },
+    {
+      "path": "install.sh",
+      "size": 1768
+    },
+    {
+      "path": "ai-sync-config.json",
+      "size": 264
+    },
+    {
+      "path": "bdking_r7_ultra.sh",
+      "size": 2313
+    },
+    {
+      "path": "bot.js",
+      "size": 453
+    },
+    {
+      "path": "tamanna_ultra_max.sh",
+      "size": 2379
+    },
+    {
+      "path": "index.html",
+      "size": 15582
+    },
+    {
+      "path": "tamanna.txt",
+      "size": 1216
+    },
+    {
+      "path": "tamanna_self_learning.sh",
+      "size": 3959
+    },
+    {
+      "path": "CORE.boot",
+      "size": 2976
+    },
+    {
+      "path": "tamanna_ultra_real_time.sh",
+      "size": 3639
+    },
+    {
+      "path": "idtamanna.sys",
+      "size": 3669
+    },
+    {
+      "path": "tamanna_ultra_secure.sh",
+      "size": 2730
+    },
+    {
+      "path": "tamanna_success_program.sh",
+      "size": 3562
+    },
+    {
+      "path": "tamanna_all_in_one.sh",
+      "size": 2404
+    },
+    {
+      "path": "ai-sync.log",
+      "size": 205
+    },
+    {
+      "path": "profile.json",
+      "size": 216
+    },
+    {
+      "path": "tamanna_head_sync.py",
+      "size": 4344
+    },
+    {
+      "path": "tamanna_ultra_firewall.sh",
+      "size": 3405
+    },
+    {
+      "path": "Tamanna-.sln",
+      "size": 4160
+    },
+    {
+      "path": "tamanna_ultra_advanced.sh",
+      "size": 3693
+    },
+    {
+      "path": "tamanna_full_backup.sh",
+      "size": 1206
+    },
+    {
+      "path": "free-fire.py",
+      "size": 3257
+    },
+    {
+      "path": "tamanna_ultra_pro.sh",
+      "size": 2962
+    },
+    {
+      "path": "auto_sync_all.sh",
+      "size": 2420
+    },
+    {
+      "path": "tamanna_ultra_24x7.sh",
+      "size": 3561
+    },
+    {
+      "path": "tamanna_repair.sh",
+      "size": 1106
+    },
+    {
+      "path": "unlock_files.py",
+      "size": 283
+    },
+    {
+      "path": "tamanna_multi_user.sh",
+      "size": 4384
+    },
+    {
+      "path": "tamanna_debug.sh",
+      "size": 1024
+    },
+    {
+      "path": "tamanna_ultra_pro_cli.sh",
+      "size": 5060
+    },
+    {
+      "path": "watcher.js",
+      "size": 800
+    },
+    {
+      "path": "tamanna_power.sh",
+      "size": 1120
+    },
+    {
+      "path": "tamanna_ultra_ai_full.sh",
+      "size": 5591
+    },
+    {
+      "path": "git.py",
+      "size": 1579
+    },
+    {
+      "path": "tamanna_github_backup.sh",
+      "size": 1697
+    },
+    {
+      "path": "tamanna_ultra_all_in_one.sh",
+      "size": 3434
+    },
+    {
+      "path": "tamanna_code_editor_runner.sh",
+      "size": 2392
+    },
+    {
+      "path": "tamanna_runner.sh",
+      "size": 1797
+    },
+    {
+      "path": "Makefile",
+      "size": 443
+    },
+    {
+      "path": "tamanna_ultra_mobile_alert.sh",
+      "size": 4207
+    },
+    {
+      "path": "tamanna_ultra_extreme.sh",
+      "size": 4114
+    },
+    {
+      "path": "package-lock.json",
+      "size": 4086
+    },
+    {
+      "path": "tamanna_autonomous.sh",
+      "size": 3722
+    },
+    {
+      "path": "tamanna_auto_pro.sh",
+      "size": 4164
+    },
+    {
+      "path": "tamanna_ultra_powerhub.sh",
+      "size": 3309
+    },
+    {
+      "path": "tamanna_head.py",
+      "size": 1555
+    },
+    {
+      "path": "packag.json",
+      "size": 323
+    },
+    {
+      "path": ".eslintrc.json",
+      "size": 344
+    },
+    {
+      "path": "tamanna_ultra_ai.sh",
+      "size": 3434
+    },
+    {
+      "path": "git clone https:/github.com/tamanna456760-it/Journal",
+      "size": 559
+    },
+    {
+      "path": "Tamanna-AI-System/git_clone_update.py",
+      "size": 403
+    },
+    {
+      "path": "Tamanna-AI-System/backup_manager.py",
+      "size": 408
+    },
+    {
+      "path": "Tamanna-AI-System/main.py",
+      "size": 367
+    },
+    {
+      "path": "Tamanna-AI-System/logger.py",
+      "size": 356
+    },
+    {
+      "path": "Tamanna-AI-System/ai_code_generator.py",
+      "size": 426
+    },
+    {
+      "path": "Tamanna-AI-System/config.py",
+      "size": 84
+    },
+    {
+      "path": "Tamanna-AI-System/file_scanner.py",
+      "size": 333
+    },
+    {
+      "path": "Tamanna-AI-System/serial_manager.py",
+      "size": 488
+    },
+    {
+      "path": "Tamanna-AI-System/git_sync.py",
+      "size": 215
+    },
+    {
+      "path": ".gitignore/ai_key",
+      "size": 34
+    },
+    {
+      "path": ".gitignore/.gitignore",
+      "size": 542
+    },
+    {
+      "path": ".vscode/launch.json",
+      "size": 581
+    },
+    {
+      "path": ".vscode/settings.json",
+      "size": 1426
+    },
+    {
+      "path": ".vscode/c_cpp_properties.json",
+      "size": 313
+    },
+    {
+      "path": ".snapshots/sponsors.md",
+      "size": 2396
+    },
+    {
+      "path": ".snapshots/snapshot-2025-12-03T15_58_46_675Z.md",
+      "size": 7923
+    },
+    {
+      "path": ".snapshots/readme.md",
+      "size": 411
+    },
+    {
+      "path": ".snapshots/config.json",
+      "size": 2272
+    },
+    {
+      "path": ".env/run.js",
+      "size": 156
+    },
+    {
+      "path": ".env/ai-sync.js",
+      "size": 1427
+    },
+    {
+      "path": ".env/package.json",
+      "size": 416
+    },
+    {
+      "path": ".tamanna/tamanna_core.py",
+      "size": 974
+    }
+  ]
+}
