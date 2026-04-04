@@ -1,0 +1,43 @@
+name: AI Auto System Runner
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"   # প্রতি 5 মিনিটে trigger
+
+jobs:
+  run-ai-system:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Install Dependencies
+        run: |
+          pip install requests
+
+      - name: 🚀 Run AI System Loop
+        run: |
+          echo "Starting AI System..."
+          
+          while true
+          do
+            echo "🔍 Running Scanner..."
+            python lint_detect_issues.py
+
+            echo "🛠 Running Auto Fix..."
+            python auto_fix_helper.py
+
+            echo "🧠 Running AI Monitor..."
+            python ai_system_monitor.py
+
+            echo "⏱ Waiting 10 seconds..."
+            sleep 10
+          done
