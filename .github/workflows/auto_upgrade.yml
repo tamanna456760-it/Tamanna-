@@ -1,0 +1,70 @@
+name: Auto Detect, Upgrade & Run System
+
+on:
+  push:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 */6 * * *'   # প্রতি ৬ ঘণ্টায় একবার রান করবে
+  workflow_dispatch:         # ম্যানুয়ালি রান করার জন্য
+
+jobs:
+  auto-upgrade-and-run:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0       # সব ব্রাঞ্চ ও ইতিহাস আনতে (git pull-এর জন্য)
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Detect all files
+      id: file_detection
+      run: |
+        echo "🔍 সব ফাইল ডিটেক্ট করা হচ্ছে..."
+        find . -type f > all_files.txt
+        echo "মোট ফাইল সংখ্যা: $(cat all_files.txt | wc -l)"
+        echo "স্যাম্পল ফাইল লিস্ট (প্রথম ১০টি):"
+        head -10 all_files.txt
+        echo "file_count=$(cat all_files.txt | wc -l)" >> $GITHUB_OUTPUT
+
+    - name: Upgrade system dependencies
+      run: |
+        echo "⬆️  আপগ্রেড চালানো হচ্ছে..."
+        # পাইথন প্যাকেজ আপগ্রেড (যদি requirements.txt থাকে)
+        if [ -f requirements.txt ]; then
+          pip install --upgrade pip
+          pip install --upgrade -r requirements.txt
+        fi
+        # নোড.js প্যাকেজ আপগ্রেড (package.json থাকলে)
+        if [ -f package.json ]; then
+          npm install -g npm
+          npm update
+        fi
+        # git pull করে সর্বশেষ কোড আনা (সর্বদাই আপ-টু-ডেট থাকবে)
+        git pull origin ${{ github.ref_name }}
+
+    - name: Run the system
+      run: |
+        echo "🚀 সিস্টেম রান করা হচ্ছে..."
+        # আপনার সিস্টেম যা চালাতে চান, এখানে দিন
+        # উদাহরণ: python app.py
+        # বা pytest, বা npm test
+        if [ -f manage.py ]; then
+          python manage.py runserver 0.0.0.0:8000 &  # ব্যাকগ্রাউন্ডে রান (CI-এর জন্য)
+          sleep 5
+          curl http://localhost:8000 || echo "সার্ভার রানিং কিন্তু রেসপন্স দেয়নি"
+        elif [ -f app.py ]; then
+          python app.py
+        else
+          echo "কোনো পরিচিত সিস্টেম ফাইল পাওয়া যায়নি।"
+          exit 1
+        fi
+
+    - name: Show final status
+      run: |
+        echo "✅ কাজ সম্পন্ন! মোট ফাইল ছিল: ${{ steps.file_detection.outputs.file_count }}"
