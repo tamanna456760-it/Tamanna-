@@ -5,17 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/resultText"
-        android:text="Tamanna AI Ready"
-        android:textSize="20sp"
-        android:layout_margin="20dp"
+    <Button
+        android:id="@+id/startBtn"
+        android:text="Start System"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
     <Button
-        android:id="@+id/scanBtn"
-        android:text="Run AI Scan"
+        android:id="@+id/stopBtn"
+        android:text="Stop System"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
