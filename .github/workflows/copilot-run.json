@@ -1,0 +1,67 @@
+{
+  "workflow": {
+    "name": "GitHub Copilot Chat Runner (Auto-Upgraded)",
+    "version": "3.0",
+    "description": "স্বয়ংক্রিয় চ্যাট ওয়ার্কফ্লো – একাধিক প্রম্পট, কন্টেক্সট ম্যানেজমেন্ট, রিট্রাই ও কন্ডিশনাল লজিক সহ",
+    "triggers": {
+      "manual": true,
+      "schedule": null,
+      "webhook": null
+    },
+    "variables": {
+      "model": "copilot-default",
+      "temperature": 0.7,
+      "max_retries": 2,
+      "retry_delay_seconds": 5
+    },
+    "steps": [
+      {
+        "id": "step_1",
+        "type": "chat",
+        "prompt": "Write a Python function to reverse a string",
+        "context": "coding",
+        "expected_output_type": "code",
+        "retry_if_empty": true
+      },
+      {
+        "id": "step_2",
+        "type": "chat",
+        "prompt": "Explain the time complexity of the previous function",
+        "context": "explain",
+        "depends_on": ["step_1"],
+        "use_previous_response": true
+      },
+      {
+        "id": "step_3",
+        "type": "conditional",
+        "condition": "$step_2.response contains 'O(n)'",
+        "then": {
+          "type": "chat",
+          "prompt": "Optimize it to O(1) using Python slicing",
+          "context": "coding"
+        },
+        "else": {
+          "type": "chat",
+          "prompt": "Show both O(n) and O(1) solutions"
+        }
+      }
+    ],
+    "output": {
+      "save_to": "copilot_upgraded_results.json",
+      "format": "json",
+      "include_timestamps": true,
+      "include_metadata": true
+    },
+    "execution": {
+      "method": "cli",
+      "cli_command": "gh copilot chat --prompt",
+      "api_endpoint": null,
+      "timeout_seconds": 60,
+      "parallel_steps": false
+    },
+    "logging": {
+      "level": "info",
+      "log_file": "copilot_workflow.log"
+    }
+  }
+}
