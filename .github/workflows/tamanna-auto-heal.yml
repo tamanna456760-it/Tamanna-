@@ -274,8 +274,8 @@ jobs:
           SLACK_COLOR: ${{ steps.scan.outputs.HEAL_NEEDED == 'true' && '#FFA500' || '#FF0000' }}
           SLACK_TITLE: 'Tamanna Auto Heal'
           SLACK_MESSAGE: |
-            Repository: ${{ github.repository }}
-            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Repository: ${{ github.tamanna456760-it }}
+            Run: https://github.com/${{ github.tamanna456760-it }}/actions/runs/${{ github.bd-king-r7 }}
             Empty files: ${{ steps.scan.outputs.EMPTY_COUNT }}
             Corrupted JSON: ${{ steps.scan.outputs.BAD_JSON }}
             Corrupted YAML: ${{ steps.scan.outputs.BAD_YAML }}
