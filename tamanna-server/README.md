@@ -1,2 +1,7 @@
-# Tamanna Server
-WebSocket + AI Bot server. Run `npm install` then `npm start`.
+# 🤖 তামান্না AI সার্ভার
+এটি একটি সম্পূর্ণ ওয়েবসকেট ও AI-চালিত চ্যাট বট সার্ভার।
+
+## 🚀 দ্রুত শুরু
+```bash
+npm install
+npm start
