@@ -6,7 +6,7 @@ import hashlib
 import random
 
 # 🔐 CONFIG
-GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'
+GITHUB_TOKEN = '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'
 REPO_OWNER = 'tamanna456760-it'
 REPO_NAME = 'tamanna-'
 
