@@ -5,7 +5,7 @@ import time
 import json
 
 # 🔐 CONFIG
-GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'
+GITHUB_TOKEN = 'tamanna'
 REPO_OWNER = 'tamanna456760-it'
 REPO_NAME = 'tamanna-'
 
