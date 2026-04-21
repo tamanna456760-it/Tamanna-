@@ -108,7 +108,7 @@ def detect_attack(content):
 # 🔄 UPDATE FILE
 # =========================
 def update_file(path, content, message):
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{tamanna}/contents/{path}"
     res = requests.get(url, headers=HEADERS)
     if res.status_code != 200:
         return
