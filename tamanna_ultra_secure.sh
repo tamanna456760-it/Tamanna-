@@ -5,7 +5,7 @@ cat > ~tamanna_ultra_secure.sh << 'EOF'
 # BD-KING-R7 + Code Generator + Auto Sync + Comm
 # =========================================
 
-ROOT="Tamanna-"
+ROOT="$HOME/Tamanna"
 LOG="$ROOT/logs/ultra_secure.log"
 mkdir -p "$ROOT/logs"
 
