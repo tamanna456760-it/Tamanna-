@@ -1,4 +1,4 @@
-// lib/db/src/schema/index.ts
+//
 // ============================================
 // Barrel Exports for Database Schema
 // ============================================
