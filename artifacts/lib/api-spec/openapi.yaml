@@ -1,0 +1,550 @@
+openapi: 3.1.0
+info:
+  title: AI Tamanna API
+  description: |
+    Advanced AI chat conversation management with streaming responses.
+    Supports real‑time SSE streams, conversation history, and optional webhooks for long‑running tasks.
+  version: 2.0.0
+  contact:
+    name: AI Tamanna Support
+    email: support@aitamanna.com
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.aitamanna.com/v1
+    description: Production
+  - url: https://staging-api.aitamanna.com/v1
+    description: Staging
+tags:
+  - name: health
+    description: Service health and readiness checks
+  - name: conversations
+    description: AI chat conversation management (CRUD + streaming)
+  - name: messages
+    description: Message operations inside conversations
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /healthz:
+    get:
+      tags: [health]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              example:
+                status: ok
+                timestamp: '2025-04-24T10:30:00Z'
+                uptime: 1234.56
+        '503':
+          description: Service unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Service unavailable
+                status: 503
+
+  /openai/conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      summary: List all conversations
+      description: Returns paginated list of conversations. Results can be filtered and sorted.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, title]
+            default: updatedAt
+          description: Field to sort by
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sorting order
+        - name: title
+          in: query
+          schema:
+            type: string
+          description: Filter by partial title match
+      responses:
+        '200':
+          description: Paginated list of conversations
+          headers:
+            X-Total-Count:
+              schema:
+                type: integer
+              description: Total number of conversations
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Request limit per minute
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: Remaining requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+              example:
+                items:
+                  - id: 1
+                    title: 'My first chat'
+                    createdAt: '2025-04-24T10:00:00Z'
+                    updatedAt: '2025-04-24T10:05:00Z'
+                total: 42
+                limit: 20
+                offset: 0
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      operationId: createConversation
+      tags: [conversations]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationBody'
+            example:
+              title: 'New AI Project'
+      responses:
+        '201':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+              example:
+                id: 42
+                title: 'New AI Project'
+                createdAt: '2025-04-24T11:00:00Z'
+                updatedAt: '2025-04-24T11:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /openai/conversations/{id}:
+    get:
+      operationId: getConversation
+      tags: [conversations]
+      summary: Get a conversation with its messages
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Conversation with full message history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationWithMessages'
+              example:
+                id: 42
+                title: 'My chat'
+                createdAt: '2025-04-24T10:00:00Z'
+                updatedAt: '2025-04-24T10:30:00Z'
+                messages:
+                  - id: 1
+                    conversationId: 42
+                    role: user
+                    content: 'What is AI?'
+                    createdAt: '2025-04-24T10:00:00Z'
+                  - id: 2
+                    conversationId: 42
+                    role: assistant
+                    content: 'AI stands for Artificial Intelligence...'
+                    createdAt: '2025-04-24T10:00:05Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      operationId: deleteConversation
+      tags: [conversations]
+      summary: Delete a conversation
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '204':
+          description: Conversation successfully deleted
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /openai/conversations/{id}/messages:
+    post:
+      operationId: sendMessage
+      tags: [conversations, messages]
+      summary: Send a message (SSE streaming response)
+      description: |
+        Initiates a streaming AI response. The endpoint returns a **Server‑Sent Events (SSE)** stream.
+        Each chunk is a JSON object with either `delta` (partial content) or `done` (end of stream).
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageBody'
+            examples:
+              simple:
+                summary: Simple text message
+                value:
+                  content: 'Explain quantum computing in simple terms'
+              with_options:
+                summary: Advanced options
+                value:
+                  content: 'Write a poem about AI'
+                  temperature: 0.8
+                  maxTokens: 200
+      responses:
+        '200':
+          description: SSE stream of AI response chunks
+          headers:
+            X-Session-Id:
+              schema:
+                type: string
+              description: Unique identifier for this streaming session
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Each event is a JSON object:
+                  - `{"delta":"Hello "}`
+                  - `{"delta":"world!"}`
+                  - `{"done":true}`
+              examples:
+                stream_example:
+                  summary: Example stream
+                  value: |
+                    event: message
+                    data: {"delta":"Hello"}
+                    
+                    event: message
+                    data: {"delta":" world"}
+                    
+                    event: message
+                    data: {"done":true}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # Optional webhook endpoint that can be called by the API
+  /webhooks/conversation-updated:
+    post:
+      summary: Webhook for conversation changes
+      description: |
+        If configured, the API will POST to this URL when a conversation is updated (e.g., after AI response completes).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationWebhookPayload'
+      responses:
+        '200':
+          description: Acknowledged
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key obtained from AI Tamanna dashboard
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token (JWT) for authenticated users
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      description: Numeric ID of the conversation
+      example: 42
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Maximum number of items to return
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Number of items to skip (for pagination)
+
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          description: Server uptime in seconds
+      required:
+        - status
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - id
+        - title
+        - createdAt
+        - updatedAt
+
+    ConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+      required:
+        - id
+        - title
+        - createdAt
+        - updatedAt
+        - messages
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    CreateConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+        - title
+
+    SendMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 8000
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+          default: 0.7
+          description: Controls randomness (0 = deterministic, 2 = very random)
+        maxTokens:
+          type: integer
+          minimum: 1
+          maximum: 4096
+          default: 1024
+        stream:
+          type: boolean
+          default: true
+          description: If false, returns a non‑streaming JSON response instead of SSE
+      required:
+        - content
+
+    ConversationWebhookPayload:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: [conversation.updated, message.created]
+        conversationId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - event
+        - conversationId
+        - timestamp
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer
+        details:
+          type: object
+          additionalProperties: true
+      required:
+        - error
+        - status
+
+  responses:
+    BadRequest:
+      description: Invalid request (validation error)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'title is required'
+            status: 400
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Invalid API key'
+            status: 401
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Conversation not found'
+            status: 404
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Rate limit exceeded. Try again in 60 seconds.'
+            status: 429
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Unexpected error occurred'
+            status: 500
