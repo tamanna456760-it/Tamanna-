@@ -1,22 +1,30 @@
 import os
 
-report = []
+errors = []
 
 for root, dirs, files in os.walk("."):
     for file in files:
+        path = os.path.join(root, file)
+
         if file.endswith(".py"):
-            path = os.path.join(root, file)
             try:
                 with open(path, "r") as f:
                     code = f.read()
-                
                 compile(code, path, 'exec')
-                report.append(f"[OK] {path}")
-
             except Exception as e:
-                report.append(f"[ERROR] {path} -> {str(e)}")
+                errors.append(f"{path} :: {str(e)}")
 
-with open("report.txt", "w") as f:
-    f.write("\n".join(report))
+        elif file.endswith(".js"):
+            # basic JS check
+            try:
+                with open(path, "r") as f:
+                    code = f.read()
+                if "console.log(" not in code:
+                    errors.append(f"{path} :: Possible issue (no output found)")
+            except Exception as e:
+                errors.append(f"{path} :: {str(e)}")
 
-print("Report Generated: report.txt")
+with open("errors.txt", "w") as f:
+    f.write("\n".join(errors))
+
+print("Errors saved in errors.txt")
