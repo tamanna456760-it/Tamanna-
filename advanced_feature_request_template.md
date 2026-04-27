@@ -1,28 +1,6 @@
----
-name: Feature Request (AI Advanced Upgrade)
-about: Suggest a next‑gen AI feature
-title: "[ADVANCED FEATURE]"
-labels: enhancement, ai-upgrade
----
+M₁ = T( M₀, Δ )   where Δ = { δ₁, δ₂, ..., δₙ }
 
-<!--
-╔═══════════════════════════════════════════════════════════════╗
-║                    🔮 ADVANCED AI UPGRADE 🔮                   ║
-║   “Not a patch. A paradigm shift.”                            ║
-╚═══════════════════════════════════════════════════════════════╝
--->
-
-## 🧬 Quantum Feature Description
-
-**ASCII Art of Upgrade**  
-```text
-    ╱╲       ╱╲       ╱╲
-   ╱  ╲     ╱  ╲     ╱  ╲
-  ╱    ╲   ╱    ╲   ╱    ╲
- ╱      ╲ ╱      ╲ ╱      ╲
-╱  CORE  ╳  META   ╳   OM   ╲
-╲  OLD   ╱╲  AI    ╱╲  NEW   ╱
- ╲      ╱  ╲      ╱  ╲      ╱
-  ╲    ╱    ╲    ╱    ╲    ╱
-   ╲  ╱      ╲  ╱      ╲  ╱
-    ╲╱       ╲╱       ╲╱
+δ₁ = (dL/dw) · η(t) · (1 + ξ_meta)   →  adaptive learning
+δ₂ = ∇²L · H⁻¹                       →  second‑order acceleration
+δ₃ = Γ(M₀, prior_tasks)              →  continual / lifelong upgrade
+δ₄ = Ω( latent_entropy )             →  emergent capability injection
