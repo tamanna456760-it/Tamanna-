@@ -1,0 +1,58 @@
+name: 🚀 Smart AI Code Analyzer
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smart-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 📦 Install
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🔍 Lint Check
+        run: |
+          flake8 . || true
+
+      - name: 🧪 Run Tests
+        run: |
+          pytest || true
+
+      - name: 🧠 Analyze Code
+        run: |
+          python scripts/analyze.py
+
+      - name: 🤖 Explain Errors
+        run: |
+          python scripts/explain.py
+
+      - name: ▶️ Run Python Files
+        run: |
+          for file in $(find . -name "*.py"); do
+            echo "Running $file"
+            python $file >> run_log.txt 2>&1 || echo "[FAILED] $file" >> run_log.txt
+          done
+
+      - name: 📊 Show Final Report
+        run: |
+          echo "===== FINAL REPORT ====="
+          cat final_report.txt || true
+
+      - name: 📁 Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: report
+          path: |
+            final_report.txt
+            run_log.txt
