@@ -5,4 +5,4 @@ if (!process.env.OPENAI_KEY) {
   process.exit(1);
 }
 
-console.log("OPENAI KEY LOADED");
+console.log("tamanna");
