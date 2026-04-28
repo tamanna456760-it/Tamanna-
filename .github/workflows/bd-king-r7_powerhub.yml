@@ -5,14 +5,20 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:   # allow manual trigger
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04   # 🔥 more stable than ubuntu-latest
+    timeout-minutes: 30     # ⛔ stuck job auto stop
+
     permissions:
       contents: read
-      actions: write   # to upload artifacts
+      actions: write
 
     steps:
       - name: Checkout code
@@ -28,36 +34,25 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Grant execute permission for gradlew
+      - name: Grant execute permission
         run: chmod +x android/gradlew
 
-      - name: Cache Gradle packages
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: gradle-${{ runner.os }}
 
-      - name: Build debug APK (or release)
+      - name: Build APK
         run: |
           cd android
-          ./gradlew assembleDebug   # change to assembleRelease for signed builds
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: BD-King-R7-debug
           path: android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 7
-
-      # Optional: Also build release (requires signing keys)
-      # - name: Build release APK
-      #   env:
-      #     KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      #   run: |
-      #     echo $KEYSTORE_BASE64 | base64 -d > android/app/keystore.jks
-      #     cd android && ./gradlew assembleRelease
