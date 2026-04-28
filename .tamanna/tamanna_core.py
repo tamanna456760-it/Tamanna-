@@ -18,6 +18,7 @@ def build_identity():
             "head",
             "core",
             "hm"
+            "systems.md"
         ]
     }
 
