@@ -1,0 +1,9 @@
+{
+  "folder": "./files",
+  "prefix": "File",
+  "start": 1,
+  "recursive": false,
+  "extensions": null,
+  "dry_run": false,
+  "create_folder": true
+}
