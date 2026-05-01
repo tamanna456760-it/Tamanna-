@@ -20,14 +20,14 @@
   },
   "api": {
     "endpoint": "https://api.tamanna.io/v1",
-    "auth_token": "YOUR_SECURE_TOKEN_HERE",
+    "auth_token": "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",
     "timeout": 30,
     "retry": 3
   },
   "sync": {
     "script": "./sync/auto_sync.sh",
     "interval_minutes": 10,
-    "git_repo": "https://github.com/Tamannna456760-it/bd-king-r7.git"
+    "git_repo": "https://github.com/Tamannna456760-it/tamanna-.git"
   },
   "logging": {
     "level": "INFO",
