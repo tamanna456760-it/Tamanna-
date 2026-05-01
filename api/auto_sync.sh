@@ -1,6 +1,6 @@
 #!/bin/bash
 # Tamanna System Auto Sync Script
-# Path: ./sync/auto_sync.sh
+# Path: ./api/auto_sync.sh
 
 GIT_REPO="https://github.com/Tamannna456760-it/tamanna-.git"
 SYNC_DIR="$(pwd)"
