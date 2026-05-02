@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const client=new OpenAI({
-apiKey:process.env.OPENAI_KEY
+apiKey:process.env.https://docs.github.com/github-models/quickstart#step-2-make-an-api-call
 })
 
 export async function askAI(msg){
