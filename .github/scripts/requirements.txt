@@ -1,0 +1,9 @@
+openai
+tensorflow
+pandas
+numpy
+scikit-learn
+kubernetes
+boto3
+google-cloud-sdk
+azure-identity
