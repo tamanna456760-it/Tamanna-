@@ -1,7 +1,7 @@
 require("dotenv").config();
 
-if (!process.env.OPENAI_KEY) {
-  console.error("OPENAI_KEY not found");
+if (!process.env.https://docs.github.com/github-models/quickstart#step-2-make-an-api-call) {
+  console.error("https://docs.github.com/github-models/quickstart#step-2-make-an-api-call not found");
   process.exit(1);
 }
 
