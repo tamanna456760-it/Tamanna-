@@ -1,0 +1,58 @@
+version: 3
+
+updates:
+  # 🔥 Python Engine Updates
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "tamanna"
+      include: "scope"
+    labels:
+      - "tamanna-bot"
+      - "python"
+      - "dependencies"
+    reviewers:
+      - "tamanna456760-it"
+    groups:
+      python-core:
+        patterns:
+          - "*"
+
+  # ⚡ Node.js Engine Updates
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "tamanna"
+      include: "scope"
+    labels:
+      - "tamanna-bot"
+      - "node"
+      - "dependencies"
+    groups:
+      node-core:
+        patterns:
+          - "*"
+
+  # 🛡 GitHub Actions Auto‑Upgrade
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "tamanna"
+      include: "scope"
+    labels:
+      - "tamanna-bot"
+      - "ci"
+      - "github-actions"
+    groups:
+      gha-core:
+        patterns:
+          - "*"
