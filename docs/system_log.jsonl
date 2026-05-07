@@ -1,0 +1,5 @@
+{"timestamp": "2026-05-07T02:00:00Z", "system_name": "BD-KING-R7", "level": "INFO", "event": "BOOT", "message": "System boot sequence started."}
+{"timestamp": "2026-05-07T02:00:02Z", "system_name": "BD-KING-R7", "level": "INFO", "event": "ENGINE_INIT", "engine": "Tamanna-AI", "message": "Tamanna Engine initialized."}
+{"timestamp": "2026-05-07T02:00:05Z", "system_name": "BD-KING-R7", "level": "INFO", "event": "DEEP_CORE", "power": "Deep Power Engaged", "message": "Deep core online."}
+{"timestamp": "2026-05-07T02:05:00Z", "system_name": "BD-KING-R7", "level": "WARN", "event": "RATE_LIMIT", "message": "High request volume detected."}
+{"timestamp": "2026-05-07T02:10:00Z", "system_name": "BD-KING-R7", "level": "INFO", "event": "HEARTBEAT", "message": "System heartbeat OK."}
