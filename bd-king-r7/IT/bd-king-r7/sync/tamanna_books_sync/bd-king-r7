@@ -1,10 +1,23 @@
----
+# Project Features: BD-King-R7
 
-If you want, I can also:
+This project includes the following powerful features for automation:
 
-✅ Add **your GitHub username automatically**  
-✅ Create a **logo ASCII / badge**  
-✅ Generate a **LICENSE file**  
-✅ Make a **PRO README (animated + shields)**  
+- ✅ Automatically add GitHub usernames for contributors.
+- ✅ Create an attractive **logo ASCII / badge** for your project branding.
+- ✅ Automatically generate a **LICENSE file** for open source compliance.
+- ✅ Produce a **PRO README** with animations and badges.
 
-Just say **“NEXT README POWER”** 🔥
+## Usage
+Run the following script to enable these features:
+
+```bash
+./setup.sh --enable-features
+```
+
+For advanced README automation, run:
+
+```bash
+./setup.sh --readme="power"
+```
+
+🔥 **Level up your project with the "NEXT README POWER" tool!**
