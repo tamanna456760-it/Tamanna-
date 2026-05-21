@@ -1,9 +1,17 @@
-# BD-KING-R7 PowerHub + Tamanna AI
+# BD-KING-R7 PowerHub + Tamanna AI  
+Local Development Setup (VS Code / Node.js)
 
-## Setup (VS Code / Local)
+## 🚀 Overview
+BD-KING-R7 PowerHub is a local AI-powered automation hub integrated with Tamanna AI.  
+This project includes a Node.js backend server and optional frontend components.
 
-1. Copy repository, open terminal in project root.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+---
+
+## 📦 Requirements
+- Node.js (v16+ recommended)
+- npm (comes with Node.js)
+- VS Code (optional but recommended)
+
+---
+
+## 📁 Project Structure
