@@ -1,0 +1,142 @@
+name: 🔐 Security Checks & Code Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly security scan
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    name: 🛡️ Security Audit
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      # Secret scanning
+      - name: 🔍 Scan for exposed secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+      
+      # SAST - Python security
+      - name: 🐍 Bandit - Python Security Scan
+        run: |
+          pip install bandit
+          bandit -r . -f json -o bandit-report.json || true
+      
+      # Dependency vulnerability scanning
+      - name: 📦 Dependency Check
+        run: |
+          pip install safety
+          safety check --json > safety-report.json || true
+      
+      # SAST - General code quality
+      - name: 🧪 SonarQube Code Quality Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=tamanna456760-it_Tamanna-
+            -Dsonar.organization=tamanna456760-it
+      
+      # Detect hardcoded secrets in code
+      - name: 🔐 Detect hardcoded credentials
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --all-files --force-use-all-plugins > .secrets.baseline || true
+      
+      # Upload security reports
+      - name: 📊 Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+            .secrets.baseline
+  
+  code-quality:
+    runs-on: ubuntu-latest
+    name: ✨ Code Quality Check
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pylint flake8 black isort
+      
+      - name: 🎨 Check code formatting (Black)
+        run: black --check . || true
+      
+      - name: 📏 Lint with Flake8
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      
+      - name: 🔍 Lint with Pylint
+        run: pylint **/*.py --exit-zero --output-format=json > pylint-report.json || true
+  
+  dependency-security:
+    runs-on: ubuntu-latest
+    name: 🔗 Dependency Security
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Check Python Dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install pip-audit
+            pip-audit || true
+          fi
+      
+      - name: Check Node Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install
+            npm audit || true
+          fi
+  
+  credential-rotation:
+    runs-on: ubuntu-latest
+    name: 🔄 Credential Management
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Validate .env file not committed
+        run: |
+          if [ -f .env ] && grep -q "GITHUB_TOKEN\|PASSWORD\|KEY" .env; then
+            echo "❌ CRITICAL: Secrets found in .env file!"
+            exit 1
+          fi
+      
+      - name: Check for hardcoded tokens
+        run: |
+          if grep -r "github_pat_\|ghp_\|ghu_" --include="*.py" --include="*.js" --include="*.sh" . 2>/dev/null; then
+            echo "❌ WARNING: Potential GitHub tokens detected in code"
+            exit 1
+          fi
