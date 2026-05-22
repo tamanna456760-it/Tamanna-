@@ -3,7 +3,7 @@ import fs from "fs-extra"
 import path from "path"
 
 export async function syncFiles({
-  repoPath = "./project",
+  repoPath = "./tamanna-",
   remoteUrl = null,
   branch = "main",
   autoPull = true,
