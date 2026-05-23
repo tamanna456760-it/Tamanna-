@@ -1,8 +1,8 @@
 #!/bin/bash
 # Tamanna System Auto Sync Script
-# Path: ./sync/auto_sync.sh
+# Path: ./api/auto_sync.sh
 
-GIT_REPO="https://github.com/Tamannna456760-it/bd-king-r7.git"
+GIT_REPO="https://github.com/Tamannna456760-it/tamanna-.git"
 SYNC_DIR="$(pwd)"
 
 echo "[SYNC] Starting auto-sync..."

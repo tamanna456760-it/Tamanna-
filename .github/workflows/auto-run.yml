@@ -1,31 +1,161 @@
-name: Auto Run All Files
+name: Auto Run All Files (Advanced)
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      parallel:
+        description: 'Run files in parallel'
+        type: boolean
+        default: true
+      timeout_seconds:
+        description: 'Timeout per file (seconds)'
+        required: false
+        default: '30'
+      file_pattern:
+        description: 'Glob pattern for files (e.g., "**/*.py" or "scripts/*.sh")'
+        required: false
+        default: '**/*.py'
 
 jobs:
   run-all:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write   # For annotating failures
 
     steps:
-      - name: Checkout Code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install Dependencies
+      - name: 📦 Install Dependencies
         run: |
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
+          pip install pytest  # optional, for test discovery
 
-      - name: Run All Python Files
+      - name: 🔍 Find Files to Run
+        id: find
         run: |
-          echo "Scanning all folders..."
-          find . -type f -name "*.py" -exec python {} \;
+          PATTERN="${{ github.event.inputs.file_pattern || '**/*.py' }}"
+          # Use find with pattern, exclude common unwanted paths
+          find . -type f -path "$PATTERN" \
+            ! -path "./__pycache__/*" \
+            ! -path "./venv/*" \
+            ! -path "./.env/*" \
+            ! -path "./.git/*" \
+            ! -name "test_*.py" \
+            ! -name "*_test.py" \
+            > file_list.txt
+          echo "FILE_COUNT=$(wc -l < file_list.txt)" >> $GITHUB_OUTPUT
+          echo "Found $(wc -l < file_list.txt) files to run."
+
+      - name: 🧪 Run Files Safely (with timeout & isolation)
+        if: steps.find.outputs.FILE_COUNT > 0
+        run: |
+          mkdir -p logs
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          PARALLEL=${{ github.event.inputs.parallel == true && 'true' || 'false' }}
+          
+          run_file() {
+            local file=$1
+            local start=$(date +%s%N)
+            echo "▶️ Running: $file"
+            if timeout $TIMEOUT python "$file" > "logs/$(basename "$file").stdout" 2> "logs/$(basename "$file").stderr"; then
+              local end=$(date +%s%N)
+              local duration=$(( (end - start) / 1000000 ))
+              echo "✅ SUCCESS: $file (${duration}ms)"
+              echo "$file|success|$duration" >> results.txt
+            else
+              local exit_code=$?
+              local end=$(date +%s%N)
+              local duration=$(( (end - start) / 1000000 ))
+              echo "❌ FAILED: $file (exit $exit_code, ${duration}ms)"
+              echo "$file|failed|$duration" >> results.txt
+              # Optionally annotate the PR/commit with the error
+              if [ -s "logs/$(basename "$file").stderr" ]; then
+                echo "::error file=$file::$(head -n 3 logs/$(basename "$file").stderr)"
+              fi
+            fi
+          }
+          
+          export -f run_file
+          export TIMEOUT
+          
+          if [ "$PARALLEL" = "true" ]; then
+            # Run up to 4 files concurrently
+            cat file_list.txt | xargs -P 4 -I {} bash -c 'run_file "$@"' _ {}
+          else
+            while IFS= read -r file; do
+              run_file "$file"
+            done < file_list.txt
+          fi
+          
+          # Generate summary counts
+          echo "TOTAL=$(wc -l < file_list.txt)" >> $GITHUB_ENV
+          SUCCESS_COUNT=$(grep -c "|success|" results.txt || true)
+          FAIL_COUNT=$(grep -c "|failed|" results.txt || true)
+          echo "SUCCESS_COUNT=$SUCCESS_COUNT" >> $GITHUB_ENV
+          echo "FAIL_COUNT=$FAIL_COUNT" >> $GITHUB_ENV
+          
+          if [ "$FAIL_COUNT" -gt 0 ]; then
+            echo "❌ $FAIL_COUNT file(s) failed."
+            exit 1
+          else
+            echo "✅ All $SUCCESS_COUNT file(s) succeeded."
+          fi
+
+      - name: 📊 Generate Job Summary
+        if: always()
+        run: |
+          echo "## 🚀 Auto Run All Files Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Files found**: ${{ steps.find.outputs.FILE_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Successful runs**: ${{ env.SUCCESS_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Failed runs**: ${{ env.FAIL_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Parallel mode**: ${{ github.event.inputs.parallel == true && 'On' || 'Off' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timeout per file**: ${{ github.event.inputs.timeout_seconds || 30 }}s" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f results.txt ]; then
+            echo "### Detailed Results" >> $GITHUB_STEP_SUMMARY
+            echo "| File | Status | Duration (ms) |" >> $GITHUB_STEP_SUMMARY
+            echo "|------|--------|---------------|" >> $GITHUB_STEP_SUMMARY
+            while IFS='|' read -r file status duration; do
+              emoji=$([ "$status" = "success" ] && echo "✅" || echo "❌")
+              echo "| $file | $emoji $status | $duration |" >> $GITHUB_STEP_SUMMARY
+            done < results.txt
+          fi
+
+      - name: 📤 Upload Logs as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 7
+
+      - name: 🚨 Notify on Failure (Slack)
+        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#alerts'
+          SLACK_COLOR: '#FF0000'
+          SLACK_TITLE: 'Auto Run Failed'
+          SLACK_MESSAGE: |
+            Repository: ${{ github.repository }}
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Failed files: ${{ env.FAIL_COUNT }} out of ${{ steps.find.outputs.FILE_COUNT }}
+
+      - name: ✨ Done
+        run: echo "🎉 Execution finished. Check the summary above."

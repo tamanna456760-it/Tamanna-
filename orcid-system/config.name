@@ -1,0 +1,18 @@
+# Tamanna Engine • BD-KING-R7
+# Sovereign System Identity File
+
+SYSTEM_NAME = "BD-KING-R7"
+ENGINE_NAME = "Tamanna-AI"
+ENGINE_VERSION = "1.0.0"
+
+OWNER_NAME = "HM INSAN ALI"
+OWNER_HANDLE = "tamanna456760-it"
+
+DOMAIN = "tamanna.io"
+REPOSITORY = "tamanna"
+
+IDENTITY_LEVEL = "sovereign"
+SYSTEM_MODE = "production"
+
+CREATED_AT = "2026-05-07T00:00:00Z"
+SIGNATURE = "Tamanna Engine • BD-KING-R7 • Identity Core"

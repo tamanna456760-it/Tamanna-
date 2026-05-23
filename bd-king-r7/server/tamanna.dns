@@ -1,10 +1,124 @@
-; ===== tamanna.io DNS Zone =====
+; ============================================================
+;          tamanna.io — HYPER ADVANCED DNS ZONE
+;   Prod • Staging • Email Brand • Security • Discovery
+; ============================================================
 
-A     @       185.123.45.67
-A     www     185.123.45.67
 
-; Optional (Email – safe to keep)
-MX    @       10 mail.tamanna.io.
+; -------------------- CORE WEB / APP LAYER ------------------
+A       @                       185.123.45.67
+A       @                       185.123.45.68
+A       www                     185.123.45.67
+A       www                     185.123.45.68
 
-; Optional TXT (security / verification)
-TXT   @       "v=spf1 a mx ~all"
+; App / API separation
+A       api                     185.123.45.71
+A       app                     185.123.45.72
+
+; Static / CDN (if self‑hosted edge)
+; A     cdn                     185.123.45.73
+
+; IPv6 (if supported)
+; AAAA    @                     2a03:abcd:1234:5678::1
+; AAAA    @                     2a03:abcd:1234:5678::2
+; AAAA    www                   2a03:abcd:1234:5678::1
+; AAAA    www                   2a03:abcd:1234:5678::2
+
+
+; -------------------- ENVIRONMENTS & WILDCARD ---------------
+A       *                       185.123.45.67
+
+A       dev                     185.123.45.69
+A       staging                 185.123.45.70
+A       sandbox                 185.123.45.75
+
+; Internal (for split‑horizon only)
+; A     internal                10.0.0.10
+; A     db.internal             10.0.0.20
+
+
+; -------------------- EMAIL DELIVERY (HARDENED) -------------
+MX      @                       10 mail1.tamanna.io.
+MX      @                       20 mail2.tamanna.io.
+
+A       mail1                   185.123.45.80
+A       mail2                   185.123.45.81
+
+; Autodiscover / autoconfig
+CNAME   autodiscover            mail1.tamanna.io.
+CNAME   autoconfig              mail1.tamanna.io.
+
+; SPF — prod
+TXT     @                       "v=spf1 a mx ip4:185.123.45.67 ip4:185.123.45.68 ip4:185.123.45.80 ip4:185.123.45.81 ~all"
+
+; SPF — staging/sandbox (optional)
+TXT     staging                 "v=spf1 ip4:185.123.45.70 ~all"
+TXT     sandbox                 "v=spf1 ip4:185.123.45.75 ~all"
+
+; DKIM — multiple selectors (placeholders)
+; TXT   default._domainkey              "v=DKIM1; k=rsa; p=PUBLIC_KEY_HERE"
+; TXT   marketing._domainkey            "v=DKIM1; k=rsa; p=PUBLIC_KEY_HERE"
+; TXT   transactional._domainkey        "v=DKIM1; k=rsa; p=PUBLIC_KEY_HERE"
+
+; DMARC — strict alignment + reporting
+TXT     _dmarc                  "v=DMARC1; p=quarantine; sp=quarantine; adkim=s; aspf=s; rua=mailto:dmarc@tamanna.io; ruf=mailto:dmarc@tamanna.io; fo=1"
+
+
+; -------------------- MTA‑STS / TLS‑RPT / DANE --------------
+TXT     _mta-sts                "v=STSv1; id=20250521"
+TXT     _smtp._tls              "v=TLSRPTv1; rua=mailto:tls-report@tamanna.io"
+
+; TLSA example (DANE) – needs real hash
+; _25._tcp.mail1.tamanna.io.  IN TLSA 3 1 1 (
+;   0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF )
+
+
+; -------------------- BIMI (BRAND LOGO FOR EMAIL) -----------
+; BIMI record (SVG logo + VMC if you have one)
+; host is default._bimi
+TXT     default._bimi           "v=BIMI1; l=https://tamanna.io/bimi/logo.svg; a=https://tamanna.io/bimi/vmc.pem"
+
+
+; -------------------- SECURITY / POLICY / CONTACTS ----------
+CAA     0 issue                 "letsencrypt.org"
+CAA     0 issuewild             "letsencrypt.org"
+CAA     0 iodef                 "mailto:security@tamanna.io"
+
+; Security.txt style
+TXT     security                "contact=mailto:security@tamanna.io, expires=2026-12-31T23:59:59Z, policy=https://tamanna.io/security"
+
+; Abuse / NOC contacts
+TXT     _abuse                  "mailto:abuse@tamanna.io"
+TXT     _noc                    "mailto:noc@tamanna.io"
+
+; Org policy
+TXT     _policy                 "org=tamanna.io; env=production; owner=infra@tamanna.io; region=global"
+
+
+; -------------------- SERVICE DISCOVERY (SRV) ----------------
+; Directory / auth / chat / game examples
+; SRV   _ldap._tcp              10 50 389 ldap.tamanna.io.
+; SRV   _kerberos._udp          10 50 88  kdc.tamanna.io.
+; SRV   _xmpp._tcp              5  50 5222 chat.tamanna.io.
+; SRV   _game._udp              1  10 27015 game.tamanna.io.
+
+; A records for those (if used)
+; A     ldap                    185.123.45.93
+; A     kdc                     185.123.45.94
+; A     chat                    185.123.45.91
+; A     game                    185.123.45.92
+
+
+; -------------------- VERIFICATION / INTEGRATIONS ------------
+; TXT   @                       "google-site-verification=XXXX"
+; TXT   @                       "MS=msXXXXXXXX"
+; TXT   _github-pages           "some-verification-token"
+
+
+; -------------------- STATUS / MONITORING --------------------
+A       status                  185.123.45.72
+; CNAME status                  statuspage.example.com.
+
+
+; -------------------- DNSSEC (ENABLE EXTERNALLY) -------------
+; DS / DNSKEY handled at registrar / DNS provider.
+; Enable DNSSEC there for full chain validation.

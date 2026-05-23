@@ -10,26 +10,45 @@ const app = express()
 app.use(express.json())
 app.use(express.static("public"))
 
-app.post("/ai", async (req,res)=>{
-
-const message=req.body.message
-
-const response=await askAI(message)
-
-res.json({reply:response})
-
+// Health check
+app.get("/", (req, res) => {
+  res.json({ status: "Tamanna AI Server Running", time: new Date() })
 })
 
-app.get("/sync",async(req,res)=>{
+// AI Route
+app.post("/ai", async (req, res) => {
+  try {
+    const message = req.body.message
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" })
+    }
 
-await githubSync()
-
-res.json({status:"GitHub synced"})
-
+    const reply = await askAI(message)
+    res.json({ reply })
+  } catch (err) {
+    console.error("AI Error:", err)
+    res.status(500).json({ error: "AI processing failed" })
+  }
 })
 
-app.listen(process.env.PORT,()=>{
+// GitHub Sync Route
+app.get("/sync", async (req, res) => {
+  try {
+    await githubSync({
+      repoPath: "./project",
+      remoteUrl: "https://github.com/tamanna456760-it/tamanna-.git",
+      branch: "main",
+      autoPull: true
+    })
 
-console.log("Tamanna AI Server Running")
+    res.json({ status: "GitHub synced successfully" })
+  } catch (err) {
+    console.error("Sync Error:", err)
+    res.status(500).json({ error: "GitHub sync failed" })
+  }
+})
 
+// Start Server
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`🚀 Tamanna AI Server Running on port ${process.env.PORT}`)
 })

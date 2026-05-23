@@ -1,0 +1,17 @@
+{
+  "folder": "./files",
+  "prefix": "File",
+  "start": 1,
+  "recursive": false,
+  "extensions": null,
+  "dry_run": false,
+  "create_folder": true,
+  "exclude_patterns": ["*.tmp", "temp*", "backup_*"],
+  "sort_by": "name",
+  "regex_pattern": null,
+  "regex_replacement": null,
+  "copy_mode": false,
+  "parallel": false,
+  "save_names_only": false,
+  "log_file": "./renamer.log"
+}

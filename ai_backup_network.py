@@ -6,7 +6,7 @@ import hashlib
 import random
 
 # 🔐 CONFIG
-GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'
+GITHUB_TOKEN = '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'
 REPO_OWNER = 'tamanna456760-it'
 REPO_NAME = 'tamanna-'
 
@@ -108,7 +108,7 @@ def detect_attack(content):
 # 🔄 UPDATE FILE
 # =========================
 def update_file(path, content, message):
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{tamanna}/contents/{path}"
     res = requests.get(url, headers=HEADERS)
     if res.status_code != 200:
         return

@@ -1,0 +1,50 @@
+name: 🔥 Advanced Code Analyzer
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 📦 Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🔍 Lint Check (flake8)
+        run: |
+          echo "Lint Checking..."
+          flake8 . || true
+
+      - name: 🧪 Run Tests (pytest)
+        run: |
+          echo "Running Tests..."
+          pytest || true
+
+      - name: 🧠 Run Analyzer Script
+        run: |
+          python scripts/analyze.py
+
+      - name: ▶️ Try Running All Python Files
+        run: |
+          for file in $(find . -name "*.py"); do
+            echo "Running $file"
+            python $file >> run_log.txt 2>&1 || echo "[FAILED] $file" >> run_log.txt
+          done
+
+      - name: 📊 Show Report
+        run: |
+          echo "===== ANALYZER REPORT ====="
+          cat report.txt || true
+          echo "===== RUN LOG ====="
+          cat run_log.txt || true

@@ -1,43 +1,200 @@
-# Python bytecode
+# ============================================================================
+# Bytecode & Compiled files
+# ============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+*.dll
+*.dylib
+*.exe
 
-# Virtual environments
+# ============================================================================
+# Virtual Environments & Python
+# ============================================================================
 venv/
 env/
 .env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
 
-# Logs and temp files
+# ============================================================================
+# IDE & Editor files
+# ============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.~*
+.DS_Store
+Thumbs.db
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# ============================================================================
+# Logs, temp files, databases
+# ============================================================================
 *.log
 *.tmp
 *.bak
+*.pid
+*.seed
+*.pid.lock
+*.sqlite
+*.db
+*.db-journal
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# GitHub Actions workflows (if you generate)
-.github/workflows/*
-
-# IntelliJ, VSCode, PyCharm settings
-.vscode/
-.idea/
-
-# Output / build folders
+# ============================================================================
+# Build & distribution artifacts
+# ============================================================================
 build/
 dist/
 *.egg-info/
+*.egg
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.whl
+*.tar.gz
+*.zip
 
-# AI / Runner temporary files
+# ============================================================================
+# Testing & coverage
+# ============================================================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# ============================================================================
+# Jupyter Notebooks (if you want to ignore outputs)
+# ============================================================================
+.ipynb_checkpoints/
+*.ipynb
+# If you keep notebooks but ignore outputs, use:
+# .ipynb_checkpoints/
+
+# ============================================================================
+# JavaScript / Node.js
+# ============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json   # optional, many projects commit it
+yarn.lock           # optional
+.eslintcache
+.parcel-cache/
+.next/
+out/
+.nuxt/
+dist/
+
+# ============================================================================
+# Java (if any Java files)
+# ============================================================================
+*.class
+*.jar
+*.war
+*.ear
+target/
+.classpath
+.project
+.settings/
+bin/
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+build/
+
+# ============================================================================
+# C / C++
+# ============================================================================
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.dSYM/
+
+# ============================================================================
+# Secrets & credentials (never commit!)
+# ============================================================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.secret
+.env.local
+.env.*.local
+.secrets
+secrets.yml
+config/secrets.yml
+credentials.json
+*.env
+*.secret.yml
+*.private
+*.id_rsa*
+
+# ============================================================================
+# OS / system files
+# ============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+*.Trashes
+
+# ============================================================================
+# Project‑specific (from your original)
+# ============================================================================
+.github/workflows/*   # if you generate workflows; commit if you want to keep
+build/
+dist/
+*.egg-info/
+*bd-king-r7*
+*tamanna-ai-app*
+
+# ============================================================================
+# AI / runner temporary files (extended)
+# ============================================================================
 *.run.log
 *.cache/
 *.out/
+*_cache/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*~
 
-# Optional: Ignore secret keys or credentials
-secret_key.txt
-config.yaml
-
-# Optional: Ignore Dependabot lock updates
-dependabot.yml
-master_sync.yml
+# ============================================================================
+# Docker / container
+# ============================================================================
+docker-compose.override.yml
+*.dockerignore
+Dockerfile.tmp
+.docker/

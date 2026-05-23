@@ -1,0 +1,37 @@
+name: Full Code Test System
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-all-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code Download
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Packages
+        run: |
+          pip install -r requirements.txt
+
+      - name: Lint Check (Error detect)
+        run: |
+          flake8 . || true
+
+      - name: Run Tests
+        run: |
+          pytest || true
+
+      - name: Try Run Python Files
+        run: |
+          for file in $(find . -name "*.py"); do
+            echo "Running $file"
+            python $file || echo "Error in $file"
+          done

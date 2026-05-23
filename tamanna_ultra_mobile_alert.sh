@@ -83,12 +83,12 @@ curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" -d cha
 
 # Optional email alert
 if command -v mailx >/dev/null 2>&1; then
-    echo "$ALERT_MSG" | mailx -s "Tamanna ULTRA ALERT" your_email@example.com
+    echo "$ALERT_MSG" | mailx -s "Tamanna ULTRA ALERT" your_tamanna456760@gmail.com.com
 fi
 
 # 9️⃣ Web Dashboard
 echo "<h1>TAMANA BD-KING-R7 ULTRA MOBILE ALERT STATUS</h1><p>Last run: $(date)</p>" > ~/Tamanna/index.html
-socat TCP-LISTEN:8080,fork FILE:~/Tamanna/index.html &
+socat TCP-LISTEN:8080,fork FILE:~index.html &
 
 # 🔹 Multi-device sync placeholder (rsync)
 # rsync -avz ~/Tamanna username@remote_server:/path/to/tamanna_backup

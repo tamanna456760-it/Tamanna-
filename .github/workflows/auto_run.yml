@@ -1,11 +1,109 @@
-      - name: Setup Node
+name: Node.js Auto Runner (Advanced)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      parallel:
+        description: 'Run files in parallel'
+        type: boolean
+        default: true
+      timeout_seconds:
+        description: 'Timeout per file (seconds)'
+        required: false
+        default: '30'
+
+jobs:
+  run-all-js:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name: Install Packages
-        run: npm install
+      - name: 📦 Install dependencies
+        run: npm ci || npm install
 
-      - name: Run All JS Files
+      - name: 🔍 Find all JS files (exclude node_modules)
+        id: find
         run: |
-          find . -type f -name "*.js" -exec node {} \;
+          find . -type f -name "*.js" \
+            ! -path "./node_modules/*" \
+            ! -path "./.git/*" \
+            ! -name "*.test.js" \
+            ! -name "*.spec.js" \
+            > js_files.txt
+          echo "FILE_COUNT=$(wc -l < js_files.txt)" >> $GITHUB_OUTPUT
+          echo "Found $(wc -l < js_files.txt) JS files."
+
+      - name: 🧪 Run all JS files safely
+        if: steps.find.outputs.FILE_COUNT > 0
+        run: |
+          mkdir -p logs
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          PARALLEL=${{ github.event.inputs.parallel == true && 'true' || 'false' }}
+          
+          run_file() {
+            local file=$1
+            echo "▶️ Running: $file"
+            if timeout $TIMEOUT node "$file" > "logs/$(basename "$file").out" 2> "logs/$(basename "$file").err"; then
+              echo "✅ SUCCESS: $file"
+              echo "$file|success" >> results.txt
+            else
+              echo "❌ FAILED: $file (timeout or error)"
+              echo "$file|failed" >> results.txt
+              # Annotate PR/commit with first error line
+              if [ -s "logs/$(basename "$file").err" ]; then
+                echo "::error file=$file::$(head -n1 logs/$(basename "$file").err)"
+              fi
+            fi
+          }
+          export -f run_file
+          
+          if [ "$PARALLEL" = "true" ]; then
+            cat js_files.txt | xargs -P 4 -I {} bash -c 'run_file "$@"' _ {}
+          else
+            while IFS= read -r file; do
+              run_file "$file"
+            done < js_files.txt
+          fi
+          
+          SUCCESS=$(grep -c "|success" results.txt || true)
+          FAIL=$(grep -c "|failed" results.txt || true)
+          echo "SUCCESS=$SUCCESS" >> $GITHUB_ENV
+          echo "FAIL=$FAIL" >> $GITHUB_ENV
+          
+          if [ "$FAIL" -gt 0 ]; then
+            echo "❌ $FAIL file(s) failed."
+            exit 1
+          else
+            echo "✅ All $SUCCESS file(s) succeeded."
+          fi
+
+      - name: 📊 Generate summary
+        if: always()
+        run: |
+          echo "## 🚀 Node.js Auto Runner Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Files found**: ${{ steps.find.outputs.FILE_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Successful**: ${{ env.SUCCESS }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Failed**: ${{ env.FAIL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Parallel**: ${{ github.event.inputs.parallel != false && 'On' || 'Off' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timeout**: ${{ github.event.inputs.timeout_seconds || 30 }}s" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📤 Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-run-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 7

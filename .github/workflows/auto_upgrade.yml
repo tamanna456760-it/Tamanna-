@@ -1,70 +1,219 @@
-name: Auto Detect, Upgrade & Run System
+name: Auto Detect, Upgrade & Run System (Advanced)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   schedule:
-    - cron: '0 */6 * * *'   # প্রতি ৬ ঘণ্টায় একবার রান করবে
-  workflow_dispatch:         # ম্যানুয়ালি রান করার জন্য
+    - cron: '0 */6 * * *'   # every 6 hours
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: 'Run mode (full/test/server)'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - test_only
+          - server_only
+      timeout_minutes:
+        description: 'Job timeout (minutes)'
+        required: false
+        default: '15'
+      debug:
+        description: 'Enable debug logging'
+        type: boolean
+        default: false
+
+# Cancel in‑progress runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  auto-upgrade-and-run:
+  detect-upgrade-run:
+    name: Auto System Runner
     runs-on: ubuntu-latest
-    
+    timeout-minutes: ${{ fromJSON(github.event.inputs.timeout_minutes || 15) }}
+    permissions:
+      contents: write   # needed for auto‑commit (optional)
+      checks: write     # for PR annotations
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0       # সব ব্রাঞ্চ ও ইতিহাস আনতে (git pull-এর জন্য)
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      # ------------------------------------------------------------------
+      # 1) Language & file detection
+      # ------------------------------------------------------------------
+      - name: 🔍 Detect project types & count files
+        id: detect
+        run: |
+          echo "## 🔍 File detection" >> $GITHUB_STEP_SUMMARY
+          echo "Scanning repository..."
+          mkdir -p reports
+          # Count all files (excluding .git)
+          TOTAL_FILES=$(find . -type f ! -path "./.git/*" | wc -l)
+          echo "total_files=$TOTAL_FILES" >> $GITHUB_OUTPUT
+          echo "- **Total files**: $TOTAL_FILES" >> $GITHUB_STEP_SUMMARY
 
-    - name: Detect all files
-      id: file_detection
-      run: |
-        echo "🔍 সব ফাইল ডিটেক্ট করা হচ্ছে..."
-        find . -type f > all_files.txt
-        echo "মোট ফাইল সংখ্যা: $(cat all_files.txt | wc -l)"
-        echo "স্যাম্পল ফাইল লিস্ট (প্রথম ১০টি):"
-        head -10 all_files.txt
-        echo "file_count=$(cat all_files.txt | wc -l)" >> $GITHUB_OUTPUT
+          # Detect languages
+          PY_COUNT=$(find . -name "*.py" ! -path "./.git/*" | wc -l)
+          JS_COUNT=$(find . -name "*.js" ! -path "./.git/*" | wc -l)
+          HTML_COUNT=$(find . -name "*.html" ! -path "./.git/*" | wc -l)
+          CSS_COUNT=$(find . -name "*.css" ! -path "./.git/*" | wc -l)
+          echo "py_count=$PY_COUNT" >> $GITHUB_OUTPUT
+          echo "js_count=$JS_COUNT" >> $GITHUB_OUTPUT
+          echo "html_count=$HTML_COUNT" >> $GITHUB_OUTPUT
+          echo "css_count=$CSS_COUNT" >> $GITHUB_OUTPUT
 
-    - name: Upgrade system dependencies
-      run: |
-        echo "⬆️  আপগ্রেড চালানো হচ্ছে..."
-        # পাইথন প্যাকেজ আপগ্রেড (যদি requirements.txt থাকে)
-        if [ -f requirements.txt ]; then
+          echo "- **Python files**: $PY_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **JavaScript files**: $JS_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **HTML files**: $HTML_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **CSS files**: $CSS_COUNT" >> $GITHUB_STEP_SUMMARY
+
+          # Save full file list as artifact
+          find . -type f ! -path "./.git/*" > reports/all_files.txt
+          head -20 reports/all_files.txt > reports/file_sample.txt
+
+      # ------------------------------------------------------------------
+      # 2) Setup languages (based on detected files)
+      # ------------------------------------------------------------------
+      - name: 🐍 Setup Python
+        if: steps.detect.outputs.py_count > 0
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Setup Node.js
+        if: steps.detect.outputs.js_count > 0
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ------------------------------------------------------------------
+      # 3) Upgrade dependencies (safe, with version pinning)
+      # ------------------------------------------------------------------
+      - name: ⬆️ Upgrade Python packages
+        if: steps.detect.outputs.py_count > 0 && hashFiles('requirements.txt') != ''
+        run: |
+          echo "Upgrading Python dependencies..."
           pip install --upgrade pip
-          pip install --upgrade -r requirements.txt
-        fi
-        # নোড.js প্যাকেজ আপগ্রেড (package.json থাকলে)
-        if [ -f package.json ]; then
-          npm install -g npm
-          npm update
-        fi
-        # git pull করে সর্বশেষ কোড আনা (সর্বদাই আপ-টু-ডেট থাকবে)
-        git pull origin ${{ github.ref_name }}
+          # Upgrade only safe packages (pin major versions if needed)
+          pip install --upgrade -r requirements.txt --upgrade-strategy only-if-needed
+          pip freeze > reports/upgraded_requirements.txt
 
-    - name: Run the system
-      run: |
-        echo "🚀 সিস্টেম রান করা হচ্ছে..."
-        # আপনার সিস্টেম যা চালাতে চান, এখানে দিন
-        # উদাহরণ: python app.py
-        # বা pytest, বা npm test
-        if [ -f manage.py ]; then
-          python manage.py runserver 0.0.0.0:8000 &  # ব্যাকগ্রাউন্ডে রান (CI-এর জন্য)
-          sleep 5
-          curl http://localhost:8000 || echo "সার্ভার রানিং কিন্তু রেসপন্স দেয়নি"
-        elif [ -f app.py ]; then
-          python app.py
-        else
-          echo "কোনো পরিচিত সিস্টেম ফাইল পাওয়া যায়নি।"
-          exit 1
-        fi
+      - name: ⬆️ Upgrade Node packages
+        if: steps.detect.outputs.js_count > 0 && hashFiles('package.json') != ''
+        run: |
+          echo "Upgrading Node dependencies..."
+          npm install -g npm@latest
+          npm update --save
+          npm list --depth=0 > reports/npm_upgraded.txt
 
-    - name: Show final status
-      run: |
-        echo "✅ কাজ সম্পন্ন! মোট ফাইল ছিল: ${{ steps.file_detection.outputs.file_count }}"
+      - name: 🔄 Pull latest changes (if any)
+        run: |
+          git pull origin ${{ github.ref_name }} --no-edit || echo "Already up to date"
+
+      # ------------------------------------------------------------------
+      # 4) Run the system (configurable mode)
+      # ------------------------------------------------------------------
+      - name: 🧪 Run tests (if test mode or full)
+        if: github.event.inputs.run_mode == 'full' || github.event.inputs.run_mode == 'test_only'
+        id: tests
+        continue-on-error: true
+        run: |
+          echo "Running tests..."
+          if [ -f manage.py ] && grep -q "test" manage.py; then
+            python manage.py test --noinput
+          elif [ -f pytest.ini ] || [ -f requirements.txt ] && grep -q "pytest" requirements.txt; then
+            pytest -v --tb=short
+          elif [ -f package.json ] && npm test --if-present; then
+            npm test
+          else
+            echo "No test framework detected. Skipping tests."
+          fi
+
+      - name: 🚀 Run server (if server mode or full)
+        if: github.event.inputs.run_mode == 'full' || github.event.inputs.run_mode == 'server_only'
+        run: |
+          echo "Starting server..."
+          # Use a timeout to avoid hanging the job
+          TIMEOUT=30
+          if [ -f manage.py ]; then
+            python manage.py runserver 0.0.0.0:8000 > server.log 2>&1 &
+            SERVER_PID=$!
+            sleep 5
+            curl --max-time $TIMEOUT http://localhost:8000 || echo "Server responded with error"
+            kill $SERVER_PID
+          elif [ -f app.py ]; then
+            timeout $TIMEOUT python app.py || true
+          elif [ -f index.js ]; then
+            timeout $TIMEOUT node index.js || true
+          else
+            echo "No known entry point found (manage.py, app.py, index.js)."
+            exit 1
+          fi
+
+      # ------------------------------------------------------------------
+      # 5) Logging & artifacts
+      # ------------------------------------------------------------------
+      - name: 📝 Collect logs
+        if: always()
+        run: |
+          mkdir -p logs
+          # Save system logs if any
+          if [ -f server.log ]; then cp server.log logs/; fi
+          if [ -f reports/upgraded_requirements.txt ]; then cp reports/upgraded_requirements.txt logs/; fi
+          if [ -f reports/npm_upgraded.txt ]; then cp reports/npm_upgraded.txt logs/; fi
+          # Debug info
+          echo "=== Job finished at $(date) ===" > logs/job_info.txt
+          echo "Run mode: ${{ github.event.inputs.run_mode }}" >> logs/job_info.txt
+          echo "Debug: ${{ github.event.inputs.debug }}" >> logs/job_info.txt
+
+      - name: 📤 Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-run-logs-${{ github.run_id }}
+          path: |
+            logs/
+            reports/
+          retention-days: 7
+
+      # ------------------------------------------------------------------
+      # 6) Summary & notifications
+      # ------------------------------------------------------------------
+      - name: 📊 Generate final summary
+        if: always()
+        run: |
+          echo "## ✅ Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run mode**: ${{ github.event.inputs.run_mode || 'full' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total files detected**: ${{ steps.detect.outputs.total_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python files**: ${{ steps.detect.outputs.py_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **JS files**: ${{ steps.detect.outputs.js_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests outcome**: ${{ steps.tests.outcome || 'not run' }}" >> $GITHUB_STEP_SUMMARY
+          echo "📁 Artifacts with full logs are attached below."
+
+      - name: 🚨 Slack notification on failure (optional)
+        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#alerts'
+          SLACK_COLOR: '#FF0000'
+          SLACK_TITLE: 'Auto System Run Failed'
+          SLACK_MESSAGE: |
+            Repository: ${{ github.tamanna456760-it }}
+            Run: https://github.com/${{ github.tamanna456760-it }}/actions/runs/${{ github.tamanna }}
+            Branch: ${{ github.bd-king-r7  }}
+            Mode: ${{ github.event.inputs.run_mode || 'full' }}
+
+      - name: ✅ Completion
+        run: echo "🎉 Auto Detect, Upgrade & Run System finished successfully."

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tamanna Server – WebSocket Test</title>
+    <style>
+        body { font-family: monospace; max-width: 600px; margin: 2rem auto; padding: 1rem; }
+        #log { background: #f4f4f4; height: 300px; overflow-y: scroll; padding: 1rem; border-radius: 8px; }
+        input, button { padding: 0.5rem; margin-top: 1rem; }
+        input { width: 70%; }
+        button { width: 25%; }
+    </style>
+</head>
+<body>
+    <h1>🤖 Tamanna Server – WebSocket Client</h1>
+    <div id="log"></div>
+    <input type="text" id="msg" placeholder="Type a message... (try /ai hello)">
+    <button onclick="sendMsg()">Send</button>
+
+    <script>
+        const ws = new WebSocket('ws://' + location.host + '/ws');
+        const logDiv = document.getElementById('log');
+        const input = document.getElementById('msg');
+
+        ws.onopen = () => addLog('✅ Connected to Tamanna Server');
+        ws.onclose = () => addLog('❌ Disconnected');
+        ws.onerror = (err) => addLog('⚠️ Error: ' + err.message);
+        ws.onmessage = (ev) => {
+            try {
+                const data = JSON.parse(ev.data);
+                addLog(`🤖 Server: ${data.message || data.text || ev.data}`);
+            } catch(e) {
+                addLog(`🤖 Server: ${ev.data}`);
+            }
+        };
+
+        function addLog(msg) {
+            const p = document.createElement('div');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function sendMsg() {
+            const txt = input.value.trim();
+            if (!txt) return;
+            addLog(`🧑 You: ${txt}`);
+            ws.send(txt);
+            input.value = '';
+        }
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMsg(); });
+    </script>
+</body>
+</html>

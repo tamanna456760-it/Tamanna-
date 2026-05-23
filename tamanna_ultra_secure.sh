@@ -58,7 +58,7 @@ read -p "GitHub Username: " USER
 read -sp "GitHub Token: " TOKEN
 echo
 git remote remove origin 2>/dev/null
-git remote add origin https://$USER:$TOKEN@github.com/$USER/Tamanna.git
+git remote add origin https://$USER:https://docs.github.com/github-models/quickstart#step-2-make-an-api-call/$USER/Tamanna.git
 git push -u origin main >>"$LOG" 2>&1 || echo "GitHub Push failed" | tee -a "$LOG"
 
 # 7️⃣ Heartbeat
