@@ -17,7 +17,7 @@ from datetime import datetime
 
 DB_NAME = "tamanna_local.db"
 TAMANNA_SERVER_URL = "https://tamanna.io/api/sync"  # নিজের API endpoint বসাও
-API_KEY = "YOUR_API_KEY_HERE"  # দরকার হলে auth token
+API_KEY = "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"  # দরকার হলে auth token
 
 SYNC_INTERVAL_SECONDS = 10  # কত সেকেন্ড পরপর sync করবে
 
