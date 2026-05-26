@@ -1,0 +1,8 @@
+import json
+
+report = {
+    "status": "safe"
+}
+
+with open("output/report.json", "w") as file:
+    json.dump(report, file, indent=4)
