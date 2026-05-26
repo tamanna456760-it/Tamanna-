@@ -1,0 +1,5 @@
+{
+  "scan_interval": 60,
+  "log_enabled": true,
+  "auto_block": true
+}
