@@ -1,0 +1,187 @@
+{
+  "tamanna_security_protocol": {
+    "system": {
+      "name": "Tamanna Radar Security Protocol System",
+      "version": "2.0",
+      "mode": "ADVANCED_DEFENSIVE_MONITORING",
+      "developer": "Tamanna Security Team",
+      "auto_update": true,
+      "multi_thread_scan": true
+    },
+
+    "ai_detection_engine": {
+      "enabled": true,
+      "threat_score_system": true,
+      "behavior_analysis": true,
+      "unknown_pattern_detection": true,
+      "auto_risk_leveling": true
+    },
+
+    "scanner": {
+      "enabled": true,
+      "recursive_scan": true,
+      "real_time_monitoring": true,
+      "background_scan": true,
+      "scan_interval_seconds": 5,
+      "detect_hidden_files": true,
+      "detect_large_files": true,
+      "detect_duplicate_files": true,
+      "detect_encrypted_files": true,
+      "max_file_size_mb": 500
+    },
+
+    "hashing": {
+      "enabled": true,
+      "algorithm": [
+        "SHA256",
+        "MD5",
+        "SHA1"
+      ],
+      "verify_integrity": true,
+      "hash_database": true
+    },
+
+    "network_monitoring": {
+      "enabled": true,
+      "monitor_local_connections": true,
+      "monitor_remote_connections": true,
+      "detect_unknown_ip": true,
+      "detect_dns_changes": true,
+      "save_connection_logs": true
+    },
+
+    "suspicious_extensions": [
+      ".exe",
+      ".dll",
+      ".bat",
+      ".cmd",
+      ".vbs",
+      ".ps1",
+      ".apk",
+      ".jar",
+      ".py",
+      ".php",
+      ".js",
+      ".so",
+      ".bin",
+      ".scr"
+    ],
+
+    "dangerous_keywords": [
+      "os.system",
+      "subprocess",
+      "eval(",
+      "exec(",
+      "socket",
+      "base64",
+      "requests",
+      "wget",
+      "curl",
+      "powershell",
+      "chmod 777",
+      "rm -rf",
+      "webhook",
+      "token",
+      "keylogger",
+      "inject",
+      "payload",
+      "reverse_shell"
+    ],
+
+    "process_monitoring": {
+      "enabled": true,
+      "real_time_process_tracking": true,
+      "detect_background_process": true,
+      "detect_high_cpu_usage": true,
+      "detect_memory_abuse": true,
+      "suspicious_commands": [
+        "nc -e",
+        "bash -i",
+        "curl http",
+        "wget http",
+        "powershell",
+        "python -c"
+      ]
+    },
+
+    "firewall_integration": {
+      "enabled": false,
+      "block_suspicious_ip": false,
+      "auto_block_unknown_ports": false
+    },
+
+    "alerts": {
+      "enabled": true,
+      "terminal_alert": true,
+      "desktop_notification": true,
+      "save_alerts": true,
+      "critical_sound_alert": true,
+      "alert_levels": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ]
+    },
+
+    "logging": {
+      "enabled": true,
+      "log_rotation": true,
+      "compress_old_logs": true,
+      "log_file": "logs/tamanna_radar.log",
+      "save_json_report": true,
+      "report_file": "reports/tamanna_radar_report.json",
+      "save_html_report": true
+    },
+
+    "quarantine": {
+      "enabled": true,
+      "auto_quarantine": false,
+      "quarantine_folder": "quarantine/",
+      "encrypt_quarantine_files": true
+    },
+
+    "backup_system": {
+      "enabled": true,
+      "auto_backup_reports": true,
+      "backup_folder": "backup/"
+    },
+
+    "scan_paths": [
+      "/sdcard/",
+      "/storage/emulated/0/",
+      "./projects/",
+      "./server/",
+      "./github/",
+      "./downloads/"
+    ],
+
+    "security_rules": {
+      "block_unknown_execution": false,
+      "monitor_script_execution": true,
+      "detect_code_injection": true,
+      "detect_remote_connections": true,
+      "detect_privilege_escalation": true,
+      "detect_file_tampering": true
+    },
+
+    "dashboard": {
+      "enabled": true,
+      "web_dashboard": false,
+      "terminal_dashboard": true,
+      "show_live_stats": true
+    },
+
+    "output": {
+      "report_format": [
+        "JSON",
+        "HTML"
+      ],
+      "include_hash": true,
+      "include_file_size": true,
+      "include_detected_keywords": true,
+      "include_scan_time": true,
+      "include_threat_score": true
+    }
+  }
+}
