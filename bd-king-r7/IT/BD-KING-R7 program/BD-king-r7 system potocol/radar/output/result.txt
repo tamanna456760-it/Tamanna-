@@ -1,0 +1,2 @@
+with open("output/result.txt", "w") as file:
+    file.write("All systems operational")
