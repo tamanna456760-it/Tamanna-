@@ -41,8 +41,8 @@ jobs:
         git config user.name " tamanna456760-it"
         git config user.email "tamanna456760@gmail.com"
         git add .
-        git commit -m "🤖 Auto-fix: Code errors resolved [skip ci]" || echo "No changes to commit"
-        git push || echo "No push needed"
+        git commit -m "🤖 Auto-fix: Code errors resolved [skip ci]" || echo "changes to commit"
+        git push || echo "push needed"
     
     - name: Create PR for Fixes
       uses: peter-evans/create-pull-request@v5
