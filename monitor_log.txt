@@ -4499,3 +4499,46 @@
 [2026-06-03 22:16:52.829579] ✏️ Modified: ./smart_monitor.log
 [2026-06-03 22:16:52.832163] ✏️ Modified: ./runner/data/ai_units.json
 [2026-06-03 22:16:52.832622] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:16:58.427571] ➕ New file detected: ./ai_units.json
+[2026-06-03 22:16:58.427789] ✏️ Modified: ./nodes_status.json
+[2026-06-03 22:16:58.427960] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:16:58.428114] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:16:58.430498] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:16:58.430816] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:04.011200] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:04.011406] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:04.013764] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:04.014019] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:04.014295] ❌ Deleted: ./ai_units.json
+[2026-06-03 22:17:04.014456] ❌ Deleted: ./nodes_status.json
+[2026-06-03 22:17:09.602031] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:09.602281] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:09.604554] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:09.604998] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:15.298124] ➕ New file detected: ./nodes_status.json
+[2026-06-03 22:17:15.298385] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:15.298534] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:15.301199] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:15.301567] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:20.940199] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:20.940441] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:20.942592] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:20.942897] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:26.535525] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:26.535771] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:26.538023] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:26.538347] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:32.129578] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:32.129772] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:32.132016] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:32.132364] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:37.722012] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:37.722226] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:37.724647] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:37.724941] ✏️ Modified: ./runner/data/nodes_status.json
+[2026-06-03 22:17:43.521533] ➕ New file detected: ./ai_units.json
+[2026-06-03 22:17:43.521736] ✏️ Modified: ./nodes_status.json
+[2026-06-03 22:17:43.521913] ✏️ Modified: ./monitor_log.txt
+[2026-06-03 22:17:43.522037] ✏️ Modified: ./smart_monitor.log
+[2026-06-03 22:17:43.524019] ✏️ Modified: ./runner/data/ai_units.json
+[2026-06-03 22:17:43.524291] ✏️ Modified: ./runner/data/nodes_status.json

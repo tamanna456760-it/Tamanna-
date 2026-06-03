@@ -1,1 +1,0 @@
-sync_set("bdking_r7_core", {"status": "active"})
