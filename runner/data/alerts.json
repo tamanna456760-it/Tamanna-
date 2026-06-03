@@ -1,0 +1,42 @@
+{
+  "tamanna_radar_alert": {
+    "alert_id": "TR-2026-001",
+    "timestamp": "2026-05-26T18:45:00Z",
+    "status": "ACTIVE",
+    "severity": "HIGH",
+
+    "alert": {
+      "message": "Suspicious activity detected",
+      "category": "Security Monitoring",
+      "threat_type": "Unknown Script Behavior"
+    },
+
+    "detection": {
+      "source_file": "test.py",
+      "detected_keywords": [
+        "os.system",
+        "socket"
+      ],
+      "process_detected": true,
+      "network_activity": false
+    },
+
+    "system_response": {
+      "real_time_alert_sent": true,
+      "log_saved": true,
+      "report_updated": true,
+      "quarantine_enabled": false
+    },
+
+    "risk_analysis": {
+      "threat_score": 87,
+      "risk_level": "CRITICAL",
+      "recommended_action": "Review suspicious file immediately"
+    },
+
+    "logging": {
+      "log_file": "logs/tamanna_radar.log",
+      "report_file": "reports/tamanna_radar_report.json"
+    }
+  }
+}

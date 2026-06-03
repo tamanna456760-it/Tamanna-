@@ -1,0 +1,19 @@
+{
+  "symptoms": {
+    "fever": { "category": "general", "urgency": "medium" },
+    "headache": { "category": "neurological", "urgency": "low" },
+    "chest_pain": { "category": "cardiac", "urgency": "high" },
+    "cough": { "category": "respiratory", "urgency": "low" },
+    "shortness_of_breath": { "category": "respiratory", "urgency": "high" },
+    "abdominal_pain": { "category": "gastrointestinal", "urgency": "medium" },
+    "dizziness": { "category": "neurological", "urgency": "medium" },
+    "nausea": { "category": "gastrointestinal", "urgency": "low" },
+    "vomiting": { "category": "gastrointestinal", "urgency": "medium" },
+    "fatigue": { "category": "general", "urgency": "low" }
+  },
+  "symptom_patterns": {
+    "flu_like": ["fever", "cough", "fatigue", "headache"],
+    "cardiac_risk": ["chest_pain", "shortness_of_breath", "dizziness"],
+    "gastrointestinal": ["abdominal_pain", "nausea", "vomiting"]
+  }
+}

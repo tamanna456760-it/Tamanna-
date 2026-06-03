@@ -1,0 +1,66 @@
+{
+  "tamanna_radar": {
+    "version": "1.0",
+    "scanner_name": "Tamanna Radar File Detector",
+    "scan_settings": {
+      "recursive_scan": true,
+      "hash_algorithm": "SHA256",
+      "real_time_detection": true,
+      "save_report": true,
+      "report_file": "tamanna_radar_report.json"
+    },
+    "suspicious_extensions": [
+      ".exe",
+      ".bat",
+      ".cmd",
+      ".vbs",
+      ".ps1",
+      ".sh",
+      ".apk",
+      ".jar",
+      ".py",
+      ".php",
+      ".js"
+    ],
+    "dangerous_keywords": [
+      "os.system",
+      "subprocess",
+      "eval(",
+      "exec(",
+      "base64",
+      "socket",
+      "requests",
+      "wget",
+      "curl",
+      "rm -rf",
+      "chmod 777",
+      "nc -e",
+      "powershell",
+      "token",
+      "webhook",
+      "cryptography"
+    ],
+    "monitoring": {
+      "enable_file_tracking": true,
+      "detect_hidden_files": true,
+      "detect_large_files": true,
+      "max_file_size_mb": 100
+    },
+    "logging": {
+      "enable_logs": true,
+      "log_level": "HIGH",
+      "log_file": "tamanna_radar.log"
+    },
+    "alerts": {
+      "terminal_alert": true,
+      "save_alerts": true,
+      "alert_level": "critical"
+    },
+    "output": {
+      "report_format": "JSON",
+      "include_hash": true,
+      "include_file_size": true,
+      "include_detected_keywords": true
+    }
+  }
+}

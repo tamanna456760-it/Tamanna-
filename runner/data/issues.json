@@ -1,0 +1,146 @@
+[
+    {
+        "file": "./auto_fix_issues.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./lint_and_detect_issues.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./issues.json",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./tamanna-auto.html",
+        "type": "Unexpected console.log",
+        "language": "HTML",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./tamanna.html",
+        "type": "Unexpected console.log",
+        "language": "HTML",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./tamanna_code_auto_comm.sh",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./.github/workflows/auto-heal.yml",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./.github/workflows/fullpower_defeanding.sh",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./.github/workflows/project_sync_monitor.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./.github/workflows/tamanna-auto-heal.yml",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/bin/python",
+        "type": "Read error",
+        "language": "Unknown",
+        "details": "[Errno 2] No such file or directory: './bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/bin/python'"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/bin/python3",
+        "type": "Read error",
+        "language": "Unknown",
+        "details": "[Errno 2] No such file or directory: './bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/bin/python3'"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/bin/python3.12",
+        "type": "Read error",
+        "language": "Unknown",
+        "details": "[Errno 2] No such file or directory: './bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/bin/python3.12'"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/lib/python3.12/site-packages/pip/_vendor/rich/console.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/lib/python3.12/site-packages/pip/_vendor/rich/live.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/lib/python3.12/site-packages/pip/_vendor/rich/progress.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/bd-king-r7/powerhub/bd-king-r7 powerhub/orchestrator/.venv/lib/python3.12/site-packages/pip/_vendor/rich/status.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/data/auto_fix.json",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/data/fix.java",
+        "type": "Unexpected console.log",
+        "language": "Java",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/problem/problem_fix.json",
+        "type": "Unexpected console.log",
+        "language": "Unknown",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/IT/problem/problem_fix.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./bd-king-r7/tamanna/auto_fixar.py",
+        "type": "Unexpected console.log",
+        "language": "Python",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./tamanna-ai-app/app/src/main/assets/control_panel.html",
+        "type": "Unexpected console.log",
+        "language": "HTML",
+        "details": "console.log found in non-JS file"
+    },
+    {
+        "file": "./tamanna-ai-app/app/src/main/assets/tamanna-ai-scanner.html",
+        "type": "Unexpected console.log",
+        "language": "HTML",
+        "details": "console.log found in non-JS file"
+    }
+]

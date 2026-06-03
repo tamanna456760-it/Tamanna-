@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>✨ Tamanna AI Panel | Smart Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b1120 0%, #0f172a 100%);
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        /* Main chat card */
+        .tamanna-panel {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+        }
+
+        /* Header */
+        .panel-header {
+            background: #0f172a;
+            padding: 1rem 1.8rem;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-avatar {
+            background: linear-gradient(135deg, #ec489a, #8b5cf6);
+            width: 48px;
+            height: 48px;
+            border-radius: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 8px 14px -6px rgba(236, 72, 153, 0.4);
+        }
+
+        .title-area h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(120deg, #f0f9ff, #c4b5fd);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .title-area p {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge {
+            background: #1e293b;
+            padding: 0.3rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            color: #a5f3fc;
+        }
+
+        .badge i {
+            font-size: 0.6rem;
+        }
+
+        .clear-btn {
+            background: #1e293b;
+            border: none;
+            color: #facc15;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+            color: white;
+            transform: scale(0.96);
+        }
+
+        /* Messages area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 5px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        /* Message bubbles */
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 85%;
+            animation: fadeUp 0.2s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .avatar-small {
+            width: 34px;
+            height: 34px;
+            background: #1e293b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .user-message .avatar-small {
+            background: linear-gradient(145deg, #3b82f6, #6366f1);
+        }
+
+        .bubble {
+            background: #1e293b;
+            padding: 0.7rem 1rem;
+            border-radius: 1.2rem;
+            border-top-left-radius: 0.2rem;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .user-message .bubble {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-top-right-radius: 0.2rem;
+            border-top-left-radius: 1.2rem;
+            color: white;
+        }
+
+        .time-stamp {
+            font-size: 0.6rem;
+            opacity: 0.6;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            background: #1e293b;
+            padding: 0.6rem 1rem;
+            border-radius: 1.2rem;
+            border-top-left-radius: 0.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 60%, 100% { transform: scale(0.6); opacity: 0.4; }
+            30% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Input area */
+        .input-area {
+            background: #0f172a;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: #1e293b;
+            border-radius: 2.5rem;
+            display: flex;
+            align-items: center;
+            padding: 0.2rem 0.2rem 0.2rem 1.2rem;
+            border: 1px solid #334155;
+            transition: 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.85rem 0.2rem;
+            color: #f1f5f9;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #64748b;
+        }
+
+        .send-btn {
+            background: #8b5cf6;
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 2rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:hover {
+            background: #7c3aed;
+            transform: scale(0.96);
+        }
+
+        .footer-note {
+            font-size: 0.65rem;
+            text-align: center;
+            padding: 0.6rem;
+            background: #020617;
+            color: #475569;
+        }
+
+        @media (max-width: 550px) {
+            .message { max-width: 92%; }
+            .panel-header { padding: 0.8rem 1rem; }
+            .chat-messages { padding: 1rem; }
+        }
+    </style>
+    <!-- Font Awesome Icons (optional but nice) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="tamanna-panel">
+    <div class="panel-header">
+        <div class="title-area">
+            <div class="ai-avatar">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div>
+                <h2>🤖 Tamanna AI Panel</h2>
+                <p><i class="fas fa-circle" style="font-size: 0.4rem; color: #22c55e;"></i> Active · Smart Core</p>
+            </div>
+        </div>
+        <div class="badge">
+            <i class="fas fa-code-branch"></i> Update Ready
+        </div>
+        <button class="clear-btn" id="clearChatBtn">
+            <i class="fas fa-trash-alt"></i> Clear
+        </button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- Messages will appear here -->
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <input type="text" id="messageInput" placeholder="Type your message...  |  Enter to send" autocomplete="off">
+        </div>
+        <button class="send-btn" id="sendBtn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+    <div class="footer-note">
+        <i class="fas fa-mobile-alt"></i> Android bridge active (if available) | Fallback AI: smart & customizable
+    </div>
+</div>
+
+<script>
+    // ================================
+    // TAMANNA AI PANEL - FULLY UPGRADABLE
+    // ================================
+    
+    // DOM elements
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearChatBtn');
+
+    // State management
+    let isBotReplying = false;
+    let pendingQueue = [];
+    let typingTimeout = null;
+
+    // Helper: current timestamp (HH:MM AM/PM)
+    function getTime() {
+        const d = new Date();
+        let hours = d.getHours();
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+
+    // Escape HTML to prevent injection
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Add message to UI
+    function addMessage(sender, text, withTime = true) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        const timeString = withTime ? getTime() : '';
+        
+        if (sender === 'user') {
+            messageDiv.classList.add('user-message');
+            messageDiv.innerHTML = `
+                <div class="avatar-small">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="bubble">
+                    ${escapeHtml(text)}
+                    <span class="time-stamp">${timeString}</span>
+                </div>
+            `;
+        } else {
+            messageDiv.classList.add('bot-message');
+            messageDiv.innerHTML = `
+                <div class="avatar-small">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bubble">
+                    ${escapeHtml(text)}
+                    <span class="time-stamp">${timeString}</span>
+                </div>
+            `;
+        }
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // ========== TYPING INDICATOR ==========
+    let typingIndicatorElement = null;
+    function showTyping() {
+        removeTyping();
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('message', 'bot-message');
+        typingDiv.id = 'typingIndicatorTamanna';
+        typingDiv.innerHTML = `
+            <div class="avatar-small">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="typing-indicator">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span style="margin-left: 6px; font-size:0.7rem;">Tamanna is thinking...</span>
+            </div>
+        `;
+        messagesContainer.appendChild(typingDiv);
+        scrollToBottom();
+        typingIndicatorElement = typingDiv;
+    }
+
+    function removeTyping() {
+        if (typingIndicatorElement && typingIndicatorElement.parentNode) {
+            typingIndicatorElement.remove();
+            typingIndicatorElement = null;
+        } else {
+            const existing = document.getElementById('typingIndicatorTamanna');
+            if (existing) existing.remove();
+        }
+    }
+
+    // ========== SMART BOT REPLY (FULLY CUSTOMIZABLE) ==========
+    // You can update this function to call any API, ChatGPT, or use Android bridge
+    function getSmartBotReply(userMsg) {
+        const lowerMsg = userMsg.toLowerCase().trim();
+        
+        // Greetings & personality
+        if (lowerMsg.match(/^(hi|hello|hey|assalamu alaikum|salam)/)) {
+            return "ওয়ালাইকুম আসসালাম! 😊 Hello from Tamanna AI! How can I help you today?";
+        }
+        if (lowerMsg.includes('how are you') || lowerMsg.includes('kemon achho')) {
+            return "I'm absolutely fantastic! 💫 Ready to assist you. What's on your mind?";
+        }
+        if (lowerMsg.includes('your name') || lowerMsg.includes("tumi ke")) {
+            return "I'm Tamanna AI — your personal intelligent dashboard companion. I can be extended with APIs and Android bridge!";
+        }
+        if (lowerMsg.includes('thanks') || lowerMsg.includes('dhonnobad')) {
+            return "You're most welcome! 🙏 Always happy to help.";
+        }
+        if (lowerMsg.includes('help') || lowerMsg.includes('ki ki korte paro')) {
+            return "🔧 I can chat, answer questions, and you can easily update my brain. Just edit the 'getSmartBotReply' function inside <script> or connect to a real backend!";
+        }
+        if (lowerMsg.includes('android') || lowerMsg.includes('bridge')) {
+            return "📱 Android bridge is active! If your app provides 'window.Android.sendMessage', I'll use it. Otherwise, I reply with my smart local AI.";
+        }
+        if (lowerMsg.includes('update') || lowerMsg.includes('customize')) {
+            return "Absolutely! This entire panel is yours — change colors, add Firebase, connect to ChatGPT. The power is in your hands! ✨";
+        }
+        
+        // creative fallbacks
+        const replies = [
+            "Interesting! Tell me more. I'm here to listen.",
+            "That's cool 😎 You can teach me new responses easily.",
+            "Tamanna AI online. Want to test the Android bridge or improve my logic?",
+            "I sense you're curious! You can modify my reply array anytime."
+        ];
+        return replies[Math.floor(Math.random() * replies.length)];
+    }
+
+    // ========== CORE: SEND MESSAGE WITH ANDROID BRIDGE SUPPORT ==========
+    async function sendUserMessage() {
+        const rawMsg = messageInput.value.trim();
+        if (rawMsg === "") return;
+        
+        // Add user message to UI
+        addMessage('user', rawMsg, true);
+        messageInput.value = "";
+        
+        // Check for Android bridge (native app)
+        if (window.Android && typeof window.Android.sendMessage === 'function') {
+            // Use Android bridge for AI response
+            showTyping();
+            try {
+                // Android method returns a string synchronously or asynchronously? We'll assume sync for simplicity.
+                const androidReply = window.Android.sendMessage(rawMsg);
+                removeTyping();
+                addMessage('bot', androidReply || "(Android reply empty)", true);
+            } catch(e) {
+                removeTyping();
+                addMessage('bot', "⚠️ Android bridge error. Using fallback AI.", true);
+                await simulateBotReply(rawMsg);
+            }
+        } else {
+            // No Android bridge → use local smart AI with typing effect
+            await simulateBotReply(rawMsg);
+        }
+        
+        scrollToBottom();
+    }
+    
+    // Simulate bot response with typing delay (local AI)
+    function simulateBotReply(userMessage) {
+        return new Promise((resolve) => {
+            showTyping();
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                const botText = getSmartBotReply(userMessage);
+                removeTyping();
+                addMessage('bot', botText, true);
+                typingTimeout = null;
+                resolve();
+            }, 700 + Math.random() * 400);
+        });
+    }
+    
+    // Clear entire chat history (preserve welcome only)
+    function resetChat() {
+        if (typingTimeout) clearTimeout(typingTimeout);
+        removeTyping();
+        messagesContainer.innerHTML = '';
+        // Welcome messages
+        addMessage('bot', "✨ Welcome to Tamanna AI Panel ✨", true);
+        addMessage('bot', "💡 I support both **Android bridge** (if available) and a smart local AI. Feel free to ask anything! You can update my responses inside the script.", true);
+        addMessage('bot', "🔧 Type 'help' or 'update' to learn how to customize me.", true);
+        scrollToBottom();
+    }
+    
+    // Event listeners
+    sendBtn.addEventListener('click', () => {
+        sendUserMessage();
+        messageInput.focus();
+    });
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendUserMessage();
+        }
+    });
+    clearBtn.addEventListener('click', resetChat);
+    
+    // Initialize panel
+    resetChat();
+    
+    // Optional: Log if Android bridge is detected
+    if (window.Android) {
+        console.log("✅ Android bridge detected! Tamanna AI can communicate with native.");
+        addMessage('bot', "📱 Android bridge connected! Your messages will be processed by native AI if implemented.", true);
+    } else {
+        console.log("ℹ️ No Android bridge. Using local smart AI (you can extend it).");
+    }
+</script>
+
+</body>
+</html>

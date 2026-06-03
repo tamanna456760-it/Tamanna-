@@ -1,0 +1,45 @@
+{
+  "monitoring_system": {
+    "version": "1.0",
+    "status": "active",
+    "scan_interval_seconds": 60,
+    "logging": {
+      "enabled": true,
+      "log_path": "./logs/monitor.log",
+      "error_log": "./logs/error.log"
+    },
+    "alerts": {
+      "enabled": true,
+      "email_notification": false,
+      "telegram_notification": false
+    },
+    "system_monitoring": {
+      "cpu_usage": true,
+      "ram_usage": true,
+      "disk_usage": true,
+      "network_activity": true,
+      "temperature": false
+    },
+    "security_monitoring": {
+      "failed_login_detection": true,
+      "ip_tracking": true,
+      "unknown_device_detection": true,
+      "firewall_status": true,
+      "malware_scan": false
+    },
+    "network_monitoring": {
+      "monitor_ports": [
+        22,
+        80,
+        443
+      ],
+      "detect_ddos": true,
+      "track_bandwidth": true
+    },
+    "backup": {
+      "enabled": true,
+      "backup_interval_hours": 24,
+      "backup_path": "./backup/"
+    }
+  }
+}

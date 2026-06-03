@@ -1,0 +1,41 @@
+{
+  "architecture": {
+    "sequence_length": 50,
+    "n_features": 10,
+    "prediction_horizon": 1,
+    "lstm_layers": [64, 32],
+    "dense_layers": [32, 16],
+    "dropout_rate": 0.2,
+    "recurrent_dropout": 0.2,
+    "bidirectional": true,
+    "return_sequences": false,
+    "stateful": false
+  },
+  "training": {
+    "batch_size": 32,
+    "epochs": 100,
+    "learning_rate": 0.001,
+    "optimizer": "adam",
+    "loss": "mse",
+    "validation_split": 0.2,
+    "early_stopping": true,
+    "patience": 15,
+    "shuffle_sequences": false
+  },
+  "anomaly_detection": {
+    "threshold_method": "percentile",
+    "threshold_percentile": 95,
+    "threshold_std_multiplier": 3.0,
+    "min_prediction_error": 0.01,
+    "use_rolling_window": true,
+    "window_size": 10,
+    "detection_method": "prediction_error"
+  },
+  "sequence_processing": {
+    "padding": "pre",
+    "truncating": "pre",
+    "max_sequence_length": 100,
+    "feature_scaling": true,
+    "temporal_features": true
+  }
+}
