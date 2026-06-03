@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "0U3dALIQpKEr96gIZUmRn9K5NDP7yGzbws6sfS0jmLc=",
+  "Source": "bd-king-orchestrator",
+  "BasePath": "_content/bd-king-orchestrator",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

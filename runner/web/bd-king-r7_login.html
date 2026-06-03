@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safe Login</title>
+
+<style>
+  /* reset */
+  * {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+  }
+
+  /* body styles */
+  body {
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: linear-gradient(to bottom, #1b263b 20%, #415a77 100%);
+	font-family: Arial, sans-serif;
+  }
+
+  /* login box */
+  .loginBox {
+	width: 350px;
+	padding: 40px;
+	background: linear-gradient(to top, #1b263b 20%, #415a77 100%);
+	box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+	border-radius: 15px;
+	border-top-left-radius: 60px;
+	border-bottom-right-radius: 60px;
+	color: #e0e0e0;
+  }
+
+  h2 {
+	text-align: center;
+	margin-bottom: 30px;
+  }
+
+  /* input fields */
+  .inputGrp {
+	margin-bottom: 20px;
+  }
+  .inputGrp label {
+	display: block;
+	margin-bottom: 5px;
+	font-size: 15px;
+	color: #a0c4ff;
+  }
+  .inputGrp input {
+	width: 100%;
+	padding: 12px;
+	border-radius: 10px;
+	border: 1.5px solid rgba(160,196,255,0.5);
+	background: rgba(255,255,255,0.05);
+	color: #e0e0e0;
+	font-size: 17px;
+	outline: none;
+  }
+  .inputGrp input:focus{
+	border-color: #6a9fff;
+	box-shadow: 0 0 8px rgba(106,159,255,0.4);
+  }
+
+  /* button */
+  button {
+	width: 100%;
+	padding: 12px;
+	border: none;
+	border-radius: 10px;
+	background: #6a9fff;
+	font-weight: 600;
+	cursor: pointer;
+  }
+  button:hover {
+	background: #5a8ae6;
+	cursor: not-allowed;
+  }
+
+  /* error message */
+  .errMsg {
+	margin-top: 15px;
+	color: #ff6b6b;
+	font-size: 15px;
+	text-align: center;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="loginBox">
+  <h2>Login</h2>
+
+  <div class="inputGrp">
+	<label for="user">Username</label>
+	<input type="text" id="user" placeholder="username here">
+  </div>
+
+  <div class="inputGrp">
+	<label for="pwd">Password</label>
+	<input type="password" id="pwd" placeholder="password here">
+  </div>
+
+  <button id="btnLogin" onclick="doLogin()">Login</button>
+
+  <div class="errMsg" id="errMsg"></div>
+</div>
+
+<script>
+  const myUser = "user";  
+  const myPass = "pass123";  
+
+  let tryCount = 0;  
+  const maxTry = 3;  
+  const lockSec = 10;  
+  let interval;
+
+  function doLogin() {
+	const u = document.getElementById('user').value;
+	const p = document.getElementById('pwd').value;
+	const err = document.getElementById('errMsg');
+	const btn = document.getElementById('btnLogin');
+
+	if (tryCount >= maxTry) { 
+	// lock if too many tries
+	  err.textContent = `Too many tries. Wait ${lockSec} sec.`;
+	  return;
+	}
+
+	if (u === myUser && p === myPass) { 
+	// correct login
+	  alert("Logged in!");
+	  tryCount = 0;
+	  err.textContent = "";
+	} else { 
+	// wrong login
+	  tryCount++;
+	  let left = maxTry - tryCount;
+
+	  if (left > 0) {
+		err.textContent = `Wrong. ${left} try left.`;
+	  } else { 
+	  // lock button
+		err.textContent = `Locked for ${lockSec} sec.`;
+		btn.disabled = true;
+
+		let secLeft = lockSec;
+
+		interval = setInterval(() => {
+		  secLeft--;
+		  err.textContent = `Locked for ${secLeft} sec.`;
+
+		  if (secLeft <= 0) {
+			clearInterval(interval);
+			tryCount = 0;
+			btn.disabled = false;
+			err.textContent = "";
+		  }
+		}, 1000);
+
+	  }
+	}
+  }
+</script>
+
+</body>
+</html>

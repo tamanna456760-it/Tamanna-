@@ -1,0 +1,67 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // --- Output & Debugging ---
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["node"],
+    "sourceMap": true,                // Enables .map files for debugging
+    "declaration": true,              // Generates .d.ts files
+    "declarationMap": true,           // Maps .d.ts back to source
+    "incremental": true,              // Speed up subsequent builds
+    "tsBuildInfoFile": ".tsbuildinfo", // Cache file for incremental builds
+
+    // --- Strictness (overriding base for this package) ---
+    "strict": true,
+    "noUncheckedIndexedAccess": true, // Prevents unsafe object/array access
+    "noPropertyAccessFromIndexSignature": true, // Forces .get() for index signatures
+    "exactOptionalPropertyTypes": true, // Distinguishes missing vs undefined
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+
+    // --- Module Resolution & Interop ---
+    "moduleResolution": "node16",      // Modern resolution for ESM / Node
+    "module": "Node16",                // Output ESM or CommonJS? Adjust as needed
+    "target": "ES2022",                // Modern runtime
+    "lib": ["ES2022"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,           // Required for tools like esbuild or swc
+
+    // --- Monorepo & Project References ---
+    "composite": true,                 // Required when project references are used
+    "emitDeclarationOnly": false,      // Emit both JS and declarations
+    "noEmitOnError": true,             // Don't emit if there are errors
+
+    // --- Linter-like checks ---
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // --- Performance & Safety ---
+    "skipLibCheck": true,              // Faster builds, assumes libs are correct
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false
+  },
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../../lib/db"
+    },
+    {
+      "path": "../../lib/api-zod"
+    },
+    {
+      "path": "../../lib/integrations-openai-ai-server"
+    }
+  ]
+}

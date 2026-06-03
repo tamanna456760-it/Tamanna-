@@ -1,0 +1,84 @@
+{
+  "configurations": [
+    {
+      "name": "Linux-GCC14-x64-O3",
+      "compilerPath": "/usr/bin/gcc-14",
+      "intelliSenseMode": "linux-gcc-x64",
+      "cStandard": "c23",
+      "cppStandard": "c++23",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "/usr/include",
+        "/usr/local/include",
+        "/usr/include/c++/14",
+        "/opt/cuda/include",
+        "/usr/include/openmp"
+      ],
+      "defines": [
+        "_GNU_SOURCE",
+        "_POSIX_C_SOURCE=200809L",
+        "NDEBUG",
+        "USE_MOLD=1",
+        "__AVX2__",
+        "__FMA__",
+        "_OPENMP"
+      ],
+      "compilerArgs": [
+        "-Wall", "-Wextra", "-Wpedantic", "-Wshadow", "-Wconversion",
+        "-O3", "-march=native", "-mtune=native",
+        "-flto=auto", "-fuse-ld=mold",
+        "-fopenmp", "-D_FORTIFY_SOURCE=2",
+        "-fomit-frame-pointer", "-pipe"
+      ],
+      "browse": { "path": ["${workspaceFolder}"], "limitSymbolsToIncludedHeaders": false },
+      "forcedInclude": [ "${workspaceFolder}/include/pch.h" ]
+    },
+    {
+      "name": "Linux-Clang18-x64-ASAN",
+      "compilerPath": "/usr/bin/clang-18",
+      "intelliSenseMode": "linux-clang-x64",
+      "cStandard": "c23",
+      "cppStandard": "c++23",
+      "includePath": ["${workspaceFolder}/**", "/usr/lib/clang/18/include"],
+      "defines": ["DEBUG", "_DEBUG", "ASAN_ENABLED", "ASAN_RECOVER"],
+      "compilerArgs": [
+        "-Wall", "-Wextra", "-Wpedantic",
+        "-g", "-O1",
+        "-fsanitize=address,undefined,leak",
+        "-fsanitize-address-use-after-scope",
+        "-fsanitize-recover=address,undefined",
+        "-fno-omit-frame-pointer"
+      ]
+    },
+    {
+      "name": "Linux-GCC14-ARM64-Cross",
+      "compilerPath": "/usr/bin/aarch64-linux-gnu-gcc-14",
+      "intelliSenseMode": "linux-gcc-arm64",
+      "cStandard": "c23",
+      "cppStandard": "c++23",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "/usr/aarch64-linux-gnu/include",
+        "/usr/aarch64-linux-gnu/sys-root/usr/include"
+      ],
+      "defines": ["__aarch64__", "_ARM_NEON=1", "NDEBUG"],
+      "compilerArgs": ["-O2", "-mcpu=cortex-a76", "-flto=4", "-static-libgcc"]
+    },
+    {
+      "name": "Linux-GCC14-PGO-O3",
+      "compilerPath": "/usr/bin/gcc-14",
+      "intelliSenseMode": "linux-gcc-x64",
+      "cStandard": "c23",
+      "cppStandard": "c++23",
+      "includePath": ["${workspaceFolder}/**"],
+      "defines": ["NDEBUG", "PGO_GEN=0"],
+      "compilerArgs": [
+        "-O3", "-march=native", "-flto=auto", "-fuse-ld=mold",
+        "-fprofile-generate=/tmp/pgo_data",
+        "-fprofile-correction"
+      ]
+    }
+  ],
+  "enableConfigurationSquiggles": true,
+  "version": 6
+}
