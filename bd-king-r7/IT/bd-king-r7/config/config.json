@@ -1,0 +1,33 @@
+{
+  "bd_king_r7_powerhub": {
+    "enabled": true,
+    "storage": {
+      "type": "distributed",
+      "auto_expand": true,
+      "compression": true,
+      "backup_enabled": true,
+      "backup_interval_hours": 6
+    },
+    "layers": {
+      "server_layer": {
+        "enabled": true,
+        "cache_enabled": true,
+        "replication": true
+      },
+      "ai_layer": {
+        "enabled": true,
+        "model_storage": true,
+        "learning_data_storage": true
+      },
+      "monitoring_layer": {
+        "enabled": true,
+        "log_retention_days": 365
+      },
+      "database_layer": {
+        "enabled": true,
+        "engine": "sqlite",
+        "auto_backup": true
+      }
+    }
+  }
+}
