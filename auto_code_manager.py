@@ -32,14 +32,16 @@ class AutoCodeManager:
         name = input("আপনার গিটহাব ইউজারনেম: ")
         email = input("আপনার গিটহাব ইমেইল: ")
         
-        subprocess.run(["git", "config", "--global", "user.name", tamanna456760-it])
-        subprocess.run(["git", "config", "--global", "user.email", tamanna456760@gmail.com])
+        # ✅ FIX: Added quotes around string values
+        subprocess.run(["git", "config", "--global", "user.name", name])
+        subprocess.run(["git", "config", "--global", "user.email", email])
         
         repo_name = input("রিপোজিটরির নাম (enter = my_ai_codes): ")
         if not repo_name:
             repo_name = "my_ai_codes"
             
-        self.github_url = f"https://github.com/{tamanna456760-it}/{tamanna-}.git"
+        # ✅ FIX: Use proper variable substitution with user input
+        self.github_url = f"https://github.com/{name}/{repo_name}.git"
         
         # রিপোজিটরি তৈরি
         if not os.path.exists(self.repo_path):
@@ -59,14 +61,14 @@ class AutoCodeManager:
         
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(f"# {description}\n")
-            f.write(f"# সেভ করা হয়েছে: {datetime.now()}\n")
+            f.write(f"# সেভ করা হয়েছে: {datetime.now()}\n")
             f.write(f"# {'='*50}\n\n")
             f.write(code)
         
-        print(f"✅ কোড সেভ করা হয়েছে: {filename}")
+        print(f"✅ কোড সেভ করা হয়েছে: {filename}")
         self._git_commit(f"সেভ: {filename} - {description}")
         return filepath
-    
+     
     def auto_fix_code(self, filepath):
         """অটো এরর ফিক্স"""
         print(f"\n🔧 ফিক্সিং: {filepath}")
@@ -98,15 +100,15 @@ class AutoCodeManager:
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(fixed_code)
             
-            print(f"✅ {len(fixes_applied)} টি এরর ফিক্স করা হয়েছে")
+            print(f"✅ {len(fixes_applied)} টি এরর ফিক্স করা হয়েছে")
             self._log_fix(filepath, fixes_applied)
             return True
         else:
             print("✅ কোন এরর নেই")
             return False
-    
+     
     def auto_write_code(self, prompt):
-        """AI দিয়ে অটো কোড লেখা"""
+        """AI দিয়ে অটো কোড লেখা"""
         print(f"\n🤖 কোড জেনারেট করা হচ্ছে: {prompt}")
         
         # বেসিক কোড টেম্পলেট
@@ -160,7 +162,7 @@ if __name__ == "__main__":
         return f'''
 # {prompt}
 # অটো জেনারেটেড কোড
-# সময়: {datetime.now()}
+# সময়: {datetime.now()}
 
 def main():
     print("প্রোগ্রাম শুরু...")
@@ -178,8 +180,9 @@ if __name__ == "__main__":
             subprocess.run(["git", "commit", "-m", message], cwd=self.repo_path, capture_output=True)
             subprocess.run(["git", "push", "-u", "origin", "main"], cwd=self.repo_path, capture_output=True)
             print(f"✅ গিটহাবে আপলোড: {message}")
-        except:
-            print("⚠️ গিট পুশ ব্যর্থ (হাতে পুশ করুন)")
+        except Exception as e:
+            # ✅ FIX: Specific exception handling instead of bare except
+            print(f"⚠️ গিট পুশ ব্যর্থ: {e}")
     
     def _log_fix(self, filepath, fixes):
         """ফিক্স লগ"""
@@ -198,7 +201,7 @@ if __name__ == "__main__":
         logs.append(log)
         with open(self.fixes_log, 'w') as f:
             json.dump(logs, f, indent=2)
-    
+     
     def scan_and_fix_all(self):
         """সব কোড স্ক্যান ও ফিক্স"""
         print("\n🔍 সব কোড ফাইলের জন্য স্ক্যান চলছে...")
@@ -211,9 +214,9 @@ if __name__ == "__main__":
                     if self.auto_fix_code(filepath):
                         fixed_files.append(file)
         
-        print(f"\n✅ {len(fixed_files)} টি ফাইল ফিক্স করা হয়েছে")
+        print(f"\n✅ {len(fixed_files)} টি ফাইল ফিক্স করা হয়েছে")
         return fixed_files
-    
+     
     def run(self):
         """মেইন মেনু"""
         while True:
@@ -223,7 +226,7 @@ if __name__ == "__main__":
             print("1. নতুন কোড সেভ করুন")
             print("2. গিটহাবে আপলোড করুন")
             print("3. অটো এরর ফিক্স")
-            print("4. AI দিয়ে কোড লিখুন")
+            print("4. AI দিয়ে কোড লিখুন")
             print("5. সব ফাইল স্ক্যান করুন")
             print("6. এক্সিট")
             
@@ -242,17 +245,17 @@ if __name__ == "__main__":
                 code = "\n".join(lines)
                 desc = input("বিবরণ (অপশনাল): ")
                 self.save_code(name, code, desc)
-                
+                 
             elif choice == "2":
                 self._git_commit("ম্যানুয়াল আপলোড")
-                
+                 
             elif choice == "3":
                 file = input("ফাইলের পাথ দিন: ")
                 if os.path.exists(file):
                     self.auto_fix_code(file)
                 else:
-                    print("❌ ফাইল পাওয়া যায়নি")
-                    
+                    print("❌ ফাইল পাওয়া যায়নি")
+                     
             elif choice == "4":
                 prompt = input("কী ধরনের কোড চান? (web scraper/api/automation): ")
                 code = self.auto_write_code(prompt)
@@ -263,10 +266,10 @@ if __name__ == "__main__":
                 if save.lower() == 'y':
                     name = input("ফাইলের নাম: ")
                     self.save_code(name, code, prompt)
-                    
+                     
             elif choice == "5":
                 self.scan_and_fix_all()
-                
+                 
             elif choice == "6":
                 print("👋 বাই-বাই!")
                 break
