@@ -1,28 +1,49 @@
 {
-  "name": "Tamanna Sync System",
-  "version": "1.0.0",
-  "mode": "auto_sync",
-  "features": {
-    "repository_sync": true,
-    "file_integrity_check": true,
-    "deployment_validation": true,
-    "monitoring": true,
-    "backup_validation": true,
-    "logging": true
+  "system": {
+    "name": "Tamanna PowerHub Sync",
+    "version": "7.0.0",
+    "mode": "automatic",
+    "enabled": true
   },
-  "checks": {
-    "git_status": true,
-    "branch_sync": true,
-    "remote_connectivity": true,
-    "missing_files": true,
-    "file_integrity": true,
-    "service_health": true,
-    "resource_usage": true
+  "repository": {
+    "auto_pull": true,
+    "auto_commit": true,
+    "auto_push": true,
+    "branch": "main",
+    "verify_integrity": true
   },
-  "output": {
-    "sync_status": true,
-    "health_score": true,
-    "warnings": true,
-    "recommendations": true
+  "monitoring": {
+    "enabled": true,
+    "service_health_check": true,
+    "resource_monitoring": true,
+    "log_analysis": true,
+    "uptime_tracking": true
+  },
+  "file_integrity": {
+    "enabled": true,
+    "check_missing_files": true,
+    "check_modified_files": true,
+    "verify_checksums": true
+  },
+  "backup": {
+    "enabled": true,
+    "verify_backups": true,
+    "retention_days": 30
+  },
+  "deployment": {
+    "validate_build": true,
+    "validate_dependencies": true,
+    "validate_configuration": true
+  },
+  "security": {
+    "audit_enabled": true,
+    "check_updates": true,
+    "review_permissions": true,
+    "review_exposed_services": true
+  },
+  "reports": {
+    "generate_health_score": true,
+    "generate_summary": true,
+    "generate_recommendations": true
   }
 }
