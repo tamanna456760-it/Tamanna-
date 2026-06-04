@@ -1,0 +1,262 @@
+name: Deploy Dev Environment (Advanced)
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip running tests'
+        type: boolean
+        default: false
+      force_deploy:
+        description: 'Force deploy even if tests fail'
+        type: boolean
+        default: false
+
+# Cancel in-progress runs on the same branch
+concurrency:
+  group: deploy-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEPLOY_ENV: dev
+  ARTIFACT_RETENTION: 7
+
+jobs:
+  prepare:
+    name: Prepare & Validate
+    runs-on: ubuntu-latest
+    outputs:
+      has_python_files: ${{ steps.detect.outputs.has_python }}
+      has_tests: ${{ steps.detect.outputs.has_tests }}
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # to detect changes
+
+      - name: 🔍 Detect project structure
+        id: detect
+        run: |
+          echo "has_python=$([ -n "$(find . -name '*.py' -not -path './.git/*' -print -quit)" ] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_tests=$([ -d tests ] && echo true || echo false)" >> $GATHUB_OUTPUT
+
+  fix-and-format:
+    name: Auto Fix & Format
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.has_python == 'true'
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install deps
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install autopep8 black isort
+
+      - name: 🔧 Run problem_fixer.py (if exists)
+        run: |
+          if [ -f problem_fixer.py ]; then
+            python problem_fixer.py
+          else
+            echo "⚠️ problem_fixer.py not found, skipping."
+          fi
+
+      - name: 🎨 Auto-format all Python files
+        run: |
+          black . --quiet || true
+          autopep8 --in-place --recursive . --aggressive --aggressive || true
+          isort . || true
+
+      - name: 💾 Save all Python file names
+        run: |
+          find . -name "*.py" -not -path "./.git/*" > all_file_names.txt
+          echo "Python files saved: $(wc -l < all_file_names.txt)"
+
+      - name: 📤 Upload formatted files (for debugging)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-auto-fix-artifacts
+          path: |
+            all_file_names.txt
+            *.py
+          retention-days: ${{ env.ARTIFACT_RETENTION }}
+
+  test:
+    name: Run Dev Tests
+    runs-on: ubuntu-latest
+    needs: [prepare, fix-and-format]
+    if: |
+      !github.event.inputs.skip_tests &&
+      needs.prepare.outputs.has_tests == 'true'
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install test deps
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest pytest-cov pytest-xdist
+
+      - name: 🧪 Run tests with coverage
+        run: |
+          pytest tests/ -v --maxfail=3 --disable-warnings --cov=. --cov-report=xml --cov-report=term
+        continue-on-error: ${{ github.event.inputs.force_deploy == 'true' }}
+
+      - name: 📤 Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-coverage-report
+          path: coverage.xml
+          retention-days: ${{ env.ARTIFACT_RETENTION }}
+
+  run-main:
+    name: Run Main Runner
+    runs-on: ubuntu-latest
+    needs: [fix-and-format, test]
+    if: always() && (needs.fix-and-format.result == 'success' || needs.test.result == 'success' || github.event.inputs.force_deploy == 'true')
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: 🚀 Run main.py
+        run: |
+          if [ -f main.py ]; then
+            python main.py
+          else
+            echo "⚠️ main.py not found, skipping."
+          fi
+
+  commit-changes:
+    name: Commit Auto Fixes
+    runs-on: ubuntu-latest
+    needs: [fix-and-format, run-main]
+    if: always() && (needs.fix-and-format.result == 'success' || needs.run-main.result == 'success')
+    permissions:
+      contents: write
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: dev
+
+      - name: 📝 Commit auto changes (if any)
+        run: |
+          git config --global user.name "tamanna456760-it"
+          git config --global user.email "tamanna456760@gmail.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "✅ No changes to commit."
+          else
+            git commit -m "🤖 chore: auto fix & sync dev [skip ci]"
+            git push origin dev
+            echo "✅ Changes committed and pushed."
+          fi
+
+  deploy:
+    name: Deploy to Dev Server
+    runs-on: ubuntu-latest
+    needs: [test, run-main, commit-changes]
+    if: |
+      (success() || github.event.inputs.force_deploy == 'true') &&
+      (github.ref == 'refs/heads/dev')
+    environment:
+      name: dev
+      url: https://dev.yourdomain.com  # change to your dev server URL
+    steps:
+      - name: 📥 Checkout latest code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: 🚚 Deploy via rsync (example)
+        run: |
+          # Replace with your actual deployment commands
+          echo "🚀 Deploying to dev server..."
+          # Example using rsync over SSH:
+          # rsync -avz --delete ./ user@dev-server:/path/to/deploy/
+          # Or using a custom script:
+          # ./deploy.sh dev
+          echo "Deployment simulated (add your real commands)"
+
+      - name: 🔄 Restart services (if needed)
+        run: |
+          echo "Restarting application services..."
+          # e.g., ssh user@dev-server "systemctl --user restart myapp"
+
+      - name: ✅ Health check
+        run: |
+          echo "Waiting for deployment to stabilize..."
+          sleep 5
+          curl --fail --max-time 30 https://dev.yourdomain.com/health || echo "⚠️ Health check failed"
+        continue-on-error: true
+
+  rollback-on-failure:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: failure() && github.event_name == 'push'
+    steps:
+      - name: 🔄 Rollback to previous commit
+        run: |
+          echo "⚠️ Deployment failed. Rolling back to previous commit..."
+          git fetch origin dev
+          git reset --hard HEAD~1
+          # Re-deploy the previous version
+          # ./deploy.sh dev --rollback
+          echo "Rollback completed."
+
+  notify:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    needs: [deploy, rollback-on-failure]
+    if: always()
+    steps:
+      - name: 📊 Generate deployment summary
+        run: |
+          echo "## 🚀 Dev Environment Deployment Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: dev" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🚨 Slack notification (on failure)
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#dev-alerts'
+          SLACK_COLOR: '#FF0000'
+          SLACK_TITLE: 'Dev Deploy Failed'
+          SLACK_MESSAGE: |
+            Deployment to dev environment failed.
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

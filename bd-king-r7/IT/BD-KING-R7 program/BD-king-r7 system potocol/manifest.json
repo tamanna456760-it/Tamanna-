@@ -1,0 +1,43 @@
+{
+  "system_name": "BD-KING-R7",
+  "owner": "Tamanna",
+  "project_id": "tamanna456760-it",
+  "version": "1.0.0",
+  "status": "active",
+
+  "paths": {
+    "root": "./",
+    "modules": "./modules",
+    "logs": "./system_log.jsonl",
+    "config": "./config",
+    "backup": "./backup"
+  },
+
+  "sync": {
+    "enabled": true,
+    "mode": "auto",
+    "interval_seconds": 10,
+    "watch_extensions": [".py", ".js", ".html", ".css", ".json", ".md"],
+    "exclude": [".git", "__pycache__", "node_modules"]
+  },
+
+  "logging": {
+    "enabled": true,
+    "format": "jsonl",
+    "level": "info"
+  },
+
+  "modules": [
+    "core",
+    "network",
+    "sync",
+    "logger"
+  ],
+
+  "environment": {
+    "python": ">=3.9",
+    "os": "linux/windows/macos"
+  },
+
+  "last_updated": "auto"
+}

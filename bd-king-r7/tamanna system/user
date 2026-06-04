@@ -1,0 +1,12 @@
+tamanna_system/
+│
+├── users/
+│   ├── user.py
+│   ├── auth.py
+│   └── roles.py
+│
+├── database/
+│   └── db.py
+│
+├── main.py
+└── README.md

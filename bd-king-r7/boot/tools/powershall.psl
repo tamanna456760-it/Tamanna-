@@ -1,0 +1,8 @@
+New-Item -ItemType Directory -Path Tamanna_System\boot_tools -Force
+New-Item -ItemType Directory -Path Tamanna_System\logs -Force
+New-Item -ItemType Directory -Path Tamanna_System\sync\backup -Force
+New-Item Tamanna_System\logs\system_log.txt -ItemType File
+New-Item Tamanna_System\logs\device_status.txt -ItemType File
+New-Item Tamanna_System\logs\system_resources.txt -ItemType File
+New-Item Tamanna_System\logs\network_log.txt -ItemType File
+New-Item Tamanna_System\README.md -ItemType File

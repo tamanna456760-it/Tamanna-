@@ -1,0 +1,37 @@
+{
+  "system": {
+    "name": "TAMANNA SYSTEM",
+    "version": "v1.0.1-ADVANCED",
+    "build_type": "MASTER-SYNC",
+    "system_id": "01856992843",
+    "owner": {
+      "git_id": "Tamannna456760-it",
+      "email": "Tamanna456760@gmail.com"
+    },
+    "modules": [
+      "core.boot",
+      "core.engine.dual",
+      "core.engine.mirror",
+      "core.heartbeat.loop",
+      "core.identity",
+      "bd-king-r7.powerhub.link"
+    ],
+    "license": "MIT"
+  },
+  "api": {
+    "endpoint": "https://api.tamanna.io/v1",
+    "auth_token": "https://docs.github.com/github-models/quickstart#step-2-make-an-api-call",
+    "timeout": 30,
+    "retry": 3
+  },
+  "sync": {
+    "script": "./sync/auto_sync.sh",
+    "interval_minutes": 10,
+    "git_repo": "https://github.com/Tamannna456760-it/tamanna-.git"
+  },
+  "logging": {
+    "level": "INFO",
+    "log_file": "./logs/system_log.txt",
+    "enable_console": true
+  }
+}

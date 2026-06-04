@@ -1,0 +1,8 @@
+{
+  "max_rpm": 80,
+  "burst_limit": 150,
+  "auto_block": true,
+  "learning_mode": true,
+  "self_update": true,
+  "risk_threshold": 0.7
+}

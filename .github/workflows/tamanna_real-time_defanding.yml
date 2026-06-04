@@ -1,0 +1,98 @@
+system:
+  name: Tamanna-Global-Defense-Network
+  mode: real_time
+  status: active
+
+# 🌍 GLOBAL NODE NETWORK (ALL SERVERS YOU CONTROL)
+network_nodes:
+  - name: master_brain
+    url: "http://localhost:8000"
+    role: ai_core
+
+  - name: firewall_node_1
+    url: "http://localhost:3000"
+    role: defense
+
+  - name: firewall_node_2
+    url: "http://localhost:3001"
+    role: defense
+
+  - name: api_node
+    url: "http://localhost:3002"
+    role: api
+
+  - name: monitor_node
+    url: "http://localhost:3003"
+    role: monitoring
+
+# 🔁 REAL TIME SYNC ENGINE
+sync:
+  enabled: true
+  interval_ms: 500
+  heartbeat: true
+  auto_reconnect: true
+  cross_node_sync: true
+
+# 🛡️ GLOBAL DEFENSE CORE
+defense:
+  enabled: true
+  mode: aggressive
+  ddos_protection: true
+  ip_global_block: true
+  threat_sharing: true
+  auto_quarantine: true
+
+# 🧠 AI BRAIN (GLOBAL DECISION SYSTEM)
+ai_brain:
+  enabled: true
+  distributed: true
+  learn_from_all_nodes: true
+  adaptive_security: true
+  threat_prediction: true
+
+# ⚡ ATTACK RESPONSE FLOW
+response_flow:
+  on_attack:
+    - detect
+    - broadcast_to_all_nodes
+    - analyze
+    - global_block
+    - update_ai_model
+
+  on_suspicious:
+    - rate_limit
+    - monitor
+
+  on_safe:
+    - allow
+
+# 📡 NETWORK MONITORING
+network:
+  deep_packet_inspection: true
+  traffic_analysis: true
+  anomaly_detection: true
+  latency_monitor: true
+
+# 🚫 AUTO BLOCK SYSTEM
+blocking:
+  enabled: true
+  global_sync_block: true
+  blacklist_sync: true
+
+# 🧬 SELF EVOLUTION (AI IMPROVE SYSTEM)
+self_learning:
+  enabled: true
+  auto_tune_defense: true
+  update_thresholds: true
+
+# 📊 LOGGING SYSTEM
+logs:
+  centralized: true
+  real_time_stream: true
+  file: "logs/global_defense.log"
+
+# 🔌 PLUGIN SYSTEM (ADD NEW SERVERS / FEATURES)
+plugins:
+  enabled: true
+  hot_add_nodes: true
+  auto_register_new_servers: true

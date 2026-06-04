@@ -2,10 +2,10 @@ GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 name: Auto Sync to Repo
 
 on:
-  push:        # Trigger when code is pushed
+  push: # Trigger when code is pushed
     branches:
-      - main   # Adjust branch name if needed
-  workflow_dispatch:  # Allow manual run
+      - main # Adjust branch name if needed
+  workflow_dispatch: # Allow manual run
 
 jobs:
   sync:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0   # Full history for syncing
+          fetch-depth: 0 # Full history for syncing
 
       - name: Set up Git
         run: |

@@ -1,0 +1,35 @@
+# GitHub System Configuration
+# TamannaBot • Sovereign Automation Engine
+
+SYSTEM_NAME = "BD-KING-R7"
+ENGINE_NAME = "Tamanna-AI"
+ENGINE_VERSION = "1.0.0"
+
+OWNER = "tamanna456760-it"
+REPOSITORY = "tamanna"
+DEFAULT_BRANCH = "main"
+
+# GitHub API
+GITHUB_API = "https://api.github.com"
+GITHUB_WEB = "https://github.com"
+
+# CI/CD Workflows
+WORKFLOW_MASTER_SYNC = ".github/workflows/master-sync.yml"
+WORKFLOW_TAMANNA_BOT = ".github/workflows/tamanna-bot.yml"
+
+# Dependabot
+DEPENDABOT_CONFIG = ".github/tamanna-bot.yml"
+DEPENDABOT_ENABLED = true
+
+# Commit Identity
+COMMIT_USER = "tamanna456760-it"
+COMMIT_EMAIL = "tamanna456760@gmail.com"
+
+# Security
+PROTECT_MAIN_BRANCH = true
+AUTO_MERGE = false
+REQUIRE_REVIEWS = true
+
+# Metadata
+CREATED_AT = "2026-05-07T00:00:00Z"
+SIGNATURE = "Tamanna Engine • BD-KING-R7 • GitHub Config"

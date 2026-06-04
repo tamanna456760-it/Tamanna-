@@ -1,0 +1,57 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #38bdf8;
+}
+
+.sub {
+    text-align: center;
+    color: #94a3b8;
+}
+
+.card {
+    background: #020617;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+button {
+    padding: 12px;
+    background: #38bdf8;
+    border: none;
+    color: #020617;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #0ea5e9;
+}
+
+.log pre {
+    height: 200px;
+    overflow-y: auto;
+    background: black;
+    color: #22c55e;
+    padding: 10px;
+}

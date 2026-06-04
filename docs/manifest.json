@@ -1,0 +1,22 @@
+{
+  "system_name": "BD-KING-R7",
+  "engine_name": "Tamanna-AI",
+  "version": "1.0.0",
+  "owner": "HM INSAN ALI",
+  "description": "Sovereign invocation engine for Tamanna.io",
+  "environment": {
+    "default": "production",
+    "supported": ["development", "staging", "production"]
+  },
+  "services": {
+    "deep_core": {
+      "enabled": true,
+      "entry": "server/deep.js",
+      "power_mode": "Deep Power Engaged"
+    }
+  },
+  "meta": {
+    "created_at": "2026-05-07T00:00:00Z",
+    "signature": "BD-KING-R7 • Tamanna Engine • Manifest"
+  }
+}

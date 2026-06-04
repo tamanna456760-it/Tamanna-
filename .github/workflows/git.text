@@ -1,0 +1,4 @@
+xos-launcher-blocker/
+├── disable_xos_launcher.sh
+├── enable_xos_launcher.sh
+└── README.md

@@ -1,0 +1,30 @@
+# ORCID‑STYLE SYSTEM CONFIGURATION
+# Tamanna Engine • BD‑KING‑R7 • Sovereign Identity File
+
+SYSTEM_NAME = "BD-KING-R7"
+ENGINE_NAME = "Tamanna-AI"
+ENGINE_VERSION = "1.0.0"
+
+OWNER = "HM INSAN ALI"
+DOMAIN = "tamanna.io"
+
+# Runtime Environment
+ENVIRONMENT = "production"
+SUPPORTED_ENVIRONMENTS = ["development", "staging", "production"]
+
+# Deep Core Engine
+DEEP_CORE_ENABLED = true
+DEEP_CORE_ENTRY = "server/deep.js"
+DEEP_CORE_POWER = "Deep Power Engaged"
+
+# Logging
+LOG_LEVEL = "info"
+LOG_FILE = "system_log.jsonl"
+LOG_FORMAT = "jsonl"
+
+# Manifest Link
+MANIFEST_FILE = "manifest.json"
+
+# Metadata
+CREATED_AT = "2026-05-07T00:00:00Z"
+SIGNATURE = "Tamanna Engine • BD-KING-R7 • ORCID Config"

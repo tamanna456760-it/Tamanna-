@@ -1,0 +1,13 @@
+[Unit]
+Description=bd-king-r7 powerhub .NET agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=youruser
+Group=youruser
+ExecStart=/usr/bin/dotnet /opt/bd-king-r7-powerhub/agent.dll
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/bd-king-r7-powerhub.log

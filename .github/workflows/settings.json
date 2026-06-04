@@ -1,0 +1,22 @@
+{
+  // Copilot কে আরও অ্যাকটিভ সাজেশন দিতে
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false
+  },
+  // কোড অ্যাকশন হিসেবে Copilot সাজেশন স্বয়ংক্রিয়ভাবে গ্রহণ? (VS Code নিজে করে না, তবে এক্সটেনশন লাগতে পারে)
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.organizeImports": true
+  },
+  // সব এক্সটেনশন অটো আপডেট চালু
+  "extensions.autoUpdate": true,
+  // Copilot এক্সটেনশন নিজেও আপডেট হবে
+  "github.copilot.updateCheck": true,  // আপডেট চেক চালু
+  
+  // যদি চান প্রতি সেভে AI দিয়ে কোড রাইট করুন (এক্সপেরিমেন্টাল)
+  "github.copilot.advanced": {
+    "inlineSuggestCount": 5,
+    "enableAutoCompletions": true
+  }
+}

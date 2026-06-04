@@ -1,99 +1,258 @@
-# bd-king-r7/it/
-name: BD-KING-R7 PowerHub Auto Builder
+name: BD-KING-R7 PowerHub Auto Builder (Advanced)
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch: {}
+    branches: ["main", "develop"]
+  workflow_dispatch:
+    inputs:
+      skip_auto_commit:
+        description: 'Skip auto‑commit of fixes'
+        type: boolean
+        default: false
+      debug_mode:
+        description: 'Enable debug logging'
+        type: boolean
+        default: false
   schedule:
-    - cron: "0 */6 * * *"   # every 6 hours auto-build
+    - cron: "0 */6 * * *"   # every 6 hours
+
+# Cancel concurrent runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   powerhub-build:
     name: PowerHub Build Helper
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write   # needed for auto‑commit
 
     steps:
       # 1) Sync Source Code
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2) Auto Detect Language & Install Dependencies
-      - name: Install dependencies (Node/Python/General)
+      # 2) Setup Languages (official actions instead of apt)
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3) Cache dependencies manually for other languages
+      - name: 💾 Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: 💾 Cache Rust cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # 4) Install dependencies (smart detection)
+      - name: 🔧 Install dependencies
         run: |
           echo "=== Auto Dependency Installer ==="
+          if [ "${{ github.event.inputs.debug_mode }}" = "true" ]; then set -x; fi
 
+          # Node.js
           if [ -f package.json ]; then
-            echo "Node.js project detected"
-            sudo apt-get update
-            sudo apt-get install -y nodejs npm
-            npm install || npm ci || true
+            echo "📦 Node.js project detected"
+            npm ci --prefer-offline || npm install
           fi
 
+          # Python
           if [ -f requirements.txt ]; then
-            echo "Python project detected"
-            sudo apt-get update
-            sudo apt-get install -y python3 python3-pip
-            pip3 install --upgrade pip
-            pip3 install -r requirements.txt || true
+            echo "🐍 Python project detected"
+            pip install --upgrade pip
+            pip install -r requirements.txt
           fi
 
-          sudo apt-get install -y build-essential git curl || true
+          # Go
+          if [ -f go.mod ]; then
+            echo "🐹 Go project detected"
+            go mod download
+          fi
 
-      # 3) Auto Build PowerHub
-      - name: PowerHub Auto Build
+          # Rust
+          if [ -f Cargo.toml ]; then
+            echo "🦀 Rust project detected"
+            cargo fetch
+          fi
+
+          # System build essentials (only if needed)
+          if [ -f Makefile ] || [ -f CMakeLists.txt ]; then
+            sudo apt-get update
+            sudo apt-get install -y build-essential cmake
+          fi
+
+      # 5) Run Tests (if available) – optional but recommended
+      - name: 🧪 Run tests
+        continue-on-error: true
+        run: |
+          echo "=== Running tests (if any) ==="
+          if [ -f package.json ] && npm test --if-present; then
+            echo "✅ npm tests passed"
+          elif [ -f requirements.txt ] && python -m pytest --maxfail=1 --disable-warnings -q; then
+            echo "✅ pytest passed"
+          elif [ -f go.mod ] && go test ./... -v; then
+            echo "✅ go test passed"
+          elif [ -f Cargo.toml ] && cargo test --quiet; then
+            echo "✅ cargo test passed"
+          else
+            echo "ℹ️ No test framework detected, skipping."
+          fi
+
+      # 6) PowerHub Auto Build
+      - name: 🏗️ PowerHub Auto Build
+        id: build
         run: |
           echo "=== Building BD-KING-R7 PowerHub ==="
+          mkdir -p build_output
 
+          # Custom build script
           if [ -f build.sh ]; then
-            echo "Running custom build.sh"
+            echo "▶️ Running custom build.sh"
             bash build.sh
           fi
 
+          # If there's a 'powerhub' subdirectory
           if [ -d powerhub ]; then
-            echo "Running PowerHub internal build"
+            echo "▶️ Building inside powerhub/"
             cd powerhub
-            if [ -f package.json ]; then npm run build || true; fi
-            if [ -f Makefile ]; then make || true; fi
+            if [ -f package.json ]; then
+              npm run build --if-present
+            fi
+            if [ -f Makefile ]; then
+              make
+            fi
+            if [ -f Cargo.toml ]; then
+              cargo build --release
+            fi
             cd ..
           fi
 
-          mkdir -p build_output
+          # Collect build artifacts (common locations)
           cp -r dist/* build_output/ 2>/dev/null || true
           cp -r build/* build_output/ 2>/dev/null || true
+          cp -r target/release/* build_output/ 2>/dev/null || true
+          cp -r output/* build_output/ 2>/dev/null || true
 
-      # 4) Auto Fix Missing Code / Formatting
-      - name: Auto Fixer
+          # Check if any artifact was generated
+          if [ -z "$(ls -A build_output)" ]; then
+            echo "⚠️ No build artifacts found. Creating a placeholder."
+            echo "Build completed on $(date)" > build_output/build_info.txt
+          else
+            echo "✅ Artifacts collected in build_output/"
+            ls -la build_output/
+          fi
+
+      # 7) Auto Fix Code Issues (only if not skipped)
+      - name: 🔧 Auto Fix Code
+        if: github.event.inputs.skip_auto_commit != 'true'
         run: |
           echo "=== Auto Fixing Code Issues ==="
 
+          # Node.js formatting
           if command -v npx >/dev/null 2>&1 && [ -f package.json ]; then
-            npx eslint . --fix || true
+            npx eslint . --fix --quiet || true
             npx prettier --write . || true
           fi
 
+          # Python formatting
           if command -v autopep8 >/dev/null 2>&1; then
-            autopep8 --in-place --recursive . || true
+            autopep8 --in-place --recursive . --aggressive --aggressive || true
+          elif command -v black >/dev/null 2>&1; then
+            black . || true
           fi
 
-      # 5) Auto Commit Fixed Code
-      - name: Commit & Push Fixes
+          # Go formatting
+          if command -v gofmt >/dev/null 2>&1; then
+            gofmt -w . || true
+          fi
+
+          # Rust formatting
+          if command -v rustfmt >/dev/null 2>&1; then
+            cargo fmt --all || true
+          fi
+
+      # 8) Auto Commit Fixes (safe: only if changes exist and not on PR)
+      - name: 📝 Commit & Push Fixes
+        if: github.event.inputs.skip_auto_commit != 'true' && github.event_name != 'pull_request'
         run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "tamanna456760@gmail.com"
+          git config --local user.name "tamanna456760-it"
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "Auto Fix: BD-KING-R7 PowerHub Build Optimized"
-            git push
+            git commit -m "🤖 Auto Fix: BD-KING-R7 PowerHub Build Optimized [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+            echo "✅ Auto‑commit pushed."
           else
-            echo "No changes to commit"
+            echo "ℹ️ No changes to commit."
           fi
 
-      # 6) Upload Build Artifacts
-      - name: Upload Build Files
+      # 9) Generate Build Summary
+      - name: 📊 Job Summary
+        if: always()
+        run: |
+          echo "## 🚀 BD-KING-R7 PowerHub Build Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Debug mode**: ${{ github.event.inputs.debug_mode || 'false' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Artifacts**: [Download here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          if [ -f build_output/build_info.txt ]; then
+            echo "### Build Output" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat build_output/build_info.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # 10) Upload Build Artifacts
+      - name: 📦 Upload Build Files
         uses: actions/upload-artifact@v4
         with:
-          name: BD-KING-R7-PowerHub-Build
+          name: BD-KING-R7-PowerHub-Build-${{ github.run_id }}
           path: build_output/
+          retention-days: 14
+
+      # 11) Slack Notification (optional, on failure)
+      - name: 🚨 Slack Alert on Failure
+        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#build-alerts'
+          SLACK_COLOR: '#FF0000'
+          SLACK_TITLE: 'PowerHub Build Failed'
+          SLACK_MESSAGE: |
+            Repository: ${{ github.repository }}
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Branch: ${{ github.ref_name }}
+            Trigger: ${{ github.event_name }}
+
+      - name: ✅ Build Success
+        if: success()
+        run: echo "🎉 PowerHub build completed successfully!"

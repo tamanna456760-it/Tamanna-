@@ -1,6 +1,6 @@
 body {
   font-family: Inter, Arial, sans-serif;
-  background: linear-gradient(180deg,#071426,#0b1020);
+  background: linear-gradient(180deg, #071426, #0b1020);
   color: #e6f7ff;
   margin: 0;
   padding: 0;
@@ -25,16 +25,22 @@ header {
 }
 
 .card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   padding: 18px;
   width: 240px;
   border-radius: 12px;
   text-align: center;
 }
 
-.card h3 { margin: 4px 0 10px 0; }
-.card .meta { opacity: 0.75; font-size: 13px; margin-bottom: 10px; }
+.card h3 {
+  margin: 4px 0 10px 0;
+}
+.card .meta {
+  opacity: 0.75;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
 
 .btn {
   display: inline-block;
@@ -45,7 +51,19 @@ header {
   font-weight: 600;
 }
 
-.btn-on { background: linear-gradient(90deg,#00d4ff,#00b3ff); color: #012; }
-.btn-off { background: rgba(255,255,255,0.06); color: #e6f7ff; border: 1px solid rgba(255,255,255,0.04); }
+.btn-on {
+  background: linear-gradient(90deg, #00d4ff, #00b3ff);
+  color: #012;
+}
+.btn-off {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e6f7ff;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
 
-footer { text-align:center; padding: 14px; opacity: 0.6; font-size: 13px; }
+footer {
+  text-align: center;
+  padding: 14px;
+  opacity: 0.6;
+  font-size: 13px;
+}

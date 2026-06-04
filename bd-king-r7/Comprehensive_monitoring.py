@@ -4,5 +4,5 @@ monitoring_stack = {
     "business_analytics": True,
     "security_monitoring": True,
     "cost_optimization": True,
-    "user_experience": True
+    "user_experience": True,
 }

@@ -1,11 +1,11 @@
-import os
 import json
-import time
 import subprocess
-from datetime import datetime
+import time
+
 
 def log(message):
     print("[BD-KING-R7 SYNC] " + message)
+
 
 def git_sync(repo, msg):
     try:
@@ -16,9 +16,11 @@ def git_sync(repo, msg):
     except Exception as e:
         log(f"Error: {e}")
 
+
 def load_config():
     with open("config.json", "r") as f:
         return json.load(f)
+
 
 def watch_and_sync():
     cfg = load_config()
@@ -29,14 +31,19 @@ def watch_and_sync():
         git_sync(cfg["git_repo"], msg)
         time.sleep(cfg["scan_interval_sec"])
 
+
 if __name__ == "__main__":
     log("Starting BD-KING-R7 Sync System...")
     watch_and_sync
-    import os, json, time, subprocess
+    import json
+    import subprocess
+    import time
+
 
 def load_config():
     with open("config.json") as f:
         return json.load(f)
+
 
 def sync_repo(repo, msg):
     try:
@@ -47,11 +54,13 @@ def sync_repo(repo, msg):
     except Exception as e:
         print(f"[SYNC ERROR] {e}")
 
+
 def main():
     cfg = load_config()
     while True:
         sync_repo(cfg["git_repo"], cfg["auto_commit_message"])
         time.sleep(cfg["scan_interval_sec"])
+
 
 if __name__ == "__main__":
     main()

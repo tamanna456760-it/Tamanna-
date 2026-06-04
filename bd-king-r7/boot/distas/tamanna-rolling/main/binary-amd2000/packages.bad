@@ -1,0 +1,10 @@
+Package: bd-king-r7
+Version: 7.0.0
+Architecture: amd2000
+Maintainer: HM INSAN ALI <tamanna456760@gmail.com>
+Depends: tamanna-power-core (>= 1.0.0)
+Filename: pool/main/b/bd-king-r7/bd-king-r7_7.0.0_amd2000.deb
+Size: 125678
+MD5sum: 5d41402abc4b2a76b9719d911017c592
+Description: BD KING R7 sovereign security system
+ Ritual firewall, affirmation chants, and powerhub integration.

@@ -12,8 +12,8 @@
   "confidence_thresholds": {
     "critical": 0.95,
     "high": 0.85,
-    "medium": 0.70,
-    "low": 0.50
+    "medium": 0.7,
+    "low": 0.5
   },
   "live_monitoring": {
     "enabled": true,
@@ -27,9 +27,9 @@
   },
   "power_management": {
     "boost_levels": {
-      "high": {"threads": 30, "processes": 12},
-      "maximum": {"threads": 50, "processes": 20},
-      "emergency": {"threads": 100, "processes": 30}
+      "high": { "threads": 30, "processes": 12 },
+      "maximum": { "threads": 50, "processes": 20 },
+      "emergency": { "threads": 100, "processes": 30 }
     },
     "auto_boost": true,
     "boost_threshold": 0.8

@@ -1,0 +1,16 @@
+[Unit]
+Description=Tamanna Master Utility
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/bd_king_r7
+ExecStart=/usr/bin/python3 /srv/bd_king_r7/tamanna_master.py up
+ExecStop=/usr/bin/python3 /srv/bd_king_r7/tamanna_master.py down
+Restart=on-failure
+User=youruser
+Environment=PATH=/usr/bin:/usr/local/bin
+
+[Install]
+WantedBy=multi-user.target

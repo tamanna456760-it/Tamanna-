@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <title>BD KING — Power Dashboard (Safe, Local)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#050507; --card:#0f1112; --accent:#00ff9d; --muted:#9aa0a6;
+      --glass: rgba(255,255,255,0.03);
+      --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{background:var(--bg);color:#e8eef0;font-family:Inter,Arial,Helvetica,sans-serif;margin:0;padding:18px}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    h1{color:var(--accent);margin:0;font-size:20px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+    .card{background:linear-gradient(180deg,var(--card),#0b0b0b);border:1px solid #151617;padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .card h2{margin:0 0 10px 0;color:var(--accent);font-size:15px}
+    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #151515}
+    .row:last-child{border-bottom:0}
+    .label{color:var(--muted);font-size:13px}
+    .value{font-weight:700;font-size:13px}
+    input, textarea, select, button{font-family:inherit}
+    input, textarea, select{width:100%;padding:8px;border-radius:8px;border:1px solid #222;background:#0b0b0b;color:#ddd}
+    textarea{min-height:90px;resize:vertical}
+    .controls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    button{background:var(--accent);border:0;color:#000;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+    .smallbtn{background:#222;color:#ddd;padding:6px 8px;border-radius:8px;border:1px solid #2a2a2a}
+    .hint{color:var(--muted);font-size:12px;margin-top:8px}
+    pre{background:var(--glass);padding:10px;border-radius:8px;overflow:auto;color:#ddd}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border:1px solid #1a1a1a;padding:8px;text-align:left;font-size:13px}
+    th{background:#0b0b0b;color:var(--muted)}
+    .danger{color:var(--danger);font-weight:700}
+    .ok{color:var(--accent);font-weight:700}
+    .flex{display:flex;gap:8px;align-items:center}
+    .badge{background:#111;padding:6px 8px;border-radius:8px;color:var(--muted);font-size:12px}
+    .file{color:#ddd}
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BD KING — Power Dashboard (Safe, Local)</h1>
+    <div style="margin-left:auto"><small>সব ডেটা লোকালি; পাসওয়ার্ড কখনো লিখবেন না</small></div>
+  </header>
+
+  <div class="grid">
+    <!-- Live Browser & Platform -->
+    <div class="card">
+      <h2>Browser & Platform</h2>
+      <div class="row"><div class="label">User agent</div><div class="value" id="ua">—</div></div>
+      <div class="row"><div class="label">Platform</div><div class="value" id="platform">—</div></div>
+      <div class="row"><div class="label">Language</div><div class="value" id="lang">—</div></div>
+      <div class="row"><div class="label">Cookies</div><div class="value" id="cookies">—</div></div>
+      <div class="hint">এই অংশ ব্রাউজার-দৃশ্যমান তথ্য দেখায়।</div>
+    </div>
+
+    <!-- Network & IP -->
+    <div class="card">
+      <h2>Network & IP</h2>
+      <div class="row"><div class="label">Connection type</div><div class="value" id="connType">—</div></div>
+      <div class="row"><div class="label">Downlink</div><div class="value" id="downlink">—</div></div>
+      <div class="row"><div class="label">Public IP</div><div class="value" id="publicIp">—</div></div>
+      <div class="controls">
+        <button id="speedTestBtn" class="smallbtn">Quick speed test</button>
+        <div class="badge" id="speedResult">—</div>
+      </div>
+      <div class="hint">Speed test uses small safe fetches; সব কাজ লোকালি হয়।</div>
+    </div>
+
+    <!-- Screen & Device -->
+    <div class="card">
+      <h2>Screen & Device</h2>
+      <div class="row"><div class="label">Screen size</div><div class="value" id="screenSize">—</div></div>
+      <div class="row"><div class="label">Pixel ratio</div><div class="value" id="dpr">—</div></div>
+      <div class="row"><div class="label">Touch support</div><div class="value" id="touch">—</div></div>
+      <div class="hint">IMEI বা সিস্টেম-লেভেল আইডেন্টিফায়ার ব্রাউজার থেকে পাওয়া যায় না।</div>
+    </div>
+
+    <!-- Battery with history -->
+    <div class="card">
+      <h2>Battery & History</h2>
+      <div class="row"><div class="label">Charging</div><div class="value" id="charging">—</div></div>
+      <div class="row"><div class="label">Level</div><div class="value" id="batteryLevel">—</div></div>
+      <div class="row"><div class="label">Charging time (s)</div><div class="value" id="chargingTime">—</div></div>
+      <div style="margin-top:10px">
+        <canvas id="batteryChart" style="width:100%;height:140px"></canvas>
+      </div>
+      <div class="controls">
+        <button id="clearBatteryHistory" class="smallbtn">Clear battery history</button>
+        <div class="badge" id="batteryCount">0 samples</div>
+      </div>
+      <div class="hint">ব্যাটারি ইতিহাস লোকালি সংরক্ষিত হয় (localStorage)।</div>
+    </div>
+
+    <!-- Storage & Permissions -->
+    <div class="card">
+      <h2>Storage & Permissions</h2>
+      <div class="row"><div class="label">LocalStorage</div><div class="value" id="ls">—</div></div>
+      <div class="row"><div class="label">IndexedDB</div><div class="value" id="idb">—</div></div>
+      <div class="row"><div class="label">Storage estimate</div><div class="value" id="storageEstimate">—</div></div>
+      <div class="row"><div class="label">Notification permission</div><div class="value" id="notifPerm">—</div></div>
+      <div class="controls">
+        <button id="requestNotif" class="smallbtn">Request Notification Permission</button>
+      </div>
+      <div class="hint">নোটিফিকেশন লগ কেবল তখনই স্বয়ংক্রিয় করা যায় যখন আপনি নেটিভ অ্যাপ ব্যবহার করেন।</div>
+    </div>
+
+    <!-- Apps usage (manual / CSV import) -->
+    <div class="card">
+      <h2>Installed Apps & Usage (Manual / CSV)</h2>
+      <div class="hint">ওয়েব পেজ ইনস্টল করা অ্যাপ তালিকা পড়তে পারে না। CSV/Takeout আপলোড করে বিশ্লেষণ করুন।</div>
+
+      <div style="margin-top:8px">
+        <input id="csvFile" type="file" accept=".csv" />
+        <input id="takeoutFile" type="file" accept=".json,application/json" style="margin-top:8px" />
+        <div style="margin-top:8px" class="controls">
+          <button id="importCsv" class="smallbtn">Import CSV</button>
+          <button id="importTakeout" class="smallbtn">Import Google Takeout JSON</button>
+          <button id="addAppBtn" class="smallbtn">Add app row</button>
+          <button id="clearApps" class="smallbtn">Clear list</button>
+        </div>
+      </div>
+
+      <table id="appsTable" style="margin-top:10px">
+        <thead>
+          <tr><th>App Name</th><th>Daily Use (min)</th><th>Data Used (MB)</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div style="margin-top:10px">
+        <canvas id="appsChart" style="width:100%;height:140px"></canvas>
+      </div>
+      <div class="hint">CSV: app_name,daily_minutes,data_mb</div>
+    </div>
+
+    <!-- Notifications log (manual) -->
+    <div class="card">
+      <h2>Notification Log (Manual)</h2>
+      <textarea id="notifLog" placeholder="এখানে নোটিফিকেশন কপি করুন — পাসওয়ার্ড কখনো লিখবেন না"></textarea>
+      <div class="controls" style="margin-top:8px">
+        <button id="saveNotif" class="smallbtn">Save log</button>
+        <button id="clearNotif" class="smallbtn">Clear</button>
+        <button id="exportNotif" class="smallbtn">Export log</button>
+      </div>
+      <div class="hint">নোটিফিকেশন স্বয়ংক্রিয়ভাবে সংগ্রহ করতে নেটিভ অ্যাপ ব্যবহার করুন।</div>
+    </div>
+
+    <!-- Security & Malware checklist -->
+    <div class="card">
+      <h2>Security & Malware</h2>
+      <div class="hint">এই প্যানেল কেবল আপনার স্ক্যান নোট ট্র্যাক করে; স্ক্যান চালাতে নেটিভ অ্যান্টিভাইরাস ব্যবহার করুন।</div>
+      <div style="margin-top:8px">
+        <label class="label">Antivirus app</label>
+        <input id="antivirusName" placeholder="e.g., Bitdefender" />
+      </div>
+      <div style="margin-top:8px">
+        <label class="label">Last scan date</label>
+        <input id="lastScan" type="date" />
+      </div>
+      <div style="margin-top:8px">
+        <label class="label">Malware found</label>
+        <select id="malwareFound"><option value="no">No</option><option value="yes">Yes</option></select>
+      </div>
+      <div class="controls" style="margin-top:10px">
+        <button id="saveSecurity" class="smallbtn">Save note</button>
+        <button id="exportSecurity" class="smallbtn">Export note</button>
+      </div>
+    </div>
+
+    <!-- Encryption & Snapshot -->
+    <div class="card" style="grid-column:1/-1">
+      <h2>Snapshot, Encrypt & Export (Local)</h2>
+      <small>পাসফ্রেজ দিয়ে JSON এনক্রিপ্ট করে লোকালি ডাউনলোড করুন। পাসফ্রেজ হারালে ডেটা পুনরুদ্ধার সম্ভব নয়।</small>
+
+      <div style="margin-top:8px">
+        <label class="label">Encryption passphrase (use strong passphrase)</label>
+        <input id="encPass" type="password" placeholder="Enter passphrase to encrypt snapshot" />
+      </div>
+
+      <div class="controls" style="margin-top:10px">
+        <button id="snapshotBtn">Create & Download Encrypted Snapshot</button>
+        <button id="downloadPlain" class="smallbtn">Download Plain JSON</button>
+        <button id="loadEncrypted" class="smallbtn">Load Encrypted File (Decrypt)</button>
+        <input id="encFile" type="file" accept=".bin,application/octet-stream" style="display:none" />
+        <button id="clearAll" class="smallbtn">Clear all local data</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="label">Raw JSON snapshot</label>
+        <pre id="jsonOut">—</pre>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    নোট: এই ড্যাশবোর্ড ব্রাউজার-দৃশ্যমান তথ্য ও আপনার ম্যানুয়াল ইনপুটই সংগ্রহ করে। এটি IMEI, সিস্টেম-লেভেল অ্যাপ তালিকা, ফোন নোটিফিকেশন বা Gmail পাসওয়ার্ড পড়তে পারে না। গভীর রিপোর্টের জন্য আমি নিরাপদ ADB ধাপ দেখাতে পারি।
+  </footer>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <script>
+    // Short helpers
+    const $ = id => document.getElementById(id);
+    const set = (id, txt) => $(id).textContent = txt ?? '—';
+    const LS_KEYS = {
+      BATTERY_HISTORY: 'bk_battery_history_v3',
+      APPS_LIST: 'bk_apps_list_v3',
+      NOTIF_LOG: 'bk_notif_log_v3',
+      SECURITY_NOTE: 'bk_security_note_v3',
+      SNAPSHOT: 'bk_snapshot_v3',
+      AUTOSAVE: 'bk_autosave_v3'
+    };
+
+    // Charts
+    let batteryChart = null;
+    let appsChart = null;
+
+    // Initialize UI
+    async function gather() {
+      set('ua', navigator.userAgent || '—');
+      set('platform', navigator.platform || '—');
+      set('lang', navigator.language || '—');
+      set('cookies', navigator.cookieEnabled ? 'Yes' : 'No');
+
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+      set('connType', conn ? (conn.effectiveType || conn.type || '—') : 'Unavailable');
+      set('downlink', conn ? (conn.downlink ? conn.downlink + ' Mbps' : '—') : 'Unavailable');
+
+      set('screenSize', screen.width + ' × ' + screen.height);
+      set('dpr', window.devicePixelRatio || '—');
+      set('touch', ('ontouchstart' in window) ? 'Yes' : 'No');
+
+      // Battery
+      try {
+        if (navigator.getBattery) {
+          const bat = await navigator.getBattery();
+          set('charging', bat.charging ? 'Yes' : 'No');
+          set('batteryLevel', Math.round(bat.level * 100) + '%');
+          set('chargingTime', bat.chargingTime === Infinity ? '—' : String(bat.chargingTime));
+          recordBatteryHistory(bat.level);
+        } else {
+          set('charging', 'Unavailable');
+          set('batteryLevel', 'Unavailable');
+          set('chargingTime', 'Unavailable');
+        }
+      } catch (e) {
+        set('charging', 'Error');
+        set('batteryLevel', 'Error');
+        set('chargingTime', 'Error');
+      }
+
+      // Storage estimate
+      try {
+        if (navigator.storage && navigator.storage.estimate) {
+          const est = await navigator.storage.estimate();
+          const used = est.usage || 0;
+          const quota = est.quota || 0;
+          set('storageEstimate', (used/1024/1024).toFixed(1) + ' MB used / ' + (quota/1024/1024).toFixed(1) + ' MB quota');
+        } else {
+          set('storageEstimate', 'Unavailable');
+        }
+      } catch (e) {
+        set('storageEstimate', 'Error');
+      }
+
+      // Permissions
+      try {
+        const perm = await navigator.permissions.query({name:'notifications'}).catch(()=>null);
+        set('notifPerm', perm ? perm.state : 'Unavailable');
+      } catch(e){ set('notifPerm','Unavailable') }
+
+      // Public IP
+      try {
+        const resp = await fetch('https://api.ipify.org?format=json', {cache:'no-store'});
+        if (resp.ok) {
+          const j = await resp.json();
+          set('publicIp', j.ip || '—');
+        } else set('publicIp','Unavailable');
+      } catch (e) { set('publicIp','Unavailable') }
+
+      updateBatteryChart();
+      updateAppsChart();
+      buildSnapshot();
+    }
+
+    // Battery history
+    function recordBatteryHistory(level) {
+      try {
+        const key = LS_KEYS.BATTERY_HISTORY;
+        const raw = localStorage.getItem(key);
+        const arr = raw ? JSON.parse(raw) : [];
+        const ts = new Date().toISOString();
+        arr.push({t: ts, level: Math.round(level*100)});
+        while (arr.length > 96) arr.shift();
+        localStorage.setItem(key, JSON.stringify(arr));
+        $('batteryCount').textContent = arr.length + ' samples';
+      } catch(e){}
+    }
+    function getBatteryHistory() {
+      try { return JSON.parse(localStorage.getItem(LS_KEYS.BATTERY_HISTORY) || '[]'); } catch(e){ return [] }
+    }
+    function clearBatteryHistory() {
+      localStorage.removeItem(LS_KEYS.BATTERY_HISTORY);
+      $('batteryCount').textContent = '0 samples';
+      updateBatteryChart();
+    }
+    function updateBatteryChart() {
+      const data = getBatteryHistory();
+      const labels = data.map(d => new Date(d.t).toLocaleTimeString());
+      const values = data.map(d => d.level);
+      const ctx = document.getElementById('batteryChart').getContext('2d');
+      if (batteryChart) {
+        batteryChart.data.labels = labels;
+        batteryChart.data.datasets[0].data = values;
+        batteryChart.update();
+      } else {
+        batteryChart = new Chart(ctx, {
+          type: 'line',
+          data: {labels, datasets:[{label:'Battery %', data: values, borderColor:'#00ff9d', backgroundColor:'rgba(0,255,157,0.08)', tension:0.3}]},
+          options: {responsive:true, plugins:{legend:{display:false}}, scales:{y:{min:0,max:100}}}
+        });
+      }
+    }
+
+    // Apps list (manual)
+    function loadApps() {
+      try {
+        const raw = localStorage.getItem(LS_KEYS.APPS_LIST);
+        const arr = raw ? JSON.parse(raw) : [];
+        const tbody = document.querySelector('#appsTable tbody');
+        tbody.innerHTML = '';
+        arr.forEach((a, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td><input data-idx="${idx}" class="appName" value="${escapeHtml(a.name)}"></td>
+                          <td><input data-idx="${idx}" class="appMin" value="${a.min}"></td>
+                          <td><input data-idx="${idx}" class="appMb" value="${a.mb}"></td>
+                          <td><button class="smallbtn delApp" data-idx="${idx}">Delete</button></td>`;
+          tbody.appendChild(tr);
+        });
+        attachAppEvents();
+      } catch(e){}
+    }
+    function attachAppEvents() {
+      document.querySelectorAll('.delApp').forEach(btn => {
+        btn.onclick = () => {
+          const idx = Number(btn.dataset.idx);
+          const arr = JSON.parse(localStorage.getItem(LS_KEYS.APPS_LIST) || '[]');
+          arr.splice(idx,1);
+          localStorage.setItem(LS_KEYS.APPS_LIST, JSON.stringify(arr));
+          loadApps();
+          updateAppsChart();
+        };
+      });
+      document.querySelectorAll('.appName, .appMin, .appMb').forEach(inp => {
+        inp.onchange = () => {
+          const idx = Number(inp.dataset.idx);
+          const arr = JSON.parse(localStorage.getItem(LS_KEYS.APPS_LIST) || '[]');
+          if (!arr[idx]) return;
+          arr[idx].name = document.querySelector(`.appName[data-idx="${idx}"]`).value;
+          arr[idx].min = Number(document.querySelector(`.appMin[data-idx="${idx}"]`).value) || 0;
+          arr[idx].mb = Number(document.querySelector(`.appMb[data-idx="${idx}"]`).value) || 0;
+          localStorage.setItem(LS_KEYS.APPS_LIST, JSON.stringify(arr));
+          updateAppsChart();
+        };
+      });
+    }
+    function addAppRow(name='', min=0, mb=0) {
+      const arr = JSON.parse(localStorage.getItem(LS_KEYS.APPS_LIST) || '[]');
+      arr.push({name, min, mb});
+      localStorage.setItem(LS_KEYS.APPS_LIST, JSON.stringify(arr));
+      loadApps();
+      updateAppsChart();
+    }
+    function clearApps() {
+      localStorage.removeItem(LS_KEYS.APPS_LIST);
+      loadApps();
+      updateAppsChart();
+    }
+    function updateAppsChart() {
+      const raw = localStorage.getItem(LS_KEYS.APPS_LIST);
+      const arr = raw ? JSON.parse(raw) : [];
+      const labels = arr.map(a => a.name);
+      const values = arr.map(a => a.min);
+      const ctx = document.getElementById('appsChart').getContext('2d');
+      if (appsChart) {
+        appsChart.data.labels = labels;
+        appsChart.data.datasets[0].data = values;
+        appsChart.update();
+      } else {
+        appsChart = new Chart(ctx, {
+          type: 'bar',
+          data: {labels, datasets:[{label:'Daily minutes', data: values, backgroundColor:'#00ff9d'}]},
+          options: {responsive:true, plugins:{legend:{display:false}}}
+        });
+      }
+    }
+
+    // CSV import
+    document.getElementById('importCsv').addEventListener('click', () => {
+      const f = document.getElementById('csvFile').files[0];
+      if (!f) { alert('CSV ফাইল সিলেক্ট করুন'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l=>l);
+        const arr = [];
+        for (const line of lines) {
+          const parts = line.split(',');
+          if (parts.length >= 1) {
+            arr.push({name: parts[0].trim(), min: Number(parts[1]||0), mb: Number(parts[2]||0)});
+          }
+        }
+        localStorage.setItem(LS_KEYS.APPS_LIST, JSON.stringify(arr));
+        loadApps();
+        updateAppsChart();
+      };
+      reader.readAsText(f);
+    });
+
+    // Google Takeout JSON import (extract Gmail addresses and optionally app data)
+    document.getElementById('importTakeout').addEventListener('click', () => {
+      const f = document.getElementById('takeoutFile').files[0];
+      if (!f) { alert('Google Takeout JSON সিলেক্ট করুন'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const j = JSON.parse(e.target.result);
+          // Try to extract email addresses from common fields
+          const emails = new Set();
+          const walk = obj => {
+            if (!obj) return;
+            if (typeof obj === 'string') {
+              const m = obj.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g);
+              if (m) m.forEach(x => emails.add(x));
+            } else if (Array.isArray(obj)) {
+              obj.forEach(walk);
+            } else if (typeof obj === 'object') {
+              Object.values(obj).forEach(walk);
+            }
+          };
+          walk(j);
+          if (emails.size) {
+            document.getElementById('manualGmails').value = Array.from(emails).join(', ');
+            alert('Takeout parsed: ' + emails.size + ' email(s) found and placed in Gmail field (no passwords).');
+          } else {
+            alert('No emails found in Takeout JSON.');
+          }
+        } catch (err) {
+          alert('Invalid JSON file.');
+        }
+      };
+      reader.readAsText(f);
+    });
+
+    // Notifications log
+    document.getElementById('saveNotif').addEventListener('click', () => {
+      localStorage.setItem(LS_KEYS.NOTIF_LOG, document.getElementById('notifLog').value || '');
+      alert('Notification log saved locally');
+    });
+    document.getElementById('clearNotif').addEventListener('click', () => {
+      document.getElementById('notifLog').value = '';
+      localStorage.removeItem(LS_KEYS.NOTIF_LOG);
+    });
+    document.getElementById('exportNotif').addEventListener('click', () => {
+      const raw = document.getElementById('notifLog').value || '';
+      const blob = new Blob([raw], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'notifications.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Security note
+    document.getElementById('saveSecurity').addEventListener('click', () => {
+      const note = {
+        antivirus: document.getElementById('antivirusName').value || null,
+        lastScan: document.getElementById('lastScan').value || null,
+        malwareFound: document.getElementById('malwareFound').value || 'no'
+      };
+      localStorage.setItem(LS_KEYS.SECURITY_NOTE, JSON.stringify(note));
+      alert('Security note saved locally');
+    });
+    document.getElementById('exportSecurity').addEventListener('click', () => {
+      const raw = localStorage.getItem(LS_KEYS.SECURITY_NOTE) || '{}';
+      const blob = new Blob([raw], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'security_note.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Quick speed test (small safe fetch)
+    async function quickSpeedTest() {
+      const url = 'https://api.ipify.org?format=json';
+      const start = performance.now();
+      try {
+        const r = await fetch(url, {cache:'no-store'});
+        const blob = await r.blob();
+        const ms = performance.now() - start;
+        const kb = blob.size / 1024;
+        const kbps = (kb / (ms/1000)).toFixed(1);
+        $('speedResult').textContent = `${kb.toFixed(1)} KB in ${Math.round(ms)} ms ≈ ${kbps} KB/s`;
+      } catch(e) {
+        $('speedResult').textContent = 'Speed test failed';
+      }
+    }
+
+    // Snapshot builder
+    async function buildSnapshot() {
+      const apps = JSON.parse(localStorage.getItem(LS_KEYS.APPS_LIST) || '[]');
+      const snapshot = {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        connection: (navigator.connection ? {effectiveType: navigator.connection.effectiveType || null, downlink: navigator.connection.downlink || null} : null),
+        screen: {width: screen.width, height: screen.height, dpr: window.devicePixelRatio},
+        battery: {charging: $('charging').textContent, level: $('batteryLevel').textContent},
+        storageEstimate: $('storageEstimate').textContent,
+        publicIp: $('publicIp').textContent,
+        apps,
+        notifications: localStorage.getItem(LS_KEYS.NOTIF_LOG) || null,
+        securityNote: JSON.parse(localStorage.getItem(LS_KEYS.SECURITY_NOTE) || 'null'),
+        manual: {
+          deviceName: document.getElementById('manualDevice').value || null,
+          model: document.getElementById('manualModel').value || null,
+          gmails: document.getElementById('manualGmails').value || null
+        },
+        batteryHistory: getBatteryHistory()
+      };
+      $('jsonOut').textContent = JSON.stringify(snapshot, null, 2);
+      return snapshot;
+    }
+
+    // Encryption helpers using Web Crypto (AES-GCM)
+    async function deriveKey(passphrase, salt) {
+      const enc = new TextEncoder();
+      const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey(
+        {name:'PBKDF2', salt, iterations: 250000, hash: 'SHA-256'},
+        baseKey,
+        {name:'AES-GCM', length:256},
+        false,
+        ['encrypt','decrypt']
+      );
+    }
+
+    async function encryptSnapshot(jsonText, passphrase) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const key = await deriveKey(passphrase, salt);
+      const enc = new TextEncoder();
+      const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, enc.encode(jsonText));
+      // Combine salt + iv + ciphertext into a single blob
+      const combined = new Uint8Array(salt.byteLength + iv.byteLength + ct.byteLength);
+      combined.set(salt, 0);
+      combined.set(iv, salt.byteLength);
+      combined.set(new Uint8Array(ct), salt.byteLength + iv.byteLength);
+      return combined;
+    }
+
+    async function decryptSnapshot(blobBuffer, passphrase) {
+      try {
+        const data = new Uint8Array(blobBuffer);
+        const salt = data.slice(0,16);
+        const iv = data.slice(16,28);
+        const ct = data.slice(28);
+        const key = await deriveKey(passphrase, salt);
+        const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+        const dec = new TextDecoder();
+        return dec.decode(pt);
+      } catch (e) {
+        throw new Error('Decryption failed (wrong passphrase or corrupted file)');
+      }
+    }
+
+    // Snapshot actions
+    document.getElementById('snapshotBtn').addEventListener('click', async () => {
+      const pass = document.getElementById('encPass').value;
+      if (!pass) { if (!confirm('No passphrase entered. Snapshot will be downloaded unencrypted. Continue?')) return; }
+      const snap = await buildSnapshot();
+      const jsonText = JSON.stringify(snap, null, 2);
+      if (pass) {
+        try {
+          const combined = await encryptSnapshot(jsonText, pass);
+          const blob = new Blob([combined], {type:'application/octet-stream'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = 'device_snapshot_encrypted.bin'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+          localStorage.setItem(LS_KEYS.SNAPSHOT, JSON.stringify(snap));
+          alert('Encrypted snapshot downloaded locally.');
+        } catch (e) {
+          alert('Encryption failed: ' + e.message);
+        }
+      } else {
+        const blob = new Blob([jsonText], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'device_snapshot.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        localStorage.setItem(LS_KEYS.SNAPSHOT, JSON.stringify(snap));
+        alert('Plain JSON snapshot downloaded locally.');
+      }
+    });
+
+    // Download plain JSON
+    document.getElementById('downloadPlain').addEventListener('click', async () => {
+      const snap = await buildSnapshot();
+      const jsonText = JSON.stringify(snap, null, 2);
+      const blob = new Blob([jsonText], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'device_snapshot.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Load encrypted file and decrypt
+    document.getElementById('loadEncrypted').addEventListener('click', () => {
+      $('encFile').click();
+    });
+    $('encFile').addEventListener('change', async (ev) => {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const pass = prompt('Enter passphrase to decrypt the file (do not share passphrase).');
+      if (!pass) { alert('Passphrase required'); return; }
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          const plain = await decryptSnapshot(e.target.result, pass);
+          // show plain JSON and offer to load manual fields
+          $('jsonOut').textContent = plain;
+          if (confirm('Decrypted successfully. Load manual fields (device name, model, gmails) from snapshot?')) {
+            try {
+              const obj = JSON.parse(plain);
+              document.getElementById('manualDevice').value = obj.manual?.deviceName || '';
+              document.getElementById('manualModel').value = obj.manual?.model || '';
+              document.getElementById('manualGmails').value = obj.manual?.gmails || '';
+              localStorage.setItem(LS_KEYS.SNAPSHOT, JSON.stringify(obj));
+              alert('Manual fields loaded locally.');
+            } catch(e) { alert('Loaded JSON is invalid'); }
+          }
+        } catch (err) {
+          alert(err.message);
+        }
+      };
+      reader.readAsArrayBuffer(f);
+      ev.target.value = '';
+    });
+
+    // Clear all local data
+    document.getElementById('clearAll').addEventListener('click', () => {
+      if (!confirm('Clear all dashboard local data? This will remove saved snapshots, apps, logs, and history.')) return;
+      Object.values(LS_KEYS).forEach(k => localStorage.removeItem(k));
+      location.reload();
+    });
+
+    // Request notification permission
+    document.getElementById('requestNotif').addEventListener('click', async () => {
+      try {
+        const res = await Notification.requestPermission();
+        set('notifPerm', res);
+        alert('Notification permission: ' + res);
+      } catch(e) { alert('Permission request failed'); }
+    });
+
+    // Attach other buttons
+    document.getElementById('addAppBtn').addEventListener('click', () => addAppRow('New App', 0, 0));
+    document.getElementById('clearApps').addEventListener('click', clearApps);
+    document.getElementById('clearBatteryHistory').addEventListener('click', clearBatteryHistory);
+    document.getElementById('speedTestBtn').addEventListener('click', quickSpeedTest);
+
+    // Utility
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // Init
+    (function init() {
+      // Load saved apps
+      loadApps();
+      // Load notif log
+      const notif = localStorage.getItem(LS_KEYS.NOTIF_LOG);
+      if (notif) document.getElementById('notifLog').value = notif;
+      // Load security note
+      const sec = localStorage.getItem(LS_KEYS.SECURITY_NOTE);
+      if (sec) {
+        try {
+          const s = JSON.parse(sec);
+          document.getElementById('antivirusName').value = s.antivirus || '';
+          document.getElementById('lastScan').value = s.lastScan || '';
+          document.getElementById('malwareFound').value = s.malwareFound || 'no';
+        } catch(e){}
+      }
+      // initial gather
+      gather();
+      // periodic gather
+      setInterval(gather, 20_000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "system_name": "TAMANN A SYSTEM",
+  "version": "v1.0.0-MASTER",
+  "developer_id": "tamanna456760-it",
+  "identity_provider": "Google",
+  "trust_level": "high",
+  "verification": "mandatory"
+}

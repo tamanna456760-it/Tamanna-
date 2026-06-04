@@ -1,12 +1,18 @@
 # r7_total_restore.py
-import os, sys, json, shutil, hashlib
+import hashlib
+import json
+import os
+import shutil
+import sys
+
 
 def sha256(path):
     h = hashlib.sha256()
     with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(1024*1024), b""):
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 def load_entries(entries_path):
     entries = []
@@ -16,17 +22,20 @@ def load_entries(entries_path):
                 entries.append(json.loads(line))
     return entries
 
+
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python r7_total_restore.py <SESSION_DIR> <TARGET_DIR> [MODULE_NAME]")
+        print(
+            "Usage: python r7_total_restore.py <SESSION_DIR> <TARGET_DIR> [MODULE_NAME]"
+        )
         sys.exit(1)
 
     session_dir = os.path.abspath(sys.argv[1])
-    target_dir  = os.path.abspath(sys.argv[2])
+    target_dir = os.path.abspath(sys.argv[2])
     module_name = sys.argv[3] if len(sys.argv) >= 4 else None
 
     entries_path = os.path.join(session_dir, "entries.jsonl")
-    files_root   = os.path.join(session_dir, "files")
+    files_root = os.path.join(session_dir, "files")
     entries = load_entries(entries_path)
 
     mismatches, restored = [], 0
@@ -54,6 +63,7 @@ def main():
             print(f" - {m[0]}/{m[1]}: {m[2]}")
     else:
         print("All files restored with integrity.")
+
 
 if __name__ == "__main__":
     main()

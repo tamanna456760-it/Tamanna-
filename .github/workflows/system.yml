@@ -1,0 +1,164 @@
+system:
+  name: Tamanna-Unified-AI-System
+  mode: ultra
+
+automation:
+  issue_scan: true
+  auto_fix: true
+  system_monitor: true
+  brain_core: true
+
+github:
+  workflows: true
+  scripts: true
+
+powerhub:
+  enabled: true
+  orchestrator: true
+  sync_pipeline: true
+  backend: true
+
+services:
+  web_backend: true
+  web_frontend: true
+  aspnet_site: true
+  api_server: true
+  chat_server: true
+  mobile_app: true
+
+security:
+  integrity_watch: true
+  defense_core: true
+  network_defense: true
+  self_defense: true
+
+state:
+  root_config: config.json
+  reports: ai_report.json
+  logs: ROOT/logs
+
+flow:
+  auto_trigger_ci: true
+  self_heal: true
+  ai_feedback_loop: true
+
+# 🧠 FILE FILTER ENGINE (NEW ADD)
+file_filter:
+
+  excluded_patterns:
+    - ".git"
+    - ".gitignore"
+    - "gradle"
+    - "gradlew"
+    - "gradlew.*"
+    - "node_modules"
+    - ".snapshots"
+    - ".idea"
+    - ".vscode"
+    - "*.log"
+    - "*.tmp"
+    - "target"
+    - "dist"
+    - "build"
+    - ".DS_Store"
+    - "*.bak"
+    - "*.swp"
+    - "*.swo"
+    - "*.lock"
+    - "*.iml"
+    - "coverage"
+    - "*.min.js"
+    - "*.min.css"
+    - "__pycache__"
+    - ".marketing"
+    - ".env"
+    - ".env.*"
+
+    # images
+    - "*.jpg"
+    - "*.jpeg"
+    - "*.png"
+    - "*.gif"
+    - "*.bmp"
+    - "*.tiff"
+    - "*.ico"
+    - "*.svg"
+    - "*.webp"
+    - "*.psd"
+    - "*.ai"
+    - "*.eps"
+    - "*.indd"
+    - "*.raw"
+    - "*.cr2"
+    - "*.nef"
+
+    # videos
+    - "*.mp4"
+    - "*.mov"
+    - "*.avi"
+    - "*.wmv"
+    - "*.flv"
+    - "*.mkv"
+    - "*.webm"
+    - "*.m4v"
+
+    # project files
+    - "*.db"
+    - "*.sqlite"
+    - "*.sqlite3"
+    - "*.mdb"
+    - "*.accdb"
+    - "*.sql"
+    - "*.dump"
+
+    # archives
+    - "*.zip"
+    - "*.tar"
+    - "*.tar.gz"
+    - "*.rar"
+    - "*.7z"
+
+    # binaries
+    - "*.exe"
+    - "*.dll"
+    - "*.so"
+    - "*.dylib"
+    - "*.jar"
+    - "*.war"
+    - "*.apk"
+    - "*.aab"
+    - "*.ipa"
+
+    # python/java
+    - "*.pyc"
+    - "*.class"
+    - "__pycache__"
+
+    - ".npmrc"
+
+  included_patterns:
+    - "build.gradle"
+    - "settings.gradle"
+    - "gradle.properties"
+    - "pom.xml"
+    - "Makefile"
+    - "CMakeLists.txt"
+    - "package.json"
+    - "requirements.txt"
+    - "Pipfile"
+    - "Gemfile"
+    - "composer.json"
+    - ".editorconfig"
+    - ".eslintrc.json"
+    - ".eslintrc.js"
+    - ".prettierrc"
+    - ".babelrc"
+    - ".dockerignore"
+    - ".gitattributes"
+    - ".stylelintrc"
+    - ".npmrc"
+
+  default:
+    default_prompt: "Enter your prompt here"
+    include_all_files: false
+    include_project_structure: true

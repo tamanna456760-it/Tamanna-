@@ -1,0 +1,13 @@
+[CORE.SHIELD]
+    shield-mode: sovereign
+    shield-density: 7x
+    shield-sync: full
+    shield-layers:
+        - identity-shield
+        - engine-shield
+        - heartbeat-shield
+        - powerhub-shield
+        - network-shield
+    shield-integrity: locked
+    shield-field: active
+    shield-echo: stable

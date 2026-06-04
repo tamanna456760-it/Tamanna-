@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
+import logging
+import signal
+import sys
+import threading
+import time
+
 from flask import Flask, jsonify
-import threading, time, signal, sys, logging
 
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 stop_event = threading.Event()
 worker_status = {"last_run": None, "runs": 0, "error": None}
+
 
 def do_work_loop():
     while not stop_event.is_set():
@@ -22,7 +29,9 @@ def do_work_loop():
             worker_status["error"] = str(e)
             time.sleep(5)
 
+
 worker_thread = threading.Thread(target=do_work_loop, daemon=True)
+
 
 @app.route("/health")
 def health():
@@ -30,9 +39,11 @@ def health():
     payload = {"status": "ok" if ok else "stopping", **worker_status}
     return jsonify(payload), 200 if ok else 503
 
+
 def start_worker():
     logging.info("Starting worker thread")
     worker_thread.start()
+
 
 def stop_handler(signum, frame):
     logging.info("Signal received, stopping gracefully...")
@@ -41,9 +52,12 @@ def stop_handler(signum, frame):
     logging.info("Worker stopped. Exiting.")
     sys.exit(0)
 
+
 if __name__ == "__main__":
     import os
+
     from waitress import serve  # production WSGI server
+
     signal.signal(signal.SIGTERM, stop_handler)
     signal.signal(signal.SIGINT, stop_handler)
     start_worker()

@@ -1,0 +1,38 @@
+name: 🤖 Real AI Debugger
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ai-debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 📦 Install OpenAI
+        run: pip install openai
+
+      - name: 🔍 Scan Code
+        run: python scripts/scan.py
+
+      - name: 🤖 AI Debugger Run
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/ai_debugger.py
+
+      - name: 📊 Show Report
+        run: cat report.txt || true
+
+      - name: 📁 Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai-debug-report
+          path: report.txt

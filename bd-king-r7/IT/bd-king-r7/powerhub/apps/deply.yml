@@ -2,7 +2,7 @@ name: Deploy to Server
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
@@ -20,7 +20,7 @@ jobs:
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
-      
+
       - name: Restart service
         uses: appleboy/ssh-action@v0.1.7
         with:

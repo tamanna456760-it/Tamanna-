@@ -1,0 +1,2 @@
+with open("logs/tamanna_radar.log", "a") as file:
+    file.write("Radar Started\n")

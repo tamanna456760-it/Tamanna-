@@ -1,7 +1,8 @@
 import logging
-logger = logging.getLogger('powerhub')
-handler = logging.FileHandler('powerhub.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+
+logger = logging.getLogger("powerhub")
+handler = logging.FileHandler("powerhub.log")
+formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)

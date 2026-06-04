@@ -1,0 +1,22 @@
+tamanna_system/
+│
+├── app.py
+├── users.py
+├── admin.py
+│
+├── tools/
+│   ├── health_check.py
+│   ├── logger.py
+│   └── env_check.py
+│
+├── api/
+│   └── routes.py
+│
+├── templates/
+│   ├── login.html
+│   ├── register.html
+│   └── dashboard.html
+│
+├── static/
+│
+└── README.md

@@ -1,0 +1,63 @@
+name: Tamanna Full Defense System
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '*/5 * * * *'  # প্রতি 5 মিনিটে auto-run
+
+jobs:
+  master_system:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Prepare Backup & Logs
+      run: |
+        mkdir -p backup
+        cp -r *.py backup/
+        echo "Backup created at $(date)" >> backup/backup_log.txt
+        touch security_logs.json
+        echo "All previous versions saved"
+
+    - name: Run Master Controller
+      run: |
+        python tamanna_master_controller.py &
+        echo "Master Controller Started"
+
+    - name: Run Auto Unit Generator
+      run: |
+        python tamanna_auto_unit.py &
+        echo "Auto Unit Generator Started"
+
+    - name: Run Security AI / Intrusion Detection
+      run: |
+        python tamanna_security_ai.py &
+        echo "Security AI Started"
+
+    - name: Run Network & PowerHub Communication
+      run: |
+        python network_powerhub.py &
+        echo "Network PowerHub Communication Started"
+
+    - name: Run Emergency Response Manager
+      run: |
+        python emergency_unit_manager.py &
+        echo "Emergency Response Manager Started"
+
+    - name: Monitor Logs Live
+      run: |
+        tail -f security_logs.json

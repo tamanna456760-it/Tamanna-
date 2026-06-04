@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Device Info</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+    }
+    .box {
+      border: 1px solid #0f0;
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>📱 Device Information</h2>
+
+<div class="box">
+  <p id="device"></p>
+  <p id="platform"></p>
+  <p id="language"></p>
+  <p id="screen"></p>
+  <p id="online"></p>
+</div>
+
+<script>
+  document.getElementById("device").innerText =
+    "User Agent: " + navigator.userAgent;
+
+  document.getElementById("platform").innerText =
+    "Platform: " + navigator.platform;
+
+  document.getElementById("language").innerText =
+    "Language: " + navigator.language;
+
+  document.getElementById("screen").innerText =
+    "Screen: " + screen.width + " x " + screen.height;
+
+  document.getElementById("online").innerText =
+    "Online Status: " + (navigator.onLine ? "Online ✅" : "Offline ❌");
+</script>
+
+</body>
+</html>

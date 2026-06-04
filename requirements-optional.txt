@@ -1,0 +1,54 @@
+# ============================================================
+# OPTIONAL DEPENDENCIES FOR ADVANCED FEATURES
+# ============================================================
+
+# Audio Processing (requires system libraries)
+pyaudio>=0.2.13
+librosa>=0.10.0
+soundfile>=0.12.1
+audioread>=3.1.0
+
+# Speech Recognition
+SpeechRecognition>=3.10.0
+pyttsx3>=2.90
+
+# Image Processing
+Pillow>=10.1.0
+OpenCV-python>=4.8.0
+scikit-image>=0.22.0
+
+# Natural Language Processing
+NLTK>=3.8.0
+spaCy>=3.7.0
+TextBlob>=0.17.0
+
+# Plotting & Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+plotly>=5.18.0
+
+# Jupyter & Notebooks
+Jupyter>=1.0.0
+JupyterLab>=4.0.0
+ipython>=8.18.0
+
+# API Documentation
+swagger-ui-py>=23.6.1
+apispec>=6.3.0
+
+# Database Drivers
+psycopg2-binary>=2.9.0
+mysqlclient>=2.2.0
+pymongo>=4.6.0
+
+# Mobile & Desktop
+Kivy>=2.3.0
+PyQt6>=6.6.0
+
+# Game Development
+Pygame>=2.5.0
+
+# Web Scraping (use responsibly)
+BeautifulSoup4>=4.12.0
+selenium>=4.15.0
+scrapy>=2.11.0

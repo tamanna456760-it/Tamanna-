@@ -1,8 +1,10 @@
 """
 Simple safe builder helper. Expand with actual build commands for your modules.
 """
-import subprocess
+
 import os
+import subprocess
+
 
 def build_all():
     print("[Builder] Starting safe build sequence...")
@@ -16,6 +18,7 @@ def build_all():
         print("[Builder] Build complete (placeholder).")
     except Exception as e:
         print("[Builder] Build error:", e)
+
 
 if __name__ == "__main__":
     build_all()

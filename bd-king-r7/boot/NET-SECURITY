@@ -1,0 +1,6 @@
+[NET-SECURITY]
+    shield-mode: reinforced
+    shield-density: 7x
+    shield-sync: locked
+    shield-integrity: verified
+    shield-field: active

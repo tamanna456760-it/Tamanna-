@@ -1,0 +1,13 @@
+@page
+@model GenericModel
+<h2>Program & System — Tamanna System</h2>
+
+<p>The "Tamanna system" is the automation layer for bd-king-r7. It includes:</p>
+<ol>
+  <li>Auto-sync agents that pull/push code, run fixers and builds.</li>
+  <li>Central orchestrator for tracking runs, failures, and history.</li>
+  <li>Web UI (this site) for documentation and quick status.</li>
+</ol>
+
+<h3>How it runs</h3>
+<p>Agents run periodically (configurable interval). They try to auto-fix (format/lint), build, and only commit & push when the build is successful. Failed builds leave changes staged for manual review.</p>

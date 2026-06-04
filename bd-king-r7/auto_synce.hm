@@ -4,18 +4,20 @@ BD-King-R7 Auto Sync Program
 Automatically synchronizes data between BD-King-R7 devices and central server
 """
 
+import hashlib
 import json
-import time
 import logging
-import requests
+import os
+import sqlite3
 import threading
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-import sqlite3
-import hashlib
-import schedule
-import os
 from typing import Dict, List, Optional
+
+import requests
+import schedule
+
 
 class BDAutoSync:
     def __init__(self, config_file: str = "config.json"):
@@ -24,8 +26,9 @@ class BDAutoSync:
         self.running = False
         self.sync_thread = None
         self.last_sync_time = None
-        self.sync_interval = self.config.get('sync_interval', 300)  # 5 minutes default
-        
+        self.sync_interval = self.config.get(
+            'sync_interval', 300)  # 5 minutes default
+
     def load_config(self, config_file: str) -> Dict:
         """Load configuration from JSON file"""
         try:

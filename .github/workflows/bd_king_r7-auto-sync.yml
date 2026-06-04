@@ -1,0 +1,54 @@
+# .github/workflows/bd-king-r7-auto-sync.yml
+name: BD-King-R7 Auto Code Sync & Fix
+
+on:
+  push:
+    branches: [ main, develop, power-sync ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  auto-sync-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Dependencies
+      run: |
+        pip install pylint flake8 black isort autopep8 bandit safety
+        pip install radon xenon mypy pytest
+    
+    - name: Auto Code Sync & Fix
+      run: python .github/scripts/auto_code_fixer.py
+    
+    - name: Commit & Push Fixes
+      run: |
+        git config user.name " tamanna456760-it"
+        git config user.email "tamanna456760@gmail.com"
+        git add .
+        git commit -m "🤖 Auto-fix: Code errors resolved [skip ci]" || echo "changes to commit"
+        git push || echo "push needed"
+    
+    - name: Create PR for Fixes
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: "🤖 Auto-fix: Code errors resolved"
+        body: "This PR contains auto-fixed code errors detected by BD-King-R7"
+        branch: auto-fix-$(date +%Y%m%d-%H%M%S)
+        base: main
+        labels: auto-fix, bot

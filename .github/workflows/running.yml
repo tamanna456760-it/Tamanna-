@@ -1,0 +1,28 @@
+name: Run JSON File
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Read run.json
+        run: |
+          echo "Reading run.json..."
+          cat run.json
+
+      - name: Validate JSON
+        run: |
+          jq . run.json > /dev/null
+          echo "JSON is valid"

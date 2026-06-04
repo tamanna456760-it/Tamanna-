@@ -1,4 +1,4 @@
 module.exports = () => ({
   status: "OK",
-  power: "Normal Power Activated"
+  power: "Normal Power Activated",
 });

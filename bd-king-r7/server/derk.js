@@ -1,4 +1,4 @@
 module.exports = () => ({
   status: "OK",
-  power: "Dark Power Online"
+  power: "Dark Power Online",
 });

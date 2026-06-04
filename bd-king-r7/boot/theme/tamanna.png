@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Display</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f0f0;
+      margin: 0;
+    }
+    figure {
+      text-align: center;
+    }
+    img {
+      max-width: 90%;
+      height: auto;
+      border: 3px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    }
+    figcaption {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <figure>
+    <img src="Photo.png" alt="Uploaded photo" />
+    <figcaption>Uploaded Photo</figcaption>
+  </figure>
+</body>
+</html>

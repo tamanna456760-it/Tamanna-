@@ -1,0 +1,6 @@
+{
+  "powerhub_name": "BD-KING-R7 PowerHub Plus",
+  "pulse_interval_ms": 1000,
+  "max_output_level": 100,
+  "status": "enabled"
+}

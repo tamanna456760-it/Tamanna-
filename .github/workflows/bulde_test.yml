@@ -1,10 +1,99 @@
+name: Build & Test Tamanna
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3️⃣ Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 4️⃣ Set up Java
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 5️⃣ Build & Test Python files
+      - name: Run Python files
+        run: |
+          for f in $(find . -type f -name "*.py"); do
+            echo "[PY] Running $f"
+            python3 "$f" || echo "[PY] ERROR in $f"
+          done
+
+      # 6️⃣ Build & Test NodeJS files
+      - name: Run NodeJS files
+        run: |
+          for f in $(find . -type f -name "*.js"); do
+            echo "[NODE] Running $f"
+            node "$f" || echo "[NODE] ERROR in $f"
+          done
+
+      # 7️⃣ Run Shell scripts
+      - name: Run Shell scripts
+        run: |
+          find . -type f -name "*.sh" -exec chmod +x {} \;
+          for f in $(find . -type f -name "*.sh"); do
+            echo "[SH] Running $f"
+            sh "$f" || echo "[SH] ERROR in $f"
+          done
+
+      # 8️⃣ Compile & Run C files
+      - name: Build & Run C files
+        run: |
+          for f in $(find . -type f -name "*.c"); do
+            out="${f%.c}"
+            gcc "$f" -o "$out" && ./"$out" || echo "[C] ERROR in $f"
+          done
+
+      # 9️⃣ Compile & Run Java files
+      - name: Build & Run Java files
+        run: |
+          for f in $(find . -type f -name "*.java"); do
+            cls=$(basename "$f" .java)
+            javac "$f" && java "$cls" || echo "[JAVA] ERROR in $f"
+          done
+
+      # 🔟 Optional: GitHub push after build/test
+      - name: GitHub Auto Commit & Push
+        if: ${{ secrets.GITHUB_TOKEN != '' }}
+        run: |
+          git config user.name "Tamanna456760-it"
+          git config user.email "tamanna456760@gmail.com"
+          git add .
+          git commit -m "Auto build/test update $(date)" || echo "Nothing to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 # tamanna/bd-king-r7/it/
 name: Build · Test · Deploy
 
 # Triggers: on push to main (or any branch), and nightly cron
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
   workflow_dispatch: {}
   schedule:
     - cron: "0 0 * * *" # daily at 00:00 UTC (adjust as needed)

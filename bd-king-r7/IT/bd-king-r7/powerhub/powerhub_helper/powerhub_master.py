@@ -19,8 +19,6 @@ Functions:
 """
 
 import os
-import sys
-import time
 import subprocess
 
 ROOT = "bd-king-r7/it"

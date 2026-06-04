@@ -1,0 +1,103 @@
+flowchart TD
+
+subgraph group_control_plane["Control plane"]
+  node_lint_detect_issues["Scan issues<br/>scanner"]
+  node_auto_fix_issues["Auto fix<br/>fixer<br/>[auto_fix_issues.py]"]
+  node_system_monitor(("System monitor"))
+  node_integrity_monitor(("Integrity check"))
+  node_self_defense{{"Self defense<br/>[ai_self_defense.py]"}}
+  node_brain_core(("Brain core<br/>policy core<br/>[ai_brain_core.py]"))
+end
+
+subgraph group_automation_ci["Automation/CI"]
+  node_github_actions["GitHub Actions<br/>ci automation<br/>[workflows]"]
+  node_github_scripts["CI scripts<br/>automation scripts<br/>[scripts]"]
+end
+
+subgraph group_sync_plane["Sync/backup"]
+  node_sync_update["Sync/update<br/>sync plane<br/>[git_sync.py]"]
+  node_backup_manager[("Backup manager<br/>[backup_manager.py]")]
+end
+
+subgraph group_security_plane["Security"]
+  node_defense_core{{"Defense core<br/>security policy<br/>[ai_defense_core.py]"}}
+  node_network_defense{{"Net defense<br/>network guard"}}
+end
+
+subgraph group_surfaces["User surfaces"]
+  node_web_frontend["Web UI<br/>web frontend<br/>[index.html]"]
+  node_chat_server["Chat server<br/>chat backend"]
+  node_android_app["Android app<br/>mobile client<br/>[MainActivity.kt]"]
+end
+
+subgraph group_backend_agents["Backend/agents"]
+  node_powerhub_core(("PowerHub core<br/>orchestrator core"))
+  node_device_agent["Device agent<br/>distributed agent"]
+  node_api_server["API server<br/>backend api<br/>[main.py]"]
+  node_artifacts_api["Typed API<br/>Node/TS backend<br/>[app.ts]"]
+  node_powerhub_cluster["PowerHub cluster<br/>multi-runtime orchestrator"]
+end
+
+subgraph group_state["State"]
+  node_state_files[("State files<br/>file-backed state<br/>[brain_memory.json]")]
+end
+
+node_lint_detect_issues -->|"classifies"| node_brain_core
+node_brain_core -->|"drives"| node_auto_fix_issues
+node_auto_fix_issues -->|"rechecks"| node_integrity_monitor
+node_integrity_monitor -->|"reports to"| node_system_monitor
+node_system_monitor -->|"escalates"| node_self_defense
+node_self_defense -->|"delegates"| node_defense_core
+node_defense_core -->|"enforces"| node_network_defense
+node_github_actions -->|"runs"| node_github_scripts
+node_github_scripts -->|"triggers"| node_lint_detect_issues
+node_github_scripts -->|"repairs"| node_auto_fix_issues
+node_sync_update -->|"backs up"| node_backup_manager
+node_backup_manager -->|"writes"| node_state_files
+node_sync_update -->|"updates"| node_state_files
+node_device_agent -->|"reports"| node_api_server
+node_api_server -->|"serves"| node_web_frontend
+node_api_server -->|"integrates"| node_chat_server
+node_android_app -->|"calls"| node_api_server
+node_powerhub_cluster -->|"orchestrates"| node_sync_update
+node_powerhub_cluster -->|"controls"| node_device_agent
+node_powerhub_cluster -->|"persists"| node_state_files
+node_state_files -->|"feeds"| node_brain_core
+node_state_files -->|"observes"| node_system_monitor
+node_artifacts_api -->|"parallel backend"| node_api_server
+node_artifacts_api -->|"supports"| node_web_frontend
+
+click node_lint_detect_issues "https://github.com/tamanna456760-it/tamanna-/blob/main/lint_and_detect_issues.py"
+click node_auto_fix_issues "https://github.com/tamanna456760-it/tamanna-/blob/main/auto_fix_issues.py"
+click node_system_monitor "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_system_monitor.py"
+click node_integrity_monitor "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_code_integrity_monitor.py"
+click node_self_defense "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_self_defense.py"
+click node_brain_core "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_brain_core.py"
+click node_powerhub_core "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_powerhub_core.py"
+click node_defense_core "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_defense_core.py"
+click node_network_defense "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_network_defense.py"
+click node_github_actions "https://github.com/tamanna456760-it/tamanna-/blob/main/.github/workflows"
+click node_github_scripts "https://github.com/tamanna456760-it/tamanna-/blob/main/.github/scripts"
+click node_sync_update "https://github.com/tamanna456760-it/tamanna-/blob/main/Tamanna-AI-System/git_sync.py"
+click node_backup_manager "https://github.com/tamanna456760-it/tamanna-/blob/main/Tamanna-AI-System/backup_manager.py"
+click node_device_agent "https://github.com/tamanna456760-it/tamanna-/tree/main/device"
+click node_api_server "https://github.com/tamanna456760-it/tamanna-/blob/main/api/main.py"
+click node_artifacts_api "https://github.com/tamanna456760-it/tamanna-/blob/main/artifacts/api-server/src/app.ts"
+click node_web_frontend "https://github.com/tamanna456760-it/tamanna-/blob/main/bd-king-r7/web/public/index.html"
+click node_android_app "https://github.com/tamanna456760-it/tamanna-/blob/main/tamanna-ai-app/app/src/main/java/com/tamanna/MainActivity.kt"
+click node_powerhub_cluster "https://github.com/tamanna456760-it/tamanna-/tree/main/bd-king-r7/IT/bd-king-r7/powerhub"
+click node_state_files "https://github.com/tamanna456760-it/tamanna-/blob/main/brain_memory.json"
+
+classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
+classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
+class node_lint_detect_issues,node_auto_fix_issues,node_system_monitor,node_integrity_monitor,node_self_defense,node_brain_core,node_state_files toneBlue
+class node_github_actions,node_github_scripts toneAmber
+class node_sync_update,node_backup_manager toneMint
+class node_defense_core,node_network_defense toneRose
+class node_web_frontend,node_chat_server,node_android_app toneIndigo
+class node_powerhub_core,node_device_agent,node_api_server,node_artifacts_api,node_powerhub_cluster toneTeal
