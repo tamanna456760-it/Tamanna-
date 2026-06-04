@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-04T05:34:36.125632Z",
-  "total_files": 284,
+  "generated_at": "2026-06-04T06:20:15.396338Z",
+  "total_files": 285,
   "files": [
     {
       "path": "ai_code_integrity_monitor.py",
@@ -272,6 +272,10 @@
       "size": 4227
     },
     {
+      "path": "TAMANNA_ULTIMATE_CODE_RUNNER.py",
+      "size": 15769
+    },
+    {
       "path": "tamanna_master_dashboard.py",
       "size": 2723
     },
@@ -353,7 +357,7 @@
     },
     {
       "path": "auto_code_manager.py",
-      "size": 10519
+      "size": 10693
     },
     {
       "path": "ai-sync-config.json",
@@ -581,7 +585,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 25336
+      "size": 25418
     },
     {
       "path": "artifacts/lib/db/src/schema/messages.ts",
