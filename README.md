@@ -1,5 +1,5 @@
 
-# 📘 Project Documentation – Ultra-Advanced Cognitive AI & Autonomous Systems (v3.0)
+# 📘 – Ultra-Advanced Cognitive AI & Autonomous Systems (v3.0)
 
 ## 🔭 Overview
 
