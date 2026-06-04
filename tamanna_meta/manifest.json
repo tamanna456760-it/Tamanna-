@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-04T06:20:15.396338Z",
+  "generated_at": "2026-06-04T06:54:26.270872Z",
   "total_files": 285,
   "files": [
     {
@@ -265,7 +265,7 @@
     },
     {
       "path": "ai_brain_core.py",
-      "size": 2608
+      "size": 6111
     },
     {
       "path": "tamanna_distributed_ai.py",
