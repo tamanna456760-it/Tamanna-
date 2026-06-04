@@ -1,0 +1,33 @@
+{
+  "blacklist": {
+    "192.168.1.100": "AA:BB:CC:DD:EE:FF",
+    "192.168.1.101": "AA:BB:CC:DD:EE:F0"
+  },
+  "whitelist": [
+    "127.0.0.1",
+    "localhost",
+    "192.168.1.1",
+    "192.168.1.50"
+  ],
+  "rate_limit_seconds": 60,
+  "enable_arp_monitoring": true,
+  "enable_port_scanning": true,
+  "enable_dos_protection": true,
+  "alert_methods": [
+    "log",
+    "email",
+    "webhook"
+  ],
+  "email_alerts": {
+    "enabled": false,
+    "recipient": "admin@example.com",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587
+  },
+  "webhook_alerts": {
+    "enabled": false,
+    "url": "https://your-webhook.com/security-alert"
+  },
+  "max_alerts_to_store": 10000,
+  "alert_retention_days": 30
+}
