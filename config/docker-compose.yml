@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  tamanna-ai:
+    image: python:3.11-slim
+    container_name: tamanna-ai-core
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/.venv
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENV=development
+    ports:
+      - "8000:8000"
+    command: python main.py
+    networks:
+      - tamanna-net
+
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: tamanna-db
+    environment:
+      POSTGRES_USER: tamanna
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: tamanna_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tamanna-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tamanna"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: tamanna-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - tamanna-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  tamanna-net:
+    driver: bridge
