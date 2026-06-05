@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-04T18:41:49.388405Z",
-  "total_files": 288,
+  "generated_at": "2026-06-05T17:06:36.359408Z",
+  "total_files": 289,
   "files": [
     {
       "path": "ai_code_integrity_monitor.py",
@@ -38,6 +38,10 @@
     {
       "path": "tamanna_debug.sh",
       "size": 1024
+    },
+    {
+      "path": "lint_monitor.py",
+      "size": 752
     },
     {
       "path": "tamanna_success_program.sh",
