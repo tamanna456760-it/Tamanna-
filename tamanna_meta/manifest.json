@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-05T17:06:36.359408Z",
+  "generated_at": "2026-06-05T17:09:44.884560Z",
   "total_files": 289,
   "files": [
     {
@@ -601,7 +601,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 25598
+      "size": 25662
     },
     {
       "path": "artifacts/lib/db/src/schema/messages.ts",
