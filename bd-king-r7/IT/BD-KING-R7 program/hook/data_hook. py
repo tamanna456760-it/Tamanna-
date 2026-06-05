@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+
+import os
+import json
+import time
+import psutil
+import socket
+from datetime import datetime
+
+CONFIG = {
+    "interval": 5,
+    "output_file": "universal_hook_data.jsonl"
+}
+
+# =========================
+# TIME
+# =========================
+
+def now():
+    return datetime.utcnow().isoformat()
+
+# =========================
+# SYSTEM DATA
+# =========================
+
+def system_hook():
+    return {
+        "time": now(),
+        "cpu_percent": psutil.cpu_percent(),
+        "ram_percent": psutil.virtual_memory().percent,
+        "disk_percent": psutil.disk_usage("/").percent,
+        "process_count": len(psutil.pids()),
+        "uptime": time.time() - psutil.boot_time()
+    }
+
+# =========================
+# NETWORK DATA
+# =========================
+
+def network_hook():
+    net = psutil.net_io_counters()
+    return {
+        "time": now(),
+        "bytes_sent": net.bytes_sent,
+        "bytes_recv": net.bytes_recv,
+        "packets_sent": net.packets_sent,
+        "packets_recv": net.packets_recv,
+        "hostname": socket.gethostname()
+    }
+
+# =========================
+# PROCESS DATA
+# =========================
+
+def process_hook():
+    processes = []
+
+    for p in psutil.process_iter(attrs=['pid', 'name', 'cpu_percent', 'memory_percent']):
+        try:
+            processes.append(p.info)
+        except:
+            pass
+
+    processes = sorted(processes, key=lambda x: x.get("cpu_percent", 0), reverse=True)
+
+    return {
+        "time": now(),
+        "top_processes": processes[:10]
+    }
+
+# =========================
+# FILE SYSTEM DATA (SAFE SCAN)
+# =========================
+
+def file_hook():
+    files = []
+
+    for f in os.listdir(".")[:30]:
+        try:
+            files.append({
+                "name": f,
+                "size": os.path.getsize(f)
+            })
+        except:
+            pass
+
+    return {
+        "time": now(),
+        "files": files
+    }
+
+# =========================
+# SECURITY BASIC CHECK (DEFENSIVE)
+# =========================
+
+def security_hook():
+    return {
+        "time": now(),
+        "suspicious_process_flag": len(psutil.pids()) > 300,
+        "status": "safe"
+    }
+
+# =========================
+# LOG DATA
+# =========================
+
+def log_hook(message="system running"):
+    return {
+        "time": now(),
+        "log": message
+    }
+
+# =========================
+# SAVE DATA
+# =========================
+
+def save(data):
+    with open(CONFIG["output_file"], "a") as f:
+        f.write(json.dumps(data) + "\n")
+
+# =========================
+# MASTER ENGINE
+# =========================
+
+def run_hook():
+    data = {
+        "system": system_hook(),
+        "network": network_hook(),
+        "process": process_hook(),
+        "files": file_hook(),
+        "security": security_hook(),
+        "log": log_hook()
+    }
+
+    save(data)
+
+    print("📊 Universal Hook Running:", data["system"]["time"])
+
+# =========================
+# LOOP
+# =========================
+
+if __name__ == "__main__":
+    while True:
+        try:
+            run_hook()
+            time.sleep(CONFIG["interval"])
+
+        except KeyboardInterrupt:
+            print("Stopped.")
+            break
+
+        except Exception as e:
+            print("Error:", e)
