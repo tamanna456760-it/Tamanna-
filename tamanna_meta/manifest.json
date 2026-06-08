@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-08T20:19:41.154035Z",
+  "generated_at": "2026-06-08T20:22:29.306361Z",
   "total_files": 289,
   "files": [
     {
@@ -341,7 +341,7 @@
     },
     {
       "path": "ai_backup_network.py",
-      "size": 15026
+      "size": 25003
     },
     {
       "path": "ai_powerhub_core.py",
@@ -601,7 +601,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 25662
+      "size": 25663
     },
     {
       "path": "artifacts/lib/db/src/schema/messages.ts",
