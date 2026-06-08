@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-08T20:14:34.329546Z",
+  "generated_at": "2026-06-08T20:19:41.154035Z",
   "total_files": 289,
   "files": [
     {
@@ -341,7 +341,7 @@
     },
     {
       "path": "ai_backup_network.py",
-      "size": 6932
+      "size": 15026
     },
     {
       "path": "ai_powerhub_core.py",
