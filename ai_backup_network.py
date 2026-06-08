@@ -23,17 +23,270 @@ NETWORK_FILE = "ai_network_state.json"
 # =========================
 # 📦 LOAD/SAVE SYSTEM
 # =========================
-def load_json(file):
-    try:
-        with open(file, "r") as f:
-            return json.load(f)
-    except:
-        return {}
 
-def save_json(file, data):
-    with open(file, "w") as f:
-        json.dump(data, f, indent=2)
+    def default(self, obj):
+        if isinstance(obj, Path):
+            return str(obj)
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return float(obj) if obj % 1 else int(obj)
+        if isinstance(obj, set):
+            return list(obj)
+        try:
+            return super().default(obj)
+        except TypeError:
+            return str(obj)   # fallback for truly custom objects
 
+class AdvancedJSONDecoder(json.JSONDecoder):
+    """Restores custom types when possible (e.g., Path)."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+    def object_hook(self, dct):
+        # Check if it’s a path representation
+        if "__path__" in dct:
+            return Path(dct["__path__"])
+        # Add more custom reconstructors here
+        return dct
+
+def custom_dumps(obj, **kwargs):
+    """JSON dump with advanced encoder."""
+    return json.dumps(obj, cls=AdvancedJSONEncoder, **kwargs)
+
+def custom_loads(s, **kwargs):
+    return json.loads(s, cls=AdvancedJSONDecoder, **kwargs)
+
+
+# -------------------------------
+# 2. Atomic file writing (prevents corruption)
+# -------------------------------
+def atomic_write(file_path: Path, data: bytes, mode: str = "wb"):
+    """Write data atomically by writing to a temp file and renaming."""
+    temp_dir = file_path.parent
+    with tempfile.NamedTemporaryFile(
+        dir=temp_dir,
+        delete=False,
+        suffix=".tmp",
+        mode=mode
+    ) as tmp_file:
+        tmp_file.write(data)
+        tmp_path = Path(tmp_file.name)
+    # Atomic rename (works on most OS)
+    os.replace(tmp_path, file_path)
+
+
+# -------------------------------
+# 3. Main advanced load/save with compression, retry, logging
+# -------------------------------
+logger = logging.getLogger(__name__)
+
+def load_json_advanced(
+    file: Union[str, Path],
+    *,
+    default: Any = None,
+    use_gzip: bool = False,
+    retries: int = 1,
+    retry_delay: float = 0.1,
+    decoder: Optional[Type[json.JSONDecoder]] = None,
+    **json_load_kwargs
+) -> Any:
+    """
+    Load JSON safely with compression, retries, and custom decoding.
+
+    Args:
+        file: Path to JSON or .json.gz file.
+        default: Value on failure (default: empty dict).
+        use_gzip: Automatically detect .gz extension or force gzip.
+        retries: Number of read attempts (e.g., for temporary file locks).
+        retry_delay: Seconds between retries.
+        decoder: Custom JSON decoder class.
+        **json_load_kwargs: Passed to json.load().
+
+    Returns:
+        Parsed JSON data or default.
+    """
+    path = Path(file)
+    if default is None:
+        default = {} if not use_gzip else {}
+
+    # Decide on gzip mode
+    if use_gzip is False and path.suffix == ".gz":
+        use_gzip = True
+    elif use_gzip is True and path.suffix != ".gz":
+        path = path.with_suffix(path.suffix + ".gz")
+
+    open_func = gzip.open if use_gzip else open
+    open_mode = "rt"   # text mode for JSON
+
+    for attempt in range(retries):
+        try:
+            with open_func(path, mode=open_mode, encoding="utf-8") as f:
+                return json.load(f, cls=decoder, **json_load_kwargs)
+        except FileNotFoundError:
+            logger.warning(f"File not found: {path}")
+            return default
+        except (json.JSONDecodeError, OSError) as e:
+            logger.error(f"Attempt {attempt+1}/{retries} failed: {e}")
+            if attempt == retries - 1:
+                if default is not None:
+                    return default
+                raise
+            time.sleep(retry_delay)
+    return default   # never reached but keeps linter happy
+
+def save_json_advanced(
+    file: Union[str, Path],
+    data: Any,
+    *,
+    indent: int = 2,
+    use_gzip: bool = False,
+    atomic: bool = True,
+    ensure_ascii: bool = False,
+    encoder: Optional[Type[json.JSONEncoder]] = None,
+    **json_dump_kwargs
+) -> None:
+    """
+    Save JSON safely with compression, atomic writes, and custom encoding.
+
+    Args:
+        file: Output path. If use_gzip=True, .gz will be added automatically.
+        data: JSON-serializable data.
+        indent: Spaces for indentation.
+        use_gzip: Enable gzip compression.
+        atomic: Write to temporary file first, then rename (prevents corruption).
+        ensure_ascii: Escape non‑ASCII characters.
+        encoder: Custom JSON encoder class.
+        **json_dump_kwargs: Passed to json.dump().
+    """
+    path = Path(file)
+    if use_gzip and path.suffix != ".gz":
+        path = path.with_suffix(path.suffix + ".gz")
+    elif not use_gzip and path.suffix == ".gz":
+        # User gave .gz but didn't ask for gzip – we'll respect the extension
+        use_gzip = True
+
+    # Prepare JSON string
+    json_str = json.dumps(
+        data,
+        indent=indent,
+        ensure_ascii=ensure_ascii,
+        cls=encoder or AdvancedJSONEncoder,
+        **json_dump_kwargs
+    )
+    json_bytes = json_str.encode("utf-8")
+    final_bytes = gzip.compress(json_bytes) if use_gzip else json_bytes
+
+    # Write
+    if atomic:
+        atomic_write(path, final_bytes, mode="wb")
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(final_bytes)
+
+
+# -------------------------------
+# 4. Decorator for auto‑loading/saving config objects
+# -------------------------------
+def autojson(file_path: Union[str, Path], **load_kwargs):
+    """
+    Decorator that injects a loaded JSON dict into the first argument,
+    and automatically saves the returned dict back to the file.
+
+    Example:
+        @autojson("config.json")
+        def update_config(cfg, new_value):
+            cfg["key"] = new_value
+            return cfg   # will be saved
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            data = load_json_advanced(file_path, **load_kwargs)
+            result = func(data, *args, **kwargs)
+            # if the result is a dict/list, we save it
+            if isinstance(result, (dict, list)):
+                save_json_advanced(file_path, result, **load_kwargs)
+            return result
+        return wrapper
+    return decorator
+
+
+# -------------------------------
+# 5. Async versions (for heavy I/O)
+# -------------------------------
+import asyncio
+import aiofiles
+import aiofiles.os
+
+async def async_load_json_advanced(
+    file: Union[str, Path],
+    use_gzip: bool = False,
+    **kwargs
+) -> Any:
+    path = Path(file)
+    if not use_gzip and path.suffix == ".gz":
+        use_gzip = True
+
+    if use_gzip:
+        async with aiofiles.open(path, "rb") as f:
+            compressed = await f.read()
+        json_bytes = gzip.decompress(compressed)
+        return json.loads(json_bytes.decode("utf-8"))
+    else:
+        async with aiofiles.open(path, "r", encoding="utf-8") as f:
+            content = await f.read()
+            return json.loads(content)
+
+async def async_save_json_advanced(
+    file: Union[str, Path],
+    data: Any,
+    use_gzip: bool = False,
+    indent: int = 2,
+    ensure_ascii: bool = False
+) -> None:
+    path = Path(file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    json_str = json.dumps(data, indent=indent, ensure_ascii=ensure_ascii)
+    json_bytes = json_str.encode("utf-8")
+
+    if use_gzip:
+        json_bytes = gzip.compress(json_bytes)
+        mode = "wb"
+    else:
+        mode = "w"
+
+    async with aiofiles.open(path, mode) as f:
+        if mode == "w":
+            await f.write(json_str)
+        else:
+            await f.write(json_bytes)
+
+
+# -------------------------------
+# Example usage
+# -------------------------------
+if __name__ == "__main__":
+    # Basic upgraded use
+    data = {"name": "Advanced", "path": Path("/tmp/test")}
+    save_json_advanced("data.json", data, atomic=True)
+    loaded = load_json_advanced("data.json")
+    print(loaded)
+
+    # With gzip
+    save_json_advanced("big.json.gz", {"x": list(range(1000))}, use_gzip=True)
+    loaded_gz = load_json_advanced("big.json.gz")
+    print(f"Loaded {len(loaded_gz['x'])} entries from gzipped file")
+
+    # Using decorator
+    @autojson("counter.json", default={"hits": 0})
+    def increment(cfg):
+        cfg["hits"] += 1
+        return cfg
+
+    increment()
+    increment()
 
 # =========================
 # 🔍 HASH SYSTEM
