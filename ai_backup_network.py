@@ -804,12 +804,112 @@ def ai_backup_network():
 # =========================
 # 🔁 LOOP
 # =========================
-def main():
-    while True:
-        print("🌐 AI BACKUP NETWORK RUNNING...")
-        ai_backup_network()
-        time.sleep(10)
 
+def signal_handler(signum, frame):
+    """Handle SIGINT (Ctrl+C) and SIGTERM."""
+    global shutdown_requested
+    logger.info(f"Received signal {signum}, shutting down gracefully...")
+    shutdown_requested = True
+
+def ai_backup_network():
+    """
+    Your actual backup logic (mock here, replace with your real function).
+    Should raise exceptions on failure.
+    """
+    # Simulate work – replace with real GitHub / backup operations
+    logger.info("Running AI backup network cycle...")
+    # Example: call your GitHub sync function
+    # from github_client import GitHubClient, GitHubConfig
+    # config = GitHubConfig.from_env()
+    # client = GitHubClient(config)
+    # client.backup_all_repos()
+    time.sleep(2)   # placeholder for real work
+    logger.info("Backup cycle completed successfully.")
+
+def run_forever(
+    interval_seconds: int,
+    on_failure: Optional[Callable[[Exception], None]] = None,
+    max_failures_before_sleep: int = 3
+):
+    """Main loop with exponential backoff on failures."""
+    global shutdown_requested
+    consecutive_failures = 0
+    current_interval = interval_seconds
+
+    logger.info(f"AI Backup Network started. Interval: {interval_seconds}s")
+
+    while not shutdown_requested:
+        try:
+            ai_backup_network()
+            # Success – reset failure counter and interval
+            consecutive_failures = 0
+            current_interval = interval_seconds
+        except Exception as e:
+            logger.exception(f"Backup cycle failed: {e}")
+            consecutive_failures += 1
+            if on_failure:
+                on_failure(e)
+
+            # Exponential backoff on repeated failures
+            if consecutive_failures >= max_failures_before_sleep:
+                backoff = min(300, current_interval * 2)  # max 5 minutes
+                logger.warning(f"Pausing for {backoff}s due to repeated failures")
+                current_interval = backoff
+            else:
+                current_interval = interval_seconds
+
+        # Wait for next cycle, but break early if shutdown requested
+        for _ in range(current_interval):
+            if shutdown_requested:
+                break
+            time.sleep(1)
+
+    logger.info("Shutdown complete. Goodbye.")
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="AI Backup Network Service",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "-i", "--interval",
+        type=int,
+        default=int(os.getenv("BACKUP_INTERVAL", "60")),
+        help="Seconds between backup cycles"
+    )
+    parser.add_argument(
+        "--max-failures",
+        type=int,
+        default=3,
+        help="Consecutive failures before increasing interval"
+    )
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        help="Run a single cycle then exit"
+    )
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+
+    # Register signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    if args.once:
+        try:
+            ai_backup_network()
+            logger.info("Single backup cycle finished successfully.")
+        except Exception as e:
+            logger.exception("Backup cycle failed")
+            sys.exit(1)
+    else:
+        run_forever(
+            interval_seconds=args.interval,
+            max_failures_before_sleep=args.max_failures,
+            on_failure=lambda e: logger.error(f"Failure callback: {e}")
+        )
 
 if __name__ == "__main__":
     main()
