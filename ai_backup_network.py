@@ -1,19 +1,302 @@
-import requests
-import base64
+import os
+import sys
 import time
 import json
+import base64
 import hashlib
-import random
+import logging
+import requests
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Union
+from dataclasses import dataclass
+from functools import wraps
+from dotenv import load_dotenv   # pip install python-dotenv
 
-# 🔐 CONFIG
-GITHUB_TOKEN = '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'
-REPO_OWNER = 'tamanna456760-it'
-REPO_NAME = 'tamanna-'
+load_dotenv()  # Load token from .env file (never hardcode!)
 
-HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
-}
+# -------------------------------
+# 1. Secure configuration
+# -------------------------------
+@dataclass
+class GitHubConfig:
+    token: str
+    owner: str
+    repo: str
+    base_url: str = "https://api.github.com"
+    per_page: int = 30
+    max_retries: int = 3
+    retry_delay: float = 1.0
+
+    @classmethod
+    def from_env(cls):
+        """Load from environment variables (safe for production)."""
+        token = os.getenv("GITHUB_TOKEN")
+        if not token:
+            raise ValueError("GITHUB_TOKEN not set in environment")
+        owner = os.getenv("REPO_OWNER")
+        repo = os.getenv("REPO_NAME")
+        if not owner or not repo:
+            raise ValueError("REPO_OWNER and REPO_NAME must be set")
+        return cls(token=token, owner=owner, repo=repo)
+
+
+# -------------------------------
+# 2. Logging setup
+# -------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("github_client")
+
+
+# -------------------------------
+# 3. Exception classes
+# -------------------------------
+class GitHubAPIError(Exception):
+    """Raised when GitHub API returns an error."""
+    pass
+
+class RateLimitExceeded(GitHubAPIError):
+    pass
+
+
+# -------------------------------
+# 4. Advanced GitHub client
+# -------------------------------
+class GitHubClient:
+    def __init__(self, config: GitHubConfig):
+        self.config = config
+        self.session = self._create_session()
+
+    def _create_session(self) -> requests.Session:
+        session = requests.Session()
+        session.headers.update({
+            "Authorization": f"token {self.config.token}",
+            "Accept": "application/vnd.github.v3+json"
+        })
+        return session
+
+    def _handle_rate_limit(self, response: requests.Response) -> None:
+        """Check rate limit and raise if exhausted."""
+        remaining = int(response.headers.get("X-RateLimit-Remaining", 1))
+        if remaining == 0:
+            reset_time = int(response.headers.get("X-RateLimit-Reset", 0))
+            sleep_seconds = max(0, reset_time - time.time()) + 1
+            logger.warning(f"Rate limit hit. Sleeping {sleep_seconds:.0f}s")
+            time.sleep(sleep_seconds)
+
+    def _request(
+        self,
+        method: str,
+        endpoint: str,
+        retry_count: int = 0,
+        **kwargs
+    ) -> requests.Response:
+        url = f"{self.config.base_url}/{endpoint.lstrip('/')}"
+        try:
+            resp = self.session.request(method, url, **kwargs)
+            self._handle_rate_limit(resp)
+
+            if resp.status_code == 404:
+                return resp   # not an error, just not found
+            if resp.status_code >= 400:
+                # Try to parse error message
+                try:
+                    error_data = resp.json()
+                    msg = error_data.get("message", resp.text)
+                except:
+                    msg = resp.text
+                raise GitHubAPIError(f"GitHub API error {resp.status_code}: {msg}")
+
+            return resp
+
+        except (requests.ConnectionError, requests.Timeout) as e:
+            logger.error(f"Network error: {e}")
+            if retry_count < self.config.max_retries:
+                time.sleep(self.config.retry_delay * (2 ** retry_count))
+                return self._request(method, endpoint, retry_count + 1, **kwargs)
+            raise
+
+    def get_paginated(self, endpoint: str, **kwargs) -> List[Dict]:
+        """Handle pagination automatically (supports link header)."""
+        results = []
+        url = f"{self.config.base_url}/{endpoint.lstrip('/')}"
+        params = kwargs.pop("params", {})
+        params["per_page"] = self.config.per_page
+        page = 1
+
+        while True:
+            params["page"] = page
+            resp = self.session.get(url, params=params, **kwargs)
+            self._handle_rate_limit(resp)
+            if resp.status_code != 200:
+                break
+            data = resp.json()
+            if not data:
+                break
+            results.extend(data)
+            page += 1
+        return results
+
+    # ---------------------------
+    # Repository operations
+    # ---------------------------
+    def get_file_content(self, file_path: str, branch: str = "main") -> Optional[str]:
+        """Get raw content of a file as string (decoded from base64)."""
+        endpoint = f"repos/{self.config.owner}/{self.config.repo}/contents/{file_path}"
+        params = {"ref": branch}
+        try:
+            resp = self._request("GET", endpoint, params=params)
+            if resp.status_code == 404:
+                return None
+            data = resp.json()
+            content = data.get("content", "")
+            if content:
+                return base64.b64decode(content).decode("utf-8")
+        except GitHubAPIError as e:
+            logger.error(f"Failed to get file {file_path}: {e}")
+        return None
+
+    def create_or_update_file(
+        self,
+        file_path: str,
+        content: str,
+        commit_message: str,
+        branch: str = "main",
+        sha: Optional[str] = None
+    ) -> Dict:
+        """
+        Create or update a file in the repo.
+        If sha is None, it will try to fetch existing sha first.
+        """
+        # If sha not provided, try to fetch existing file
+        if sha is None:
+            existing = self.get_file_metadata(file_path, branch)
+            if existing:
+                sha = existing.get("sha")
+
+        endpoint = f"repos/{self.config.owner}/{self.config.repo}/contents/{file_path}"
+        data = {
+            "message": commit_message,
+            "content": base64.b64encode(content.encode("utf-8")).decode("utf-8"),
+            "branch": branch
+        }
+        if sha:
+            data["sha"] = sha
+
+        resp = self._request("PUT", endpoint, json=data)
+        return resp.json()
+
+    def get_file_metadata(self, file_path: str, branch: str = "main") -> Optional[Dict]:
+        """Get file metadata (including sha) without downloading content."""
+        endpoint = f"repos/{self.config.owner}/{self.config.repo}/contents/{file_path}"
+        params = {"ref": branch}
+        try:
+            resp = self._request("GET", endpoint, params=params)
+            if resp.status_code == 404:
+                return None
+            return resp.json()
+        except GitHubAPIError:
+            return None
+
+    def delete_file(self, file_path: str, commit_message: str, branch: str = "main") -> bool:
+        """Delete a file from the repo."""
+        metadata = self.get_file_metadata(file_path, branch)
+        if not metadata:
+            logger.warning(f"File {file_path} does not exist")
+            return False
+
+        endpoint = f"repos/{self.config.owner}/{self.config.repo}/contents/{file_path}"
+        data = {
+            "message": commit_message,
+            "sha": metadata["sha"],
+            "branch": branch
+        }
+        self._request("DELETE", endpoint, json=data)
+        return True
+
+    def get_all_files_in_path(self, path: str = "", branch: str = "main") -> List[Dict]:
+        """Recursively get all files in a directory."""
+        endpoint = f"repos/{self.config.owner}/{self.config.repo}/contents/{path}"
+        params = {"ref": branch}
+        resp = self._request("GET", endpoint, params=params)
+        items = resp.json()
+        files = []
+        for item in items:
+            if item["type"] == "file":
+                files.append(item)
+            elif item["type"] == "dir":
+                files.extend(self.get_all_files_in_path(item["path"], branch))
+        return files
+
+    # ---------------------------
+    # Utility: commit hash & tree
+    # ---------------------------
+    def get_last_commit_sha(self, branch: str = "main") -> Optional[str]:
+        endpoint = f"repos/{self.config.owner}/{self.config.repo}/git/ref/heads/{branch}"
+        try:
+            resp = self._request("GET", endpoint)
+            return resp.json()["object"]["sha"]
+        except GitHubAPIError:
+            return None
+
+
+# -------------------------------
+# 5. Decorator for automatic retry & rate limit handling
+# -------------------------------
+def github_retry(max_attempts=3):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            for attempt in range(max_attempts):
+                try:
+                    return func(self, *args, **kwargs)
+                except (requests.ConnectionError, RateLimitExceeded) as e:
+                    if attempt == max_attempts - 1:
+                        raise
+                    wait = 2 ** attempt
+                    logger.warning(f"Retry {attempt+1} after {wait}s: {e}")
+                    time.sleep(wait)
+                except GitHubAPIError as e:
+                    # Do not retry on 4xx client errors (except 429)
+                    if "429" in str(e):
+                        continue
+                    raise
+            return None
+        return wrapper
+    return decorator
+
+
+# -------------------------------
+# Example usage (production ready)
+# -------------------------------
+if __name__ == "__main__":
+    # Initialize from environment (safe)
+    config = GitHubConfig.from_env()
+    client = GitHubClient(config)
+
+    # Example: Read a file
+    content = client.get_file_content("README.md")
+    print(f"README.md exists: {content is not None}")
+
+    # Example: Create/update a JSON file
+    data = {"timestamp": time.time(), "value": random.randint(1, 100)}
+    json_str = json.dumps(data, indent=2)
+    result = client.create_or_update_file(
+        "data/config.json",
+        json_str,
+        "Update config via script"
+    )
+    print(f"File updated: {result['content']['sha']}")
+
+    # Example: Delete a file
+    # client.delete_file("data/old.json", "Remove old file")
+
+    # Example: Get all Python files in src/
+    # py_files = client.get_all_files_in_path("src", branch="main")
+    # for f in py_files:
+    #     print(f['path'])
 
 # 📦 Backup Storage
 BACKUP_FILE = "ai_backup_db.json"
