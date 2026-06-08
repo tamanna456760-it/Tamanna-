@@ -100,9 +100,43 @@ def broadcast_status(network_state, file, status):
 # 🚨 ATTACK DETECTION
 # =========================
 def detect_attack(content):
-    danger = ["rm -rf", "exec(", "eval(", "os.system"]
-    return any(d in content for d in danger)
+    patterns = {
+        "Critical Delete": r"rm\s+-rf",
+        "Code Execution": r"\bexec\s*\(",
+        "Dynamic Eval": r"\beval\s*\(",
+        "Shell Command": r"\bos\.system\s*\(",
+        "Subprocess": r"\bsubprocess\.",
+        "Import Bypass": r"\b__import__\s*\(",
+        "File Write": r"\bopen\s*\(.*['\"]w['\"]",
+        "Pickle Load": r"\bpickle\.loads\s*\(",
+        "Marshal Load": r"\bmarshal\.loads\s*\(",
+    }
 
+    findings = []
+
+    for name, pattern in patterns.items():
+        if re.search(pattern, content, re.IGNORECASE | re.MULTILINE):
+            findings.append(name)
+
+    count = len(findings)
+
+    if count >= 5:
+        risk = "CRITICAL"
+    elif count >= 3:
+        risk = "HIGH"
+    elif count >= 1:
+        risk = "MEDIUM"
+    else:
+        risk = "SAFE"
+
+    return {
+        "detected": count > 0,
+        "risk": risk,
+        "threat_count": count,
+        "findings": findings,
+        "content_length": len(content),
+        "scan_time": datetime.utcnow().isoformat() + "Z"
+    }
 
 # =========================
 # 🔄 UPDATE FILE
