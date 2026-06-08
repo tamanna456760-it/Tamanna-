@@ -84,15 +84,80 @@ def restore_file(path, backup_db):
 # =========================
 # 🤖 AI COMMUNICATION
 # =========================
-def update_network_state(state):
-    save_json(NETWORK_FILE, state)
+
+def _node_identity():
+    base = f"{socket.gethostname()}-{uuid.getnode()}"
+    return hashlib.sha256(base.encode()).hexdigest()[:16]
+
+
+def _make_event(file, status):
+    ts = time.time()
+
+    payload = f"{file}|{status}|{ts}".encode()
+    integrity = hashlib.sha256(payload).hexdigest()
+
+    return {
+        "event_id": str(uuid.uuid4()),
+        "node_id": _node_identity(),
+        "hostname": socket.gethostname(),
+        "file": file,
+        "status": status,
+        "timestamp": ts,
+        "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts)),
+        "integrity": integrity,
+        "retry": 0,
+    }
 
 
 def broadcast_status(network_state, file, status):
-    network_state[file] = {
-        "status": status,
-        "timestamp": time.time(),
-        "node_id": random.randint(1000, 9999)
+    event = _make_event(file, status)
+
+    with LOCK:
+        network_state.setdefault(file, [])
+        network_state[file].append(event)
+
+        EVENT_QUEUE.append(event)
+
+    return event
+
+
+def flush_queue(save_json, NETWORK_FILE, network_state, max_retries=5):
+    """
+    Reliable persistence layer with retry + queue draining
+    """
+
+    for attempt in range(max_retries):
+        try:
+            with LOCK:
+                while EVENT_QUEUE:
+                    event = EVENT_QUEUE.popleft()
+                    file = event["file"]
+
+                    network_state.setdefault(file, [])
+                    network_state[file].append(event)
+
+                save_json(NETWORK_FILE, network_state)
+
+            return {
+                "saved": True,
+                "queue_flushed": True,
+                "remaining_queue": len(EVENT_QUEUE),
+                "attempts": attempt + 1,
+            }
+
+        except Exception as e:
+            time.sleep(0.2 * (attempt + 1))
+
+            # push back safety (avoid data loss)
+            with LOCK:
+                EVENT_QUEUE.appendleft(event)
+
+            last_error = str(e)
+
+    return {
+        "saved": False,
+        "error": last_error,
+        "remaining_queue": len(EVENT_QUEUE),
     }
 
 
