@@ -10,7 +10,137 @@ BACKUP_STATE = "ai_backup_db.json"
 
 BRAIN_MEMORY = "brain_memory.json"
 
-
+📁 backup/
+ ├── bd-king-r7_all_backup.py
+ ├── r7_backup.py
+ ├── bd-king-r7.sql
+ └── ssl.sh
+📁 tools/
+ ├── nmap/
+ ├── wireshark/
+ ├── smoke.py
+ ├── wireshark_automation.py
+ └── capture_filter.py
+📁 reports/
+ ├── issues_report.json
+ ├── fix_report.json
+ ├── ai_report.json
+ ├── ai_backup_db.json
+ ├── brain_memory.json
+ └── Metadata.json
+📁 automation/
+ ├── sync_engine.py
+ ├── bd-king-r7_max_sync.py
+ ├── advanced_sync.py
+ ├── ai_sync_controller.py
+ ├── auto_fixar.py
+ └── problem_fix.json
+📁 monitoring/
+ ├── system_monitor.py
+ ├── system_monitoring.py
+ ├── monitoring.py
+ ├── uptime_monitor.py
+ ├── monitoring.json
+📁 models/
+ ├── cnn_config.json
+ ├── transformer_config.json
+ ├── cnn_pattern_detector.py
+ ├── rnn_sequence_analyzer.py
+ ├── transformer_pattern_engine.py
+ ├── lstm_anomaly.py
+ ├── autoencoder_anomaly.py
+ ├── gan_anomaly_detector.py
+ └── time_series_predictor.py
+📁 powerhub/
+ ├── powerhub_master.py
+ ├── run_bd-king-r7_powerhub.py
+ ├── monitor.py
+ ├── module.py
+ ├── self_defence_power.py
+ ├── ai_master_power.py
+ ├── ai_control.py
+ ├── communication_power.py
+ ├── Universal_access_power.py
+ │
+ ├── 📁 scripts/
+ │    ├── power.sh
+ │    ├── roolback.sh
+ │    ├── setup_service.sh
+ │
+ ├── powerhub.service
+ └── ci-cd.yml
+📁 website/
+ ├── 📁 backend/
+ │    ├── server.js
+ │    ├── server_main.js
+ │    ├── chat.js
+ │    ├── auth.js
+ │    └── routes/
+ │         ├── auth.js
+ │         └── chat.js
+ │
+ ├── 📁 frontend/
+ │    ├── index.html
+ │    ├── vite.config.js
+ │    ├── package.json
+ │    └── src/
+ │         ├── main.jsx
+ │         ├── index.css
+ │         ├── apps.jsx
+ │         ├── components/navbar.jsx
+ │         ├── pages/Home.jsx
+ │         └── pages/chat.jsx
+ │
+ ├── 📁 ai_service/
+ │    └── ai_server.js
+ │
+ ├── 📁 nginx/
+ │    └── nginx.conf
+ │
+ └── 📁 database/
+      └── init.sql
+📁 src/
+ ├── 📁 core/
+ │    ├── sync_engine.py
+ │    ├── monitoring_system.py
+ │    ├── warking.py
+ │    ├── decision_maker.py
+ │    ├── ai_engine.py
+ │    ├── learning_system.py
+ │    ├── data_processor.py
+ │    └── bd-king-r7.yaml
+ │
+ ├── 📁 Cybersecurity/
+ │    ├── cybersecurity.py
+ │    ├── network_defence.py
+ │    ├── security_awareness.py
+ │    ├── Digital_forensics.py
+ │    └── security_hardening.sh
+ │
+ ├── 📁 database/
+ │    ├── schema.sql
+ │    ├── bd.json
+ │    ├── symptoms_db.json
+ │    └── metadata.json
+ │
+ ├── 📁 map/
+ │    ├── bd-king-r7_map.py
+ │    └── smoke.py
+ │
+ ├── 📁 apps/
+ │    ├── apps.py
+ │    ├── synce.py
+ │    ├── ai_sync_controller.py
+ │    └── bd-king-r7_ai.py
+ │
+ ├── 📁 config/
+ │    ├── ai_sync_config.json
+ │    ├── security.yaml
+ │    ├── sync_config.yaml
+ │    └── settings.py
+ │
+ ├── 📁 problem/
+ │    └── problem_fix.json
 # =========================
 # 🧠 LOAD / SAVE
 # =========================

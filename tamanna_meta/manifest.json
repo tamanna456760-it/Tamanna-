@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-04T06:20:15.396338Z",
-  "total_files": 285,
+  "generated_at": "2026-06-08T20:28:37.822634Z",
+  "total_files": 289,
   "files": [
     {
       "path": "ai_code_integrity_monitor.py",
@@ -40,6 +40,10 @@
       "size": 1024
     },
     {
+      "path": "lint_monitor.py",
+      "size": 752
+    },
+    {
       "path": "tamanna_success_program.sh",
       "size": 3562
     },
@@ -50,6 +54,10 @@
     {
       "path": ".prettierrc",
       "size": 565
+    },
+    {
+      "path": "README .md",
+      "size": 266
     },
     {
       "path": "unlock_files.py",
@@ -265,7 +273,7 @@
     },
     {
       "path": "ai_brain_core.py",
-      "size": 2608
+      "size": 6111
     },
     {
       "path": "tamanna_distributed_ai.py",
@@ -278,6 +286,10 @@
     {
       "path": "tamanna_master_dashboard.py",
       "size": 2723
+    },
+    {
+      "path": "config. json",
+      "size": 406
     },
     {
       "path": "idtamanna.sys",
@@ -329,7 +341,7 @@
     },
     {
       "path": "ai_backup_network.py",
-      "size": 4335
+      "size": 28400
     },
     {
       "path": "ai_powerhub_core.py",
@@ -365,7 +377,7 @@
     },
     {
       "path": "README.md",
-      "size": 1358
+      "size": 7161
     },
     {
       "path": "tamanna_head.py",
@@ -386,6 +398,10 @@
     {
       "path": "brain_memory.json",
       "size": 3503
+    },
+    {
+      "path": "monitor.py",
+      "size": 1843
     },
     {
       "path": "tamanna.html",
@@ -585,7 +601,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 25418
+      "size": 25663
     },
     {
       "path": "artifacts/lib/db/src/schema/messages.ts",
