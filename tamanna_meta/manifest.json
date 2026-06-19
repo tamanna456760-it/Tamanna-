@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-19T06:04:36.049521Z",
-  "total_files": 290,
+  "generated_at": "2026-06-19T06:33:24.102453Z",
+  "total_files": 291,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1110,6 +1110,10 @@
     {
       "path": ".tamanna/readme.md",
       "size": 8954
+    },
+    {
+      "path": ".tamanna/worjer.js",
+      "size": 697
     },
     {
       "path": ".tamanna/config.json",
