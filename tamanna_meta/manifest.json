@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-17T19:30:14.239223Z",
-  "total_files": 289,
+  "generated_at": "2026-06-19T06:00:30.070955Z",
+  "total_files": 290,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -146,6 +146,10 @@
     {
       "path": "tamanna_head.py",
       "size": 1555
+    },
+    {
+      "path": "CNAME",
+      "size": 10
     },
     {
       "path": "bot.js",
