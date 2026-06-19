@@ -1,0 +1,7 @@
+2026-06-19 10:00:01 INFO Server Started
+2026-06-19 10:00:05 INFO Node connected: node-1 (192.168.1.10)
+2026-06-19 10:00:07 INFO Heartbeat received: node-1
+2026-06-19 10:00:10 WARNING Rate limit warning: 192.168.1.10
+2026-06-19 10:00:15 INFO Command executed: ping -> node-1
+2026-06-19 10:00:20 ERROR Invalid JSON packet from 192.168.1.11
+2026-06-19 10:00:25 INFO Node status updated: node-1 ONLINE
