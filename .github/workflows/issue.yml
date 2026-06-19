@@ -1,7 +1,7 @@
 - name: 🧹 Close Stale Issues & PRs (AI Optimized)
   uses: actions/stale@v10.3.0
   with:
-    repo-token: ${{ secrets.GITHUB_TOKEN }}
+    repo-token: ${{ secrets.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 }}
 
     # 💬 Messages
     stale-issue-message: "⚠️ This issue is inactive. It will be closed soon if no update."
