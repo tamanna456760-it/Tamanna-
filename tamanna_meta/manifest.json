@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-19T18:24:18.470300Z",
-  "total_files": 294,
+  "generated_at": "2026-06-19T18:26:15.949907Z",
+  "total_files": 295,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -570,6 +570,10 @@
     {
       "path": "artifacts/api-server/src/routes/index.ts",
       "size": 5952
+    },
+    {
+      "path": "logs/global_defense.log",
+      "size": 419
     },
     {
       "path": "logs/run.log",
