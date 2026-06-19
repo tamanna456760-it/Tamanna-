@@ -1,0 +1,8 @@
+* Sync System
+** Status
+- Active
+- Monitoring
+
+** Nodes
+- Node-1
+- Node-2
