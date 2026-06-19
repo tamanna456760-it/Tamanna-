@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-19T06:33:24.102453Z",
-  "total_files": 291,
+  "generated_at": "2026-06-19T06:39:15.523421Z",
+  "total_files": 292,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1093,7 +1093,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 25716
+      "size": 25783
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
@@ -1118,6 +1118,10 @@
     {
       "path": ".tamanna/config.json",
       "size": 2272
+    },
+    {
+      "path": ".tamanna/wearing.js",
+      "size": 732
     },
     {
       "path": ".tamanna/launch.json",
