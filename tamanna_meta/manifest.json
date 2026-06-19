@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-19T06:40:23.662934Z",
-  "total_files": 293,
+  "generated_at": "2026-06-19T17:24:56.765741Z",
+  "total_files": 294,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -126,6 +126,10 @@
     {
       "path": "fix_report.json",
       "size": 835
+    },
+    {
+      "path": "deep_packet_inspection.py",
+      "size": 796
     },
     {
       "path": "stat_counter.py",
@@ -1097,7 +1101,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 25851
+      "size": 25916
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
