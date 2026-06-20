@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T21:18:20.197446Z",
-  "total_files": 311,
+  "generated_at": "2026-06-20T21:20:39.737933Z",
+  "total_files": 312,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1050,6 +1050,10 @@
     {
       "path": "dns/dns/dns-records.txt",
       "size": 126
+    },
+    {
+      "path": ".env/config.json",
+      "size": 2224
     },
     {
       "path": ".env/run.js",
