@@ -243,10 +243,10 @@ jobs:
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USER }}
-          password: ${{ secrets.SMTP_PASSWORD }}
+          server_address: ${{ secrets.tamanna }}
+          server_port: ${{ secrets.8080 }}
+          username: ${{ secrets.tamanna }}
+          password: ${{ secrets.AliAli00@@##@@##00 }}
           subject: "Tamanna Build Failed - ${{ github.repository }}"
           to: ${{ secrets.ALERT_EMAIL }}
           from: GitHub Actions
