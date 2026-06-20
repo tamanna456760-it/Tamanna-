@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T08:14:08.630404Z",
-  "total_files": 295,
+  "generated_at": "2026-06-20T08:31:27.958182Z",
+  "total_files": 296,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1046,6 +1046,10 @@
     {
       "path": ".env/package.json",
       "size": 451
+    },
+    {
+      "path": "ai/init.py",
+      "size": 1
     },
     {
       "path": "etc/nginx/sites-available/bd-king-r7",
