@@ -9,7 +9,7 @@ async function run() {
 
   console.log("Repositories:");
   data.forEach(repo => {
-    console.log(`- ${repo.full_name}`);
+    console.log(`- ${repo.tamanna-}`);
   });
 }
 
