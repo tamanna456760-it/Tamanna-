@@ -1,5 +1,105 @@
 flowchart TD
 
+subgraph group_grp_automation["Automation"]
+  node_node_workflows["GitHub Actions<br/>CI orchestration<br/>[workflows]"]
+  node_node_scripts["Helper Scripts<br/>automation tools<br/>[scripts]"]
+  node_node_scan["Scan Loop<br/>repo scanner<br/>[scan.py]"]
+  node_node_fix["Fix Loop<br/>auto-fixer<br/>[auto_fix_issues.py]"]
+  node_node_sync["Sync Jobs<br/>sync scripts<br/>[auto_sync_all.sh]"]
+end
+
+subgraph group_grp_ai["AI Core"]
+  node_node_ai_brain["AI Brain<br/>reasoning core<br/>[ai_brain_core.py]"]
+  node_node_powerhub_core["Powerhub Core<br/>ai orchestration"]
+  node_node_self_defense["Self Defense<br/>defense policy<br/>[ai_self_defense.py]"]
+  node_node_integrity["Integrity Monitor<br/>code integrity"]
+  node_node_network_defense["Network Defense<br/>network policy"]
+  node_node_monitor["System Monitor<br/>runtime monitor"]
+end
+
+subgraph group_grp_services["Services"]
+  node_node_node_backend["Node Backend<br/>API service<br/>[server.js]"]
+  node_node_py_backend["Python Backend<br/>AI service<br/>[main.py]"]
+  node_node_ts_api["API Server<br/>TypeScript API<br/>[app.ts]"]
+  node_node_dotnet["Razor App<br/>.NET web app<br/>[Program.cs]"]
+end
+
+subgraph group_grp_clients["Clients"]
+  node_node_android["Android App<br/>mobile control shell<br/>[MainActivity.kt]"]
+  node_node_web_frontend["Web Frontend<br/>React/Vite UI<br/>[main.jsx]"]
+  node_node_web_shells["Web Shells<br/>html/js ui<br/>[control_panel.html]"]
+end
+
+subgraph group_grp_state["State"]
+  node_node_state[("State Files<br/>file-backed state<br/>[brain_memory.json]")]
+  node_node_reports[("Reports DB<br/>sqlite state<br/>[projects.json]")]
+end
+
+subgraph group_grp_security["Security"]
+  node_node_security["Security Stack<br/>defense subsystem"]
+  node_node_protocols["Defense Protocols<br/>policy framework<br/>[main.py]"]
+end
+
+node_node_workflows -->|"triggers"| node_node_scan
+node_node_workflows -->|"auto-heal"| node_node_fix
+node_node_workflows -->|"sync"| node_node_sync
+node_node_scripts -->|"analyze"| node_node_scan
+node_node_scripts -->|"refactor"| node_node_fix
+node_node_scan -->|"consults"| node_node_ai_brain
+node_node_fix -->|"policy"| node_node_ai_brain
+node_node_ai_brain -->|"enforces"| node_node_self_defense
+node_node_ai_brain -->|"coordinates"| node_node_powerhub_core
+node_node_powerhub_core -->|"observes"| node_node_monitor
+node_node_integrity -->|"blocks"| node_node_self_defense
+node_node_network_defense -->|"inspects"| node_node_security
+node_node_node_backend -->|"stores"| node_node_state
+node_node_py_backend -->|"uses"| node_node_ai_brain
+node_node_ts_api -->|"persists"| node_node_state
+node_node_dotnet -->|"reads"| node_node_reports
+node_node_android -->|"calls"| node_node_node_backend
+node_node_android -->|"syncs"| node_node_ts_api
+node_node_web_frontend -->|"calls"| node_node_node_backend
+node_node_web_shells -->|"hosts"| node_node_py_backend
+node_node_security -->|"feeds"| node_node_protocols
+node_node_protocols -->|"guards"| node_node_sync
+node_node_monitor -->|"logs"| node_node_state
+
+click node_node_workflows "https://github.com/tamanna456760-it/tamanna-/blob/main/.github/workflows"
+click node_node_scripts "https://github.com/tamanna456760-it/tamanna-/blob/main/.github/scripts"
+click node_node_scan "https://github.com/tamanna456760-it/tamanna-/blob/main/scripts/scan.py"
+click node_node_fix "https://github.com/tamanna456760-it/tamanna-/blob/main/auto_fix_issues.py"
+click node_node_sync "https://github.com/tamanna456760-it/tamanna-/blob/main/auto_sync_all.sh"
+click node_node_ai_brain "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_brain_core.py"
+click node_node_powerhub_core "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_powerhub_core.py"
+click node_node_self_defense "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_self_defense.py"
+click node_node_integrity "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_code_integrity_monitor.py"
+click node_node_network_defense "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_network_defense.py"
+click node_node_monitor "https://github.com/tamanna456760-it/tamanna-/blob/main/ai_system_monitor.py"
+click node_node_node_backend "https://github.com/tamanna456760-it/tamanna-/blob/main/bd-king-r7/server/backend/server.js"
+click node_node_py_backend "https://github.com/tamanna456760-it/tamanna-/blob/main/Tamanna-AI-System/main.py"
+click node_node_ts_api "https://github.com/tamanna456760-it/tamanna-/blob/main/artifacts/api-server/src/app.ts"
+click node_node_dotnet "https://github.com/tamanna456760-it/tamanna-/blob/main/bd-king-r7/website/bd-king-website/Program.cs"
+click node_node_android "https://github.com/tamanna456760-it/tamanna-/blob/main/tamanna-ai-app/app/src/main/java/com/tamanna/MainActivity.kt"
+click node_node_web_frontend "https://github.com/tamanna456760-it/tamanna-/blob/main/bd-king-r7/website/frontend/src/main.jsx"
+click node_node_web_shells "https://github.com/tamanna456760-it/tamanna-/blob/main/control_panel.html"
+click node_node_state "https://github.com/tamanna456760-it/tamanna-/blob/main/brain_memory.json"
+click node_node_reports "https://github.com/tamanna456760-it/tamanna-/blob/main/bd-king-r7/website/bd-king-website/data/projects.json"
+click node_node_security "https://github.com/tamanna456760-it/tamanna-/blob/main/deep_packet_inspection.py"
+click node_node_protocols "https://github.com/tamanna456760-it/tamanna-/blob/main/bd-king-r7/IT/potocol/server defanding potocol/main.py"
+
+classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
+classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
+class node_node_workflows,node_node_scripts,node_node_scan,node_node_fix,node_node_sync toneBlue
+class node_node_ai_brain,node_node_powerhub_core,node_node_self_defense,node_node_integrity,node_node_network_defense,node_node_monitor toneAmber
+class node_node_node_backend,node_node_py_backend,node_node_ts_api,node_node_dotnet toneMint
+class node_node_android,node_node_web_frontend,node_node_web_shells toneRose
+class node_node_state,node_node_reports toneIndigo
+class node_node_security,node_node_protocols toneTeal
 subgraph group_automation["Automation loop"]
   node_ci["GitHub Actions<br/>orchestration<br/>[workflows]"]
   node_scripts["AI scripts<br/>repair tools<br/>[scripts]"]
