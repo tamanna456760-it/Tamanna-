@@ -15,6 +15,6 @@ export default {
         },
       });
     } else {
-      return new Response("Please add an ?url=https://wwwtamanna.com/ parameter");
+      return new Response("Please add an ?url=https://www.tamanna.com/ parameter");
     }
   },
