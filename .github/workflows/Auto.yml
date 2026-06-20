@@ -252,4 +252,4 @@ jobs:
           from: GitHub Actions
           body: |
             Build failed for ${{ github.repository }}.
-            See logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            See logs: https://github.com/${{ github.com/tamanna456760-it/tamanna- }}/actions/runs/${{ github.run_id }}
