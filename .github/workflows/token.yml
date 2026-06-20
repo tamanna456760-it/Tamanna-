@@ -1,0 +1,36 @@
+name: Cloudflare Terraform Deploy
+
+on:
+push:
+branches:
+- main
+- tamanna-
+
+workflow_dispatch:
+
+jobs:
+terraform:
+runs-on: ubuntu-latest
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: d75413548f36f992000da92e5a7c3aab
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  - name: Setup Terraform
+    uses: hashicorp/setup-terraform@v3
+
+  - name: Terraform Init
+    run: terraform init
+
+  - name: Terraform Validate
+    run: terraform validate
+
+  - name: Terraform Plan
+    run: terraform plan
+
+  - name: Terraform Apply
+    run: terraform apply -auto-approve
