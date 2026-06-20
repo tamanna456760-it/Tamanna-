@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T21:47:15.617183Z",
+  "generated_at": "2026-06-20T21:49:05.186963Z",
   "total_files": 313,
   "files": [
     {
@@ -489,7 +489,7 @@
     },
     {
       "path": "github/bot.js",
-      "size": 334
+      "size": 333
     },
     {
       "path": "Tamanna-AI-System/tamanna.js",
@@ -1177,7 +1177,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 27331
+      "size": 27393
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
