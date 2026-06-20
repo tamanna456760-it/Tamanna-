@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T19:28:11.932473Z",
-  "total_files": 302,
+  "generated_at": "2026-06-20T19:29:19.593008Z",
+  "total_files": 304,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1032,6 +1032,14 @@
       "size": 394
     },
     {
+      "path": "dns/workers/worker.js",
+      "size": 231
+    },
+    {
+      "path": "dns/dns/dns-records.txt",
+      "size": 126
+    },
+    {
       "path": ".env/run.js",
       "size": 270
     },
@@ -1133,7 +1141,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 26495
+      "size": 26557
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
