@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T21:01:39.664495Z",
+  "generated_at": "2026-06-20T21:16:47.954828Z",
   "total_files": 311,
   "files": [
     {
@@ -285,7 +285,7 @@
     },
     {
       "path": "config.json",
-      "size": 140
+      "size": 2361
     },
     {
       "path": "ldtamanna.inf",
@@ -1169,7 +1169,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 27187
+      "size": 27264
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
