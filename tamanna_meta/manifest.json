@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T19:30:04.837841Z",
-  "total_files": 304,
+  "generated_at": "2026-06-20T19:31:23.885460Z",
+  "total_files": 305,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -166,6 +166,10 @@
     {
       "path": "run.json",
       "size": 188841
+    },
+    {
+      "path": "wrangler.tomal",
+      "size": 97
     },
     {
       "path": "free-fire.py",
