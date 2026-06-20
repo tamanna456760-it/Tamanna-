@@ -1,88 +1,48 @@
+resource "cloudflare_account_token" "example_account_token" {
+  account_id = "d75413548f36f992000da92e5a7c3aab"
+  name       = "sparkling-resonance-3dc9"
 
-{
-  "id": "074efd94b8f9b0ba28f4028fa1b146f2",
-  "name": "sparkling-resonance-3dc9",
-  "status": "active",
-  "issued_on": "2026-06-20T21:11:49Z",
-  "modified_on": "2026-06-20T21:11:49Z",
-  "last_used_on": null,
-  "policies": [
-    {
-      "id": "332fa015ffcb4f8c8487f1f5ee6d8410",
-      "effect": "allow",
-      "resources": {
-        "com.cloudflare.api.account.d75413548f36f992000da92e5a7c3aab": "*"
-      },
-      "permission_groups": [
-        {
-          "id": "839a02e413024d06a4e7d8c56d4470d7",
-          "name": "Websearch Run"
-        },
-        {
-          "id": "384a77ea7c2e47d898715dc6a064f3f4",
-          "name": "AI Search Write"
-        },
-        {
-          "id": "e5e805d0a90441b58e8c7a41aa1cf85e",
-          "name": "AI Search Run"
-        },
-        {
-          "id": "01aab63d6e064d7a8160339985d2db19",
-          "name": "AI Search Read"
-        },
-        {
-          "id": "234108c786084936a381bb19b7f4ea65",
-          "name": "Auto Rag Write Run Engine"
-        },
-        {
-          "id": "e84fd345697c4036a14e7810da036e1a",
-          "name": "Agents Gateway Write"
-        },
-        {
-          "id": "82748b814dcd46b9b3e66b8151ba5e95",
-          "name": "Agents Gateway Run"
-        },
-        {
-          "id": "151803815e4f47de854c2fb7f8284d57",
-          "name": "Agents Gateway Read"
-        },
-        {
-          "id": "7fb8d27511b34d02994d005b520b679f",
-          "name": "Auto Rag Write"
-        },
-        {
-          "id": "d7887c7a417e4cf2a69f1d01c1a1dc3b",
-          "name": "Auto Rag Read"
-        },
-        {
-          "id": "644535f4ed854494a59cb289d634b257",
-          "name": "AI Gateway Run"
-        },
-        {
-          "id": "6c8a3737f07f46369c1ea1f22138daaf",
-          "name": "AI Gateway Write"
-        },
-        {
-          "id": "4dc8917b4b40457d88d3035d5dadb054",
-          "name": "AI Gateway Read"
-        },
-        {
-          "id": "bacc64e0f6c34fc0883a1223f938a104",
-          "name": "Workers AI Write"
-        },
-        {
-          "id": "a92d2450e05d4e7bb7d0a64968f83d11",
-          "name": "Workers AI Read"
-        }
-      ]
+  policies = [{
+    effect = "allow"
+    permission_groups = [{
+      id = "839a02e413024d06a4e7d8c56d4470d7"
+      }, {
+      id = "384a77ea7c2e47d898715dc6a064f3f4"
+      }, {
+      id = "e5e805d0a90441b58e8c7a41aa1cf85e"
+      }, {
+      id = "01aab63d6e064d7a8160339985d2db19"
+      }, {
+      id = "234108c786084936a381bb19b7f4ea65"
+      }, {
+      id = "e84fd345697c4036a14e7810da036e1a"
+      }, {
+      id = "82748b814dcd46b9b3e66b8151ba5e95"
+      }, {
+      id = "151803815e4f47de854c2fb7f8284d57"
+      }, {
+      id = "7fb8d27511b34d02994d005b520b679f"
+      }, {
+      id = "d7887c7a417e4cf2a69f1d01c1a1dc3b"
+      }, {
+      id = "644535f4ed854494a59cb289d634b257"
+      }, {
+      id = "6c8a3737f07f46369c1ea1f22138daaf"
+      }, {
+      id = "4dc8917b4b40457d88d3035d5dadb054"
+      }, {
+      id = "bacc64e0f6c34fc0883a1223f938a104"
+      }, {
+      id = "a92d2450e05d4e7bb7d0a64968f83d11"
+    }]
+    resources = jsonencode({
+      "com.cloudflare.api.account.d75413548f36f992000da92e5a7c3aab" = "*"
+    })
+  }]
+
+  condition = {
+    request_ip = {
+      in     = ["31.215.22.64/32"]
     }
-  ],
-  "condition": {
-    "request_ip": {
-      "in": [
-        "31.215.22.64/32"
-      ]
-    }
-  },
-  "editable": true
+  }
 }
