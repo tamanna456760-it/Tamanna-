@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T19:49:45.618564Z",
-  "total_files": 308,
+  "generated_at": "2026-06-20T19:51:31.176986Z",
+  "total_files": 309,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1076,6 +1076,10 @@
       "size": 1179
     },
     {
+      "path": "tamanna-speed-optimizatio/assets/js/async-loader.js",
+      "size": 397
+    },
+    {
       "path": "ai/file_daygram_1.js",
       "size": 25175
     },
@@ -1157,7 +1161,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 26911
+      "size": 27002
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
