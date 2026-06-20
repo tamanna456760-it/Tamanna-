@@ -7,4 +7,4 @@ function loadScriptAsync(src) {
 }
 
 // ব্যবহার উদাহরণ:
-loadScriptAsync('https://cdn.example.com/your-script.js');
+loadScriptAsync('https://cdn.tamanna.com/tamanna.js');
