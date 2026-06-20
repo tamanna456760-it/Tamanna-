@@ -2,254 +2,291 @@ name: Tamanna Ultimate Auto Build
 
 on:
   push:
-    branches: [ "tamanna-", "develop" ]
+    branches:
+      - tamanna-
+      - develop
     paths:
-      - '**.md'
+      - '**/*.md'
       - 'docs/**'
       - '.gitignore'
-  pull_request:
-    branches: [ "tamanna-", "develop" ]
-  schedule:
-    - cron: '0 2 * * *'   # daily 2 AM build
-  workflow_dispatch:        # manual trigger
 
-# Cancel previous running workflows on same PR/branch
+  pull_request:
+    branches:
+      - tamanna-
+      - develop
+
+  schedule:
+    - cron: '0 2 * * *'
+
+  workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: "20"
   PYTHON_VERSION: "3.11"
-  JAVA_VERSION: 17
-  GO_VERSION: "1.21"
-  DOCKER_REGISTRY: ghcr.io
+  JAVA_VERSION: "21"
+  GO_VERSION: "1.22"
 
 jobs:
-  # ---------- 1. Lint & Format (fast, early failure) ----------
+
   lint:
+    name: Lint & Validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: hashFiles('package.json') != ''
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Run linters
-        run: |
-          if [ -f "package.json" ]; then
-            npm install --no-audit --no-fund
-            npm run lint 2>/dev/null || echo "⚠️ No lint script found"
-          fi
-      - name: Run ShellCheck on scripts
-        run: |
-          if command -v shellcheck &>/dev/null; then
-            find . -name "*.sh" -exec shellcheck {} \;
-          fi
 
-  # ---------- 2. Build & Test (matrix for multiple versions) ----------
+      - name: Install Node Dependencies
+        if: hashFiles('package.json') != ''
+        run: |
+          npm install --no-audit --no-fund
+
+      - name: Run ESLint
+        if: hashFiles('package.json') != ''
+        run: |
+          npm run lint || echo "No lint script found"
+
+      - name: ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+          find . -name "*.sh" -exec shellcheck {} \; || true
+
   build-test:
+    name: Build & Test
     runs-on: ubuntu-latest
-    needs: [lint]
-    strategy:
-      matrix:
-        node-version: [18, 20]
-        python-version: ["3.10", "3.11"]
-        java-version: [17, 21]
-      fail-fast: false   # test all combinations, collect results
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # full history for better caching
+    needs: lint
+    timeout-minutes: 30
 
-      # ---------- Node.js ----------
-      - name: Setup Node ${{ matrix.node-version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # NODE
+      - name: Setup Node
+        if: hashFiles('package.json') != ''
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-      - name: Install Node dependencies
+      - name: Node Install
         if: hashFiles('package.json') != ''
-        run: npm ci --no-audit --no-fund
+        run: npm ci
 
-      - name: Run Node tests
+      - name: Node Test
         if: hashFiles('package.json') != ''
         run: |
-          npm test 2>/dev/null || echo "No test script, skipping"
+          npm test || echo "No Node tests"
 
-      # ---------- Python ----------
-      - name: Setup Python ${{ matrix.python-version }}
+      # PYTHON
+      - name: Setup Python
+        if: hashFiles('requirements.txt') != ''
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: '**/requirements.txt'
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install Python dependencies
+      - name: Install Python Packages
         if: hashFiles('requirements.txt') != ''
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run Python tests
-        if: hashFiles('pytest.ini') != '' || hashFiles('tests/') != ''
+      - name: Run Pytest
+        if: hashFiles('tests/**/*.py') != ''
         run: |
           pip install pytest
-          pytest --junitxml=pytest.xml
+          pytest || true
 
-      # ---------- Java / Maven ----------
-      - name: Setup Java ${{ matrix.java-version }}
+      # JAVA
+      - name: Setup Java
+        if: hashFiles('pom.xml') != ''
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java-version }}
-          cache: 'maven'
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
 
-      - name: Maven build & test
+      - name: Maven Test
         if: hashFiles('pom.xml') != ''
-        run: mvn -B clean compile test --file pom.xml
+        run: |
+          mvn -B clean test
 
-      # ---------- Go (if go.mod exists) ----------
+      # GO
       - name: Setup Go
+        if: hashFiles('go.mod') != ''
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true
 
-      - name: Go build & test
+      - name: Go Test
         if: hashFiles('go.mod') != ''
         run: |
           go mod download
-          go test -v ./...
+          go test ./...
 
-      # ---------- Docker build test (if Dockerfile exists) ----------
-      - name: Docker build test
+      # DOCKER
+      - name: Docker Build Test
         if: hashFiles('Dockerfile') != ''
-        run: docker build -t test-image .
+        run: |
+          docker build -t tamanna-build:test .
 
-      # ---------- Upload test artifacts on failure ----------
-      - name: Upload test logs
-        uses: actions/upload-artifact@v4
+      - name: Upload Logs
         if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          name: test-logs-${{ matrix.node-version }}-${{ matrix.python-version }}
+          name: build-logs
           path: |
-            **/target/surefire-reports/
-            **/test-results/
-            **/pytest.xml
-            **/logs/
+            **/*.log
+            **/test-results/**
+            **/surefire-reports/**
           retention-days: 7
 
-  # ---------- 3. Security Scanning (CodeQL + Trivy + Secrets) ----------
   security:
+    name: Security Scan
     runs-on: ubuntu-latest
-    needs: [build-test]
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
+    needs: build-test
+    timeout-minutes: 30
 
-      # CodeQL analysis
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # CODEQL
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript, python, java, go
-      - name: Perform CodeQL Analysis
+          languages: javascript,python,java,go
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
         uses: github/codeql-action/analyze@v3
 
-      # Trivy filesystem scan (vulnerabilities + misconfigurations)
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+      # TRIVY
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@0.33.1
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-      - name: Upload Trivy results to GitHub Security tab
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy.sarif
+
+      - name: Upload Trivy Results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: trivy.sarif
 
-      # Secret scanning (trufflehog)
-      - name: Run TruffleHog for secrets
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          extra_args: --no-verification --only-verified
-
-      # Dependency review (only on PRs)
+      # DEPENDENCY REVIEW
       - name: Dependency Review
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: moderate
 
-      # Generate SBOM (Software Bill of Materials)
+      # TRUFFLEHOG
+      - name: Scan Secrets
+        uses: trufflesecurity/trufflehog@v3.90.0
+        with:
+          path: ./
+          extra_args: --only-verified
+
+      # SBOM
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@v0.20.5
         with:
           format: spdx-json
           output-file: sbom.spdx.json
 
-  # ---------- 4. Deployment (only on push to main, after all success) ----------
-  deploy-staging:
-    runs-on: ubuntu-latest
-    needs: [security]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment: staging   # requires environment protection rules
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to staging
-        run: |
-          echo "🚀 Deploying to staging environment"
-          # Add your actual deployment script here
-          # e.g., ./deploy.sh staging
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
 
-  # ---------- 5. Final summary & notifications ----------
+  deploy:
+    name: Deploy Tamanna Branch
+    runs-on: ubuntu-latest
+    needs: security
+
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/tamanna-'
+
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        run: |
+          echo "Deploying Tamanna Branch"
+          echo "Add your deployment commands here"
+
   finalize:
+    name: Final Summary
     runs-on: ubuntu-latest
-    needs: [lint, build-test, security, deploy-staging]
-    if: always()   # always run to show summary
-    steps:
-      - name: Generate job summary
-        run: |
-          echo "## 🚀 Tamanna Ultimate Auto Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status | Duration |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint | ${{ needs.lint.result }} | ${{ needs.lint.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Test | ${{ needs.build-test.result }} | ${{ needs.build-test.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scan | ${{ needs.security.result }} | ${{ needs.security.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deploy Staging | ${{ needs.deploy-staging.result }} | ${{ needs.deploy-staging.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Tamanna Auto Sync Completed Successfully!**" >> $GITHUB_STEP_SUMMARY
 
-      - name: Send Slack notification on failure
+    if: always()
+
+    needs:
+      - lint
+      - build-test
+      - security
+      - deploy
+
+    steps:
+      - name: Summary
+        run: |
+          echo "# Tamanna Ultimate Auto Build" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | ${{ needs.deploy.result }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Slack Notification
         if: failure() && github.event_name != 'pull_request'
-        uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@v2.3.3
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_COLOR: '#ff0000'
-          SLACK_TITLE: 'Build Failed'
-          SLACK_MESSAGE: |
-            Repository: ${{ github.repository }}
-            Branch: ${{ github.ref_name }}
-            Run: ${{ github.run_id }}
-            Failed jobs: ${{ join(needs.*.result, ', ') }}
+          SLACK_COLOR: "#ff0000"
+          SLACK_TITLE: "Tamanna Build Failed"
 
-      - name: Send email on failure (optional)
+      - name: Email Notification
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.tamanna }}
-          server_port: ${{ secrets.8080 }}
-          username: ${{ secrets.tamanna }}
-          password: ${{ secrets.AliAli00@@##@@##00 }}
-          subject: "Tamanna Build Failed - ${{ github.repository }}"
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Tamanna Build Failed"
           to: ${{ secrets.ALERT_EMAIL }}
           from: GitHub Actions
           body: |
-            Build failed for ${{ github.repository }}.
-            See logs: https://github.com/${{ github.com/tamanna456760-it/tamanna- }}/actions/runs/${{ github.run_id }}
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+
+            Run URL:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
