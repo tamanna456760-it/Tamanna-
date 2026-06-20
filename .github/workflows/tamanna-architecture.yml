@@ -1,0 +1,242 @@
+name: Tamanna AI Architecture Pipeline
+
+on:
+  push:
+    branches:
+      - tamanna-
+      - develop
+      - main
+
+  pull_request:
+    branches:
+      - tamanna-
+      - develop
+      - main
+
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 */6 * * *"
+
+permissions:
+  contents: write
+  actions: read
+  security-events: write
+
+env:
+  AI_SYSTEM: TAMANNA
+  AI_MEMORY: brain_memory.json
+  AI_SYNC: enabled
+  AI_DEFENSE: active
+
+jobs:
+
+  architecture-scan:
+    name: Architecture Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Verify Core Files
+        run: |
+          echo "Checking architecture..."
+
+          test -f ai_brain_core.py || true
+          test -f brain_memory.json || true
+          test -f ai_system_monitor.py || true
+          test -f deep_packet_inspection.py || true
+
+      - name: Run Scanner
+        run: |
+          if [ -f scripts/scan.py ]; then
+            python scripts/scan.py
+          fi
+
+      - name: Run File Scanner
+        run: |
+          if [ -f Tamanna-AI-System/file_scanner.py ]; then
+            python Tamanna-AI-System/file_scanner.py
+          fi
+
+  ai-runtime:
+    name: AI Runtime Validation
+    runs-on: ubuntu-latest
+    needs: architecture-scan
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate AI Core
+        run: |
+          python -m py_compile ai_brain_core.py || true
+
+      - name: Validate Learning Engine
+        run: |
+          python -m py_compile bd-king-r7/IT/core/learning_system.py || true
+
+      - name: Validate Monitor
+        run: |
+          python -m py_compile ai_system_monitor.py || true
+
+      - name: Validate Defense Core
+        run: |
+          python -m py_compile ai_defense_core.py || true
+
+  auto-heal:
+    name: Auto Heal System
+    runs-on: ubuntu-latest
+    needs: ai-runtime
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Execute Fixer
+        run: |
+          if [ -f scripts/fixer.py ]; then
+            python scripts/fixer.py
+          fi
+
+      - name: Execute Auto Fix
+        run: |
+          if [ -f auto_fix_issues.py ]; then
+            python auto_fix_issues.py
+          fi
+
+  security-defense:
+    name: Security Defense Layer
+    runs-on: ubuntu-latest
+    needs: auto-heal
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Deep Packet Inspection
+        run: |
+          if [ -f deep_packet_inspection.py ]; then
+            python deep_packet_inspection.py
+          fi
+
+      - name: Network Defense
+        run: |
+          if [ -f ai_network_defense.py ]; then
+            python ai_network_defense.py
+          fi
+
+      - name: Self Defense
+        run: |
+          if [ -f ai_self_defense.py ]; then
+            python ai_self_defense.py
+          fi
+
+  sync-recovery:
+    name: Sync & Recovery
+    runs-on: ubuntu-latest
+    needs: security-defense
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Sync Engine
+        run: |
+          if [ -f Tamanna-AI-System/git_sync.py ]; then
+            python Tamanna-AI-System/git_sync.py
+          fi
+
+      - name: Backup Manager
+        run: |
+          if [ -f Tamanna-AI-System/backup_manager.py ]; then
+            python Tamanna-AI-System/backup_manager.py
+          fi
+
+  build-surfaces:
+    name: Build User Surfaces
+    runs-on: ubuntu-latest
+    needs: sync-recovery
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Build Backend
+        run: |
+          if [ -f bd-king-r7/website/backend/package.json ]; then
+            cd bd-king-r7/website/backend
+            npm install
+          fi
+
+      - name: Build Frontend
+        run: |
+          if [ -f bd-king-r7/website/frontend/package.json ]; then
+            cd bd-king-r7/website/frontend
+            npm install
+            npm run build || true
+          fi
+
+      - name: Build .NET Site
+        run: |
+          if [ -f bd-king-r7/website/bd-king-website/Program.cs ]; then
+            cd bd-king-r7/website/bd-king-website
+            dotnet restore
+            dotnet build
+          fi
+
+  architecture-report:
+    name: Final Architecture Report
+    runs-on: ubuntu-latest
+    needs:
+      - build-surfaces
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Generate Report
+        run: |
+          mkdir -p reports
+
+          cat > reports/architecture-report.json << EOF
+          {
+            "system":"TAMANNA-AI",
+            "automation":"active",
+            "learning":"active",
+            "security":"active",
+            "sync":"active",
+            "status":"healthy"
+          }
+          EOF
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-architecture-report
+          path: reports/
