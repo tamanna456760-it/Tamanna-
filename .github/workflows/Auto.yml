@@ -3,7 +3,7 @@ name: Tamanna Ultimate Auto Build
 on:
   push:
     branches: [ "tamanna-", "develop" ]
-    paths-ignore:
+    paths:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
