@@ -2,13 +2,13 @@ name: Tamanna Ultimate Auto Build
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "tamanna-", "develop" ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "tamanna-", "develop" ]
   schedule:
     - cron: '0 2 * * *'   # daily 2 AM build
   workflow_dispatch:        # manual trigger
