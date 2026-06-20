@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T19:48:00.065887Z",
-  "total_files": 307,
+  "generated_at": "2026-06-20T19:49:45.618564Z",
+  "total_files": 308,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1068,6 +1068,10 @@
       "size": 451
     },
     {
+      "path": "tamanna-speed-optimizatio/speed_config.php",
+      "size": 569
+    },
+    {
       "path": "tamanna-speed-optimizatio/.htaccess",
       "size": 1179
     },
@@ -1153,7 +1157,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 26826
+      "size": 26911
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
