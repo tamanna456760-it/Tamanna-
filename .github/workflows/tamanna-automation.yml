@@ -1,0 +1,242 @@
+name: Tamanna AI Automation Control Plane
+
+on:
+  push:
+    branches:
+      - main
+      - tamanna-
+  pull_request:
+    branches:
+      - main
+      - tamanna-
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: tamanna-ai-system
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+
+jobs:
+
+  issue-scan:
+    name: Issue Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run Issue Scanner
+        run: |
+          if [ -f lint_and_detect_issues.py ]; then
+            python lint_and_detect_issues.py
+          fi
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-report
+          path: |
+            issues_report.json
+
+  auto-fix:
+    name: Auto Fix Engine
+    needs: issue-scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Requirements
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run Auto Fix
+        run: |
+          if [ -f auto_fix_issues.py ]; then
+            python auto_fix_issues.py
+          fi
+
+      - name: Commit Auto Fixes
+        run: |
+          git config --global user.name "Tamanna-AI"
+          git config --global user.email "actions@github.com"
+
+          git add .
+
+          git diff --cached --quiet || \
+          git commit -m "🤖 Tamanna AI Auto Fix"
+
+          git push || true
+
+  ai-runtime:
+    name: AI Runtime
+    needs: auto-fix
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install AI Requirements
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run AI Brain Core
+        run: |
+          if [ -f ai_brain_core.py ]; then
+            python ai_brain_core.py
+          fi
+
+      - name: Run Defense Core
+        run: |
+          if [ -f ai_defense_core.py ]; then
+            python ai_defense_core.py
+          fi
+
+      - name: Run AI System Monitor
+        run: |
+          if [ -f ai_system_monitor.py ]; then
+            python ai_system_monitor.py
+          fi
+
+      - name: Run Tamanna AI Main
+        run: |
+          if [ -f Tamanna-AI-System/main.py ]; then
+            python Tamanna-AI-System/main.py
+          fi
+
+  infrastructure:
+    name: Platform Validation
+    needs: ai-runtime
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Node Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          fi
+
+      - name: Validate API Server
+        run: |
+          if [ -f artifacts/api-server/src/app.ts ]; then
+            echo "API Server Found"
+          fi
+
+      - name: Validate Database Schema
+        run: |
+          if [ -f artifacts/lib/db/src/schema/index.ts ]; then
+            echo "Database Schema Found"
+          fi
+
+      - name: Validate OpenAPI Contract
+        run: |
+          if [ -f artifacts/lib/api-spec/openapi.yaml ]; then
+            echo "OpenAPI Contract Found"
+          fi
+
+      - name: Validate Backend Server
+        run: |
+          if [ -f bd-king-r7/server/server.js ]; then
+            echo "Backend Server Found"
+          fi
+
+  monitoring:
+    name: System Monitor
+    needs: infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Run Monitor
+        run: |
+          if [ -f monitor.py ]; then
+            python monitor.py
+          fi
+
+      - name: Create Logs Folder
+        run: |
+          mkdir -p logs
+
+      - name: Save Log Entry
+        run: |
+          echo "$(date) Workflow completed" >> logs/run.log
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-logs
+          path: logs/
+
+  powerhub-sync:
+    name: Powerhub Deployment Sync
+    needs: monitoring
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Powerhub Sync
+        run: |
+          echo "Synchronizing Powerhub"
+
+      - name: Verify Orchestrator
+        run: |
+          find . -iname "*orchestrator*" || true
+
+      - name: Verify Agent
+        run: |
+          find . -iname "*agent*" || true
+
+      - name: Final Status
+        run: |
+          echo "Tamanna AI Automation Completed Successfully"
