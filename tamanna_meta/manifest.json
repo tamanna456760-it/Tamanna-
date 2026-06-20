@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T19:53:17.364452Z",
-  "total_files": 309,
+  "generated_at": "2026-06-20T19:54:40.860746Z",
+  "total_files": 310,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1070,6 +1070,10 @@
     {
       "path": "tamanna-speed-optimizatio/speed_config.php",
       "size": 569
+    },
+    {
+      "path": "tamanna-speed-optimizatio/README.md",
+      "size": 3250
     },
     {
       "path": "tamanna-speed-optimizatio/.htaccess",
