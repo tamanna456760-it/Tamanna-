@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-20T21:54:59.586767Z",
-  "total_files": 314,
+  "generated_at": "2026-06-21T09:46:33.725276Z",
+  "total_files": 315,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -146,6 +146,10 @@
     {
       "path": "ai_network_defense.py",
       "size": 3876
+    },
+    {
+      "path": "fix-mesh.sh",
+      "size": 21589
     },
     {
       "path": "tamanna_head.py",
