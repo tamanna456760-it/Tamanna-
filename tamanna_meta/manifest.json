@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-22T18:57:13.224792Z",
-  "total_files": 315,
+  "generated_at": "2026-06-22T19:01:31.979416Z",
+  "total_files": 316,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -546,6 +546,10 @@
     {
       "path": "Tamanna-AI-System/serial_manager.py",
       "size": 488
+    },
+    {
+      "path": "Tamanna-AI-System/www/native.js",
+      "size": 4940
     },
     {
       "path": ".vscode/c_cpp_properties.json",
