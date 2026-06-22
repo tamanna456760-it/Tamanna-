@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-22T19:01:31.979416Z",
-  "total_files": 316,
+  "generated_at": "2026-06-22T19:03:07.980132Z",
+  "total_files": 317,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -550,6 +550,10 @@
     {
       "path": "Tamanna-AI-System/www/native.js",
       "size": 4940
+    },
+    {
+      "path": "Tamanna-AI-System/www/index.html",
+      "size": 10238
     },
     {
       "path": ".vscode/c_cpp_properties.json",
@@ -1189,7 +1193,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 27523
+      "size": 27604
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
