@@ -1,0 +1,35 @@
+/*
+ * ╔═════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                      TAMANNA-AI GITHUB AUTO-ENGINEER MODULE                         ║
+ * ║  Powered by Tamanna AI System (Core v3.5) & GitHub Integrated Intelligence           ║
+ * ║  Warning: This module is fully protected from code deletion by Auto-Upgrade/Fix     ║
+ * ╚═════════════════════════════════════════════════════════════════════════════════════╝
+ */
+name: Security-Audit-Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '30 0 * * 0' # Run weekly on Sundays
+
+jobs:
+  codeql-analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ['javascript', 'typescript']
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
