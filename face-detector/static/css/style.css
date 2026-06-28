@@ -1,0 +1,43 @@
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f4f4;
+}
+
+.container{
+    width:90%;
+    max-width:800px;
+    margin:40px auto;
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+h1{
+    text-align:center;
+}
+
+form{
+    text-align:center;
+    margin-top:20px;
+}
+
+button{
+    padding:12px 25px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+img{
+    max-width:100%;
+    display:block;
+    margin:20px auto;
+}
