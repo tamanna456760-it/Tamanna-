@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T17:21:12.139351Z",
+  "generated_at": "2026-06-28T17:23:16.369152Z",
   "total_files": 347,
   "files": [
     {
@@ -1141,7 +1141,7 @@
     },
     {
       "path": "face-detector/face-locker/templates/Login.html",
-      "size": 235
+      "size": 793
     },
     {
       "path": "face-detector/detector/video_detector.py",
@@ -1313,7 +1313,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 30069
+      "size": 30164
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
