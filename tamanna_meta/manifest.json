@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T16:44:38.469062Z",
-  "total_files": 331,
+  "generated_at": "2026-06-28T16:49:30.054920Z",
+  "total_files": 334,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1108,6 +1108,18 @@
       "size": 86
     },
     {
+      "path": "face-detector/static/css/style.css",
+      "size": 579
+    },
+    {
+      "path": "face-detector/static/uploads/.gitkeep",
+      "size": 55
+    },
+    {
+      "path": "face-detector/static/js/script.js",
+      "size": 101
+    },
+    {
       "path": "face-detector/models/haarcascade_frontalface_default.xml",
       "size": 187
     },
@@ -1249,7 +1261,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 28677
+      "size": 28758
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
