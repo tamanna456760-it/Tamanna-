@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T16:30:11.516814Z",
-  "total_files": 324,
+  "generated_at": "2026-06-28T16:33:31.266732Z",
+  "total_files": 326,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1084,6 +1084,10 @@
       "size": 126
     },
     {
+      "path": "face-detector/README.md",
+      "size": 1564
+    },
+    {
       "path": "face-detector/Dockerfile",
       "size": 103
     },
@@ -1094,6 +1098,10 @@
     {
       "path": "face-detector/app.py",
       "size": 185
+    },
+    {
+      "path": "face-detector/docker-compose.yml",
+      "size": 86
     },
     {
       "path": "face-detector/detector/face_detector.py",
@@ -1221,7 +1229,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 28019
+      "size": 28180
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
