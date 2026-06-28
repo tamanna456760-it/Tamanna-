@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T16:36:46.387466Z",
-  "total_files": 327,
+  "generated_at": "2026-06-28T16:38:11.990398Z",
+  "total_files": 328,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1106,6 +1106,10 @@
     {
       "path": "face-detector/docker-compose.yml",
       "size": 86
+    },
+    {
+      "path": "face-detector/models/haarcascade_frontalface_default.xml",
+      "size": 187
     },
     {
       "path": "face-detector/detector/face_detector.py",
