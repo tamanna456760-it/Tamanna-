@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T13:41:44.174106Z",
+  "generated_at": "2026-06-28T13:42:49.471461Z",
   "total_files": 319,
   "files": [
     {
@@ -181,7 +181,7 @@
     },
     {
       "path": "LICENSE",
-      "size": 35149
+      "size": 1211
     },
     {
       "path": "bdking_r7_tamanna_ultra.sh",
@@ -1201,7 +1201,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 27747
+      "size": 27805
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
