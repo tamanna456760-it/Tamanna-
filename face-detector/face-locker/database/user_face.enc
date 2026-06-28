@@ -1,0 +1,16 @@
+import os
+from encryptor import generate_key, encrypt_to_file
+
+# folder create
+os.makedirs("database", exist_ok=True)
+
+# step 1: key generate
+generate_key()
+
+# step 2: input face image
+input_image = "database/user_face.jpg"
+
+# step 3: output encrypted file
+output_file = "database/user_face.enc"
+
+encrypt_to_file(input_image, output_file)
