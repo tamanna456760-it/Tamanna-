@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T13:39:47.677382Z",
-  "total_files": 318,
+  "generated_at": "2026-06-28T13:41:44.174106Z",
+  "total_files": 319,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -178,6 +178,10 @@
     {
       "path": "free-fire.py",
       "size": 3257
+    },
+    {
+      "path": "LICENSE",
+      "size": 35149
     },
     {
       "path": "bdking_r7_tamanna_ultra.sh",
@@ -1197,7 +1201,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 27687
+      "size": 27747
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
