@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T13:45:17.641688Z",
-  "total_files": 319,
+  "generated_at": "2026-06-28T13:46:04.642005Z",
+  "total_files": 320,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -434,6 +434,10 @@
     {
       "path": "auto_fix_issues.py",
       "size": 1776
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "size": 5202
     },
     {
       "path": "system_auto_run.bat",
