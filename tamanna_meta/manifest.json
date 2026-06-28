@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T17:01:23.328531Z",
-  "total_files": 339,
+  "generated_at": "2026-06-28T17:02:26.836349Z",
+  "total_files": 340,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1160,6 +1160,10 @@
       "size": 348
     },
     {
+      "path": "face-detector/detector/age_gender.py",
+      "size": 2842
+    },
+    {
       "path": ".env/config.json",
       "size": 2224
     },
@@ -1281,7 +1285,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 29367
+      "size": 29457
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
