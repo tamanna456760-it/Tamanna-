@@ -1,7 +1,7 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T16:33:31.266732Z",
-  "total_files": 326,
+  "generated_at": "2026-06-28T16:34:58.004225Z",
+  "total_files": 327,
   "files": [
     {
       "path": "tamanna_ultra_secure.sh",
@@ -1100,6 +1100,10 @@
       "size": 185
     },
     {
+      "path": "face-detector/.gitignore",
+      "size": 566
+    },
+    {
       "path": "face-detector/docker-compose.yml",
       "size": 86
     },
@@ -1229,7 +1233,7 @@
     },
     {
       "path": "tamanna_meta/manifest.json",
-      "size": 28180
+      "size": 28333
     },
     {
       "path": "ROOT/logs/ultra_secure.log",
