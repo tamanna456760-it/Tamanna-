@@ -1,6 +1,6 @@
 {
   "tamanna_head": true,
-  "generated_at": "2026-06-28T13:44:07.335044Z",
+  "generated_at": "2026-06-28T13:45:17.641688Z",
   "total_files": 319,
   "files": [
     {
@@ -181,7 +181,7 @@
     },
     {
       "path": "LICENSE",
-      "size": 7048
+      "size": 1069
     },
     {
       "path": "bdking_r7_tamanna_ultra.sh",
