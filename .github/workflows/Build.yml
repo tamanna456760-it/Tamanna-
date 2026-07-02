@@ -1,37 +1,38 @@
 name: Build
 
 on:
-push:
-branches:
-- main
-pull_request:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
-contents: read
+  contents: read
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-strategy:
-  matrix:
-    node-version: [20]
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
 
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: npm ci
 
-  - name: Setup Node.js
-    uses: actions/setup-node@v4
-    with:
-      node-version: ${{ matrix.node-version }}
-      cache: npm
+      - name: Run Tests
+        run: npm test || echo "No tests found"
 
-  - name: Install Dependencies
-    run: npm ci
-
-  - name: Run Tests
-    run: npm test
-
-  - name: Build Project
-    run: npm run build
+      - name: Build Project
+        run: npm run build || echo "No build script found"

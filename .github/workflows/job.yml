@@ -2,7 +2,8 @@ name: Tamanna Auto Run & Sync (Advanced)
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       skip_python:
@@ -38,7 +39,6 @@ on:
         type: boolean
         default: false
 
-# Cancel concurrent runs on the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: write   # for auto-commit
+      contents: write
 
     steps:
       - name: 📥 Checkout repository
@@ -58,9 +58,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ------------------------------------------------------------------
-      # 1) Setup all languages (cached)
-      # ------------------------------------------------------------------
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
@@ -84,16 +81,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc make
 
-      - name: 📦 Install Python dependencies (if any)
+      - name: 📦 Install Python dependencies
         run: |
           if [ -f requirements.txt ]; then
             pip install --upgrade pip
             pip install -r requirements.txt
           fi
 
-      # ------------------------------------------------------------------
-      # 2) Create logs directory and helper function
-      # ------------------------------------------------------------------
       - name: Prepare logging
         run: |
           mkdir -p logs
@@ -111,7 +105,6 @@ jobs:
             exit_code=$?
             echo "❌ FAILED: $file (exit $exit_code)"
             echo "$file|failed|$exit_code" >> results.txt
-            # Annotate PR/commit with first error line
             if [ -s "${log_base}.err" ]; then
               echo "::error file=$file::$(head -n1 ${log_base}.err)"
             fi
@@ -119,9 +112,6 @@ jobs:
           EOF
           chmod +x run_with_logging.sh
 
-      # ------------------------------------------------------------------
-      # 3) Run Python files
-      # ------------------------------------------------------------------
       - name: 🐍 Run Python files
         if: github.event.inputs.skip_python != 'true'
         run: |
@@ -134,9 +124,6 @@ jobs:
               ./run_with_logging.sh "$file" "python3 '$file'" "$TIMEOUT"
             done
 
-      # ------------------------------------------------------------------
-      # 4) Run Node.js files
-      # ------------------------------------------------------------------
       - name: 📦 Run Node.js files
         if: github.event.inputs.skip_node != 'true'
         run: |
@@ -148,9 +135,6 @@ jobs:
               ./run_with_logging.sh "$file" "node '$file'" "$TIMEOUT"
             done
 
-      # ------------------------------------------------------------------
-      # 5) Run Shell scripts
-      # ------------------------------------------------------------------
       - name: 🐚 Run Shell scripts
         if: github.event.inputs.skip_shell != 'true'
         run: |
@@ -160,9 +144,6 @@ jobs:
             ./run_with_logging.sh "$file" "bash '$file'" "$TIMEOUT"
           done
 
-      # ------------------------------------------------------------------
-      # 6) Compile & run C files
-      # ------------------------------------------------------------------
       - name: 🔧 Compile & run C files
         if: github.event.inputs.skip_c != 'true'
         run: |
@@ -173,9 +154,6 @@ jobs:
             rm -f "$out"
           done
 
-      # ------------------------------------------------------------------
-      # 7) Compile & run Java files
-      # ------------------------------------------------------------------
       - name: ☕ Compile & run Java files
         if: github.event.inputs.skip_java != 'true'
         run: |
@@ -186,46 +164,6 @@ jobs:
             (cd "$dir" && javac "$cls.java" && ./run_with_logging.sh "$file" "java $cls" "$TIMEOUT")
           done
 
-      # ------------------------------------------------------------------
-      # 8) Run PowerHub helpers (specific paths)
-      # ------------------------------------------------------------------
-      - name: ⚡ Run PowerHub Helpers
-        if: github.event.inputs.skip_powerhub != 'true'
-        run: |
-          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
-          POWERHUB_PATHS=(
-            "bd-king-r7/it/bd-king-r7/powerhub/powerhub_helper/bd-king-r7_powerhub.bad"
-            "bd-king-r7/it/auto_install.bad"
-            "bd-king-r7/it/auto_sync.bad"
-            "bd-king-r7/it/bd-king-r7_ultra_synce.bad"
-            "bd-king-r7/it/warking_helper.bad"
-          )
-          for path in "${POWERHUB_PATHS[@]}"; do
-            if [ -f "$path" ]; then
-              chmod +x "$path"
-              echo "▶️ Running PowerHub helper: $path"
-              # Try as bash first, then Python
-              if timeout "$TIMEOUT" bash "$path" > "logs/$(basename "$path").out" 2> "logs/$(basename "$path").err"; then
-                echo "✅ SUCCESS: $path (bash)"
-                echo "$path|success|bash" >> results.txt
-              elif timeout "$TIMEOUT" python3 "$path" >> "logs/$(basename "$path").out" 2>> "logs/$(basename "$path").err"; then
-                echo "✅ SUCCESS: $path (python3)"
-                echo "$path|success|python3" >> results.txt
-              else
-                echo "❌ FAILED: $path"
-                echo "$path|failed" >> results.txt
-                if [ -s "logs/$(basename "$path").err" ]; then
-                  echo "::error file=$path::$(head -n1 logs/$(basename "$path").err)"
-                fi
-              fi
-            else
-              echo "⚠️ Helper not found: $path"
-            fi
-          done
-
-      # ------------------------------------------------------------------
-      # 9) Summarize results
-      # ------------------------------------------------------------------
       - name: 📊 Generate job summary
         if: always()
         run: |
@@ -247,9 +185,6 @@ jobs:
             echo "- **No files were executed** (all language groups skipped or no files found)" >> $GITHUB_STEP_SUMMARY
           fi
 
-      # ------------------------------------------------------------------
-      # 10) Auto-commit changes (only if any changes exist)
-      # ------------------------------------------------------------------
       - name: 📝 Commit auto changes
         if: github.event.inputs.force_commit == 'true' || (success() && github.event_name != 'pull_request')
         run: |
@@ -264,9 +199,6 @@ jobs:
             echo "✅ Changes committed and pushed."
           fi
 
-      # ------------------------------------------------------------------
-      # 11) Upload logs as artifact
-      # ------------------------------------------------------------------
       - name: 📤 Upload logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -275,9 +207,6 @@ jobs:
           path: logs/
           retention-days: 7
 
-      # ------------------------------------------------------------------
-      # 12) Slack notification on failure (optional)
-      # ------------------------------------------------------------------
       - name: 🚨 Slack alert on failure
         if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
         uses: rtCamp/action-slack-notify@v2
