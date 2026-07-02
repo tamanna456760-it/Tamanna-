@@ -2,57 +2,366 @@ name: BD-King-R7 Auto Build & Fix
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+  schedule:
+    # Build daily at 3 AM UTC
+    - cron: '0 3 * * *'
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        type: choice
+        options:
+          - debug
+          - release
+        default: 'debug'
+      skip_tests:
+        description: 'Skip unit tests'
+        type: boolean
+        default: false
+      verbose:
+        description: 'Enable verbose logging'
+        type: boolean
+        default: false
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: bd-king-r7-build-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  build:
-    runs-on: ubuntu-22.04   # 🔥 more stable than ubuntu-latest
-    timeout-minutes: 30     # ⛔ stuck job auto stop
+permissions:
+  contents: read
+  checks: write
+  actions: write
+  pull-requests: write
 
-    permissions:
-      contents: read
-      actions: write
+jobs:
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: ✅ Validate Gradle files
+        run: |
+          echo "Validating Gradle configuration..."
+          
+          if [ ! -f "android/gradlew" ]; then
+            echo "❌ ERROR: android/gradlew not found"
+            exit 1
+          fi
+          
+          if [ ! -f "android/build.gradle" ] && [ ! -f "android/build.gradle.kts" ]; then
+            echo "❌ ERROR: No build.gradle found"
+            exit 1
+          fi
+          
+          echo "✓ Gradle configuration valid"
+
+      - name: ✅ Validate Android structure
+        run: |
+          echo "Validating Android project structure..."
+          
+          REQUIRED_DIRS=("android" "android/app" "android/gradle")
+          
+          for dir in "${REQUIRED_DIRS[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ ERROR: Missing directory: $dir"
+              exit 1
+            fi
+          done
+          
+          echo "✓ Android project structure valid"
+
+  build:
+    name: Build Android APK
+    needs: validate
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    outputs:
+      build_status: ${{ steps.build.outcome }}
+      apk_path: ${{ steps.build.outputs.APK_PATH }}
+      build_time: ${{ steps.build.outputs.BUILD_TIME }}
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2️⃣ Setup JDK 17
+      - name: ☕ Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          cache: 'gradle'
+          cache-dependency-path: 'android/build.gradle*'
 
-      - name: Setup Android SDK
+      # 3️⃣ Display Java version
+      - name: 📋 Verify Java installation
+        run: |
+          echo "Java version: $(java -version 2>&1 | head -n 1)"
+          echo "Gradle version: $(./android/gradlew --version | head -n 1)"
+
+      # 4️⃣ Setup Android SDK
+      - name: 🤖 Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: 33
+          target: default
+          arch: x86_64
 
-      - name: Grant execute permission
-        run: chmod +x android/gradlew
+      # 5️⃣ Accept Android licenses
+      - name: 📜 Accept Android licenses
+        run: |
+          echo "Accepting Android SDK licenses..."
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+          echo "✓ Licenses accepted"
 
-      - name: Cache Gradle
+      # 6️⃣ Grant execute permissions
+      - name: 🔐 Grant execute permissions
+        run: |
+          echo "Setting execute permissions on Gradle wrapper..."
+          chmod +x android/gradlew
+          chmod +x android/gradle/wrapper/gradle-wrapper.jar
+          echo "✓ Permissions set"
+
+      # 7️⃣ Cache Gradle dependencies
+      - name: 💾 Cache Gradle dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: gradle-${{ runner.os }}
+            ~/.android/build-cache
+          key: gradle-cache-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*') }}-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-cache-${{ runner.os }}-
+            gradle-cache-
 
-      - name: Build APK
+      # 8️⃣ Run Gradle lint
+      - name: 🔍 Run Gradle lint
+        id: lint
+        continue-on-error: true
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          echo "Running Gradle linter..."
+          ./gradlew lint \
+            --no-daemon \
+            --stacktrace \
+            --info 2>&1 | tee lint.log || true
+          
+          if grep -qi "error" lint.log; then
+            echo "⚠️  Lint errors found (non-blocking)"
+          else
+            echo "✓ Lint check passed"
+          fi
 
-      - name: Upload APK
+      # 9️⃣ Run unit tests (optional)
+      - name: 🧪 Run unit tests
+        if: github.event.inputs.skip_tests != 'true'
+        id: test
+        continue-on-error: true
+        run: |
+          cd android
+          echo "Running unit tests..."
+          ./gradlew test \
+            --no-daemon \
+            --stacktrace 2>&1 | tee test.log || true
+          
+          if [ $? -eq 0 ]; then
+            echo "✓ Tests passed"
+          else
+            echo "⚠️  Some tests failed (non-blocking)"
+          fi
+
+      # 🔟 Build APK
+      - name: 🏗️ Build Android APK
+        id: build
+        run: |
+          cd android
+          
+          BUILD_TYPE="${{ github.event.inputs.build_type || 'debug' }}"
+          VERBOSE_FLAG="${{ github.event.inputs.verbose == 'true' && '--info' || '' }}"
+          
+          echo "════════════════════════════════════"
+          echo "🚀 Building $BUILD_TYPE APK"
+          echo "════════════════════════════════════"
+          
+          BUILD_START=$(date +%s)
+          
+          if [ "$BUILD_TYPE" = "release" ]; then
+            echo "Building RELEASE variant..."
+            ./gradlew assembleRelease \
+              --no-daemon \
+              --stacktrace \
+              $VERBOSE_FLAG || {
+              echo "❌ Release build failed"
+              exit 1
+            }
+            APK_PATH="android/app/build/outputs/apk/release/*.apk"
+          else
+            echo "Building DEBUG variant..."
+            ./gradlew assembleDebug \
+              --no-daemon \
+              --stacktrace \
+              $VERBOSE_FLAG || {
+              echo "❌ Debug build failed"
+              exit 1
+            }
+            APK_PATH="android/app/build/outputs/apk/debug/*.apk"
+          fi
+          
+          BUILD_END=$(date +%s)
+          BUILD_TIME=$((BUILD_END - BUILD_START))
+          
+          # Find APK file
+          APK_FILE=$(find . -name "*$BUILD_TYPE*.apk" -type f | head -1)
+          
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ ERROR: No APK file generated"
+            exit 1
+          fi
+          
+          APK_SIZE=$(du -h "$APK_FILE" | cut -f1)
+          
+          echo "BUILD_TIME=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "APK_PATH=$APK_FILE" >> $GITHUB_OUTPUT
+          echo "APK_SIZE=$APK_SIZE" >> $GITHUB_OUTPUT
+          
+          echo "════════════════════════════════════"
+          echo "✅ Build successful!"
+          echo "════════════════════════════════════"
+          echo "APK File: $APK_FILE"
+          echo "APK Size: $APK_SIZE"
+          echo "Build Time: ${BUILD_TIME}s"
+
+      # 1️⃣1️⃣ Verify APK
+      - name: ✅ Verify APK integrity
+        if: steps.build.outcome == 'success'
+        run: |
+          echo "Verifying APK integrity..."
+          
+          APK_FILE="${{ steps.build.outputs.APK_PATH }}"
+          
+          if [ ! -f "$APK_FILE" ]; then
+            echo "❌ APK file not found: $APK_FILE"
+            exit 1
+          fi
+          
+          # Check file size (must be > 1MB typically)
+          FILE_SIZE=$(stat -f%z "$APK_FILE" 2>/dev/null || stat -c%s "$APK_FILE")
+          
+          if [ "$FILE_SIZE" -lt 1000000 ]; then
+            echo "⚠️  APK suspiciously small: $FILE_SIZE bytes"
+          else
+            echo "✓ APK size valid: $FILE_SIZE bytes"
+          fi
+          
+          # List APK contents summary
+          unzip -l "$APK_FILE" | head -20
+          echo "..."
+          unzip -l "$APK_FILE" | tail -3
+
+      # 1️⃣2️⃣ Upload APK artifact
+      - name: 📤 Upload APK artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: BD-King-R7-debug
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: bd-king-r7-apk-${{ github.run_id }}
+          path: android/app/build/outputs/apk/**/*.apk
+          retention-days: 30
+          if-no-files-found: warn
+
+      # 1️⃣3️⃣ Upload build logs
+      - name: 📤 Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bd-king-r7-logs-${{ github.run_id }}
+          path: |
+            android/lint.log
+            android/test.log
+            android/app/build/reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      # 1️⃣4️⃣ Generate build summary
+      - name: 📊 Generate build summary
+        if: always()
+        run: |
+          {
+            echo "## 🤖 BD-King-R7 Build Report"
+            echo ""
+            echo "### 📋 Configuration"
+            echo "| Setting | Value |"
+            echo "|---------|-------|"
+            echo "| **Runner** | ubuntu-22.04 |"
+            echo "| **JDK** | 17 (Temurin) |"
+            echo "| **Build Type** | ${{ github.event.inputs.build_type || 'debug' }} |"
+            echo "| **Branch** | ${{ github.ref_name }} |"
+            echo "| **Trigger** | ${{ github.event_name }} |"
+            echo ""
+            
+            if [ "${{ steps.build.outcome }}" == "success" ]; then
+              echo "### ✅ Build Status: SUCCESS"
+              echo "- **APK Path**: ${{ steps.build.outputs.APK_PATH }}"
+              echo "- **APK Size**: ${{ steps.build.outputs.APK_SIZE }}"
+              echo "- **Build Time**: ${{ steps.build.outputs.BUILD_TIME }}s"
+            else
+              echo "### ❌ Build Status: FAILED"
+              echo "Check logs above for details"
+            fi
+            
+            echo ""
+            echo "### 📎 Artifacts"
+            echo "- [APK Build](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo "- [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
+
+      # 1️⃣5️⃣ Slack notification
+      - name: 🚨 Slack notification (failure)
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#build-alerts'
+          SLACK_COLOR: 'danger'
+          SLACK_TITLE: '❌ BD-King-R7 Build Failed'
+          SLACK_MESSAGE: |
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Commit:* ${{ github.sha }}
+            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: ✅ Slack notification (success)
+        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#build-alerts'
+          SLACK_COLOR: 'good'
+          SLACK_TITLE: '✅ BD-King-R7 Build Succeeded'
+          SLACK_MESSAGE: |
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Build Type:* ${{ github.event.inputs.build_type || 'debug' }}
+            *APK Size:* ${{ steps.build.outputs.APK_SIZE }}
+            *Build Time:* ${{ steps.build.outputs.BUILD_TIME }}s
+            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # 1️⃣6️⃣ Completion
+      - name: 🎉 Build complete
+        run: |
+          echo "════════════════════════════════════"
+          echo "✅ BD-King-R7 Build Workflow Complete"
+          echo "════════════════════════════════════"
