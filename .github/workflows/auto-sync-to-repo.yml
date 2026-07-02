@@ -1,85 +1,149 @@
-name: Auto Sync Tamanna
+name: Auto Sync & Mirror
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, master]
   schedule:
-    - cron: '0 * * * *' # প্রতি ঘন্টায় একবার auto sync
+    # Run every hour (sync automatically)
+    - cron: '0 * * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   auto-sync:
+    name: Auto Sync to Main
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1️⃣ Checkout repository with full history
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2️⃣ Set up Git
-      - name: Setup Git
+      # 2️⃣ Configure Git safely
+      - name: Configure Git
         run: |
-          git config user.name "Tamanna456760-it"
-          git config user.email "tamanna456760@gmail.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      # 3️⃣ Add all files
-      - name: Add files
+      # 3️⃣ Check for changes before committing
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "✓ No changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✓ Changes detected - proceeding with sync"
+          fi
+
+      # 4️⃣ Stage and commit changes (only if there are changes)
+      - name: Commit changes
+        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           git add .
-          git commit -m "Auto sync $(date)" || echo "Nothing to commit"
+          git commit -m "🔄 Auto sync: $(date +'%Y-%m-%d %H:%M:%S UTC')" \
+            --author="Tamanna Bot <tamanna456760@gmail.com>" || \
+            { echo "⚠ Nothing to commit"; exit 0; }
 
-      # 4️⃣ Push changes
+      # 5️⃣ Push changes safely
       - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
-# bd-king-r7/it/
-name: Auto Sync Mirror
+          script: |
+            try {
+              const { execSync } = require('child_process');
+              execSync('git push origin main --force-with-lease', { stdio: 'inherit' });
+              console.log('✓ Changes pushed successfully');
+            } catch (error) {
+              console.error('✗ Push failed:', error.message);
+              throw error;
+            }
 
-on:
-  push:
-    branches: ["main", "master"]
-  workflow_dispatch: {}
-
-jobs:
-  mirror:
-    name: Mirror to external repo
+  mirror-sync:
+    name: Mirror to External Repository
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: secrets.MIRROR_REPO != ''
+
     steps:
+      # 1️⃣ Checkout all history
       - name: Checkout all history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure git
+      # 2️⃣ Configure Git
+      - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
 
-      - name: Add mirror remote
-        env:
-          MIRROR_REPO: ${{ secrets.MIRROR_REPO }} # e.g. git@github.com:you/backup-repo.git
-        run: |
-          if [ -z "$MIRROR_REPO" ]; then
-            echo "MIRROR_REPO not set — skipping mirror push"
-            exit 0
-          fi
-          git remote remove mirror 2>/dev/null || true
-          git remote add mirror "$MIRROR_REPO"
-          # ensure we can push with SSH key if using git@ style URL
-          echo "Mirror remote set to $MIRROR_REPO"
-
-      - name: Add SSH key for push (if using SSH)
+      # 3️⃣ Setup SSH authentication (if needed)
+      - name: Setup SSH authentication
         if: startsWith(secrets.MIRROR_REPO, 'git@')
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.MIRROR_SSH_KEY }}
+          SSH_KEY: ${{ secrets.MIRROR_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 700 ~/.ssh
+          
+          # Write SSH key securely
+          echo "$SSH_KEY" | base64 -d > ~/.ssh/id_rsa 2>/dev/null || \
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+          
+          # Add GitHub to known_hosts
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
+          
+          echo "✓ SSH authentication ready"
 
-      - name: Push mirror (force)
+      # 4️⃣ Add mirror remote
+      - name: Configure mirror remote
+        env:
+          MIRROR_REPO: ${{ secrets.MIRROR_REPO }}
         run: |
-          git push --mirror mirror --force
+          if [ -z "$MIRROR_REPO" ]; then
+            echo "⚠ MIRROR_REPO not configured - skipping mirror sync"
+            exit 0
+          fi
+          
+          # Remove existing mirror remote if it exists
+          git remote remove mirror 2>/dev/null || true
+          
+          # Add new mirror remote
+          git remote add mirror "$MIRROR_REPO"
+          
+          echo "✓ Mirror remote configured: $MIRROR_REPO"
+
+      # 5️⃣ Validate mirror configuration
+      - name: Validate mirror connection
+        run: |
+          git remote -v
+          echo "✓ Remote configuration verified"
+
+      # 6️⃣ Push to mirror with force-with-lease
+      - name: Push to mirror repository
+        run: |
+          git push --mirror mirror || \
+          { echo "⚠ Mirror push failed - retrying with force"; \
+            git push --mirror mirror --force; }
+          echo "✓ Mirror push completed"
+
+      # 7️⃣ Notification on failure
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Mirror sync failed for ${{ secrets.MIRROR_REPO }}"
+          exit 1
