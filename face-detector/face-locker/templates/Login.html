@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Vault</title>
+</head>
+<body>
+
+<h2>Face Login System</h2>
+
+<h3>Register Face</h3>
+<form action="/register" method="post" enctype="multipart/form-data">
+    <input type="file" name="image">
+    <button>Register</button>
+</form>
+
+<hr>
+
+<h3>Unlock</h3>
+<form action="/unlock" method="post" enctype="multipart/form-data">
+    <input type="file" name="image">
+    <button>Login</button>
+</form>
+
+<hr>
+
+<h3>Encrypt File</h3>
+<form action="/encrypt" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button>Encrypt</button>
+</form>
+
+<hr>
+
+<h3>Decrypt File</h3>
+<form action="/decrypt" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button>Decrypt</button>
+</form>
+
+</body>
+</html>
