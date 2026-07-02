@@ -4,15 +4,20 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "*/5 * * * *"   # every 5 minutes
-  workflow_dispatch:        # manual trigger with options
+    # Run every hour (5 min is too aggressive for production)
+    - cron: '0 * * * *'
+  workflow_dispatch:
     inputs:
       debug:
         description: 'Enable debug logging'
         type: boolean
         default: false
       skip_fix:
-        description: 'Skip auto‑fix script'
+        description: 'Skip auto-fix script'
+        type: boolean
+        default: false
+      force_rebuild:
+        description: 'Force complete rebuild'
         type: boolean
         default: false
 
@@ -23,100 +28,217 @@ concurrency:
 
 jobs:
   auto-fix-build:
+    name: Auto Fix & Build Pipeline
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
-      contents: write   # needed for auto‑commit (if added later)
+      contents: write
+      checks: write
+      actions: read
 
     steps:
+      # 1️⃣ Checkout repository
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Set up Python
+      # 2️⃣ Setup Python with caching
+      - name: 🐍 Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'          # cache pip dependencies
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
 
-      - name: 📦 Install OS dependencies (optional, non‑fatal)
+      # 3️⃣ Install OS dependencies (non-fatal)
+      - name: 📦 Install OS dependencies
+        continue-on-error: true
         run: |
-          echo "🔧 Installing optional system packages..."
+          echo "🔧 Installing system packages..."
           if command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update
-            # Group common native libs; failures ignored with '|| true'
+            sudo apt-get update -qq
             sudo apt-get install -y \
               libportaudio2 portaudio19-dev \
               libssl-dev libffi-dev build-essential \
-            || true
+              git curl wget 2>/dev/null || true
+            echo "✓ System packages installed"
           fi
 
+      # 4️⃣ Install Python dependencies
       - name: 🐍 Install Python dependencies
         id: pip-install
         run: |
-          echo "Installing from requirements.txt (if exists)..."
+          python -m pip install --upgrade pip setuptools wheel
+          
+          # Install main requirements
           if [ -f requirements.txt ]; then
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt || true
+            echo "📦 Installing requirements.txt..."
+            pip install -q -r requirements.txt || true
+            echo "✓ Main requirements installed"
           else
-            echo "⚠️ No requirements.txt found – skipping."
+            echo "⚠️  requirements.txt not found"
           fi
-
+          
+          # Install optional requirements
           if [ -f requirements-optional.txt ]; then
-            echo "Installing optional dependencies..."
-            pip install -r requirements-optional.txt || true
+            echo "📦 Installing optional dependencies..."
+            pip install -q -r requirements-optional.txt || true
+            echo "✓ Optional requirements installed"
           fi
+          
+          # Install auto-fix tools
+          echo "🛠️  Installing code quality tools..."
+          pip install -q autopep8 black flake8 pylint isort 2>&1 || true
+          echo "✓ Code quality tools installed"
 
-          # Install common auto‑fix tools if missing
-          pip install --upgrade autopep8 black flake8 pylint || true
-
-      - name: 🔨 Ensure auto‑fix script exists
+      # 5️⃣ Ensure auto-fix script exists
+      - name: 🔨 Create auto-fix script (if missing)
         run: |
           mkdir -p scripts
+          
           if [ ! -f scripts/auto_build_and_fix.sh ]; then
-            echo "⚠️ scripts/auto_build_and_fix.sh not found – creating a default one."
-            cat > scripts/auto_build_and_fix.sh << 'EOF'
-#!/bin/bash
-set -e
-echo "🔍 Running auto‑fix (Python formatting)"
-autopep8 --in-place --recursive . --aggressive --aggressive 2>/dev/null || true
-black . 2>/dev/null || true
-echo "🏗️ Running build (if any)"
-if [ -f setup.py ]; then python setup.py sdist bdist_wheel; fi
-if [ -f pyproject.toml ]; then python -m build; fi
-echo "✅ Auto‑fix and build completed."
-EOF
+            echo "⚠️  Creating auto-fix script..."
+            cat > scripts/auto_build_and_fix.sh << 'EOFSCRIPT'
+          #!/bin/bash
+          set -e
+          
+          echo "═══════════════════════════════════════"
+          echo "🔍 Starting Auto Fix & Build Pipeline"
+          echo "═══════════════════════════════════════"
+          
+          # 1. Import sorting
+          echo "📋 Step 1/5: Sorting imports..."
+          isort . --profile black --skip-gitignore 2>/dev/null || true
+          
+          # 2. Auto format with autopep8
+          echo "🎨 Step 2/5: Running autopep8..."
+          autopep8 --in-place --recursive . \
+            --aggressive --aggressive \
+            --ignore=E501,W605 \
+            2>/dev/null || true
+          
+          # 3. Format with Black
+          echo "🎯 Step 3/5: Running Black formatter..."
+          black . --line-length=100 2>/dev/null || true
+          
+          # 4. Lint with flake8
+          echo "🔎 Step 4/5: Running flake8 linter..."
+          flake8 . --count --statistics \
+            --ignore=E501,W605,E203 \
+            --exclude=.git,__pycache__,venv,.venv \
+            2>/dev/null || true
+          
+          # 5. Build
+          echo "🏗️  Step 5/5: Running build..."
+          if [ -f setup.py ]; then
+            echo "   └─ Building with setup.py..."
+            python setup.py sdist bdist_wheel 2>/dev/null || true
+          fi
+          
+          if [ -f pyproject.toml ]; then
+            echo "   └─ Building with pyproject.toml..."
+            pip install -q build 2>/dev/null
+            python -m build 2>/dev/null || true
+          fi
+          
+          if [ -f Makefile ]; then
+            echo "   └─ Running Makefile..."
+            make build 2>/dev/null || true
+          fi
+          
+          echo ""
+          echo "═══════════════════════════════════════"
+          echo "✅ Auto Fix & Build Completed"
+          echo "═══════════════════════════════════════"
+          EOFSCRIPT
             chmod +x scripts/auto_build_and_fix.sh
+            echo "✓ Auto-fix script created"
+          else
+            echo "✓ Auto-fix script exists"
           fi
 
-      - name: 🚀 Run auto-fix script (with retry)
+      # 6️⃣ Enable debug logging if requested
+      - name: 🔍 Enable debug mode
+        if: github.event.inputs.debug == 'true'
+        run: |
+          echo "DEBUG=true" >> $GITHUB_ENV
+          set -x
+          echo "✓ Debug mode enabled"
+
+      # 7️⃣ Run auto-fix script with retry
+      - name: 🚀 Run auto-fix script
         if: github.event.inputs.skip_fix != 'true'
         id: fix
+        continue-on-error: true
         run: |
-          echo "=== Starting auto-fix process ==="
-          set +e
+          echo "▶️  Starting auto-fix pipeline..."
+          
           MAX_RETRIES=2
           RETRY=0
           SCRIPT="scripts/auto_build_and_fix.sh"
+          EXIT_CODE=0
           
           while [ $RETRY -lt $MAX_RETRIES ]; do
-            echo "▶️ Execution attempt $((RETRY+1))"
-            bash "$SCRIPT" 2>&1 | tee auto_fix.log
-            if [ ${PIPESTATUS[0]} -eq 0 ]; then
-              echo "✅ Auto-fix succeeded."
-              exit 0
-            fi
-            RETRY=$((RETRY+1))
-            if [ $RETRY -lt $MAX_RETRIES ]; then
-              echo "⚠️ Failed, retrying in 5 seconds..."
-              sleep 5
+            echo "🔄 Attempt $((RETRY + 1))/$MAX_RETRIES"
+            
+            if bash "$SCRIPT" 2>&1 | tee -a auto_fix.log; then
+              echo "✅ Auto-fix succeeded on attempt $((RETRY + 1))"
+              EXIT_CODE=0
+              break
+            else
+              EXIT_CODE=$?
+              RETRY=$((RETRY + 1))
+              
+              if [ $RETRY -lt $MAX_RETRIES ]; then
+                echo "⚠️  Attempt $((RETRY)) failed, retrying in 10 seconds..."
+                sleep 10
+              else
+                echo "❌ Auto-fix failed after $MAX_RETRIES attempts"
+                EXIT_CODE=1
+              fi
             fi
           done
-          echo "❌ Auto-fix failed after $MAX_RETRIES attempts."
-          exit 1
+          
+          exit $EXIT_CODE
 
-      - name: 📤 Upload logs (always)
+      # 8️⃣ Verify changes
+      - name: 📊 Verify code changes
+        id: verify
+        continue-on-error: true
+        run: |
+          echo "Checking for code changes..."
+          
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "✓ No code changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✓ Code changes detected"
+            git diff --stat
+          fi
+
+      # 9️⃣ Commit and push changes
+      - name: 📤 Commit auto-fix changes
+        if: steps.verify.outputs.changed == 'true' && github.event.inputs.skip_fix != 'true'
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          
+          git add -A
+          git commit -m "🤖 Auto fix: code formatting & linting ($(date -u +'%Y-%m-%d %H:%M:%S UTC'))" \
+            --author="Tamanna Bot <tamanna456760@gmail.com>" || \
+            { echo "⚠️  No changes to commit"; exit 0; }
+          
+          git push origin main --force-with-lease || \
+            { echo "⚠️  Push skipped (no changes or conflict)"; exit 0; }
+          
+          echo "✓ Changes committed and pushed"
+
+      # 🔟 Upload artifacts
+      - name: 📁 Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -124,41 +246,94 @@ EOF
           path: |
             auto_fix.log
             scripts/auto_build_and_fix.sh
+            dist/
+            build/
           retention-days: 7
 
-      - name: 📊 Generate job summary
+      # 1️⃣1️⃣ Generate workflow summary
+      - name: 📋 Generate workflow summary
         if: always()
         run: |
-          echo "## 🤖 Auto Fix & Build Report" >> $GITHUB_STEP_SUMMARY
-          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Debug mode**: ${{ github.event.inputs.debug || 'false' }}" >> $GITHUB_STEP_SUMMARY
-          if [ -f requirements.txt ]; then
-            echo "- **Requirements**: found" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Requirements**: missing (skipped)" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ "${{ steps.fix.outcome }}" == "success" ]; then
-            echo "- **Auto‑fix status**: ✅ succeeded" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.fix.outcome }}" == "failure" ]; then
-            echo "- **Auto‑fix status**: ❌ failed (see artifacts)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Auto‑fix status**: ⏭️ skipped" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## 🤖 Auto Fix & Build Report"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| **Workflow** | ${{ github.workflow }} |"
+            echo "| **Trigger** | ${{ github.event_name }} |"
+            echo "| **Branch** | ${{ github.ref_name }} |"
+            echo "| **Commit** | ${{ github.sha }} |"
+            echo "| **Debug Mode** | ${{ github.event.inputs.debug || 'false' }} |"
+            echo "| **Skip Fix** | ${{ github.event.inputs.skip_fix || 'false' }} |"
+            echo ""
+            
+            if [ -f requirements.txt ]; then
+              echo "### 📦 Dependencies"
+              echo "- Main requirements: ✅ Found"
+            else
+              echo "### 📦 Dependencies"
+              echo "- Main requirements: ⚠️  Missing"
+            fi
+            
+            if [ -f requirements-optional.txt ]; then
+              echo "- Optional requirements: ✅ Found"
+            fi
+            
+            echo ""
+            echo "### ✅ Job Status"
+            if [ "${{ steps.fix.outcome }}" == "success" ]; then
+              echo "- **Auto-fix**: ✅ Succeeded"
+            else
+              echo "- **Auto-fix**: ❌ Failed (check artifacts)"
+            fi
+            
+            if [ "${{ steps.verify.outputs.changed }}" == "true" ]; then
+              echo "- **Code Changes**: ✅ Detected & Committed"
+            else
+              echo "- **Code Changes**: ℹ️  None detected"
+            fi
+            
+            echo ""
+            echo "### 🔗 Artifacts"
+            echo "- [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
 
-      - name: 🚨 Slack notification on failure (optional)
-        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+      # 1️⃣2️⃣ Slack notification on failure (optional)
+      - name: 🚨 Slack notification
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_CHANNEL: '#alerts'
-          SLACK_COLOR: '#FF0000'
-          SLACK_TITLE: 'Auto Fix & Build Failed'
+          SLACK_CHANNEL: '#ci-alerts'
+          SLACK_COLOR: 'danger'
+          SLACK_TITLE: '❌ Auto Fix & Build Failed'
           SLACK_MESSAGE: |
-            Repository: ${{ github.repository }}
-            Run: https://github.com/${{ github.tamanna456760-it }}/actions/runs/${{ github.tamanna- }}
-            Branch: ${{ github.bd-king-r7  }}
-            Trigger: ${{ github.bd-king-r7 }}
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Trigger:* ${{ github.event_name }}
+            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-      - name: ✅ Completion message
-        run: echo "🎉 Workflow finished. Check the summary above or artifacts for details."
+      # 1️⃣3️⃣ Success notification (optional)
+      - name: ✅ Success notification
+        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#ci-alerts'
+          SLACK_COLOR: 'good'
+          SLACK_TITLE: '✅ Auto Fix & Build Succeeded'
+          SLACK_MESSAGE: |
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Trigger:* ${{ github.event_name }}
+            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # 1️⃣4️⃣ Completion message
+      - name: 🎉 Completion message
+        run: |
+          echo "════════════════════════════════════"
+          echo "✅ Auto Fix & Build Workflow Complete"
+          echo "════════════════════════════════════"
+          echo "Check the summary above for details"
