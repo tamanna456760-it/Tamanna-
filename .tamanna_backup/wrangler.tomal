@@ -1,0 +1,5 @@
+name = "tamanna"
+main = "workers/worker.js"
+compatibility_date = "2026-06-20"
+
+workers_dev = true

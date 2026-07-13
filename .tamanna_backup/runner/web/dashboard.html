@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tamanna Master Control</title>
+    <style>
+        body { font-family: Arial; background:#111;color:#fff; }
+        table { border-collapse: collapse; width: 100%; margin-top:20px; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: center; }
+        th { background: #222; }
+    </style>
+</head>
+<body>
+    <h1>Tamanna Master Control Dashboard</h1>
+    <p>Total AI Units: <span id="total_units">0</span></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Node</th>
+                <th>Status</th>
+                <th>Power</th>
+                <th>Units</th>
+            </tr>
+        </thead>
+        <tbody id="nodes_table"></tbody>
+    </table>
+
+    <script>
+        async function updateStatus() {
+            const res = await fetch('/status');
+            const data = await res.json();
+            document.getElementById('total_units').textContent = data.total_units;
+            const tbody = document.getElementById('nodes_table');
+            tbody.innerHTML = '';
+            for (let node in data.nodes) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${node}</td><td>${data.nodes[node].status}</td><td>${data.nodes[node].power}</td><td>${data.nodes[node].units}</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+        setInterval(updateStatus, 1000);
+        updateStatus();
+    </script>
+</body>
+</html>

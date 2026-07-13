@@ -1,0 +1,6 @@
+{"time": "2026-06-03T17:38:59.963772Z", "kind": "sync_start", "detail": "Scanning Tamanna"}
+{"time": "2026-06-03T17:38:59.966174Z", "kind": "error", "detail": "Root path not found: Tamanna"}
+{"time": "2026-06-03T17:38:59.967288Z", "kind": "sync_init", "detail": {"file_count": 0, "message": "Tamanna head initialized with all files."}}
+{"time": "2026-06-03T17:38:59.969036Z", "kind": "heartbeat", "detail": {"files_total": 0, "time": "2026-06-03T17:38:59.968655Z"}}
+{"time": "2026-06-03T17:38:59.970139Z", "kind": "error", "detail": "Root path not found: Tamanna"}
+{"time": "2026-06-03T17:38:59.971203Z", "kind": "integrity_ok", "detail": "All files match head state."}

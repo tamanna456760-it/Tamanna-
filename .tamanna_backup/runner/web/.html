@@ -1,0 +1,15 @@
+<canvas id="mirror" width="800" height="450"></canvas>
+<script>
+const ctx = mirror.getContext("2d");
+let x = 0;
+
+setInterval(() => {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0,800,450);
+  ctx.fillStyle = "#0f0";
+  ctx.font = "20px monospace";
+  ctx.fillText("IT DEVICE MIRROR DEMO", 20, 30);
+  ctx.fillRect(x, 200, 100, 10);
+  x = (x + 5) % 800;
+}, 30);
+</script>
