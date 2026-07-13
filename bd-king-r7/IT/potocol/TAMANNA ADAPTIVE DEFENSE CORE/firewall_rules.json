@@ -1,9 +1,0 @@
-{
-  "max_rpm_per_ip": 100,
-  "global_block_threshold": 200,
-  "geo_restriction": false,
-  "bot_detection": true,
-  "ddos_protection": true,
-  "auto_sync": true,
-  "strict_mode": true
-}

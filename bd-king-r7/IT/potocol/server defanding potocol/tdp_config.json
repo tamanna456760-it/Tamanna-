@@ -1,8 +1,0 @@
-{
-  "max_requests_per_minute": 60,
-  "block_threshold": 120,
-  "monitor_interval": 5,
-  "auto_block": true,
-  "log_attacks": true,
-  "secure_mode": true
-}

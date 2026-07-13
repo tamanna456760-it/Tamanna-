@@ -1,9 +1,0 @@
-{
-  "endpoints": [
-    {
-      "url": "https://api.example.com/webhook",
-      "events": ["build_completed", "sync_finished"],
-      "active": true
-    }
-  ]
-}

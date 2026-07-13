@@ -1,3 +1,0 @@
-function pullSystem() {
-    callAPI("pull");
-}

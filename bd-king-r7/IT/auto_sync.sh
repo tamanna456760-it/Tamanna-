@@ -1,3 +1,0 @@
----
-
-# 🧩 Auto Sync Script <~>

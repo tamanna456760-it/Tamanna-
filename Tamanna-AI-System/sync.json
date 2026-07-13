@@ -1,9 +1,0 @@
-{
-  "commit_message": "Auto commit by AI Sync Engine",
-  "retry_count": 5,
-  "branch": "main",
-  "auto_pull": true,
-  "auto_push": true,
-  "watch_mode": false,
-  "interval_seconds": 60
-}
