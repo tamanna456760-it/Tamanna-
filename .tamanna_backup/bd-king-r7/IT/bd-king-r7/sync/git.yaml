@@ -1,0 +1,4 @@
+- name: Configure git
+  run: |
+    git config user.name "github-actions[bot]"
+    git config tamanna456760@gmail.com "github-actions[bot]@tamanna456760-it.noreply.github.com"

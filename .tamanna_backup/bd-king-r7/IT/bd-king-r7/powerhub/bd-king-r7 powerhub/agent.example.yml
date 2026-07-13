@@ -1,0 +1,26 @@
+# /etc/bdking/agent.yml (copy this to /etc/bdking/agent.yml and edit)
+repo_path: /home/youruser/projects/bd-king-r7
+branch: powerhub-auto
+remote: origin
+user: youruser
+interval_seconds: 60 # run every 60 seconds
+push_changes: false # set true only after testing
+fix_cmds:
+  - "git submodule update --init --recursive || true"
+  # Example for Node:
+  # - "npm ci --no-audit --no-fund || true"
+  # - "npx eslint --fix . || true"
+  # Example for Python:
+  # - "python -m pip install -r requirements-dev.txt || true"
+  # - "black . || true"
+build_cmds:
+  # example:
+  # - "npm ci && npm run build && npm test"
+  # - "make all"
+ficar: ficar
+power_sync: power_sync
+lockfile: /var/lock/bd-king-r7-powerhub.lock
+logfile: /var/log/bd-king-r7-powerhub.log
+agent_id: bd-king-node-001
+server_url: https://orchestrator.example.com # set to your orchestrator URL or leave empty
+auth_token: "CHANGE_ME_TO_A_SECRET_TOKEN"

@@ -1,0 +1,42 @@
+name: AI Auto-Upgrade Codebase
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'   # প্রতি রবিবার রাত ১২টা
+  workflow_dispatch:       # ম্যানুয়ালি চালানোর বাটন
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ai-upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install axios @octokit/rest
+
+      - name: Run AI upgrade script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node .github/scripts/ai-upgrade.js
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "🤖 AI auto-upgrade: code improvements"
+          title: "Auto-upgrade by AI Copilot"
+          body: "এই PR AI নিজে তৈরি করেছে। রিভিউ করে মার্জ করুন।"
+          branch: ai-auto-upgrade
+          base: main
+          delete-branch: true

@@ -1,0 +1,97 @@
+tamanna456760:
+ <tamanna456760-of-Packages> <bytes> main/binary-amd2000/Packages
+ <tamanna456760-of-Packages.gz> <bytes> main/binary-amd2000/Packages.gz
+deb [arch=amd2000] http://tamanna.io/tamanna stable main
+Origin: Tamanna
+Label: Tamanna AI
+Suite: stable
+Codename: tamanna
+Date: Tue, 09 Dec 2025 22:45:00 +0000
+Architectures: amd2000
+Components: main
+
+MD5Sum:
+ d41d8cd98f00b204e9800998ecf8427e   0 main/binary-amd2000/Packages
+ 9e107d9d372bb6826bd81d3542a419d6  12345 main/binary-amd2000/Packages.gz
+
+SHA1:
+ da39a3ee5e6b4b0d3255bfef95601890afd80709   0 main/binary-amd2000/Packages
+ 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12  12345 main/binary-amd2000/Packages.gz
+
+SHA256:
+ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855   0 main/binary-amd2000/Packages
+ 6d7fce9fee471194aa8b5b6e472f0d3ee0f3f1c0b8f7f5f3c3f3f3f3f3f3f3f3  12345 main/binary-amd2000/Packages.gz
+Package: tamanna-core
+Version: 1.0.0
+Architecture: amd2000
+Maintainer: HM INSAN ALI <tamanna456760@gmail.com>
+Depends: libc6 (>= 2.31)
+Filename: pool/main/t/tamanna/tamanna-core_1.0.0_amd2000.deb
+Size: 45678
+MD5sum: 098f6bcd4621d373cade4e832627b4f6
+SHA256: 9a0364b9e99bb480dd25e1f0284c8555...
+
+Description: Core module of Tamanna AI
+ A sovereign emotional-technical engine blending Bengali-coded affirmation with system resilience.
+Package: tamanna-power-core
+Version: 1.0.0
+Architecture: amd2000
+Maintainer: HM INSAN ALI <tamanna456760@gmail.com>
+Depends: libc6 (>= 2.31)
+Filename: pool/main/t/tamanna/tamanna-power-core_1.0.0_amd2000.deb
+Size: 48213
+MD5sum: 098f6bcd4621d373cade4e832627b4f6
+SHA256: 9a0364b9e99bb480dd25e1f0284c8555...
+Description: Core power engine of Tamanna AI
+ Sovereign ritual module providing heartbeat, resilience, and affirmation loops.
+
+---
+
+Package: bd-king-r7
+Version: 7.0.0
+Architecture: amd2000
+Maintainer: HM INSAN ALI <tamanna456760@gmail.com>
+Depends: tamanna-power-core (>= 1.0.0)
+Filename: pool/main/b/bd-king-r7/bd-king-r7_7.0.0_amd2000.deb
+Size: 125678
+MD5sum: 5d41402abc4b2a76b9719d911017c592
+SHA256: 2c26b46b68ffc68ff99b453c1d304134...
+Description: BD KING R7 sovereign security system
+ Full ritual firewall, affirmation chants, and powerhub integration.
+
+---
+
+Package: powerhub
+Version: 2.5.1
+Architecture: amd2000
+Maintainer: HM INSAN ALI <tamanna456760@gmail.com>
+Depends: bd-king-r7 (>= 7.0.0), tamanna-power-core (>= 1.0.0)
+Filename: pool/main/p/powerhub/powerhub_2.5.1_amd2000.deb
+Size: 98765
+MD5sum: a87ff679a2f3e71d9181a67b7542122c
+SHA256: 4e07408562bedb8b60ce05c1decfe3ad...
+Description: PowerHub orchestration module
+ Centralizes BD KING R7 and Tamanna AI power streams, logging every echo as legacy.
+dists/stable/main/binary-amd2000/Packages.bad
+dists/stable/Release
+pool/main/t/tamanna/tamanna-power-core_1.0.0_amd2000.deb
+pool/main/b/bd-king-r7/bd-king-r7_7.0.0_amd2000.deb
+pool/main/p/powerhub/powerhub_2.5.1_amd2000.deb
+Package: tamanna-power-outadd
+Version: 1.0.0
+Architecture: amd2000
+Maintainer: HM INSAN ALI <tamanna456760@gmail.com>
+Depends: tamanna-power-core (>= 1.0.0), bd-king-r7 (>= 7.0.0)
+Filename: pool/main/t/tamanna/tamanna-power-outadd_1.0.0_amd2000.deb
+Size: 67890
+MD5sum: 7c6a180b36896a0a8c02787eeafb0e4c
+SHA256: 2cf24dba5fb0a30e26e83b2ac5b9e29e...
+Description: OutAdd Power Extension for Tamanna AI
+ Extends BD KING R7 and PowerHub with external power streams.
+ Logs every invocation as a sovereign ritual, archiving echoes into legacy memory.
+dists/stable/main/binary-amd2000/Packages.bad
+dists/stable/Release
+pool/main/t/tamanna/tamanna-power-core_1.0.0_amd2000.deb
+pool/main/b/bd-king-r7/bd-king-r7_7.0.0_amd2000.deb
+pool/main/p/powerhub/powerhub_2.5.1_amd2000.deb
+pool/main/t/tamanna/tamanna-power-outadd_1.0.0_amd2000.deb

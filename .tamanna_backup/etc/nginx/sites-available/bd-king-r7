@@ -1,0 +1,11 @@
+server {
+    listen 80;
+    server_name bd-king-r7.io www.bd-king-r7.io;
+
+    root /var/www/bd-king-r7;
+    index index.html index.py;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}

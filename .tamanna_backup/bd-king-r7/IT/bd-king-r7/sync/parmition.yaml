@@ -1,0 +1,32 @@
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+name: Auto Sync to Repo
+
+on:
+  push: # Trigger when code is pushed
+    branches:
+      - main # Adjust branch name if needed
+  workflow_dispatch: # Allow manual run
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Full history for syncing
+
+      - name: Set up Git
+        run: |
+          git config --global @tamanna456760-it "github-tamanna[bot]"
+          git config --global user.tamanna456760@gmail.com"github-actions[bot]@users.noreply.github.com"
+
+      - name: Add target repo remote
+        run: |
+          git remote add target https://github.com/@tamanna456760-it/TARGET-REPO.git
+          git fetch target
+
+      - name: Push changes to target repo
+        run: |
+          git push target main --force

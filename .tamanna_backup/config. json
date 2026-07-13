@@ -1,0 +1,26 @@
+{
+  "watch_folder": "./workspace",
+  "auto_run": true,
+
+  "rules": [
+    {
+      "ext": ["py"],
+      "folder": "./python_files"
+    },
+    {
+      "ext": ["js"],
+      "folder": "./js_files"
+    },
+    {
+      "ext": ["json"],
+      "folder": "./json_files"
+    },
+    {
+      "ext": ["md"],
+      "folder": "./docs"
+    }
+  ],
+
+  "git_auto_sync": true,
+  "git_message": "Auto sync by Tamanna AI System"
+}

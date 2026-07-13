@@ -1,0 +1,88 @@
+CREATE TABLE reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- Report Information
+    report_uuid VARCHAR(64) UNIQUE NOT NULL,
+    timestamp DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    -- Agent Information
+    agent_id VARCHAR(128) NOT NULL,
+    agent_name VARCHAR(128),
+    agent_version VARCHAR(64),
+
+    -- Build Information
+    branch VARCHAR(128),
+    commit_sha VARCHAR(64),
+    committed VARCHAR(32),
+    build_ok VARCHAR(32),
+
+    -- Status Information
+    status VARCHAR(32),
+    severity VARCHAR(16),
+    sync_status VARCHAR(32) DEFAULT 'pending',
+    archived INTEGER DEFAULT 0,
+
+    -- System Information
+    hostname VARCHAR(128),
+    ip_address VARCHAR(64),
+    os_name VARCHAR(64),
+    os_version VARCHAR(64),
+    device_id VARCHAR(128),
+    session_id VARCHAR(128),
+
+    -- Resource Monitoring
+    cpu_usage REAL,
+    cpu_temperature REAL,
+    memory_usage REAL,
+    disk_usage REAL,
+    network_usage REAL,
+    network_latency REAL,
+    uptime_seconds INTEGER DEFAULT 0,
+
+    -- Performance Metrics
+    execution_time REAL,
+    performance_score REAL,
+    success_rate REAL,
+    active_tasks INTEGER DEFAULT 0,
+    retry_count INTEGER DEFAULT 0,
+
+    -- Error Tracking
+    error_count INTEGER DEFAULT 0,
+    warning_count INTEGER DEFAULT 0,
+    crash_count INTEGER DEFAULT 0,
+    last_error TEXT,
+
+    -- Backup Information
+    last_backup DATETIME,
+    backup_size INTEGER,
+    restore_point VARCHAR(128),
+
+    -- Data Storage
+    payload TEXT,
+    notes TEXT,
+    tags TEXT,
+
+    -- Integrity
+    checksum VARCHAR(128),
+    signature VARCHAR(256)
+);
+
+CREATE INDEX idx_reports_agent_id
+ON reports(agent_id);
+
+CREATE INDEX idx_reports_timestamp
+ON reports(timestamp);
+
+CREATE INDEX idx_reports_status
+ON reports(status);
+
+CREATE INDEX idx_reports_severity
+ON reports(severity);
+
+CREATE INDEX idx_reports_sync_status
+ON reports(sync_status);
+
+CREATE INDEX idx_reports_hostname
+ON reports(hostname);

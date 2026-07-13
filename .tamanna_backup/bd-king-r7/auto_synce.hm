@@ -1,0 +1,668 @@
+#!/usr/bin/env python3
+"""
+BD-King-R7 Auto Sync Program
+Automatically synchronizes data between BD-King-R7 devices and central server
+"""
+
+import hashlib
+import json
+import logging
+import os
+import sqlite3
+import threading
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Optional
+
+import requests
+import schedule
+
+
+class BDAutoSync:
+    def __init__(self, config_file: str = "config.json"):
+        self.config = self.load_config(config_file)
+        self.setup_logging()
+        self.running = False
+        self.sync_thread = None
+        self.last_sync_time = None
+        self.sync_interval = self.config.get(
+            'sync_interval', 300)  # 5 minutes default
+
+    def load_config(self, config_file: str) -> Dict:
+        """Load configuration from JSON file"""
+        try:
+            with open(config_file, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            # Default configuration
+                'device_id': 'BD-King-R7-001',
+                'server_url': 'https://api.bd-king.com/sync',
+                'api_key': 'your-api-key-here',
+                'sync_interval': 300,
+                'max_retries': 3,
+                'retry_delay': 5,
+                'data_paths': [
+                    '/data/transactions',
+                    '/data/inventory',
+                    '/data/customers'
+                ],
+                'database_path': '/data/bd_king.db',
+                'log_level': 'INFO'
+            }
+            self.save_config(config, config_file)
+            return config
+    
+    def save_config(self, config: Dict, config_file: str):
+        """Save configuration to JSON file"""
+        with open(config_file, 'w') as f:
+            json.dump(config, f, indent=4)
+    
+    def setup_logging(self):
+        """Setup logging configuration"""
+        log_level = getattr(logging, self.config.get('log_level', 'INFO'))
+        logging.basicConfig(
+            level=log_level,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('bd_king_sync.log'),
+                logging.StreamHandler()
+            ]
+        )
+        self.logger = logging.getLogger('BDAutoSync')
+    
+    def start_sync(self):
+        """Start the automatic synchronization"""
+        self.running = True
+        self.logger.info("Starting BD-King-R7 Auto Sync")
+        
+        # Start background sync thread
+        self.sync_thread = threading.Thread(target=self._sync_worker)
+        self.sync_thread.daemon = True
+        self.sync_thread.start()
+        
+        # Start scheduled tasks
+        self._setup_schedules()
+        
+        self.logger.info("Auto Sync started successfully")
+    
+    def stop_sync(self):
+        """Stop the automatic synchronization"""
+        self.running = False
+        if self.sync_thread and self.sync_thread.is_alive():
+            self.sync_thread.join(timeout=10)
+        self.logger.info("BD-King-R7 Auto Sync stopped")
+    
+    def _sync_worker(self):
+        """Background worker for continuous synchronization"""
+        while self.running:
+            try:
+                self.perform_sync()
+                time.sleep(self.sync_interval)
+            except Exception as e:
+                self.logger.error(f"Sync worker error: {e}")
+                time.sleep(60)  # Wait 1 minute before retrying
+    
+    def _setup_schedules(self):
+        """Setup scheduled synchronization tasks"""
+        # Sync every 5 minutes
+        schedule.every(self.sync_interval).seconds.do(self.perform_sync)
+        
+        # Daily full sync at 2 AM
+        schedule.every().day.at("02:00").do(self.perform_full_sync)
+        
+        # Hourly health check
+        schedule.every().hour.do(self.health_check)
+        
+        # Start schedule runner in background
+        def schedule_runner():
+            while self.running:
+                schedule.run_pending()
+                time.sleep(1)
+        
+        schedule_thread = threading.Thread(target=schedule_runner)
+        schedule_thread.daemon = True
+        schedule_thread.start()
+    
+    def perform_sync(self):
+        """Perform synchronization with central server"""
+        self.logger.info("Starting synchronization")
+        
+        try:
+            # Step 1: Collect local changes
+            local_changes = self.collect_local_changes()
+            if not local_changes:
+                self.logger.info("No local changes to sync")
+                return
+            
+            # Step 2: Send changes to server
+            sync_result = self.send_to_server(local_changes)
+            
+            # Step 3: Process server response and get remote changes
+            if sync_result.get('success'):
+                remote_changes = sync_result.get('data', {})
+                self.apply_remote_changes(remote_changes)
+                
+                # Step 4: Update sync status
+                self.update_sync_status(local_changes)
+                
+                self.last_sync_time = datetime.now()
+                self.logger.info(f"Sync completed successfully. Processed {len(local_changes)} local changes")
+            else:
+                self.logger.error(f"Sync failed: {sync_result.get('error')}")
+                
+        except Exception as e:
+            self.logger.error(f"Sync error: {e}")
+    
+    def perform_full_sync(self):
+        """Perform a full synchronization"""
+        self.logger.info("Starting full synchronization")
+        
+        try:
+            # Collect all local data
+            all_local_data = self.collect_all_local_data()
+            
+            # Send to server
+            full_sync_result = self.send_full_sync(all_local_data)
+            
+            if full_sync_result.get('success'):
+                # Apply complete dataset from server
+                complete_data = full_sync_result.get('data', {})
+                self.apply_complete_dataset(complete_data)
+                
+                self.logger.info("Full synchronization completed successfully")
+            else:
+                self.logger.error(f"Full sync failed: {full_sync_result.get('error')}")
+                
+        except Exception as e:
+            self.logger.error(f"Full sync error: {e}")
+    
+    def collect_local_changes(self) -> List[Dict]:
+        """Collect local changes since last sync"""
+        changes = []
+        
+        try:
+            # Get database changes
+            db_changes = self.get_database_changes()
+            changes.extend(db_changes)
+            
+            # Get file changes
+            file_changes = self.get_file_changes()
+            changes.extend(file_changes)
+            
+        except Exception as e:
+            self.logger.error(f"Error collecting local changes: {e}")
+        
+        return changes
+    
+    def get_database_changes(self) -> List[Dict]:
+        """Get changes from local database"""
+        changes = []
+        
+        try:
+            conn = sqlite3.connect(self.config['database_path'])
+            cursor = conn.cursor()
+            
+            # Get last sync timestamp
+            last_sync = self.last_sync_time or datetime.now() - timedelta(days=30)
+            
+            # Query for changes in different tables
+            tables = ['transactions', 'inventory', 'customers', 'settings']
+            
+            for table in tables:
+                cursor.execute(f"""
+                    SELECT * FROM {table} 
+                    WHERE last_modified > ? OR sync_status = 'pending'
+                """, (last_sync,))
+                
+                rows = cursor.fetchall()
+                for row in rows:
+                    changes.append({
+                        'table': table,
+                        'data': dict(zip([col[0] for col in cursor.description], row)),
+                        'operation': 'upsert',
+                        'timestamp': datetime.now().isoformat()
+                    })
+            
+            conn.close()
+            
+        except Exception as e:
+            self.logger.error(f"Error getting database changes: {e}")
+        
+        return changes
+    
+    def get_file_changes(self) -> List[Dict]:
+        """Get changes from file system"""
+        changes = []
+        
+        try:
+            for data_path in self.config.get('data_paths', []):
+                path = Path(data_path)
+                if path.exists():
+                    for file_path in path.rglob('*'):
+                        if file_path.is_file():
+                            # Check if file was modified since last sync
+                            file_mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
+                            if not self.last_sync_time or file_mtime > self.last_sync_time:
+                                file_data = {
+                                    'path': str(file_path),
+                                    'content': self.read_file_safe(file_path),
+                                    'modified': file_mtime.isoformat(),
+                                    'operation': 'file_update'
+                                }
+                                changes.append(file_data)
+            
+        except Exception as e:
+            self.logger.error(f"Error getting file changes: {e}")
+        
+        return changes
+    
+    def read_file_safe(self, file_path: Path) -> str:
+        """Read file content safely"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except:
+            return ""
+    
+    def send_to_server(self, changes: List[Dict]) -> Dict:
+        """Send changes to central server"""
+        for attempt in range(self.config.get('max_retries', 3)):
+            try:
+                headers = {
+                    'Authorization': f'Bearer {self.config["api_key"]}',
+                    'Content-Type': 'application/json',
+                    'X-Device-ID': self.config['device_id']
+                }
+                
+                payload = {
+                    'device_id': self.config['device_id'],
+                    'changes': changes,
+                    'timestamp': datetime.now().isoformat(),
+                    'sync_type': 'incremental'
+                }
+                
+                response = requests.post(
+                    f"{self.config['server_url']}/sync",
+                    json=payload,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    return response.json()
+                else:
+                    self.logger.warning(f"Server returned {response.status_code}: {response.text}")
+                    
+            except requests.exceptions.RequestException as e:
+                self.logger.warning(f"Attempt {attempt + 1} failed: {e}")
+                if attempt < self.config.get('max_retries', 3) - 1:
+                    time.sleep(self.config.get('retry_delay', 5))
+        
+        return {'success': False, 'error': 'All sync attempts failed'}
+    
+    def send_full_sync(self, data: Dict) -> Dict:
+        """Send full sync data to server"""
+        try:
+            headers = {
+                'Authorization': f'Bearer {self.config["api_key"]}',
+                'Content-Type': 'application/json',
+                'X-Device-ID': self.config['device_id']
+            }
+            
+            payload = {
+                'device_id': self.config['device_id'],
+                'full_data': data,
+                'timestamp': datetime.now().isoformat(),
+                'sync_type': 'full'
+            }
+            
+            response = requests.post(
+                f"{self.config['server_url']}/full-sync",
+                json=payload,
+                headers=headers,
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                return {'success': False, 'error': f"HTTP {response.status_code}: {response.text}"}
+                
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+    
+    def apply_remote_changes(self, remote_changes: Dict):
+        """Apply changes received from server"""
+        try:
+            # Apply database changes
+            if 'database_changes' in remote_changes:
+                self.apply_database_changes(remote_changes['database_changes'])
+            
+            # Apply file changes
+            if 'file_changes' in remote_changes:
+                self.apply_file_changes(remote_changes['file_changes'])
+            
+            # Apply configuration updates
+            if 'config_updates' in remote_changes:
+                self.apply_config_updates(remote_changes['config_updates'])
+                
+        except Exception as e:
+            self.logger.error(f"Error applying remote changes: {e}")
+    
+    def apply_database_changes(self, changes: List[Dict]):
+        """Apply database changes from server"""
+        try:
+            conn = sqlite3.connect(self.config['database_path'])
+            cursor = conn.cursor()
+            
+            for change in changes:
+                table = change['table']
+                operation = change['operation']
+                data = change['data']
+                
+                if operation == 'upsert':
+                    # Build upsert query
+                    columns = ', '.join(data.keys())
+                    placeholders = ', '.join(['?' for _ in data])
+                    update_clause = ', '.join([f"{k} = ?" for k in data.keys()])
+                    
+                    query = f"""
+                        INSERT INTO {table} ({columns}) 
+                        VALUES ({placeholders})
+                        ON CONFLICT(id) DO UPDATE SET {update_clause}
+                    """
+                    
+                    values = list(data.values()) * 2  # For INSERT and UPDATE parts
+                    cursor.execute(query, values)
+                
+                elif operation == 'delete':
+                    cursor.execute(f"DELETE FROM {table} WHERE id = ?", (data['id'],))
+            
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            self.logger.error(f"Error applying database changes: {e}")
+    
+    def apply_file_changes(self, changes: List[Dict]):
+        """Apply file changes from server"""
+        try:
+            for file_change in changes:
+                file_path = Path(file_change['path'])
+                
+                # Ensure directory exists
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Write file content
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(file_change['content'])
+                
+                self.logger.info(f"Updated file: {file_path}")
+                
+        except Exception as e:
+            self.logger.error(f"Error applying file changes: {e}")
+    
+    def apply_config_updates(self, config_updates: Dict):
+        """Apply configuration updates from server"""
+        try:
+            # Update current config
+            self.config.update(config_updates)
+            
+            # Save updated config
+            self.save_config(self.config, "config.json")
+            
+            # Apply runtime changes
+            if 'sync_interval' in config_updates:
+                self.sync_interval = config_updates['sync_interval']
+            
+            self.logger.info("Configuration updated from server")
+            
+        except Exception as e:
+            self.logger.error(f"Error applying config updates: {e}")
+    
+    def apply_complete_dataset(self, complete_data: Dict):
+        """Apply complete dataset from server (for full sync)"""
+        try:
+            # Backup current data
+            self.create_backup()
+            
+            # Apply complete database
+            if 'database' in complete_data:
+                self.apply_complete_database(complete_data['database'])
+            
+            # Apply complete files
+            if 'files' in complete_data:
+                self.apply_complete_files(complete_data['files'])
+            
+            self.logger.info("Complete dataset applied successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Error applying complete dataset: {e}")
+            self.restore_backup()
+    
+    def create_backup(self):
+        """Create backup of current data"""
+        try:
+            backup_dir = Path("backups") / datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Backup database
+            if Path(self.config['database_path']).exists():
+                import shutil
+                shutil.copy2(self.config['database_path'], backup_dir / "bd_king.db")
+            
+            # Backup data files
+            for data_path in self.config.get('data_paths', []):
+                if Path(data_path).exists():
+                    shutil.copytree(data_path, backup_dir / Path(data_path).name)
+            
+            self.logger.info(f"Backup created: {backup_dir}")
+            
+        except Exception as e:
+            self.logger.error(f"Error creating backup: {e}")
+    
+    def restore_backup(self):
+        """Restore from latest backup"""
+        try:
+            backup_dir = Path("backups")
+            if backup_dir.exists():
+                # Find latest backup
+                backups = sorted(backup_dir.iterdir(), key=os.path.getmtime)
+                if backups:
+                    latest_backup = backups[-1]
+                    
+                    # Restore database
+                    if (latest_backup / "bd_king.db").exists():
+                        import shutil
+                        shutil.copy2(latest_backup / "bd_king.db", self.config['database_path'])
+                    
+                    self.logger.info(f"Restored from backup: {latest_backup}")
+                    
+        except Exception as e:
+            self.logger.error(f"Error restoring backup: {e}")
+    
+    def collect_all_local_data(self) -> Dict:
+        """Collect all local data for full sync"""
+        all_data = {}
+        
+        try:
+            # Collect all database data
+            all_data['database'] = self.get_all_database_data()
+            
+            # Collect all file data
+            all_data['files'] = self.get_all_file_data()
+            
+        except Exception as e:
+            self.logger.error(f"Error collecting all local data: {e}")
+        
+        return all_data
+    
+    def get_all_database_data(self) -> Dict:
+        """Get all data from local database"""
+        all_data = {}
+        
+        try:
+            conn = sqlite3.connect(self.config['database_path'])
+            cursor = conn.cursor()
+            
+            tables = ['transactions', 'inventory', 'customers', 'settings']
+            
+            for table in tables:
+                cursor.execute(f"SELECT * FROM {table}")
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+                all_data[table] = [dict(zip(columns, row)) for row in rows]
+            
+            conn.close()
+            
+        except Exception as e:
+            self.logger.error(f"Error getting all database data: {e}")
+        
+        return all_data
+    
+    def get_all_file_data(self) -> List[Dict]:
+        """Get all file data"""
+        file_data = []
+        
+        try:
+            for data_path in self.config.get('data_paths', []):
+                path = Path(data_path)
+                if path.exists():
+                    for file_path in path.rglob('*'):
+                        if file_path.is_file():
+                            file_data.append({
+                                'path': str(file_path),
+                                'content': self.read_file_safe(file_path),
+                                'modified': datetime.fromtimestamp(file_path.stat().st_mtime).isoformat()
+                            })
+            
+        except Exception as e:
+            self.logger.error(f"Error getting all file data: {e}")
+        
+        return file_data
+    
+    def update_sync_status(self, changes: List[Dict]):
+        """Update sync status for processed changes"""
+        try:
+            conn = sqlite3.connect(self.config['database_path'])
+            cursor = conn.cursor()
+            
+            for change in changes:
+                if 'table' in change and 'data' in change:
+                    table = change['table']
+                    data_id = change['data'].get('id')
+                    
+                    if data_id:
+                        cursor.execute(f"""
+                            UPDATE {table} 
+                            SET sync_status = 'synced', last_sync = ?
+                            WHERE id = ?
+                        """, (datetime.now(), data_id))
+            
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            self.logger.error(f"Error updating sync status: {e}")
+    
+    def health_check(self):
+        """Perform health check and report status"""
+        try:
+            health_status = {
+                'device_id': self.config['device_id'],
+                'status': 'healthy',
+                'last_sync': self.last_sync_time.isoformat() if self.last_sync_time else None,
+                'timestamp': datetime.now().isoformat(),
+                'disk_usage': self.get_disk_usage(),
+                'memory_usage': self.get_memory_usage()
+            }
+            
+            # Send health status to server
+            headers = {
+                'Authorization': f'Bearer {self.config["api_key"]}',
+                'Content-Type': 'application/json'
+            }
+            
+            requests.post(
+                f"{self.config['server_url']}/health",
+                json=health_status,
+                headers=headers,
+                timeout=10
+            )
+            
+            self.logger.debug("Health check completed")
+            
+        except Exception as e:
+            self.logger.error(f"Health check error: {e}")
+    
+    def get_disk_usage(self) -> Dict:
+        """Get disk usage information"""
+        try:
+            import shutil
+            total, used, free = shutil.disk_usage("/")
+            return {
+                'total': total,
+                'used': used,
+                'free': free,
+                'percent_used': (used / total) * 100
+            }
+        except:
+            return {}
+    
+    def get_memory_usage(self) -> Dict:
+        """Get memory usage information"""
+        try:
+            import psutil
+            memory = psutil.virtual_memory()
+            return {
+                'total': memory.total,
+                'used': memory.used,
+                'free': memory.free,
+                'percent_used': memory.percent
+            }
+        except:
+            return {}
+    
+    def manual_sync(self):
+        """Trigger manual synchronization"""
+        self.logger.info("Manual sync triggered")
+        self.perform_sync()
+    
+    def get_sync_status(self) -> Dict:
+        """Get current synchronization status"""
+        return {
+            'device_id': self.config['device_id'],
+            'running': self.running,
+            'last_sync_time': self.last_sync_time,
+            'next_sync_in': self.get_next_sync_time(),
+            'sync_interval': self.sync_interval
+        }
+    
+    def get_next_sync_time(self) -> Optional[datetime]:
+        """Get next scheduled sync time"""
+        if self.last_sync_time:
+            return self.last_sync_time + timedelta(seconds=self.sync_interval)
+        return None
+
+def main():
+    """Main function to run the auto sync program"""
+    sync_manager = BDAutoSync()
+    
+    try:
+        # Start auto sync
+        sync_manager.start_sync()
+        
+        # Keep the program running
+        while True:
+            time.sleep(1)
+            
+    except KeyboardInterrupt:
+        print("\nShutting down BD-King-R7 Auto Sync...")
+        sync_manager.stop_sync()
+    except Exception as e:
+        print(f"Error: {e}")
+        sync_manager.stop_sync()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,15 @@
+name: Repository Cleanup Script
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: List files to be removed
+        run: |
+          echo "Files that will be cleaned up:"
+          find .github/workflows -type f ! -name "*.yml" ! -name "*.yaml" -exec echo "  ❌ {}" \;

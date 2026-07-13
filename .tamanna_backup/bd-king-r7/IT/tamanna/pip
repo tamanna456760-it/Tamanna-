@@ -1,0 +1,29 @@
+---
+
+## 5️⃣ pyproject.toml (MOST IMPORTANT)
+
+### 📄 `pyproject.toml`
+```toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tamanna-system"
+version = "1.0.0"
+description = "Tamanna System Automation Package"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+
+dependencies = [
+    "requests",
+    "tqdm",
+    "google-api-python-client",
+    "google-auth",
+    "google-auth-httplib2",
+    "google-auth-oauthlib"
+]
+
+[project.urls]
+Homepage = "https://example.com"

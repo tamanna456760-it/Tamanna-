@@ -1,0 +1,7 @@
+// app/build.gradle
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:32.1.1')
+    implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.firebase:firebase-auth-ktx'
+}
+apply plugin: 'com.google.gms.google-services'

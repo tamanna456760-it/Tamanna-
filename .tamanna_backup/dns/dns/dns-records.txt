@@ -1,0 +1,6 @@
+DNS Records
+
+CNAME api tamanna.tamanna456760.workers.dev Proxied
+CNAME www tamanna.tamanna456760.workers.dev Proxied
+
+TTL Auto

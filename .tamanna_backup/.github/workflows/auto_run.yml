@@ -1,0 +1,368 @@
+name: Node.js Auto Runner (Advanced)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      parallel:
+        description: 'Run files in parallel'
+        type: boolean
+        default: true
+      timeout_seconds:
+        description: 'Timeout per file (seconds)'
+        type: string
+        required: false
+        default: '30'
+      node_version:
+        description: 'Node.js version'
+        type: choice
+        options:
+          - '18'
+          - '20'
+          - '22'
+        default: '20'
+      exclude_pattern:
+        description: 'Exclude pattern (regex)'
+        type: string
+        required: false
+        default: 'test|spec|dist|build'
+
+permissions:
+  contents: read
+  checks: write
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-all-js:
+    name: Node.js Auto Runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    outputs:
+      total_files: ${{ steps.find.outputs.FILE_COUNT }}
+      success_count: ${{ steps.run.outputs.SUCCESS }}
+      fail_count: ${{ steps.run.outputs.FAIL }}
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2️⃣ Setup Node.js with caching
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node_version || '20' }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      # 3️⃣ Display Node versions
+      - name: 📋 Display Node versions
+        run: |
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+
+      # 4️⃣ Install dependencies
+      - name: 📦 Install dependencies
+        id: npm-install
+        continue-on-error: true
+        run: |
+          echo "Installing dependencies..."
+          if [ -f package-lock.json ]; then
+            npm ci --prefer-offline --no-audit
+          elif [ -f package.json ]; then
+            npm install --prefer-offline --no-audit
+          else
+            echo "⚠️  No package.json found"
+            echo "skip_run=true" >> $GITHUB_OUTPUT
+          fi
+
+      # 5️⃣ Create logs directory
+      - name: 📂 Setup directories
+        run: |
+          mkdir -p logs results
+          echo "✓ Directories created"
+
+      # 6️⃣ Find all JS files
+      - name: 🔍 Find all JS files
+        id: find
+        run: |
+          echo "Searching for JS files..."
+          
+          EXCLUDE_PATTERN="${{ github.event.inputs.exclude_pattern || 'test|spec|dist|build' }}"
+          
+          find . -type f -name "*.js" \
+            ! -path "./node_modules/*" \
+            ! -path "./.git/*" \
+            ! -path "./.github/*" \
+            ! -path "./.vscode/*" \
+            ! -path "./.*" \
+            -not \( -path "*" -prune -o -name "*${EXCLUDE_PATTERN}*" \) \
+            2>/dev/null | sort > js_files.txt
+          
+          FILE_COUNT=$(wc -l < js_files.txt)
+          echo "FILE_COUNT=$FILE_COUNT" >> $GITHUB_OUTPUT
+          
+          if [ $FILE_COUNT -gt 0 ]; then
+            echo "✓ Found $FILE_COUNT JavaScript files:"
+            head -20 js_files.txt
+            if [ $FILE_COUNT -gt 20 ]; then
+              echo "... and $((FILE_COUNT - 20)) more"
+            fi
+          else
+            echo "⚠️  No JavaScript files found"
+          fi
+
+      # 7️⃣ Run all JS files safely
+      - name: 🧪 Run all JS files
+        if: steps.find.outputs.FILE_COUNT > 0 && steps.npm-install.outputs.skip_run != 'true'
+        id: run
+        continue-on-error: true
+        run: |
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          PARALLEL=${{ github.event.inputs.parallel == 'true' && 'true' || 'false' }}
+          
+          echo "════════════════════════════════════"
+          echo "🚀 Running JavaScript Files"
+          echo "════════════════════════════════════"
+          echo "Mode: $([ "$PARALLEL" = "true" ] && echo "PARALLEL (4 workers)" || echo "SEQUENTIAL")"
+          echo "Timeout: ${TIMEOUT}s per file"
+          echo "════════════════════════════════════"
+          echo ""
+          
+          > results.txt
+          > run_summary.txt
+          
+          run_file() {
+            local file=$1
+            local timeout_val=$2
+            local filename=$(basename "$file")
+            local base_name="${filename%.*}"
+            
+            echo "▶️  Running: $file"
+            
+            # Create individual log files
+            local out_file="logs/${base_name}.out"
+            local err_file="logs/${base_name}.err"
+            
+            # Run with timeout
+            if timeout "$timeout_val" node "$file" > "$out_file" 2> "$err_file"; then
+              echo "✅ SUCCESS: $file" | tee -a run_summary.txt
+              echo "$file|success|0" >> results.txt
+              return 0
+            else
+              local exit_code=$?
+              if [ $exit_code -eq 124 ]; then
+                echo "⏱️  TIMEOUT: $file (>${timeout_val}s)" | tee -a run_summary.txt
+                echo "$file|timeout|124" >> results.txt
+              else
+                echo "❌ FAILED: $file (exit code: $exit_code)" | tee -a run_summary.txt
+                echo "$file|failed|$exit_code" >> results.txt
+                
+                # Annotate with error
+                if [ -s "$err_file" ]; then
+                  local error_msg=$(head -n1 "$err_file" | sed 's/"/\\"/g')
+                  echo "::error file=$file::$error_msg"
+                fi
+              fi
+              return 1
+            fi
+          }
+          
+          export -f run_file
+          export TIMEOUT
+          
+          # Count files
+          FILE_COUNT=$(wc -l < js_files.txt)
+          echo "Processing $FILE_COUNT file(s)..."
+          echo ""
+          
+          # Run sequentially or in parallel
+          if [ "$PARALLEL" = "true" ]; then
+            echo "🔄 Running in PARALLEL mode (max 4 concurrent jobs)..."
+            cat js_files.txt | xargs -P 4 -I {} bash -c 'run_file "$@" "$TIMEOUT"' _ {}
+          else
+            echo "🔄 Running in SEQUENTIAL mode..."
+            while IFS= read -r file; do
+              run_file "$file" "$TIMEOUT" || true
+            done < js_files.txt
+          fi
+          
+          echo ""
+          echo "════════════════════════════════════"
+          echo "📊 Results Summary"
+          echo "════════════════════════════════════"
+          
+          # Parse results
+          SUCCESS=$(grep -c "|success|" results.txt 2>/dev/null || echo 0)
+          FAILED=$(grep -c "|failed|" results.txt 2>/dev/null || echo 0)
+          TIMEOUT_COUNT=$(grep -c "|timeout|" results.txt 2>/dev/null || echo 0)
+          TOTAL=$((SUCCESS + FAILED + TIMEOUT_COUNT))
+          
+          echo "SUCCESS=$SUCCESS" >> $GITHUB_OUTPUT
+          echo "FAIL=$FAILED" >> $GITHUB_OUTPUT
+          echo "TIMEOUT=$TIMEOUT_COUNT" >> $GITHUB_OUTPUT
+          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+          
+          echo "✅ Successful: $SUCCESS"
+          echo "❌ Failed: $FAILED"
+          echo "⏱️  Timeout: $TIMEOUT_COUNT"
+          echo "📊 Total: $TOTAL"
+          echo "════════════════════════════════════"
+          echo ""
+          
+          # Show failed files
+          if [ $FAILED -gt 0 ]; then
+            echo "❌ Failed Files:"
+            grep "|failed|" results.txt | cut -d'|' -f1 | sed 's/^/  - /'
+            echo ""
+          fi
+          
+          # Show timeout files
+          if [ $TIMEOUT_COUNT -gt 0 ]; then
+            echo "⏱️  Timeout Files:"
+            grep "|timeout|" results.txt | cut -d'|' -f1 | sed 's/^/  - /'
+            echo ""
+          fi
+          
+          # Exit with error if any failed
+          if [ $FAILED -gt 0 ] || [ $TIMEOUT_COUNT -gt 0 ]; then
+            exit 1
+          fi
+
+      # 8️⃣ Analyze results
+      - name: 📈 Analyze results
+        if: always() && steps.find.outputs.FILE_COUNT > 0
+        id: analyze
+        run: |
+          if [ -f results.txt ]; then
+            SUCCESS=$(grep -c "|success|" results.txt 2>/dev/null || echo 0)
+            FAILED=$(grep -c "|failed|" results.txt 2>/dev/null || echo 0)
+            TIMEOUT=$(grep -c "|timeout|" results.txt 2>/dev/null || echo 0)
+            
+            if [ $SUCCESS -gt 0 ]; then
+              SUCCESS_RATE=$((SUCCESS * 100 / (SUCCESS + FAILED + TIMEOUT)))
+            else
+              SUCCESS_RATE=0
+            fi
+            
+            echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+            echo "✓ Success rate: $SUCCESS_RATE%"
+          fi
+
+      # 9️⃣ Generate detailed summary
+      - name: 📊 Generate workflow summary
+        if: always()
+        run: |
+          {
+            echo "## 🚀 Node.js Auto Runner Report"
+            echo ""
+            echo "### 📋 Configuration"
+            echo "| Setting | Value |"
+            echo "|---------|-------|"
+            echo "| **Node Version** | ${{ github.event.inputs.node_version || '20' }} |"
+            echo "| **Mode** | ${{ github.event.inputs.parallel == 'true' && '⚡ Parallel (4 workers)' || '🔄 Sequential' }} |"
+            echo "| **Timeout** | ${{ github.event.inputs.timeout_seconds || 30 }}s |"
+            echo "| **Trigger** | ${{ github.event_name }} |"
+            echo "| **Branch** | ${{ github.ref_name }} |"
+            echo ""
+            
+            if [ -f results.txt ]; then
+              SUCCESS=$(grep -c "|success|" results.txt 2>/dev/null || echo 0)
+              FAILED=$(grep -c "|failed|" results.txt 2>/dev/null || echo 0)
+              TIMEOUT=$(grep -c "|timeout|" results.txt 2>/dev/null || echo 0)
+              
+              echo "### ✅ Results"
+              echo "| Status | Count | Percentage |"
+              echo "|--------|-------|------------|"
+              echo "| ✅ Success | $SUCCESS | $((SUCCESS * 100 / (SUCCESS + FAILED + TIMEOUT)))% |"
+              echo "| ❌ Failed | $FAILED | $((FAILED * 100 / (SUCCESS + FAILED + TIMEOUT)))% |"
+              echo "| ⏱️ Timeout | $TIMEOUT | $((TIMEOUT * 100 / (SUCCESS + FAILED + TIMEOUT)))% |"
+              echo ""
+              
+              if [ $FAILED -gt 0 ]; then
+                echo "### ❌ Failed Files"
+                echo '```'
+                grep "|failed|" results.txt | cut -d'|' -f1 | sed 's/^/- /'
+                echo '```'
+                echo ""
+              fi
+              
+              if [ $TIMEOUT -gt 0 ]; then
+                echo "### ⏱️ Timeout Files"
+                echo '```'
+                grep "|timeout|" results.txt | cut -d'|' -f1 | sed 's/^/- /'
+                echo '```'
+                echo ""
+              fi
+            fi
+            
+            echo "### 📎 Artifacts"
+            echo "- [Detailed Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
+
+      # 🔟 Upload logs and results
+      - name: 📤 Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-run-logs-${{ github.run_id }}
+          path: |
+            logs/
+            results.txt
+            js_files.txt
+            run_summary.txt
+          retention-days: 14
+
+      # 1️⃣1️⃣ Slack notification
+      - name: 🚨 Slack notification
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#ci-alerts'
+          SLACK_COLOR: 'danger'
+          SLACK_TITLE: '❌ Node.js Auto Runner Failed'
+          SLACK_MESSAGE: |
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Failed Files:* ${{ steps.run.outputs.FAIL || '0' }}
+            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # 1️⃣2️⃣ Success notification
+      - name: ✅ Success notification
+        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#ci-alerts'
+          SLACK_COLOR: 'good'
+          SLACK_TITLE: '✅ Node.js Auto Runner Succeeded'
+          SLACK_MESSAGE: |
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Files Executed:* ${{ steps.run.outputs.TOTAL || steps.find.outputs.FILE_COUNT }}
+            *Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # 1️⃣3️⃣ Completion
+      - name: 🎉 Completion
+        if: always()
+        run: |
+          echo "════════════════════════════════════"
+          echo "✅ Node.js Auto Runner Complete"
+          echo "════════════════════════════════════"
+          echo "Check artifacts and summary above"

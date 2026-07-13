@@ -1,0 +1,14 @@
+name: Auto Sync
+
+on:
+  push:
+  schedule:
+    - cron: "*/10 * * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Sync
+        run: python powerhub/sync.py

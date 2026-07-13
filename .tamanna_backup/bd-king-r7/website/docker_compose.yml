@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+      - ai-service
+    networks:
+      - bdking-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=bdking
+      - DB_USER=admin
+      - DB_PASS=password
+      - AI_SERVICE_URL=http://ai-service:3002
+      - JWT_SECRET=bdking-r7-super-secret-key-2024
+    depends_on:
+      - postgres
+    networks:
+      - bdking-network
+
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "3002:3002"
+    environment:
+      - OPENAI_API_KEY=your_openai_key_here
+      - MODEL=gpt-4
+      - MAX_TOKENS=2000
+    networks:
+      - bdking-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=bdking
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - bdking-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - bdking-network
+
+volumes:
+  postgres_data:
+
+networks:
+  bdking-network:
+    driver: bridge

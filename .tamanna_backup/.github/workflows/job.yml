@@ -1,0 +1,224 @@
+name: Tamanna Auto Run & Sync (Advanced)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      skip_python:
+        description: 'Skip Python files'
+        type: boolean
+        default: false
+      skip_node:
+        description: 'Skip Node.js files'
+        type: boolean
+        default: false
+      skip_shell:
+        description: 'Skip Shell scripts'
+        type: boolean
+        default: false
+      skip_c:
+        description: 'Skip C files'
+        type: boolean
+        default: false
+      skip_java:
+        description: 'Skip Java files'
+        type: boolean
+        default: false
+      skip_powerhub:
+        description: 'Skip PowerHub helpers'
+        type: boolean
+        default: false
+      timeout_seconds:
+        description: 'Timeout per file (seconds)'
+        required: false
+        default: '30'
+      force_commit:
+        description: 'Force commit even without changes'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tamanna-auto-run:
+    name: Tamanna Universal Runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🔧 Install C compiler & utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make
+
+      - name: 📦 Install Python dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install --upgrade pip
+            pip install -r requirements.txt
+          fi
+
+      - name: Prepare logging
+        run: |
+          mkdir -p logs
+          cat > run_with_logging.sh << 'EOF'
+          #!/bin/bash
+          file="$1"
+          cmd="$2"
+          timeout="$3"
+          log_base="logs/$(basename "$file" | sed 's/\./_/g')"
+          echo "▶️ Running: $file"
+          if timeout "$timeout" bash -c "$cmd" > "${log_base}.out" 2> "${log_base}.err"; then
+            echo "✅ SUCCESS: $file"
+            echo "$file|success" >> results.txt
+          else
+            exit_code=$?
+            echo "❌ FAILED: $file (exit $exit_code)"
+            echo "$file|failed|$exit_code" >> results.txt
+            if [ -s "${log_base}.err" ]; then
+              echo "::error file=$file::$(head -n1 ${log_base}.err)"
+            fi
+          fi
+          EOF
+          chmod +x run_with_logging.sh
+
+      - name: 🐍 Run Python files
+        if: github.event.inputs.skip_python != 'true'
+        run: |
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          find . -type f -name "*.py" \
+            ! -path "./.git/*" \
+            ! -path "./__pycache__/*" \
+            ! -path "./venv/*" \
+            -print0 | while IFS= read -r -d '' file; do
+              ./run_with_logging.sh "$file" "python3 '$file'" "$TIMEOUT"
+            done
+
+      - name: 📦 Run Node.js files
+        if: github.event.inputs.skip_node != 'true'
+        run: |
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          find . -type f -name "*.js" \
+            ! -path "./.git/*" \
+            ! -path "./node_modules/*" \
+            -print0 | while IFS= read -r -d '' file; do
+              ./run_with_logging.sh "$file" "node '$file'" "$TIMEOUT"
+            done
+
+      - name: 🐚 Run Shell scripts
+        if: github.event.inputs.skip_shell != 'true'
+        run: |
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          find . -type f -name "*.sh" ! -path "./.git/*" -exec chmod +x {} \;
+          find . -type f -name "*.sh" ! -path "./.git/*" -print0 | while IFS= read -r -d '' file; do
+            ./run_with_logging.sh "$file" "bash '$file'" "$TIMEOUT"
+          done
+
+      - name: 🔧 Compile & run C files
+        if: github.event.inputs.skip_c != 'true'
+        run: |
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          find . -type f -name "*.c" ! -path "./.git/*" -print0 | while IFS= read -r -d '' file; do
+            out="${file%.c}"
+            gcc "$file" -o "$out" && ./run_with_logging.sh "$file" "./$out" "$TIMEOUT"
+            rm -f "$out"
+          done
+
+      - name: ☕ Compile & run Java files
+        if: github.event.inputs.skip_java != 'true'
+        run: |
+          TIMEOUT=${{ github.event.inputs.timeout_seconds || 30 }}
+          find . -type f -name "*.java" ! -path "./.git/*" -print0 | while IFS= read -r -d '' file; do
+            dir=$(dirname "$file")
+            cls=$(basename "$file" .java)
+            (cd "$dir" && javac "$cls.java" && ./run_with_logging.sh "$file" "java $cls" "$TIMEOUT")
+          done
+
+      - name: 📊 Generate job summary
+        if: always()
+        run: |
+          echo "## 🚀 Tamanna Auto Run & Sync Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timeout per file**: ${{ github.event.inputs.timeout_seconds || 30 }}s" >> $GITHUB_STEP_SUMMARY
+          if [ -f results.txt ]; then
+            SUCCESS=$(grep -c "|success" results.txt || echo 0)
+            FAIL=$(grep -c "|failed" results.txt || echo 0)
+            echo "- **Successful runs**: $SUCCESS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Failed runs**: $FAIL" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Detailed results" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat results.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **No files were executed** (all language groups skipped or no files found)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📝 Commit auto changes
+        if: github.event.inputs.force_commit == 'true' || (success() && github.event_name != 'pull_request')
+        run: |
+          git config --global user.name "TamannaBot"
+          git config --global user.email "tamanna-bot@example.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "✅ No changes to commit."
+          else
+            git commit -m "🤖 Auto update: Tamanna universal runner [skip ci]"
+            git push origin main
+            echo "✅ Changes committed and pushed."
+          fi
+
+      - name: 📤 Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-run-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 7
+
+      - name: 🚨 Slack alert on failure
+        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: '#alerts'
+          SLACK_COLOR: '#FF0000'
+          SLACK_TITLE: 'Tamanna Auto Run Failed'
+          SLACK_MESSAGE: |
+            Repository: ${{ github.repository }}
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Branch: ${{ github.ref_name }}
+
+      - name: ✅ Completion
+        run: echo "🎉 Tamanna universal runner finished. Check the summary above or logs artifact."

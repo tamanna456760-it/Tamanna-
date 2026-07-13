@@ -1,0 +1,28 @@
+// Basic power test sequence
+typedef struct {
+    float voltage;
+    float current;
+    bool status;
+} PowerReading;
+
+bool run_power_hab_tests(void) {
+    PowerReading reading;
+    
+    // Test 1: Power-on sequence
+    if (!test_power_on_sequence()) {
+        return false;
+    }
+    
+    // Test 2: Voltage regulation
+    reading = read_power_sensors();
+    if (!validate_voltage(reading.voltage)) {
+        return false;
+    }
+    
+    // Test 3: Load testing
+    if (!test_under_load()) {
+        return false;
+    }
+    
+    return true;
+}

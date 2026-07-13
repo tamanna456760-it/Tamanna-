@@ -1,0 +1,5 @@
+User Table:
+- id
+- username
+- password_hash
+- role

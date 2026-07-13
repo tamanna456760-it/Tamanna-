@@ -1,0 +1,118 @@
+name: BD-KING-R7 AI Auto Build & Sync & Deploy
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [webhook_trigger]
+
+jobs:
+  build-and-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          pip install requests google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+      - name: Run Build Script
+        run: |
+          if [ -f build.py ]; then
+            python build.py
+          else
+            echo "No build.py found"
+            exit 1
+          fi
+
+      - name: Run Online Code Validator
+        run: |
+          if [ -f online_validator.py ]; then
+            python online_validator.py
+          fi
+
+      - name: Sync with Google Drive
+        run: |
+          if [ -f google_sync.py ]; then
+            python google_sync.py
+          fi
+
+      - name: Process Webhooks
+        run: |
+          if [ -f webhook_handler.py ]; then
+            python webhook_handler.py
+          fi
+
+      - name: Sync JSON Files
+        run: |
+          if [ -f json_sync.py ]; then
+            python json_sync.py
+          fi
+
+      - name: Auto Commit Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🤖 Auto: Build, Sync & Deploy\n\n- Code validation\n- Google Drive sync\n- Webhook processing\n- JSON file sync\n- Timestamp: $(date)"
+            git push
+          fi
+
+      - name: Notify Webhook
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"status": "success", "repository": "${{ github.repository }}", "commit": "${{ github.sha }}"}' \
+            ${{ secrets.WEBHOOK_URL }}
+
+  online-runner:
+    runs-on: ubuntu-latest
+    needs: build-and-sync
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Online Code
+        run: |
+          python -c "
+          import requests
+          import json
+
+          # Online code execution example
+          code_to_run = '''
+          def main():
+              print('🔄 Running code online...')
+              return {'status': 'success', 'message': 'Code executed remotely'}
+
+          if __name__ == '__main__':
+              result = main()
+              print(json.dumps(result))
+          '''
+
+          # Execute the code
+          exec(code_to_run)
+          "

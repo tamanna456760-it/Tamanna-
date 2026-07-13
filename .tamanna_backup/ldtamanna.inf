@@ -1,0 +1,43 @@
+; File: LDTamanna.inf
+; Purpose: Create a root-enumerated device that loads LDTamanna.sys
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = System
+ClassGuid   = {4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider    = %ManufacturerName%
+DriverVer   = 12/09/2025,1.0.0.0
+CatalogFile = LDTamanna.cat
+
+[DestinationDirs]
+DefaultDestDir = 12  ; drivers directory
+
+[SourceDisksFiles]
+LDTamanna.sys = 1
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64
+
+[Standard.NTamd64]
+%LDTamannaDeviceDesc% = LDTamanna_Install, ROOT\LDTamanna
+
+[LDTamanna_Install]
+CopyFiles = LDTamanna_CopyFiles
+
+[LDTamanna_CopyFiles]
+LDTamanna.sys
+
+[LDTamanna_Install.Services]
+AddService = LDTamanna, 0x00000002, LDTamanna_Service_Inst
+
+[LDTamanna_Service_Inst]
+DisplayName    = %LDTamannaServiceName%
+ServiceType    = 1          ; SERVICE_KERNEL_DRIVER
+StartType      = 3          ; SERVICE_DEMAND_START
+ErrorControl   = 1
+ServiceBinary  = %12%\LDTamanna.sys
+
+[Strings]
+ManufacturerName     = "Tamanna Sovereign Systems"
+LDTamannaDeviceDesc  = "Tamanna Sovereign Heartbeat Device"
+LDTamannaServiceName = "LDTamanna"

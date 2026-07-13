@@ -1,0 +1,29 @@
+{
+  "diseases": {
+    "common_cold": {
+      "symptoms": ["cough", "headache", "fatigue"],
+      "treatment": ["rest", "hydration", "over_the_counter_cold_medicine"],
+      "urgency": "low"
+    },
+    "influenza": {
+      "symptoms": ["fever", "cough", "headache", "fatigue", "body_aches"],
+      "treatment": [
+        "rest",
+        "hydration",
+        "antiviral_medication",
+        "fever_reducer"
+      ],
+      "urgency": "medium"
+    },
+    "pneumonia": {
+      "symptoms": ["fever", "cough", "shortness_of_breath", "chest_pain"],
+      "treatment": ["antibiotics", "medical_attention", "hospitalization"],
+      "urgency": "high"
+    },
+    "heart_attack": {
+      "symptoms": ["chest_pain", "shortness_of_breath", "dizziness"],
+      "treatment": ["emergency_medical_help", "aspirin", "hospitalization"],
+      "urgency": "critical"
+    }
+  }
+}

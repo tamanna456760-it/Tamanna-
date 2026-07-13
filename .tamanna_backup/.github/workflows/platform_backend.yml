@@ -1,0 +1,81 @@
+name: Platform Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:    # allows manual trigger
+
+jobs:
+  backend_ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install autopep8 pyyaml
+
+      # 4️⃣ Run Problem Fixer (auto code fix)
+      - name: Run Problem Fixer
+        run: |
+          python problem_fixer.py
+
+      # 5️⃣ Save all file names
+      - name: Save File Names
+        run: |
+          python - <<EOF
+          import os
+          file_names = []
+          for root, dirs, files in os.walk("."):
+              for file in files:
+                  if file.endswith(".py"):
+                      file_names.append(os.path.join(root, file))
+          with open("all_file_names.txt", "w") as f:
+              for name in file_names:
+                  f.write(name + "\\n")
+          EOF
+
+      # 6️⃣ Run Main Runner
+      - name: Run Main Runner
+        run: |
+          python main.py
+
+      # 7️⃣ Run Backend Tests (if you have pytest)
+      - name: Run Backend Tests
+        run: |
+          if [ -f "tests" ]; then
+            pip install pytest
+            pytest tests/ --maxfail=1 --disable-warnings -q
+          fi
+
+      # 8️⃣ Commit auto changes (fixes, file names)
+      - name: Commit auto changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto sync & fix"
+          git push || echo "No changes to push"
+
+      # 9️⃣ Optional Deployment Step
+      - name: Deploy Backend
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Add your deployment commands here, e.g., SSH deploy or Docker push"

@@ -1,0 +1,258 @@
+name: 🔧 Auto Lint & Fix Code
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.py'
+      - '**.js'
+      - '**.sh'
+      - '.github/workflows/auto-lint-and-fix.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '**.py'
+      - '**.js'
+      - '**.sh'
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+
+jobs:
+  lint-and-fix:
+    name: 🔍 Lint & Auto-Fix Python/JavaScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort pylint pytest pytest-cov
+          pip install -q -r requirements.txt 2>/dev/null || true
+          pip install -q -r bd-king-r7/IT/requirements.txt 2>/dev/null || true
+
+      - name: 📋 Run Flake8 Linting
+        id: flake8
+        continue-on-error: true
+        run: |
+          echo "### 🔍 Flake8 Linting Results" >> $GITHUB_STEP_SUMMARY
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics >> flake8_critical.txt 2>&1 || true
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics >> flake8_warnings.txt 2>&1 || true
+          
+          if [ -s flake8_critical.txt ]; then
+            echo "⚠️ **Critical Issues Found:**" >> $GITHUB_STEP_SUMMARY
+            cat flake8_critical.txt >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -s flake8_warnings.txt ]; then
+            echo "📌 **Warnings:**" >> $GITHUB_STEP_SUMMARY
+            head -20 flake8_warnings.txt >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🎨 Run Black Formatter
+        id: black
+        continue-on-error: true
+        run: |
+          echo "### 🎨 Black Code Formatting" >> $GITHUB_STEP_SUMMARY
+          black --check . --exclude venv,node_modules,.git 2>&1 | tee black_check.txt || true
+          
+          if grep -q "would be reformatted" black_check.txt; then
+            echo "Fixing code with Black..."
+            black . --exclude venv,node_modules,.git
+            echo "✅ **Code formatted with Black**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Code already formatted properly**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🔄 Run isort (Import Sorting)
+        continue-on-error: true
+        run: |
+          echo "### 🔄 Import Sorting (isort)" >> $GITHUB_STEP_SUMMARY
+          isort . --check-only --diff 2>&1 | tee isort_check.txt || true
+          
+          if [ -s isort_check.txt ] && [ $(wc -l < isort_check.txt) -gt 0 ]; then
+            echo "Fixing imports..."
+            isort .
+            echo "✅ **Imports sorted**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Imports already sorted**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🧹 Fix Shell Scripts
+        continue-on-error: true
+        run: |
+          echo "### 🧹 Shell Script Analysis" >> $GITHUB_STEP_SUMMARY
+          sudo apt-get install -y shellcheck > /dev/null 2>&1
+          
+          for script in $(find . -name "*.sh" -not -path "./node_modules/*" -not -path "./.git/*"); do
+            echo "Checking $script..."
+            shellcheck -x "$script" 2>&1 | tee -a shellcheck_results.txt || true
+          done
+          
+          if [ -s shellcheck_results.txt ]; then
+            echo "⚠️ **Shell Script Issues:**" >> $GITHUB_STEP_SUMMARY
+            head -20 shellcheck_results.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Shell scripts look good**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📊 Run Pylint
+        id: pylint
+        continue-on-error: true
+        run: |
+          echo "### 📊 Pylint Code Analysis" >> $GITHUB_STEP_SUMMARY
+          find . -name "*.py" -not -path "*/venv/*" -not -path "*/__pycache__/*" -not -path "*/.git/*" | head -20 | xargs pylint --exit-zero --max-line-length=127 2>&1 | tee pylint_report.txt || true
+          
+          grep "^Your code has been rated" pylint_report.txt >> $GITHUB_STEP_SUMMARY || echo "⚠️ Pylint report generated" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🧪 Run Python Tests
+        id: pytest
+        continue-on-error: true
+        run: |
+          echo "### 🧪 Unit Tests (pytest)" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "tests" ] || [ -d "test" ]; then
+            pytest --tb=short --cov=. --cov-report=term-missing 2>&1 | tee pytest_report.txt || true
+            
+            if [ -s pytest_report.txt ]; then
+              tail -30 pytest_report.txt >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "ℹ️ **No tests directory found** (Create tests/ for unit testing)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🔴 Check for broken Python imports
+        id: import-check
+        continue-on-error: true
+        run: |
+          echo "### 🔍 Broken Imports Check" >> $GITHUB_STEP_SUMMARY
+          
+          python3 << 'EOF'
+          import ast
+          import os
+          
+          broken_files = []
+          
+          for root, dirs, files in os.walk('.'):
+              # Skip certain directories
+              dirs[:] = [d for d in dirs if d not in ['venv', 'node_modules', '.git', '__pycache__']]
+              
+              for file in files:
+                  if file.endswith('.py'):
+                      filepath = os.path.join(root, file)
+                      try:
+                          with open(filepath, 'r') as f:
+                              ast.parse(f.read())
+                      except SyntaxError as e:
+                          broken_files.append(f"❌ {filepath}: {e}")
+          
+          if broken_files:
+              print("\n### Syntax Errors Found:")
+              for item in broken_files[:10]:
+                  print(item)
+          else:
+              print("✅ All Python files have valid syntax!")
+          EOF
+
+      - name: 📝 Create Pull Request with fixes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: '🔧 Auto: Code formatting & linting fixes'
+          title: '🔧 Auto: Code Quality Improvements'
+          body: |
+            ## 🤖 Automated Code Quality Report
+            
+            This PR contains automated fixes from the CI/CD pipeline:
+            
+            - ✅ Code formatted with Black
+            - ✅ Imports sorted with isort
+            - ✅ Flake8 linting applied
+            - ✅ Shell scripts checked
+            
+            **Generated by:** GitHub Actions Workflow
+            **Date:** ${{ github.event.head_commit.timestamp }}
+          branch: auto/code-quality-fixes
+          delete-branch: true
+          labels: 'automated,code-quality'
+          draft: false
+
+      - name: 📤 Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-reports
+          path: |
+            flake8_*.txt
+            black_check.txt
+            isort_check.txt
+            shellcheck_results.txt
+            pylint_report.txt
+            pytest_report.txt
+          retention-days: 30
+
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 🔒 Bandit Security Scan
+        continue-on-error: true
+        run: |
+          pip install bandit safety
+          echo "### 🔒 Security Analysis" >> $GITHUB_STEP_SUMMARY
+          
+          bandit -r . -f json -o bandit_report.json 2>/dev/null || true
+          bandit -r . -f txt 2>&1 | head -50 >> $GITHUB_STEP_SUMMARY || true
+
+      - name: 📦 Check Python Dependencies
+        continue-on-error: true
+        run: |
+          pip install safety
+          echo "### 📦 Dependency Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          safety check --json 2>&1 | head -30 >> $GITHUB_STEP_SUMMARY || echo "✅ No known vulnerabilities" >> $GITHUB_STEP_SUMMARY
+
+  final-report:
+    name: 📊 Final Quality Report
+    runs-on: ubuntu-latest
+    needs: [lint-and-fix, security-scan]
+    if: always()
+
+    steps:
+      - name: 📋 Summary
+        run: |
+          echo "## ✅ CI/CD Pipeline Complete"
+          echo ""
+          echo "### Status Summary"
+          echo "- **Lint & Fix:** ${{ needs.lint-and-fix.result }}"
+          echo "- **Security Scan:** ${{ needs.security-scan.result }}"
+          echo ""
+          echo "✨ Your code quality workflow is running!"

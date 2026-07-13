@@ -1,0 +1,2 @@
+with open("logs/errors.log", "a") as file:
+    file.write("Error Found\n")

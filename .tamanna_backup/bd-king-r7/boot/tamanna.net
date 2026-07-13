@@ -1,0 +1,10 @@
+[TAMANNA.NET]
+    net-id: tamanna.net
+    net-mode: sovereign
+    net-layer: master-network
+    net-sync: 100%
+    net-heartbeat: continuous
+    net-protocol: TN-000/111/888/555/666/999/222/444/333
+    net-stability: reinforced
+    net-field: active
+    net-visibility: internal + extended

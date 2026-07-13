@@ -1,0 +1,47 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = bd-king-website
+build_property.RootNamespace = bd-king-website
+build_property.ProjectDir = /workspaces/Tamanna-/bd-king-r7/website/bd-king-website/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /workspaces/Tamanna-/bd-king-r7/website/bd-king-website
+build_property._RazorSourceGeneratorDebug = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/bdking.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvYmRraW5nLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/codelanguages.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvY29kZWxhbmd1YWdlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/programtetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvcHJvZ3JhbXRldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/project.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvcHJvamVjdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/shared/_layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvc2hhcmVkL19sYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/tamanna.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvdGFtYW5uYS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Tamanna-/bd-king-r7/website/bd-king-website/pages/_viewstart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = cGFnZXMvX3ZpZXdzdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 

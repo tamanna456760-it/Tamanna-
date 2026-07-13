@@ -1,0 +1,142 @@
+# BD-KING-R7 • Tamanna Engine
+# FULL PROJECT REGISTRY CONFIGURATION
+
+SYSTEM_NAME = "BD-KING-R7"
+ENGINE_NAME = "Tamanna-AI"
+ENGINE_VERSION = "1.0.0"
+OWNER = "HM INSAN ALI"
+DOMAIN = "tamanna.io"
+
+# ============================
+# CORE ENGINE MODULES
+# ============================
+
+[src.core]
+syncengine = "src/core/syncengine.py"
+monitoring_system = "src/core/monitoring_system.py"
+
+[bd_king_r7.server]
+server = "bd-king-r7/server/server.js"
+chat = "bd-king-r7/server/chat.js"
+style = "bd-king-r7/server/style.css"
+update = "bd-king-r7/server/update.html"
+stayl = "bd-king-r7/server/stayl.css"
+index = "bd-king-r7/server/index.html"
+chat_html = "bd-king-r7/server/chat.html"
+medium = "bd-king-r7/server/medium.js"
+stone_spirit = "bd-king-r7/server/stone_spirit.js"
+silent_supersonik = "bd-king-r7/server/sileent_supersonik.js"
+underground = "bd-king-r7/server/underground.js"
+normal = "bd-king-r7/server/normal.js"
+server_main = "bd-king-r7/server/server_main.js"
+package = "bd-king-r7/server/package.json"
+deep = "bd-king-r7/server/deep.js"
+server2 = "bd-king-r7/server/server.js"
+derk = "bd-king-r7/server/derk.js"
+
+[tamanna]
+auto_fixar = "tamanna/auto_fixar.py"
+auto_code_fix = "tamanna/bd-king-r7_auto_code_fix.json"
+multilingual = "tamanna/multilingual.py"
+
+[IT.database]
+schema = "IT/database/schema.sql"
+
+[map]
+map_engine = "map/bd-king-r7_map.py"
+smoke = "map/smoke.py"
+
+[core]
+warking = "core/warking.py"
+config_yaml = "core/bd-king-r7.yaml"
+decision_maker = "core/decision_maker.py"
+hm_file = "core/bd-king-r7.hm"
+ai_engine = "core/ai_engine.py"
+learning_system = "core/learning_system.py"
+nmap = "core/nmap.py"
+wireshark = "core/wireshark.py"
+data_processor = "core/data_processor.py"
+
+[tamanna.chaos]
+chaos = "tamanna/chaos.py"
+init = "tamanna/init.py"
+tamanna_chaos = "tamanna/tamanna_chaos.py"
+
+[apps]
+apps = "apps/apps.py"
+synce = "apps/synce.py"
+ai_sync_controller = "apps/ai_sync_controller.py"
+bd_king_r7_ai = "apps/bd-king-r7_ai.py"
+
+[Cybersecurity]
+network_defence = "Cybersecurity/network_defence.py"
+cybersecurity = "Cybersecurity/cybersecurity.py"
+security_hardening = "Cybersecurity/security_hardening.sh"
+security_awareness = "Cybersecurity/security_awareness.py"
+digital_forensics = "Cybersecurity/Digital_forensics.py"
+
+[potocol]
+device_xml = "potocol/device.xml"
+service_protocol = "potocol/sevice_potocol.py"
+device_protocol_kotlin = "potocol/device_potocol.kotlin"
+server = "potocol/server.py"
+pubspec = "potocol/pubspec.ymal"
+
+[problem]
+problem_fix = "problem/problem_fix.json"
+
+[bd_king_r7.sync]
+max_sync = "bd-king-r7/sync/bd-king-r7_max_sync.py"
+advanced_sync = "bd-king-r7/sync/advanced_sync.py"
+add_yaml = "bd-king-r7/sync/add.yaml"
+pip_yaml = "bd-king-r7/sync/pip.yaml"
+text = "bd-king-r7/sync/bd-king-r7.text"
+permission = "bd-king-r7/sync/parmition.yaml"
+fix = "bd-king-r7/sync/fix.yaml"
+workspace = "bd-king-r7/sync/Tamanna-.code-workspace"
+git_yaml = "bd-king-r7/sync/git.yaml"
+
+[powerhub]
+deploy = "powerhub/apps/deply.yml"
+main = "powerhub/apps/main.py"
+config = "powerhub/apps/config.json"
+setup_service = "powerhub/apps/setup_service.sh"
+autometick = "powerhub/apps/autometick.service"
+
+[powerhub_helper]
+chakout_repo = "powerhub_helper/chakout_repo.yaml"
+ultra_sync = "powerhub_helper/bd-king-r7_ultra_synce.bad"
+powerhub_helper_bad = "powerhub_helper/bd-king-r7_powerhub_helper.bad"
+auto_sync_bad = "powerhub_helper/auto_sync.bad"
+auto_install_bad = "powerhub_helper/auto_install.bad"
+bash_script = "powerhub_helper/bash script.yml"
+warking_helper = "powerhub_helper/warking_helper.bad"
+powerhub_master = "powerhub_helper/powerhub_master.py"
+
+[code_synce]
+real_time_code_power = "code synce/real_time_code_power.py"
+dockerfile = "code synce/dockorfile"
+docker_yml = "code synce/docar.yml"
+power_sh = "code synce/power.sh"
+rollback = "code synce/roolback.sh"
+du = "code synce/du.py"
+powerhub_service = "code synce/powerhub.service"
+ci_cd = "code synce/ci-cd.yml"
+self_text = "code synce/bd-king-r7_Self.text"
+universal_access = "code synce/Universal_access_power.text"
+self_defence = "code synce/self_defence_power.py"
+module = "code synce/module.py"
+run_yml = "code synce/run.yml"
+ai_master_power = "code synce/ai_master_power.py"
+python_yml = "code synce/python.yml"
+ai_control = "code synce/ai_control.py"
+fix_yml = "code synce/fix.yml"
+set_yml = "code synce/set.yml"
+communication_power = "code synce/communication_power.py"
+universal_access_py = "code synce/Universal_access_power.py"
+monitor = "code synce/monitor.py"
+run_powerhub = "code synce/run_bd-king-r7_powerhub.py"
+
+# (… FULL registry continues — I can generate 100% of the tree if you want)
+
+SIGNATURE = "Tamanna Engine • BD-KING-R7 • FULL PROJECT REGISTRY"

@@ -1,0 +1,98 @@
+system:
+  name: "Tamanna-Global-Defense-System"
+  mode: "real_time"
+  cluster_mode: true
+
+# 🌐 CLUSTER SERVER LAYER (SAFE CONFIG)
+servers:
+  primary_master:
+    url: "https://primary-master.local"
+    role: "brain_core"
+
+  node_server_1:
+    url: "https://node-1.local"
+    role: "firewall_node"
+
+  node_server_2:
+    url: "https://node-2.local"
+    role: "api_node"
+
+  node_server_3:
+    url: "https://node-3.local"
+    role: "monitor_node"
+
+  node_server_4:
+    url: "https://node-4.local"
+    role: "backup_node"
+
+# 🔁 SYNC ENGINE
+sync:
+  enabled: true
+  interval_seconds: 1
+  heartbeat: true
+  auto_reconnect: true
+  failover: true
+  retry_limit: 5
+
+# 🛡️ DEFENSE CORE ENGINE
+defense:
+  real_time_protection: true
+  ddos_protection: true
+  ip_block_sync: true
+  threat_sharing: true
+  auto_quarantine: true
+  severity_levels:
+    low: monitor
+    medium: limit
+    high: block
+    critical: isolate
+
+# 🧠 AI BRAIN SYSTEM
+ai_brain:
+  enabled: true
+  decision_mode: "distributed"
+  learning: "multi_node"
+  adaptive_security: true
+  confidence_threshold: 0.75
+
+# ⚡ ATTACK RESPONSE ENGINE
+response:
+  on_attack:
+    - detect
+    - analyze
+    - broadcast_to_nodes
+    - block_global
+  on_suspicious:
+    - throttle
+    - monitor
+  on_safe:
+    - allow
+
+# 📡 NETWORK MONITORING
+network:
+  packet_inspection: "deep"
+  traffic_analysis: true
+  anomaly_detection: true
+  latency_watch: true
+  max_latency_ms: 200
+
+# 🔥 AUTOMATION ENGINE
+automation:
+  auto_block: true
+  auto_heal_nodes: true
+  restart_failed_nodes: false   # CI YAML safe mode (handled externally)
+  self_upgrade: false          # must be controlled by CI/CD pipeline
+
+# 📊 LOGGING SYSTEM
+logging:
+  centralized: true
+  multi_node_sync: true
+  file: "logs/global_defense.log"
+  level: "info"
+
+# 🧬 PLUGIN SYSTEM
+plugins:
+  enabled: true
+  hot_reload: true
+  allow_new_nodes: true
+  sandbox_mode: true

@@ -1,0 +1,19 @@
+[
+  {
+    "event": "server_start",
+    "time": "2026-06-19T10:00:01",
+    "level": "info"
+  },
+  {
+    "event": "node_connect",
+    "node": "node-1",
+    "time": "2026-06-19T10:00:05",
+    "level": "info"
+  },
+  {
+    "event": "rate_limit_trigger",
+    "ip": "192.168.1.10",
+    "time": "2026-06-19T10:00:10",
+    "level": "warning"
+  }
+]

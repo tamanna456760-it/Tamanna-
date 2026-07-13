@@ -1,0 +1,69 @@
+name: Master Sync
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 2 * * *' # daily at 2 AM UTC
+  workflow_dispatch:    # allows manual trigger
+
+jobs:
+  master_sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install autopep8 pyyaml
+
+      # 4️⃣ Run Problem Fixer
+      - name: Run Problem Fixer
+        run: |
+          python problem_fixer.py
+
+      # 5️⃣ Save all file names
+      - name: Save File Names
+        run: |
+          python - <<EOF
+          import os
+          file_names = []
+          for root, dirs, files in os.walk("."):
+              for file in files:
+                  if file.endswith(".py"):
+                      file_names.append(os.path.join(root, file))
+          with open("all_file_names.txt", "w") as f:
+              for name in file_names:
+                  f.write(name + "\\n")
+          EOF
+
+      # 6️⃣ Run main runner
+      - name: Run Main Runner
+        run: |
+          python main.py
+
+      # 7️⃣ Commit auto changes (like fixer or new file names)
+      - name: Commit auto changes
+        run: |
+          git config --global user.name "tamanna456760-it"
+          git config --global user.email "tamanna456760@gmail.com.com"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto sync & fix"
+          git push || echo "No changes to push"
+
+      # 8️⃣ Optional: Dependabot trigger (if needed)
+      - name: Trigger Dependabot
+        uses: dependabot/fetch-metadata@v1

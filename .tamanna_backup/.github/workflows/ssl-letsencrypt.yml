@@ -1,0 +1,56 @@
+name: Tamanna SSL LetsEncrypt Auto Manager
+
+on:
+  push:
+    branches: [ "main", "tamanna-" ]
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  ssl-renew:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Install Certbot & Renew SSL
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+            sudo apt update &&
+            sudo apt install certbot python3-certbot-nginx -y || true &&
+
+            sudo certbot renew --quiet
+          "
+
+      - name: Force SSL for Multi Domains (if first setup)
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+            sudo certbot --nginx \
+            -d tamanna.com \
+            -d www.tamanna.com \
+            -d tamanna.xyz \
+            -d www.tamanna.xyz \
+            -d tamanna.org \
+            -d www.tamanna.org || true
+          "
+
+      - name: Reload Nginx
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+            sudo systemctl reload nginx
+          "
+
+      - name: Health Check
+        run: |
+          curl -I https://tamanna.com || true
+          curl -I https://tamanna.xyz || true
+          curl -I https://tamanna.org || true

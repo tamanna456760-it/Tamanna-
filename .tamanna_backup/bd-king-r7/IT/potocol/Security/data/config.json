@@ -1,0 +1,6 @@
+{
+  "risk": "HIGH",
+  "ip": "192.168.1.10",
+  "reason": "Too many requests in short time",
+  "count": 45
+}

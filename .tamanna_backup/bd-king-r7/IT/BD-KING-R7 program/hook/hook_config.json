@@ -1,0 +1,17 @@
+{
+  "version": "7.0",
+  "hooks": {
+    "server": true,
+    "website": true,
+    "data": true,
+    "ai": true,
+    "device": true,
+    "network": true,
+    "security": true
+  },
+  "monitoring": {
+    "interval_seconds": 60,
+    "auto_report": true,
+    "real_time_alerts": true
+  }
+}

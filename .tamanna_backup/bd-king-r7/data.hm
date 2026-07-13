@@ -1,0 +1,55 @@
+-- BD-King-R7 Database Schema
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    transaction_id TEXT UNIQUE NOT NULL,
+    amount REAL NOT NULL,
+    currency TEXT DEFAULT 'BDT',
+    customer_id INTEGER,
+    transaction_type TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sync_status TEXT DEFAULT 'pending',
+    last_sync TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id TEXT UNIQUE NOT NULL,
+    product_name TEXT NOT NULL,
+    quantity INTEGER DEFAULT 0,
+    price REAL NOT NULL,
+    category TEXT,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sync_status TEXT DEFAULT 'pending',
+    last_sync TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    email TEXT,
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sync_status TEXT DEFAULT 'pending',
+    last_sync TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    setting_key TEXT UNIQUE NOT NULL,
+    setting_value TEXT NOT NULL,
+    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sync_status TEXT DEFAULT 'pending',
+    last_sync TIMESTAMP
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_transactions_sync ON transactions(sync_status, last_modified);
+CREATE INDEX IF NOT EXISTS idx_inventory_sync ON inventory(sync_status, last_updated);
+CREATE INDEX IF NOT EXISTS idx_customers_sync ON customers(sync_status, last_modified);
+CREATE INDEX IF NOT EXISTS idx_settings_sync ON settings(sync_status, last_modified);

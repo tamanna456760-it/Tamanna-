@@ -1,0 +1,17 @@
+{
+    "device_id": "BD-King-R7-001",
+    "server_url": "https://api.bd-king.com/sync",
+    "api_key": "your-actual-api-key",
+    "sync_interval": 300,
+    "max_retries": 3,
+    "retry_delay": 5,
+    "data_paths": [
+        "/data/transactions",
+        "/data/inventory",
+        "/data/customers"
+    ],
+    "database_path": "/data/bd_king.db",
+    "log_level": "INFO",
+    "backup_enabled": true,
+    "backup_retention_days": 7
+}

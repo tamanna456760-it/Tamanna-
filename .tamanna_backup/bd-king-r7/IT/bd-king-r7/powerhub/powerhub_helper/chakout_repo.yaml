@@ -1,0 +1,44 @@
+name: BD-KING-R7 PowerHub Auto Builder
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-helper:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Setup environment (example: Node.js, Python, or custom)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Run build script
+      - name: Build PowerHub
+        run: npm run build
+
+      # 5. Run tests (optional)
+      - name: Run tests
+        run: npm test
+
+      # 6. Upload build artifacts
+      - name: Upload build output
+        uses: actions/upload-artifact@v3
+        with:
+          name: powerhub-build
+          path: dist/

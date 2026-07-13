@@ -1,0 +1,93 @@
+←
+"use client";
+
+export default function LoginPlansPage() {
+return (
+<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center p-6">
+<div className="w-full max-w-6xl space-y-10">
+
+{/* Login Card */}
+<div className="bg-slate-900/70 backdrop-blur rounded-2xl border border-white/10 p-8 shadow-2xl">
+<h1 className="text-2xl font-semibold mb-1">Login</h1>
+<p className="text-slate-400 text-sm mb-6">
+Log in using your email and password. Your account is created by the admin.
+</p>
+
+<div className="space-y-4">
+<div>
+<label className="text-sm text-slate-400">Email</label>
+<input
+type="email"
+placeholder="your@gmail.com"
+className="mt-1 w-full bg-slate-950 rounded-lg p-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+/>
+</div>
+
+<div>
+<label className="text-sm text-slate-400">Password</label>
+<input
+type="password"
+placeholder="Password"
+className="mt-1 w-full bg-slate-950 rounded-lg p-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500"
+/>
+</div>
+
+<button className="w-full mt-4 py-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 font-semibold text-lg">
+Login
+</button>
+</div>
+</div>
+
+{/* Plans */}
+<div className="bg-slate-900/70 backdrop-blur rounded-2xl border border-white/10 p-8 shadow-2xl">
+<div className="flex justify-between items-center mb-6">
+<div>
+<h2 className="text-xl font-semibold">Plans</h2>
+<p className="text-slate-400 text-sm">Monthly packages (character quota)</p>
+</div>
+<span className="text-sm text-slate-400">To buy/activate: WhatsApp</span>
+</div>
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+{/* Starter */}
+<div className="bg-slate-950 rounded-xl border border-white/10 p-6">
+<h3 className="text-lg font-semibold mb-2">Starter</h3>
+<p className="text-2xl font-bold mb-4">PKR 3,000 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+<ul className="text-sm text-slate-300 space-y-2 mb-4">
+<li>• 1 Million characters</li>
+<li>• Voice cloning access</li>
+</ul>
+<span className="inline-block text-xs bg-white/10 px-3 py-1 rounded-full">1M Characters</span>
+</div>
+
+{/* Pro */}
+<div className="bg-gradient-to-br from-slate-950 to-slate-900 rounded-xl border border-purple-500/40 p-6 shadow-lg">
+<h3 className="text-lg font-semibold mb-2">Pro</h3>
+<p className="text-2xl font-bold mb-4">PKR 7,000 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+<ul className="text-sm text-slate-300 space-y-2 mb-4">
+<li>• 5 Million characters</li>
+<li>• Unlimited voice cloning</li>
+</ul>
+<span className="inline-block text-xs bg-purple-600 px-3 py-1 rounded-full">Best Value · 5M</span>
+</div>
+
+{/* Business */}
+<div className="bg-slate-950 rounded-xl border border-white/10 p-6">
+<h3 className="text-lg font-semibold mb-2">Business</h3>
+<p className="text-2xl font-bold mb-4">PKR 10,000 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+<ul className="text-sm text-slate-300 space-y-2 mb-4">
+<li>• 11 Million characters</li>
+<li>• Unlimited voice cloning</li>
+</ul>
+<span className="inline-block text-xs bg-white/10 px-3 py-1 rounded-full">Max · 11M</span>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+);
+}
+ 

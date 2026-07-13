@@ -1,0 +1,90 @@
+system:
+  name: "Tamanna-Unified-AI-System"
+  mode: "ultra"
+  version: "3.0"
+
+# 🧠 CORE ORCHESTRATION LAYER
+core:
+  brain_core: true
+  decision_engine: "ai_distributed"
+  event_bus: true
+  auto_healing: true
+
+# ⚙️ AUTOMATION ENGINE (SAFE MODE)
+automation:
+  issue_scan: true
+  auto_fix: false        # CI SAFE: external pipeline required
+  system_monitor: true
+  feedback_loop: true
+
+# 🌐 GITHUB INTEGRATION
+github:
+  workflows: true
+  scripts: true
+  ci_mode: true
+
+# 🔥 POWER HUB ORCHESTRATOR
+powerhub:
+  enabled: true
+  orchestrator: true
+  sync_pipeline: true
+  backend: true
+  queue_system: "event-driven"
+
+# 🧩 SERVICES LAYER
+services:
+  web_backend: true
+  web_frontend: true
+  api_server: true
+  chat_server: true
+  mobile_app: true
+  aspnet_site: true
+
+# 🛡️ SECURITY ENGINE
+security:
+  integrity_watch: true
+  defense_core: true
+  network_defense: true
+  self_defense: true
+  threat_level: adaptive
+
+# 📊 STATE MANAGEMENT
+state:
+  root_config: "config.json"
+  reports: "ai_report.json"
+  logs: "ROOT/logs"
+
+# 🔁 FLOW CONTROL
+flow:
+  auto_trigger_ci: true
+  self_heal: true
+  ai_feedback_loop: true
+
+# 📁 FILE FILTER ENGINE (OPTIMIZED)
+file_filter:
+
+  excluded_patterns:
+    - ".git"
+    - "node_modules"
+    - "__pycache__"
+    - "*.log"
+    - "*.tmp"
+    - "*.zip"
+    - "*.exe"
+    - "*.dll"
+    - "*.mp4"
+    - "*.png"
+    - "*.jpg"
+
+  included_patterns:
+    - "package.json"
+    - "requirements.txt"
+    - "pom.xml"
+    - "build.gradle"
+    - "Makefile"
+    - ".env.example"
+
+  rules:
+    include_project_structure: true
+    include_all_files: false
+    default_prompt: "Enter your prompt here"

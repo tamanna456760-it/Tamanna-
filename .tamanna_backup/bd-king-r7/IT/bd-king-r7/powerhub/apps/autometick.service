@@ -1,0 +1,17 @@
+[Unit]
+Description=My Auto Full-Power Worker
+After=network.target
+
+[Service]
+Type=simple
+User=myauto
+Group=myauto
+WorkingDirectory=/opt/myauto
+ExecStart=/usr/bin/env python3 /opt/myauto/app/main.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+# If you need environment vars, don't put secrets here; use /etc/myauto/env or systemd drop-in with protected permissions.
+
+[Install]
+WantedBy=multi-user.target

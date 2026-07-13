@@ -1,0 +1,37 @@
+body {
+  background: #020617;
+  color: #e5e7eb;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.card {
+  background: #0f172a;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #22c55e;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 18px;
+}

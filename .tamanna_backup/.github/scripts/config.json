@@ -1,0 +1,48 @@
+resource "cloudflare_account_token" "example_account_token" {
+  account_id = "d75413548f36f992000da92e5a7c3aab"
+  name       = "sparkling-resonance-3dc9"
+
+  policies = [{
+    effect = "allow"
+    permission_groups = [{
+      id = "839a02e413024d06a4e7d8c56d4470d7"
+      }, {
+      id = "384a77ea7c2e47d898715dc6a064f3f4"
+      }, {
+      id = "e5e805d0a90441b58e8c7a41aa1cf85e"
+      }, {
+      id = "01aab63d6e064d7a8160339985d2db19"
+      }, {
+      id = "234108c786084936a381bb19b7f4ea65"
+      }, {
+      id = "e84fd345697c4036a14e7810da036e1a"
+      }, {
+      id = "82748b814dcd46b9b3e66b8151ba5e95"
+      }, {
+      id = "151803815e4f47de854c2fb7f8284d57"
+      }, {
+      id = "7fb8d27511b34d02994d005b520b679f"
+      }, {
+      id = "d7887c7a417e4cf2a69f1d01c1a1dc3b"
+      }, {
+      id = "644535f4ed854494a59cb289d634b257"
+      }, {
+      id = "6c8a3737f07f46369c1ea1f22138daaf"
+      }, {
+      id = "4dc8917b4b40457d88d3035d5dadb054"
+      }, {
+      id = "bacc64e0f6c34fc0883a1223f938a104"
+      }, {
+      id = "a92d2450e05d4e7bb7d0a64968f83d11"
+    }]
+    resources = jsonencode({
+      "com.cloudflare.api.account.d75413548f36f992000da92e5a7c3aab" = "*"
+    })
+  }]
+
+  condition = {
+    request_ip = {
+      in     = ["31.215.22.64/32"]
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# Tamanna System Requirements
+colorama>=0.4.4
+pygments>=2.10.0
+requests>=2.25.1

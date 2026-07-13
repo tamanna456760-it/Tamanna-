@@ -1,0 +1,84 @@
+name: Tamanna AI Scanner
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+
+  workflow_dispatch:
+
+push:
+  branches:
+    - main
+
+jobs:
+  tamanna-analysis:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Tools
+        run: |
+          pip install pylint bandit autopep8 flake8 safety
+
+      - name: Create Scan Folders
+        run: |
+          mkdir -p reports
+          mkdir -p logs
+          mkdir -p fixed_code
+
+      - name: Analyze Python Code
+        run: |
+          pylint . > reports/pylint_report.txt || true
+
+      - name: Security Scan
+        run: |
+          bandit -r . > reports/security_report.txt || true
+
+      - name: Style Check
+        run: |
+          flake8 . > reports/style_report.txt || true
+
+      - name: Auto Fix Python Files
+        run: |
+          find . -name "*.py" -exec autopep8 --in-place --aggressive --aggressive {} \;
+
+      - name: Dependency Vulnerability Check
+        run: |
+          safety check > reports/dependency_report.txt || true
+
+      - name: Generate Tamanna Report
+        run: |
+          echo "Tamanna AI Analysis Completed" > reports/final_report.txt
+          echo "Date: $(date)" >> reports/final_report.txt
+
+      - name: Save Logs
+        run: |
+          echo "[OK] Tamanna AI Scan Finished" >> logs/system.log
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-ai-reports
+          path: reports/
+
+      - name: Commit Fixed Files
+        run: |
+          git config --global user.name "tamanna456760-it"
+          git config --global user.email "tamanna456760@gmail.com"
+
+          git add .
+
+          git commit -m "Tamanna AI Auto Fix Update" || echo "No changes"
+
+          git push

@@ -1,0 +1,6 @@
+# BD-King-R7 AI Doctor System Dependencies
+json>=2.0.9
+datetime>=4.3
+typing>=3.7.4
+hashlib>=20081119
+random>=1.0.1

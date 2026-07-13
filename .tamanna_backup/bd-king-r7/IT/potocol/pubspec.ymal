@@ -1,0 +1,54 @@
+// pubspec.yaml
+name: offline_app
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.2.2
+
+// lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() => runApp(const OfflineApp());
+
+class OfflineApp extends StatelessWidget {
+  const OfflineApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home: Home());
+  }
+}
+
+class Home extends StatefulWidget { @override State<Home> createState() => _HomeState(); }
+class _HomeState extends State<Home> {
+  String note = "";
+  @override void initState() { super.initState(); _load(); }
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() => note = prefs.getString("note") ?? "");
+  }
+  Future<void> _save(String v) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("note", v);
+    setState(() => note = v);
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Offline app")),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(children: [
+          TextField(
+            decoration: const InputDecoration(labelText: "Local note"),
+            onChanged: _save,
+          ),
+          const SizedBox(height: 12),
+          Text("Saved locally: $note"),
+        ]),
+      ),
+    );
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "project_name": "bd-king-r7",
+  "ai_model": "gpt-4",
+  "auto_sync": {
+    "enabled": true,
+    "watch_patterns": [
+      "**/*.js",
+      "**/*.py",
+      "**/*.java",
+      "**/*.cpp",
+      "**/*.html",
+      "**/*.css"
+    ],
+    "ignore_patterns": ["node_modules/**", "dist/**", "build/**", "*.log"]
+  },
+  "code_fixing": {
+    "auto_fix": true,
+    "lint_before_commit": true,
+    "test_before_sync": true
+  },
+  "git": {
+    "auto_commit": true,
+    "commit_message_template": "AI Sync: {timestamp} - {changes}",
+    "branch": "main"
+  }
+}

@@ -1,0 +1,3 @@
+function pullSystem() {
+    callAPI("pull");
+}

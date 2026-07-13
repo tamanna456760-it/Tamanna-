@@ -1,0 +1,2 @@
+with open("logs/scan_history.log", "a") as file:
+    file.write("Scan Completed\n")

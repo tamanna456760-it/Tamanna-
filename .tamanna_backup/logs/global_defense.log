@@ -1,0 +1,6 @@
+2026-06-19 10:00:01 | INFO | SYSTEM_START | Global Defense System Started
+2026-06-19 10:00:05 | INFO | NODE_STATUS | node-1 | online
+2026-06-19 10:00:08 | INFO | ping received | 192.168.1.10
+2026-06-19 10:00:12 | WARNING | ATTACK_DETECTED | IP:192.168.1.50 | RISK:HIGH | REASON:Too many requests
+2026-06-19 10:00:20 | INFO | NODE_STATUS | node-2 | offline
+2026-06-19 10:00:25 | ERROR | SYSTEM_ERROR | Connection timeout

@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""
+TI-PULS (Technology Intelligence - Proactive Unified Learning System)
+Advanced AI System for BD-King-R7
+"""
+
+import asyncio
+import logging
+import signal
+import sys
+from datetime import datetime
+from pathlib import Path
+
+from modules.analytics import AnalyticsModule
+from modules.automation import AutomationModule
+from modules.monitoring import MonitoringModule
+from modules.security import SecurityModule
+
+from core.ai_engine import TI_PULS_Engine
+from core.data_processor import DataProcessor
+from core.decision_maker import DecisionMaker
+
+from utils.logger setup_logger
+
+
+class TI_PULS_System:
+    """Main TI-PULS AI System Class"""
+
+    def __init__(self):
+        self.version = "1.0.0"
+        self.system_id = "TI-PULS-BD-KING-R7"
+        self.running = False
+
+        # Initialize components
+        self.setup_directories()
+        self.logger = setup_logger()
+        self.data_processor = DataProcessor()
+        self.ai_engine = TI_PULS_Engine()
+        self.decision_maker = DecisionMaker()
+        self.security = SecurityModule()
+        self.analytics = AnalyticsModule()
+        self.automation = AutomationModule()
+        self.monitoring = MonitoringModule()
+
+        # System state
+        self.system_state = {
+            "status": "initializing",
+            "start_time": datetime.now(),
+            "components_loaded": False,
+            "ai_model_loaded": False
+        }
+
+    def setup_directories(self):
+        """Create necessary directories"""
+        directories = [
+            "data/models",
+            "data/training",
+            "data/logs",
+            "data/backups",
+            "config/rules"
+        ]
+
+        for directory in directories:
+            Path(directory).mkdir(parents=True, exist_ok=True)
+
+    async def initialize_system(self):
+        """Initialize all system components"""
+        self.logger.info(f"Initializing {self.system_id} v{self.version}")
+
+        try:
+            # Initialize components in order
+            await self.security.initialize()
+            await self.data_processor.initialize()
+            await self.ai_engine.initialize()
+            await self.decision_maker.initialize()
+            await self.analytics.initialize()
+            await self.automation.initialize()
+            await self.monitoring.initialize()
+
+            # Load AI models
+            model_loaded = await self.ai_engine.load_models()
+            self.system_state["ai_model_loaded"] = model_loaded
+
+            self.system_state["components_loaded"] = True
+            self.system_state["status"] = "ready"
+
+            self.logger.info("TI-PULS System initialized successfully")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"System initialization failed: {e}")
+            return False
+
+    async def start_system(self):
+        """Start the main system loop"""
+        if not await self.initialize_system():
+            self.logger.error("Cannot start system - initialization failed")
+            return False
+
+        self.running = True
+        self.system_state["status"] = "running"
+        self.logger.info("TI-PULS System started successfully")
+
+        # Start main processing loop
+        await self.main_loop()
+
+        return True
+
+    async def main_loop(self):
+        """Main system processing loop"""
+        iteration = 0
+
+        while self.running:
+            try:
+                iteration += 1
+                self.logger.debug(f"System iteration {iteration}")
+
+                # Process incoming data
+                processed_data = await self.data_processor.process_incoming_data()
+
+                # Analyze with AI engine
+                ai_insights = await self.ai_engine.analyze_data(processed_data)
+
+                # Make decisions based on insights
+                decisions = await self.decision_maker.make_decisions(ai_insights)
+
+                # Execute automation tasks
+                await self.automation.execute_decisions(decisions)
+
+                # Monitor system health
+                await self.monitoring.check_system_health()
+
+                # Generate analytics report
+                if iteration % 10 == 0:  # Every 10 iterations
+                    await self.analytics.generate_report()
+
+                # Security check
+                await self.security.run_security_scan()
+
+                # Sleep to prevent excessive CPU usage
+                await asyncio.sleep(1)
+
+            except Exception as e:
+                self.logger.error(f"Error in main loop: {e}")
+                await asyncio.sleep(5)  # Wait before retrying
+
+    async def shutdown(self):
+        """Graceful system shutdown"""
+        self.logger.info("Initiating system shutdown...")
+        self.running = False
+
+        # Shutdown components in reverse order
+        await self.monitoring.shutdown()
+        await self.automation.shutdown()
+        await self.analytics.shutdown()
+        await self.security.shutdown()
+        await self.decision_maker.shutdown()
+        await self.ai_engine.shutdown()
+        await self.data_processor.shutdown()
+
+        self.system_state["status"] = "shutdown"
+        self.logger.info("TI-PULS System shutdown complete")
+
+    def get_system_status(self):
+        """Get current system status"""
+        return {
+            **self.system_state,
+            "uptime": str(datetime.now() - self.system_state["start_time"]),
+            "version": self.version,
+            "system_id": self.system_id
+        }
+
+# Signal handlers for graceful shutdown
+
+
+def signal_handler(signum, frame):
+    """Handle shutdown signals"""
+    asyncio.create_task(ti_puls_system.shutdown())
+
+
+async def main():
+    """Main application entry point"""
+    global ti_puls_system
+
+    ti_puls_system = TI_PULS_System()
+
+    # Register signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    try:
+        # Start the system
+        await ti_puls_system.start_system()
+
+        # Keep the system running
+        while ti_puls_system.running:
+            await asyncio.sleep(1)
+
+    except KeyboardInterrupt:
+        await ti_puls_system.shutdown()
+    except Exception as e:
+        logging.error(f"Fatal error: {e}")
+        await ti_puls_system.shutdown()
+
+if __name__ == "__main__":
+    asyncio.run(main())
