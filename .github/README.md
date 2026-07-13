@@ -1,3 +1,12 @@
+
+# পরিবর্তন stage করুন
+git add .github/README.md
+
+# Commit করুন
+git commit -m "docs: upgrade .github README"
+
+# GitHub-এ push করুন
+git push -u origin upgrade-readme
 # 🤖 AI Auto System Runner
 
 এই প্রজেক্টটি একটি সম্পূর্ণ **AI-powered automation system**, যা GitHub repository এর কোডগুলোকে:
