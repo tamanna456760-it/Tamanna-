@@ -1,0 +1,15 @@
+name: Tamanna Domain Monitor
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Domain
+        run: |
+          curl -I https://www.tamanna.com || true
+          curl -I https://tamanna456760-it.github.io/Tamanna-/ || true
