@@ -1,0 +1,28 @@
+Tamanna AI Cyber Security Training Modules
+
+1. Linux Security Basics
+- File permissions
+- User management
+- Process monitoring
+
+2. Network Defense
+- TCP/IP basics
+- Firewall configuration
+- Secure network monitoring
+
+3. Web Security
+- OWASP Top 10 awareness
+- Secure coding
+- Input validation
+- Authentication protection
+
+4. Defensive Tools
+- Log analysis
+- Vulnerability scanning on owned systems
+- Security reporting
+
+5. Secure Development
+- Code review
+- Dependency checking
+- Secret detection
+- Patch management
