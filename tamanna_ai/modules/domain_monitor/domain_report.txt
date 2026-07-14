@@ -1,22 +1,22 @@
 ===== TAMANNA AI DOMAIN MONITOR =====
-Wed Jul 15 00:52:09 +04 2026
+Wed Jul 15 01:00:00 +04 2026
 
 === NAMESERVER ===
-arturo.ns.cloudflare.com.
 magali.ns.cloudflare.com.
+arturo.ns.cloudflare.com.
 
 === A RECORD ===
 172.67.201.236
 104.21.76.227
 
 === WWW RECORD ===
-104.21.76.227
 172.67.201.236
+104.21.76.227
 
 === HTTPS STATUS ===
   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
                                  Dload  Upload  Total   Spent   Left   Speed
-  0      0   0      0   0      0      0      0                              0  0      0   0      0   0      0      0      0           00:02              0  0      0   0      0   0      0      0      0           00:03              0  0      0   0      0   0      0      0      0           00:04              0  0      0   0      0   0      0      0      0           00:05              0  0      0   0      0   0      0      0      0           00:06              0  0      0   0      0   0      0      0      0           00:07              0  0      0   0      0   0      0      0      0           00:08              0  0      0   0      0   0      0      0      0           00:09              0  0      0   0      0   0      0      0      0           00:10              0  0      0   0      0   0      0      0      0           00:11              0  0      0   0      0   0      0      0      0           00:12              0  0      0   0      0   0      0      0      0           00:13              0  0      0   0      0   0      0      0      0           00:14              0
-curl: (28) Operation timed out after 15003 milliseconds with 0 bytes received
+  0      0   0      0   0      0      0      0                              0  0      0   0      0   0      0      0      0           00:01              0  0      0   0      0   0      0      0      0           00:02              0  0      0   0      0   0      0      0      0           00:03              0  0      0   0      0   0      0      0      0           00:04              0  0      0   0      0   0      0      0      0           00:05              0  0      0   0      0   0      0      0      0           00:06              0  0      0   0      0   0      0      0      0           00:07              0  0      0   0      0   0      0      0      0           00:08              0  0      0   0      0   0      0      0      0           00:09              0  0      0   0      0   0      0      0      0           00:10              0  0      0   0      0   0      0      0      0           00:11              0  0      0   0      0   0      0      0      0           00:12              0  0      0   0      0   0      0      0      0           00:13              0  0      0   0      0   0      0      0      0           00:14              0
+curl: (28) Operation timed out after 15000 milliseconds with 0 bytes received
 
 === END ===
