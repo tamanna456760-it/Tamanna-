@@ -1,0 +1,8 @@
+Tamanna AI Defensive Rules
+
+- Monitor suspicious activity
+- Analyze security events
+- Protect private data
+- Create audit reports
+- Never access unauthorized systems
+- Never collect stolen information
