@@ -37,9 +37,8 @@ to the pymysql driver as well.
 
 """  # noqa
 
+from ...util import langhelpers, py3k
 from .mysqldb import MySQLDialect_mysqldb
-from ...util import langhelpers
-from ...util import py3k
 
 
 class MySQLDialect_pymysql(MySQLDialect_mysqldb):
@@ -75,15 +74,11 @@ class MySQLDialect_pymysql(MySQLDialect_mysqldb):
         )
 
     def is_disconnect(self, e, connection, cursor):
-        if super(MySQLDialect_pymysql, self).is_disconnect(
-            e, connection, cursor
-        ):
+        if super(MySQLDialect_pymysql, self).is_disconnect(e, connection, cursor):
             return True
         elif isinstance(e, self.dbapi.Error):
             str_e = str(e).lower()
-            return (
-                "already closed" in str_e or "connection was killed" in str_e
-            )
+            return "already closed" in str_e or "connection was killed" in str_e
         else:
             return False
 

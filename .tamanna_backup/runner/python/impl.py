@@ -6,9 +6,7 @@
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
 
-"""Pool implementation classes.
-
-"""
+"""Pool implementation classes."""
 
 import traceback
 import weakref
@@ -25,7 +23,6 @@ from ..util import threading
 
 
 class QueuePool(Pool):
-
     """A :class:`_pool.Pool`
     that imposes a limit on the number of open connections.
 
@@ -38,13 +35,7 @@ class QueuePool(Pool):
     _queue_class = sqla_queue.Queue
 
     def __init__(
-        self,
-        creator,
-        pool_size=5,
-        max_overflow=10,
-        timeout=30.0,
-        use_lifo=False,
-        **kw
+        self, creator, pool_size=5, max_overflow=10, timeout=30.0, use_lifo=False, **kw
     ):
         r"""
         Construct a QueuePool.
@@ -234,7 +225,6 @@ class FallbackAsyncAdaptedQueuePool(AsyncAdaptedQueuePool):
 
 
 class NullPool(Pool):
-
     """A Pool which does not pool connections.
 
     Instead it literally opens and closes the underlying DB-API connection
@@ -274,7 +264,6 @@ class NullPool(Pool):
 
 
 class SingletonThreadPool(Pool):
-
     """A Pool that maintains one connection per thread.
 
     Maintains one connection per each thread, never moving a connection to a
@@ -390,7 +379,6 @@ class SingletonThreadPool(Pool):
 
 
 class StaticPool(Pool):
-
     """A Pool of exactly one connection, used for all requests.
 
     Reconnect-related functions such as ``recycle`` and connection
@@ -451,7 +439,6 @@ class StaticPool(Pool):
 
 
 class AssertionPool(Pool):
-
     """A :class:`_pool.Pool` that allows at most one checked out connection at
     any given time.
 
@@ -498,9 +485,7 @@ class AssertionPool(Pool):
     def _do_get(self):
         if self._checked_out:
             if self._checkout_traceback:
-                suffix = " at:\n%s" % "".join(
-                    chop_traceback(self._checkout_traceback)
-                )
+                suffix = " at:\n%s" % "".join(chop_traceback(self._checkout_traceback))
             else:
                 suffix = ""
             raise AssertionError("connection is already checked out" + suffix)

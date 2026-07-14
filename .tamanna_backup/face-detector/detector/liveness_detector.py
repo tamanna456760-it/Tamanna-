@@ -1,8 +1,10 @@
-import cv2
-import numpy as np
 import os
 
+import cv2
+import numpy as np
+
 MODEL_PATH = "models/liveness.onnx"
+
 
 class LivenessDetector:
 
@@ -19,7 +21,7 @@ class LivenessDetector:
         if self.model is None:
             return {"liveness": "Unknown (No model)"}
 
-        blob = cv2.dnn.blobFromImage(img, 1/255.0, (96,96))
+        blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (96, 96))
         self.model.setInput(blob)
         pred = self.model.forward()[0]
 

@@ -29,8 +29,7 @@ def run_wireshark_test_suite():
         result = runner.run(suite)
 
         total_tests += result.testsRun
-        passed_tests += result.testsRun - \
-            len(result.failures) - len(result.errors)
+        passed_tests += result.testsRun - len(result.failures) - len(result.errors)
         skipped_tests += len(result.skipped)
 
     print("\n" + "=" * 60)

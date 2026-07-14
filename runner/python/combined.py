@@ -7,13 +7,15 @@
 #  SYSTEM CONFIGURATION
 # -----------------------------
 IP_ADDRESS = "192.168.0.10"
-MAG_CODE   = "TAMANNA-456760-IT"
+MAG_CODE = "TAMANNA-456760-IT"
+
 
 # -----------------------------
 #  SYSTEM UTILITIES
 # -----------------------------
 def log(message):
     print(f"[{IP_ADDRESS} | {MAG_CODE}] {message}")
+
 
 def validate_input(data):
     if data is None or data == "":

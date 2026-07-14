@@ -114,8 +114,7 @@ class SuiteRequirements(Requirements):
         # somehow only_if([x, y]) isn't working here, negation/conjunctions
         # getting confused.
         return exclusions.only_if(
-            lambda: self.on_update_cascade.enabled
-            or self.deferrable_fks.enabled
+            lambda: self.on_update_cascade.enabled or self.deferrable_fks.enabled
         )
 
     @property
@@ -328,9 +327,7 @@ class SuiteRequirements(Requirements):
     @property
     def sane_rowcount_w_returning(self):
         return exclusions.fails_if(
-            lambda config: not (
-                config.db.dialect.supports_sane_rowcount_returning
-            ),
+            lambda config: not (config.db.dialect.supports_sane_rowcount_returning),
             "driver doesn't support 'sane' rowcount when returning is on",
         )
 
@@ -1211,9 +1208,7 @@ class SuiteRequirements(Requirements):
         requirement as not present.
 
         """
-        return exclusions.skip_if(
-            lambda config: config.options.low_connections
-        )
+        return exclusions.skip_if(lambda config: config.options.low_connections)
 
     @property
     def no_windows(self):
@@ -1297,15 +1292,11 @@ class SuiteRequirements(Requirements):
 
     @property
     def python38(self):
-        return exclusions.only_if(
-            lambda: util.py38, "Python 3.8 or above required"
-        )
+        return exclusions.only_if(lambda: util.py38, "Python 3.8 or above required")
 
     @property
     def cpython(self):
-        return exclusions.only_if(
-            lambda: util.cpython, "cPython interpreter needed"
-        )
+        return exclusions.only_if(lambda: util.cpython, "cPython interpreter needed")
 
     @property
     def patch_library(self):

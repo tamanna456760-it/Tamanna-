@@ -6,8 +6,7 @@
 import io
 import sys
 
-from gunicorn.http.errors import (NoMoreData, ChunkMissingTerminator,
-                                  InvalidChunkSize)
+from gunicorn.http.errors import NoMoreData, ChunkMissingTerminator, InvalidChunkSize
 
 
 class ChunkedReader(object):
@@ -52,10 +51,10 @@ class ChunkedReader(object):
             unreader.unread(buf.getvalue()[2:])
             return b""
         self.req.trailers = self.req.parse_headers(buf.getvalue()[:idx])
-        unreader.unread(buf.getvalue()[idx + 4:])
+        unreader.unread(buf.getvalue()[idx + 4 :])
 
     def parse_chunked(self, unreader):
-        (size, rest) = self.parse_chunk_size(unreader)
+        size, rest = self.parse_chunk_size(unreader)
         while size > 0:
             while size > len(rest):
                 size -= len(rest)
@@ -68,9 +67,9 @@ class ChunkedReader(object):
             rest = rest[size:]
             while len(rest) < 2:
                 rest += unreader.read()
-            if rest[:2] != b'\r\n':
+            if rest[:2] != b"\r\n":
                 raise ChunkMissingTerminator(rest[:2])
-            (size, rest) = self.parse_chunk_size(unreader, data=rest[2:])
+            size, rest = self.parse_chunk_size(unreader, data=rest[2:])
 
     def parse_chunk_size(self, unreader, data=None):
         buf = io.BytesIO()
@@ -83,7 +82,7 @@ class ChunkedReader(object):
             idx = buf.getvalue().find(b"\r\n")
 
         data = buf.getvalue()
-        line, rest_chunk = data[:idx], data[idx + 2:]
+        line, rest_chunk = data[:idx], data[idx + 2 :]
 
         chunk_size = line.split(b";", 1)[0].strip()
         try:
@@ -257,6 +256,6 @@ class Body(object):
                 ret.append(data)
                 data = b""
             else:
-                line, data = data[:pos + 1], data[pos + 1:]
+                line, data = data[: pos + 1], data[pos + 1 :]
                 ret.append(line)
         return ret

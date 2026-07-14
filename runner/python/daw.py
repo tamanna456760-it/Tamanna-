@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-import os, time, hashlib, json
+import hashlib
+import json
+import os
+import time
 from datetime import datetime
 
 SYSTEM = "BD-KING-R7"
@@ -8,12 +11,15 @@ MODULES = "modules"
 MANIFEST = "hash_manifest.json"
 MYTH = "myth_log.jsonl"
 
-def now(): 
+
+def now():
     return datetime.utcnow().isoformat() + "Z"
+
 
 def log(event, data):
     with open(MYTH, "a", encoding="utf-8") as f:
         f.write(json.dumps({"time": now(), "event": event, "data": data}) + "\n")
+
 
 def sha256(path):
     h = hashlib.sha256()
@@ -21,6 +27,7 @@ def sha256(path):
         for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 def build_manifest():
     m = {}
@@ -31,15 +38,18 @@ def build_manifest():
             m[r] = sha256(p)
     return m
 
+
 def save_manifest(m):
     with open(MANIFEST, "w") as f:
         json.dump(m, f, indent=2)
+
 
 def init_integrity():
     m = build_manifest()
     save_manifest(m)
     log("integrity_init", {"files": len(m)})
     print("Manifest initialized.")
+
 
 def check_integrity():
     if not os.path.exists(MANIFEST):
@@ -59,15 +69,16 @@ def check_integrity():
         return
 
     print("Integrity deviation detected.")
-    log("integrity_violation", {
-        "added": list(added),
-        "removed": list(removed),
-        "changed": list(changed)
-    })
+    log(
+        "integrity_violation",
+        {"added": list(added), "removed": list(removed), "changed": list(changed)},
+    )
+
 
 def heartbeat():
     print(f"{SYSTEM} heartbeat at {now()}")
     log("heartbeat", {"alive": True})
+
 
 def run():
     print(f"{SYSTEM} security engine started.")
@@ -86,6 +97,7 @@ def run():
             last_chk = t
 
         time.sleep(1)
+
 
 if __name__ == "__main__":
     run()

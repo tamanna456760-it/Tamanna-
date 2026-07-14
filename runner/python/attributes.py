@@ -456,9 +456,7 @@ class InstrumentedAttribute(Mapped):
     inherit_cache = True
 
     def __set__(self, instance, value):
-        self.impl.set(
-            instance_state(instance), instance_dict(instance), value, None
-        )
+        self.impl.set(instance_state(instance), instance_dict(instance), value, None)
 
     def __delete__(self, instance):
         self.impl.delete(instance_state(instance), instance_dict(instance))
@@ -481,9 +479,7 @@ class InstrumentedAttribute(Mapped):
             return self.impl.get(state, dict_)
 
 
-HasEntityNamespace = util.namedtuple(
-    "HasEntityNamespace", ["entity_namespace"]
-)
+HasEntityNamespace = util.namedtuple("HasEntityNamespace", ["entity_namespace"])
 HasEntityNamespace.is_mapper = HasEntityNamespace.is_aliased_class = False
 
 
@@ -604,9 +600,7 @@ def create_proxied_attribute(descriptor):
                 return getattr(descriptor, attribute)
             except AttributeError as err:
                 if attribute == "comparator":
-                    util.raise_(
-                        AttributeError("comparator"), replace_context=err
-                    )
+                    util.raise_(AttributeError("comparator"), replace_context=err)
                 try:
                     # comparator itself might be unreachable
                     comparator = self.comparator
@@ -840,9 +834,7 @@ class AttributeImpl(object):
         msg = "This AttributeImpl is not configured to track parents."
         assert self.trackparent, msg
 
-        return (
-            state.parents.get(id(self.parent_token), optimistic) is not False
-        )
+        return state.parents.get(id(self.parent_token), optimistic) is not False
 
     def sethasparent(self, state, parent_state, value):
         """Set a boolean flag on the given item corresponding to
@@ -860,10 +852,7 @@ class AttributeImpl(object):
             if id_ in state.parents:
                 last_parent = state.parents[id_]
 
-                if (
-                    last_parent is not False
-                    and last_parent.key != parent_state.key
-                ):
+                if last_parent is not False and last_parent.key != parent_state.key:
 
                     if last_parent.obj() is None:
                         raise orm_exc.StaleDataError(
@@ -982,9 +971,7 @@ class AttributeImpl(object):
         self.set(state, dict_, value, initiator, passive=passive)
 
     def remove(self, state, dict_, value, initiator, passive=PASSIVE_OFF):
-        self.set(
-            state, dict_, None, initiator, passive=passive, check_old=value
-        )
+        self.set(state, dict_, None, initiator, passive=passive, check_old=value)
 
     def pop(self, state, dict_, value, initiator, passive=PASSIVE_OFF):
         self.set(
@@ -1094,17 +1081,13 @@ class ScalarAttributeImpl(AttributeImpl):
             old = dict_.get(self.key, NO_VALUE)
 
         if self.dispatch.set:
-            value = self.fire_replace_event(
-                state, dict_, value, old, initiator
-            )
+            value = self.fire_replace_event(state, dict_, value, old, initiator)
         state._modified_event(dict_, self, old)
         dict_[self.key] = value
 
     def fire_replace_event(self, state, dict_, value, previous, initiator):
         for fn in self.dispatch.set:
-            value = fn(
-                state, value, previous, initiator or self._replace_token
-            )
+            value = fn(state, value, previous, initiator or self._replace_token)
         return value
 
     def fire_remove_event(self, state, dict_, value, initiator):
@@ -1136,17 +1119,13 @@ class ScalarObjectAttributeImpl(ScalarAttributeImpl):
             old = self.get(
                 state,
                 dict_,
-                passive=PASSIVE_ONLY_PERSISTENT
-                | NO_AUTOFLUSH
-                | LOAD_AGAINST_COMMITTED,
+                passive=PASSIVE_ONLY_PERSISTENT | NO_AUTOFLUSH | LOAD_AGAINST_COMMITTED,
             )
         else:
             old = self.get(
                 state,
                 dict_,
-                passive=PASSIVE_NO_FETCH ^ INIT_OK
-                | LOAD_AGAINST_COMMITTED
-                | NO_RAISE,
+                passive=PASSIVE_NO_FETCH ^ INIT_OK | LOAD_AGAINST_COMMITTED | NO_RAISE,
             )
 
         self.fire_remove_event(state, dict_, old, self._remove_token)
@@ -1156,11 +1135,7 @@ class ScalarObjectAttributeImpl(ScalarAttributeImpl):
         # if the attribute is expired, we currently have no way to tell
         # that an object-attribute was expired vs. not loaded.   So
         # for this test, we look to see if the object has a DB identity.
-        if (
-            existing is NO_VALUE
-            and old is not PASSIVE_NO_RESULT
-            and state.key is None
-        ):
+        if existing is NO_VALUE and old is not PASSIVE_NO_RESULT and state.key is None:
             raise AttributeError("%s object does not have a value" % self)
 
     def get_history(self, state, dict_, passive=PASSIVE_OFF):
@@ -1186,9 +1161,7 @@ class ScalarObjectAttributeImpl(ScalarAttributeImpl):
                     | NO_RAISE
                     | DEFERRED_HISTORY_LOAD
                 )
-                original = self._fire_loader_callables(
-                    state, self.key, loader_passive
-                )
+                original = self._fire_loader_callables(state, self.key, loader_passive)
             return History.from_object_attribute(
                 self, state, current, original=original
             )
@@ -1239,17 +1212,13 @@ class ScalarObjectAttributeImpl(ScalarAttributeImpl):
             old = self.get(
                 state,
                 dict_,
-                passive=PASSIVE_ONLY_PERSISTENT
-                | NO_AUTOFLUSH
-                | LOAD_AGAINST_COMMITTED,
+                passive=PASSIVE_ONLY_PERSISTENT | NO_AUTOFLUSH | LOAD_AGAINST_COMMITTED,
             )
         else:
             old = self.get(
                 state,
                 dict_,
-                passive=PASSIVE_NO_FETCH ^ INIT_OK
-                | LOAD_AGAINST_COMMITTED
-                | NO_RAISE,
+                passive=PASSIVE_NO_FETCH ^ INIT_OK | LOAD_AGAINST_COMMITTED | NO_RAISE,
             )
 
         if (
@@ -1291,9 +1260,7 @@ class ScalarObjectAttributeImpl(ScalarAttributeImpl):
                 self.sethasparent(instance_state(previous), state, False)
 
         for fn in self.dispatch.set:
-            value = fn(
-                state, value, previous, initiator or self._replace_token
-            )
+            value = fn(state, value, previous, initiator or self._replace_token)
 
         state._modified_event(dict_, self, previous)
 
@@ -1360,9 +1327,7 @@ class CollectionAttributeImpl(AttributeImpl):
         self._append_token = Event(self, OP_APPEND)
         self._remove_token = Event(self, OP_REMOVE)
         self._bulk_replace_token = Event(self, OP_BULK_REPLACE)
-        self._duck_typed_as = util.duck_type_collection(
-            self.collection_factory()
-        )
+        self._duck_typed_as = util.duck_type_collection(self.collection_factory())
 
         if getattr(self.collection_factory, "_sa_linker", None):
 
@@ -1397,29 +1362,19 @@ class CollectionAttributeImpl(AttributeImpl):
             original = state.committed_state[self.key]
             if original is not NO_VALUE:
                 current_states = [
-                    ((c is not None) and instance_state(c) or None, c)
-                    for c in current
+                    ((c is not None) and instance_state(c) or None, c) for c in current
                 ]
                 original_states = [
-                    ((c is not None) and instance_state(c) or None, c)
-                    for c in original
+                    ((c is not None) and instance_state(c) or None, c) for c in original
                 ]
 
                 current_set = dict(current_states)
                 original_set = dict(original_states)
 
                 return (
-                    [
-                        (s, o)
-                        for s, o in current_states
-                        if s not in original_set
-                    ]
+                    [(s, o) for s, o in current_states if s not in original_set]
                     + [(s, o) for s, o in current_states if s in original_set]
-                    + [
-                        (s, o)
-                        for s, o in original_states
-                        if s not in current_set
-                    ]
+                    + [(s, o) for s, o in original_states if s not in current_set]
                 )
 
         return [(instance_state(o), o) for o in current]
@@ -1503,9 +1458,7 @@ class CollectionAttributeImpl(AttributeImpl):
         collection = self.get_collection(state, dict_, passive=passive)
         if collection is PASSIVE_NO_RESULT:
             value = self.fire_append_event(state, dict_, value, initiator)
-            assert (
-                self.key not in dict_
-            ), "Collection was loaded during event handling."
+            assert self.key not in dict_, "Collection was loaded during event handling."
             state._get_pending_mutation(self.key).append(value)
         else:
             collection.append_with_event(value, initiator)
@@ -1514,9 +1467,7 @@ class CollectionAttributeImpl(AttributeImpl):
         collection = self.get_collection(state, state.dict, passive=passive)
         if collection is PASSIVE_NO_RESULT:
             self.fire_remove_event(state, dict_, value, initiator)
-            assert (
-                self.key not in dict_
-            ), "Collection was loaded during event handling."
+            assert self.key not in dict_, "Collection was loaded during event handling."
             state._get_pending_mutation(self.key).remove(value)
         else:
             collection.remove_with_event(value, initiator)
@@ -1554,11 +1505,7 @@ class CollectionAttributeImpl(AttributeImpl):
                 receiving_type = self._duck_typed_as
 
                 if setting_type is not receiving_type:
-                    given = (
-                        iterable is None
-                        and "None"
-                        or iterable.__class__.__name__
-                    )
+                    given = iterable is None and "None" or iterable.__class__.__name__
                     wanted = self._duck_typed_as.__name__
                     raise TypeError(
                         "Incompatible collection type: %s is not %s-like"
@@ -1573,9 +1520,7 @@ class CollectionAttributeImpl(AttributeImpl):
                     if util.py3k:
                         iterable = iterable.values()
                     else:
-                        iterable = getattr(
-                            iterable, "itervalues", iterable.values
-                        )()
+                        iterable = getattr(iterable, "itervalues", iterable.values)()
                 else:
                     iterable = iter(iterable)
         new_values = list(iterable)
@@ -1605,9 +1550,7 @@ class CollectionAttributeImpl(AttributeImpl):
 
         self._dispose_previous_collection(state, old, old_collection, True)
 
-    def _dispose_previous_collection(
-        self, state, collection, adapter, fire_event
-    ):
+    def _dispose_previous_collection(self, state, collection, adapter, fire_event):
         del collection._sa_adapter
 
         # discarding old collection make sure it is not referenced in empty
@@ -1647,9 +1590,7 @@ class CollectionAttributeImpl(AttributeImpl):
 
         return user_data
 
-    def get_collection(
-        self, state, dict_, user_data=None, passive=PASSIVE_OFF
-    ):
+    def get_collection(self, state, dict_, user_data=None, passive=PASSIVE_OFF):
         """Retrieve the CollectionAdapter associated with the given state.
 
         if user_data is None, retrieves it from the state using normal
@@ -1740,9 +1681,7 @@ def backref_listeners(attribute, key, uselist):
             # tokens to test for a recursive loop.
             check_append_token = child_impl._append_token
             check_bulk_replace_token = (
-                child_impl._bulk_replace_token
-                if child_impl.collection
-                else None
+                child_impl._bulk_replace_token if child_impl.collection else None
             )
 
             if (
@@ -1810,9 +1749,7 @@ def backref_listeners(attribute, key, uselist):
             else:
                 check_remove_token = child_impl._remove_token
                 check_replace_token = (
-                    child_impl._bulk_replace_token
-                    if child_impl.collection
-                    else None
+                    child_impl._bulk_replace_token if child_impl.collection else None
                 )
                 check_for_dupes_on_remove = False
 
@@ -1906,9 +1843,7 @@ class History(util.namedtuple("History", ["added", "unchanged", "deleted"])):
     def sum(self):
         """Return a collection of added + unchanged + deleted."""
 
-        return (
-            (self.added or []) + (self.unchanged or []) + (self.deleted or [])
-        )
+        return (self.added or []) + (self.unchanged or []) + (self.deleted or [])
 
     def non_deleted(self):
         """Return a collection of added + unchanged."""
@@ -1927,18 +1862,9 @@ class History(util.namedtuple("History", ["added", "unchanged", "deleted"])):
 
     def as_state(self):
         return History(
-            [
-                (c is not None) and instance_state(c) or None
-                for c in self.added
-            ],
-            [
-                (c is not None) and instance_state(c) or None
-                for c in self.unchanged
-            ],
-            [
-                (c is not None) and instance_state(c) or None
-                for c in self.deleted
-            ],
+            [(c is not None) and instance_state(c) or None for c in self.added],
+            [(c is not None) and instance_state(c) or None for c in self.unchanged],
+            [(c is not None) and instance_state(c) or None for c in self.deleted],
         )
 
     @classmethod
@@ -1951,10 +1877,7 @@ class History(util.namedtuple("History", ["added", "unchanged", "deleted"])):
             else:
                 return cls((), [current], ())
         # don't let ClauseElement expressions here trip things up
-        elif (
-            current is not NO_VALUE
-            and attribute.is_equal(current, original) is True
-        ):
+        elif current is not NO_VALUE and attribute.is_equal(current, original) is True:
             return cls((), [current], ())
         else:
             # current convention on native scalars is to not
@@ -1976,9 +1899,7 @@ class History(util.namedtuple("History", ["added", "unchanged", "deleted"])):
                 return cls([current], (), deleted)
 
     @classmethod
-    def from_object_attribute(
-        cls, attribute, state, current, original=_NO_HISTORY
-    ):
+    def from_object_attribute(cls, attribute, state, current, original=_NO_HISTORY):
         if original is _NO_HISTORY:
             original = state.committed_state.get(attribute.key, _NO_HISTORY)
 
@@ -2022,12 +1943,10 @@ class History(util.namedtuple("History", ["added", "unchanged", "deleted"])):
         else:
 
             current_states = [
-                ((c is not None) and instance_state(c) or None, c)
-                for c in current
+                ((c is not None) and instance_state(c) or None, c) for c in current
             ]
             original_states = [
-                ((c is not None) and instance_state(c) or None, c)
-                for c in original
+                ((c is not None) and instance_state(c) or None, c) for c in original
             ]
 
             current_set = dict(current_states)
@@ -2115,9 +2034,7 @@ def register_attribute_impl(
     manager = manager_of_class(class_)
     if uselist:
         factory = kw.pop("typecallable", None)
-        typecallable = manager.instrument_collection_class(
-            key, factory or list
-        )
+        typecallable = manager.instrument_collection_class(key, factory or list)
     else:
         typecallable = kw.pop("typecallable", None)
 
@@ -2130,9 +2047,7 @@ def register_attribute_impl(
             class_, key, callable_, dispatch, typecallable=typecallable, **kw
         )
     elif useobject:
-        impl = ScalarObjectAttributeImpl(
-            class_, key, callable_, dispatch, **kw
-        )
+        impl = ScalarObjectAttributeImpl(class_, key, callable_, dispatch, **kw)
     else:
         impl = ScalarAttributeImpl(class_, key, callable_, dispatch, **kw)
 
@@ -2145,9 +2060,7 @@ def register_attribute_impl(
     return manager[key]
 
 
-def register_descriptor(
-    class_, key, comparator=None, parententity=None, doc=None
-):
+def register_descriptor(class_, key, comparator=None, parententity=None, doc=None):
     manager = manager_of_class(class_)
 
     descriptor = InstrumentedAttribute(

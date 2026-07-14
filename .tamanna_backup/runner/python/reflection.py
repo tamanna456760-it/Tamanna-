@@ -234,9 +234,7 @@ class Inspector(object):
 
         if hasattr(self.dialect, "get_schema_names"):
             with self._operation_context() as conn:
-                return self.dialect.get_schema_names(
-                    conn, info_cache=self.info_cache
-                )
+                return self.dialect.get_schema_names(conn, info_cache=self.info_cache)
         return []
 
     def get_table_names(self, schema=None):
@@ -361,9 +359,7 @@ class Inspector(object):
         """
 
         with self._operation_context() as conn:
-            return self.dialect.get_temp_table_names(
-                conn, info_cache=self.info_cache
-            )
+            return self.dialect.get_temp_table_names(conn, info_cache=self.info_cache)
 
     def get_temp_view_names(self):
         """Return a list of temporary view names for the current bind.
@@ -375,9 +371,7 @@ class Inspector(object):
 
         """
         with self._operation_context() as conn:
-            return self.dialect.get_temp_view_names(
-                conn, info_cache=self.info_cache
-            )
+            return self.dialect.get_temp_view_names(conn, info_cache=self.info_cache)
 
     def get_table_options(self, table_name, schema=None, **kw):
         """Return a dictionary of options specified when the table of the
@@ -409,9 +403,7 @@ class Inspector(object):
         """
 
         with self._operation_context() as conn:
-            return self.dialect.get_view_names(
-                conn, schema, info_cache=self.info_cache
-            )
+            return self.dialect.get_view_names(conn, schema, info_cache=self.info_cache)
 
     def get_sequence_names(self, schema=None):
         """Return all sequence names in `schema`.
@@ -754,9 +746,7 @@ class Inspector(object):
         )
 
         # reflect table options, like mysql_engine
-        tbl_opts = self.get_table_options(
-            table_name, schema, **table.dialect_kwargs
-        )
+        tbl_opts = self.get_table_options(table_name, schema, **table.dialect_kwargs)
         if tbl_opts:
             # add additional kwargs to the Table if the dialect
             # returned them
@@ -771,9 +761,7 @@ class Inspector(object):
         found_table = False
         cols_by_orig_name = {}
 
-        for col_d in self.get_columns(
-            table_name, schema, **table.dialect_kwargs
-        ):
+        for col_d in self.get_columns(table_name, schema, **table.dialect_kwargs):
             found_table = True
 
             self._reflect_column(
@@ -788,9 +776,7 @@ class Inspector(object):
         if not found_table and not self.has_table(table_name, schema):
             raise exc.NoSuchTableError(table_name)
 
-        self._reflect_pk(
-            table_name, schema, table, cols_by_orig_name, exclude_columns
-        )
+        self._reflect_pk(table_name, schema, table, cols_by_orig_name, exclude_columns)
 
         self._reflect_fk(
             table_name,
@@ -833,9 +819,7 @@ class Inspector(object):
             reflection_options,
         )
 
-        self._reflect_table_comment(
-            table_name, schema, table, reflection_options
-        )
+        self._reflect_table_comment(table_name, schema, table, reflection_options)
 
     def _reflect_column(
         self, table, col_d, include_columns, exclude_columns, cols_by_orig_name
@@ -917,9 +901,7 @@ class Inspector(object):
     def _reflect_pk(
         self, table_name, schema, table, cols_by_orig_name, exclude_columns
     ):
-        pk_cons = self.get_pk_constraint(
-            table_name, schema, **table.dialect_kwargs
-        )
+        pk_cons = self.get_pk_constraint(table_name, schema, **table.dialect_kwargs)
         if pk_cons:
             pk_cols = [
                 cols_by_orig_name[pk]
@@ -945,9 +927,7 @@ class Inspector(object):
         _extend_on,
         reflection_options,
     ):
-        fkeys = self.get_foreign_keys(
-            table_name, schema, **table.dialect_kwargs
-        )
+        fkeys = self.get_foreign_keys(table_name, schema, **table.dialect_kwargs)
         for fkey_d in fkeys:
             conname = fkey_d["name"]
             # look for columns by orig name in cols_by_orig_name,
@@ -975,9 +955,7 @@ class Inspector(object):
                         **reflection_options
                     )
                 for column in referred_columns:
-                    refspec.append(
-                        ".".join([referred_schema, referred_table, column])
-                    )
+                    refspec.append(".".join([referred_schema, referred_table, column]))
             else:
                 if resolve_fks:
                     sa_schema.Table(
@@ -996,11 +974,7 @@ class Inspector(object):
                 options = {}
             table.append_constraint(
                 sa_schema.ForeignKeyConstraint(
-                    constrained_columns,
-                    refspec,
-                    conname,
-                    link_to_name=True,
-                    **options
+                    constrained_columns, refspec, conname, link_to_name=True, **options
                 )
             )
 
@@ -1046,9 +1020,7 @@ class Inspector(object):
             for c in columns:
                 try:
                     idx_col = (
-                        cols_by_orig_name[c]
-                        if c in cols_by_orig_name
-                        else table.c[c]
+                        cols_by_orig_name[c] if c in cols_by_orig_name else table.c[c]
                     )
                 except KeyError:
                     util.warn(
@@ -1105,9 +1077,7 @@ class Inspector(object):
             for c in columns:
                 try:
                     constrained_col = (
-                        cols_by_orig_name[c]
-                        if c in cols_by_orig_name
-                        else table.c[c]
+                        cols_by_orig_name[c] if c in cols_by_orig_name else table.c[c]
                     )
                 except KeyError:
                     util.warn(
@@ -1139,9 +1109,7 @@ class Inspector(object):
         for const_d in constraints:
             table.append_constraint(sa_schema.CheckConstraint(**const_d))
 
-    def _reflect_table_comment(
-        self, table_name, schema, table, reflection_options
-    ):
+    def _reflect_table_comment(self, table_name, schema, table, reflection_options):
         try:
             comment_dict = self.get_table_comment(table_name, schema)
         except NotImplementedError:

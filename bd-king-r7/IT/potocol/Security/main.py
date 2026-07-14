@@ -1,13 +1,13 @@
-import socket
 import json
+import socket
 import threading
 from datetime import datetime
 
-from auth_manager import verify
-from rate_limiter import RateLimiter
-from event_logger import log_event
 from attack_detector import AttackDetector
+from auth_manager import verify
 from auto_sync import AutoSync
+from event_logger import log_event
+from rate_limiter import RateLimiter
 
 HOST = "0.0.0.0"
 PORT = 9000
@@ -19,13 +19,16 @@ sync = AutoSync()
 # Active nodes
 nodes = {}
 
+
 def build_response(status, message, data=None):
-    return json.dumps({
-        "status": status,
-        "message": message,
-        "time": datetime.utcnow().isoformat(),
-        "data": data or {}
-    })
+    return json.dumps(
+        {
+            "status": status,
+            "message": message,
+            "time": datetime.utcnow().isoformat(),
+            "data": data or {},
+        }
+    )
 
 
 def handle_client(conn, addr):
@@ -78,10 +81,9 @@ def handle_client(conn, addr):
             response = build_response("ok", "registered", nodes[node_id])
 
         elif command == "status":
-            response = build_response("ok", "server status", {
-                "nodes": len(nodes),
-                "online": len(sync.nodes)
-            })
+            response = build_response(
+                "ok", "server status", {"nodes": len(nodes), "online": len(sync.nodes)}
+            )
 
         else:
             response = build_response("error", "unknown command")
@@ -104,11 +106,7 @@ def start_server():
 
     while True:
         conn, addr = server.accept()
-        threading.Thread(
-            target=handle_client,
-            args=(conn, addr),
-            daemon=True
-        ).start()
+        threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
 
 
 if __name__ == "__main__":

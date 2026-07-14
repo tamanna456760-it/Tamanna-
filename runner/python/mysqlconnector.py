@@ -173,9 +173,7 @@ class MySQLDialect_mysqlconnector(MySQLDialect):
             try:
                 from mysql.connector.constants import ClientFlag
 
-                client_flags = opts.get(
-                    "client_flags", ClientFlag.get_default()
-                )
+                client_flags = opts.get("client_flags", ClientFlag.get_default())
                 client_flags |= ClientFlag.FOUND_ROWS
                 opts["client_flags"] = client_flags
             except Exception:

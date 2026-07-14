@@ -1,9 +1,11 @@
 # auto_backup.py
-import shutil
 import datetime
+import shutil
 
 src_folders = ["boot_tools", "logs"]
-backup_folder = f"sync/backup/backup_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+backup_folder = (
+    f"sync/backup/backup_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+)
 
 shutil.os.makedirs(backup_folder)
 

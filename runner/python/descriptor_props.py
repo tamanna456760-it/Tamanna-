@@ -51,9 +51,7 @@ class DescriptorProperty(MapperProperty):
 
             if hasattr(prop, "get_history"):
 
-                def get_history(
-                    self, state, dict_, passive=attributes.PASSIVE_OFF
-                ):
+                def get_history(self, state, dict_, passive=attributes.PASSIVE_OFF):
                     return prop.get_history(state, dict_, passive)
 
         if self.descriptor is None:
@@ -185,9 +183,7 @@ class CompositeProperty(DescriptorProperty):
                 # key not present.  Iterate through related
                 # attributes, retrieve their values.  This
                 # ensures they all load.
-                values = [
-                    getattr(instance, key) for key in self._attribute_keys
-                ]
+                values = [getattr(instance, key) for key in self._attribute_keys]
 
                 # current expected behavior here is that the composite is
                 # created on access if the object is persistent or if
@@ -249,8 +245,7 @@ class CompositeProperty(DescriptorProperty):
             else:
                 raise sa_exc.ArgumentError(
                     "Composite expects Column objects or mapped "
-                    "attributes/attribute names as arguments, got: %r"
-                    % (attr,)
+                    "attributes/attribute names as arguments, got: %r" % (attr,)
                 )
             props.append(prop)
         return props
@@ -280,9 +275,9 @@ class CompositeProperty(DescriptorProperty):
         def refresh_handler(state, context, to_load):
             # note this corresponds to sqlalchemy.ext.mutable load_attrs()
 
-            if not to_load or (
-                {self.key}.union(self._attribute_keys)
-            ).intersection(to_load):
+            if not to_load or ({self.key}.union(self._attribute_keys)).intersection(
+                to_load
+            ):
                 _load_refresh_handler(state, context, to_load, is_refresh=True)
 
         def _load_refresh_handler(state, context, to_load, is_refresh):
@@ -327,21 +322,11 @@ class CompositeProperty(DescriptorProperty):
 
             state.dict.pop(self.key, None)
 
-        event.listen(
-            self.parent, "after_insert", insert_update_handler, raw=True
-        )
-        event.listen(
-            self.parent, "after_update", insert_update_handler, raw=True
-        )
-        event.listen(
-            self.parent, "load", load_handler, raw=True, propagate=True
-        )
-        event.listen(
-            self.parent, "refresh", refresh_handler, raw=True, propagate=True
-        )
-        event.listen(
-            self.parent, "expire", expire_handler, raw=True, propagate=True
-        )
+        event.listen(self.parent, "after_insert", insert_update_handler, raw=True)
+        event.listen(self.parent, "after_update", insert_update_handler, raw=True)
+        event.listen(self.parent, "load", load_handler, raw=True, propagate=True)
+        event.listen(self.parent, "refresh", refresh_handler, raw=True, propagate=True)
+        event.listen(self.parent, "expire", expire_handler, raw=True, propagate=True)
 
         # TODO: need a deserialize hook here
 
@@ -393,9 +378,7 @@ class CompositeProperty(DescriptorProperty):
 
         def create_row_processor(self, query, procs, labels):
             def proc(row):
-                return self.property.composite_class(
-                    *[proc(row) for proc in procs]
-                )
+                return self.property.composite_class(*[proc(row) for proc in procs])
 
             return proc
 
@@ -422,9 +405,7 @@ class CompositeProperty(DescriptorProperty):
 
         @util.memoized_property
         def clauses(self):
-            return expression.ClauseList(
-                group=False, *self._comparable_elements
-            )
+            return expression.ClauseList(group=False, *self._comparable_elements)
 
         def __clause_element__(self):
             return self.expression
@@ -450,8 +431,7 @@ class CompositeProperty(DescriptorProperty):
                 values = value.__composite_values__()
             else:
                 raise sa_exc.ArgumentError(
-                    "Can't UPDATE composite attribute %s to %r"
-                    % (self.prop, value)
+                    "Can't UPDATE composite attribute %s to %r" % (self.prop, value)
                 )
 
             return zip(self._comparable_elements, values)
@@ -519,8 +499,7 @@ class ConcreteInheritedProperty(DescriptorProperty):
             raise AttributeError(
                 "Concrete %s does not implement "
                 "attribute %r at the instance level.  Add "
-                "this property explicitly to %s."
-                % (self.parent, self.key, self.parent)
+                "this property explicitly to %s." % (self.parent, self.key, self.parent)
             )
 
         class NoninheritedConcreteProp(object):
@@ -723,22 +702,16 @@ class SynonymProperty(DescriptorProperty):
                     )
                 )
             elif (
-                parent.persist_selectable.c[self.key]
-                in parent._columntoproperty
-                and parent._columntoproperty[
-                    parent.persist_selectable.c[self.key]
-                ].key
+                parent.persist_selectable.c[self.key] in parent._columntoproperty
+                and parent._columntoproperty[parent.persist_selectable.c[self.key]].key
                 == self.name
             ):
                 raise sa_exc.ArgumentError(
                     "Can't call map_column=True for synonym %r=%r, "
                     "a ColumnProperty already exists keyed to the name "
-                    "%r for column %r"
-                    % (self.key, self.name, self.name, self.key)
+                    "%r for column %r" % (self.key, self.name, self.name, self.key)
                 )
-            p = properties.ColumnProperty(
-                parent.persist_selectable.c[self.key]
-            )
+            p = properties.ColumnProperty(parent.persist_selectable.c[self.key])
             parent._configure_property(self.name, p, init=init, setparent=True)
             p._mapped_by_synonym = self.key
 

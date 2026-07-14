@@ -13,10 +13,7 @@ for root, dirs, files in os.walk("."):
                 compile(code, path, "exec")
 
         except Exception as e:
-            errors.append({
-                "file": path,
-                "error": str(e)
-            })
+            errors.append({"file": path, "error": str(e)})
 
 with open("errors.txt", "w") as f:
     for e in errors:

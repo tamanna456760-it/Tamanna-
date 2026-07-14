@@ -28,8 +28,7 @@ class AssertRule(object):
 
     def no_more_statements(self):
         assert False, (
-            "All statements are complete, but pending "
-            "assertion rules remain"
+            "All statements are complete, but pending " "assertion rules remain"
         )
 
 
@@ -101,9 +100,7 @@ class CompiledSQL(SQLMatchRule):
         # is being sent from a previous cached query, which some misbehaviors
         # in the ORM can cause, see #6881
         cache_key = None  # execute_observed.context.compiled.cache_key
-        extracted_parameters = (
-            None  # execute_observed.context.extracted_parameters
-        )
+        extracted_parameters = None  # execute_observed.context.extracted_parameters
 
         if "schema_translate_map" in context.execution_options:
             map_ = context.execution_options["schema_translate_map"]
@@ -129,15 +126,11 @@ class CompiledSQL(SQLMatchRule):
 
         if not parameters:
             _received_parameters = [
-                compiled.construct_params(
-                    extracted_parameters=extracted_parameters
-                )
+                compiled.construct_params(extracted_parameters=extracted_parameters)
             ]
         else:
             _received_parameters = [
-                compiled.construct_params(
-                    m, extracted_parameters=extracted_parameters
-                )
+                compiled.construct_params(m, extracted_parameters=extracted_parameters)
                 for m in parameters
             ]
 
@@ -248,9 +241,9 @@ class DialectSQL(CompiledSQL):
         return received_stmt == stmt
 
     def _received_statement(self, execute_observed):
-        received_stmt, received_params = super(
-            DialectSQL, self
-        )._received_statement(execute_observed)
+        received_stmt, received_params = super(DialectSQL, self)._received_statement(
+            execute_observed
+        )
 
         # TODO: why do we need this part?
         for real_stmt in execute_observed.statements:
@@ -420,33 +413,24 @@ def assert_engine(engine):
     orig = []
 
     @event.listens_for(engine, "before_execute")
-    def connection_execute(
-        conn, clauseelement, multiparams, params, execution_options
-    ):
+    def connection_execute(conn, clauseelement, multiparams, params, execution_options):
         # grab the original statement + params before any cursor
         # execution
         orig[:] = clauseelement, multiparams, params
 
     @event.listens_for(engine, "after_cursor_execute")
-    def cursor_execute(
-        conn, cursor, statement, parameters, context, executemany
-    ):
+    def cursor_execute(conn, cursor, statement, parameters, context, executemany):
         if not context:
             return
         # then grab real cursor statements and associate them all
         # around a single context
-        if (
-            asserter.accumulated
-            and asserter.accumulated[-1].context is context
-        ):
+        if asserter.accumulated and asserter.accumulated[-1].context is context:
             obs = asserter.accumulated[-1]
         else:
             obs = SQLExecuteObserved(context, orig[0], orig[1], orig[2])
             asserter.accumulated.append(obs)
         obs.statements.append(
-            SQLCursorExecuteObserved(
-                statement, parameters, context, executemany
-            )
+            SQLCursorExecuteObserved(statement, parameters, context, executemany)
         )
 
     try:

@@ -11,14 +11,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from core.ai_engine import TI_PULS_Engine
+from core.data_processor import DataProcessor
+from core.decision_maker import DecisionMaker
 from modules.analytics import AnalyticsModule
 from modules.automation import AutomationModule
 from modules.monitoring import MonitoringModule
 from modules.security import SecurityModule
-
-from core.ai_engine import TI_PULS_Engine
-from core.data_processor import DataProcessor
-from core.decision_maker import DecisionMaker
 
 from utils.logger setup_logger
 

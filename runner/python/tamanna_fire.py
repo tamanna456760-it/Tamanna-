@@ -1,8 +1,9 @@
+import hashlib
+import json
 import os
 import time
-import json
-import hashlib
 from datetime import datetime
+
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -25,12 +26,14 @@ drive = build("drive", "v3", credentials=creds)
 
 print("🔥 TAMANNA FIRE MODE SYNC STARTED")
 
+
 # ================= HELPERS =================
 def log(msg):
     line = f"[{datetime.now()}] {msg}"
     print(line)
     with open(LOG_FILE, "a") as f:
         f.write(line + "\n")
+
 
 def file_hash(path):
     h = hashlib.sha256()
@@ -39,12 +42,14 @@ def file_hash(path):
             h.update(chunk)
     return h.hexdigest()
 
+
 # ================= LOAD STATE =================
 if os.path.exists(STATE_FILE):
     with open(STATE_FILE, "r") as f:
         state = json.load(f)
 else:
     state = {}
+
 
 # ================= UPLOAD =================
 def upload(path, rel_path):
@@ -54,12 +59,11 @@ def upload(path, rel_path):
 
     media = MediaFileUpload(path, resumable=True)
     drive.files().create(
-        body={"name": rel_path},
-        media_body=media,
-        fields="id"
+        body={"name": rel_path}, media_body=media, fields="id"
     ).execute()
 
     log(f"🚀 UPLOADED: {rel_path}")
+
 
 # ================= FIRE SYNC LOOP =================
 while True:

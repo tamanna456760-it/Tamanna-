@@ -1,9 +1,17 @@
 {
+<<<<<<< HEAD
   "AI-683": {
     "id": "AI-683",
     "power": 10,
     "status": "active",
     "timestamp": 1780510667.3888888,
+=======
+  "AI-989": {
+    "id": "AI-989",
+    "power": 10,
+    "status": "active",
+    "timestamp": 1780511698.7640965,
+>>>>>>> afc55be49bfa71b480695f994563a57377bfe607
     "controlled_by": "Tamanna"
   }
 }

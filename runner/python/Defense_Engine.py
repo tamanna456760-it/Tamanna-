@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict
 
+
 class TamannaDefenseProtocol:
     def __init__(self, config):
         self.config = config
@@ -12,10 +13,7 @@ class TamannaDefenseProtocol:
         self.request_log[ip].append(now)
 
         # remove old requests (>60 sec)
-        self.request_log[ip] = [
-            t for t in self.request_log[ip]
-            if now - t < 60
-        ]
+        self.request_log[ip] = [t for t in self.request_log[ip] if now - t < 60]
 
     def is_attack(self, ip):
         if ip in self.blocked_ips:

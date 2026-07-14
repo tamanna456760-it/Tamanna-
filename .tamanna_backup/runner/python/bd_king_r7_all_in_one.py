@@ -12,6 +12,7 @@ MANIFEST = "manifest.json"
 LOG_FILE = "system_log.jsonl"
 BACKUP_DIR = "backup"
 
+
 # ======================
 # LOGGER MODULE
 # ======================
@@ -20,13 +21,14 @@ def log(event, level="info", data=None):
         "time": datetime.utcnow().isoformat() + "Z",
         "system": SYSTEM_NAME,
         "level": level,
-        "event": event
+        "event": event,
     }
     if data:
         entry.update(data)
 
     with open(LOG_FILE, "a") as f:
         f.write(json.dumps(entry) + "\n")
+
 
 # ======================
 # CORE MODULE
@@ -39,6 +41,7 @@ def load_manifest():
     log("manifest_missing", level="error")
     return {}
 
+
 # ======================
 # SYNC MODULE
 # ======================
@@ -47,11 +50,13 @@ def auto_sync(interval=10):
     log("auto_sync_check", data={"files_checked": files})
     time.sleep(interval)
 
+
 # ======================
 # HEARTBEAT MODULE
 # ======================
 def heartbeat():
     log("system_heartbeat", data={"status": "alive"})
+
 
 # ======================
 # BACKUP MODULE
@@ -63,6 +68,7 @@ def backup_system():
     shutil.make_archive(name, "zip", ".")
     log("backup_created", data={"file": name})
 
+
 # ======================
 # PERFORMANCE MODULE
 # ======================
@@ -72,12 +78,14 @@ def performance_check():
     duration = round(time.time() - start, 4)
     log("performance_check", data={"response_time": duration})
 
+
 # ======================
 # INTERFACE MODULE
 # ======================
 def command(cmd):
     log("command_received", data={"command": cmd})
     return f"Executed: {cmd}"
+
 
 # ======================
 # MAIN SYSTEM LOOP

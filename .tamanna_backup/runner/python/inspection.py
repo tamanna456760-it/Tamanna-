@@ -32,7 +32,6 @@ in a forwards-compatible way.
 from . import exc
 from . import util
 
-
 _registrars = util.defaultdict(list)
 
 
@@ -69,8 +68,7 @@ def inspect(subject, raiseerr=True):
 
     if raiseerr and (reg is None or ret is None):
         raise exc.NoInspectionAvailable(
-            "No inspection system is "
-            "available for object of type %s" % type_
+            "No inspection system is " "available for object of type %s" % type_
         )
     return ret
 
@@ -79,9 +77,7 @@ def _inspects(*types):
     def decorate(fn_or_cls):
         for type_ in types:
             if type_ in _registrars:
-                raise AssertionError(
-                    "Type %s is already " "registered" % type_
-                )
+                raise AssertionError("Type %s is already " "registered" % type_)
             _registrars[type_] = fn_or_cls
         return fn_or_cls
 

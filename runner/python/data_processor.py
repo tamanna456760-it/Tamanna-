@@ -84,8 +84,7 @@ class DataProcessor:
             # Store processed data
             self.processed_data = merged_data
 
-            self.logger.info(
-                f"Processed data from {len(self.data_sources)} sources")
+            self.logger.info(f"Processed data from {len(self.data_sources)} sources")
             return merged_data
 
         except Exception as e:

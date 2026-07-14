@@ -150,8 +150,7 @@ class _PlainColumnGetter(object):
         m = base._state_mapper(state)
 
         key = [
-            m._get_state_attr_by_column(state, state.dict, col)
-            for col in self._cols(m)
+            m._get_state_attr_by_column(state, state.dict, col) for col in self._cols(m)
         ]
 
         if self.composite:
@@ -178,9 +177,7 @@ class _SerializableColumnGetter(object):
         state = base.instance_state(value)
         m = base._state_mapper(state)
         key = [
-            m._get_state_attr_by_column(
-                state, state.dict, m.mapped_table.columns[k]
-            )
+            m._get_state_attr_by_column(state, state.dict, m.mapped_table.columns[k])
             for k in self.colkeys
         ]
         if self.composite:
@@ -222,7 +219,7 @@ class _SerializableColumnGetterV2(_PlainColumnGetter):
     def _cols(self, mapper):
         cols = []
         metadata = getattr(mapper.local_table, "metadata", None)
-        for (ckey, tkey) in self.colkeys:
+        for ckey, tkey in self.colkeys:
             if tkey is None or metadata is None or tkey not in metadata:
                 cols.append(mapper.local_table.c[ckey])
             else:
@@ -627,20 +624,16 @@ class CollectionAdapter(object):
         self._data()._sa_appender(item, _sa_initiator=initiator)
 
     def _set_empty(self, user_data):
-        assert (
-            not self.empty
-        ), "This collection adapter is already in the 'empty' state"
+        assert not self.empty, "This collection adapter is already in the 'empty' state"
         self.empty = True
         self.owner_state._empty_collections[self._key] = user_data
 
     def _reset_empty(self):
-        assert (
-            self.empty
-        ), "This collection adapter is not in the 'empty' state"
+        assert self.empty, "This collection adapter is not in the 'empty' state"
         self.empty = False
-        self.owner_state.dict[
+        self.owner_state.dict[self._key] = self.owner_state._empty_collections.pop(
             self._key
-        ] = self.owner_state._empty_collections.pop(self._key)
+        )
 
     def _refuse_empty(self):
         raise sa_exc.InvalidRequestError(
@@ -911,8 +904,7 @@ def _instrument_class(cls):
     # (e.g. InstrumentedList).  Catch anything else that sneaks in here...
     if cls.__module__ == "__builtin__":
         raise sa_exc.ArgumentError(
-            "Can not instrument a built-in type. Use a "
-            "subclass, even a trivial one."
+            "Can not instrument a built-in type. Use a " "subclass, even a trivial one."
         )
 
     roles, methods = _locate_roles_and_methods(cls)
@@ -983,11 +975,7 @@ def _setup_canned_roles(cls, roles, methods):
         # apply ABC auto-decoration to methods that need it
         for method, decorator in decorators.items():
             fn = getattr(cls, method, None)
-            if (
-                fn
-                and method not in methods
-                and not hasattr(fn, "_sa_instrumented")
-            ):
+            if fn and method not in methods and not hasattr(fn, "_sa_instrumented"):
                 setattr(cls, method, decorator(fn))
 
 
@@ -1052,9 +1040,7 @@ def _instrument_membership_mutator(method, before, argument, after):
     adapter."""
     # This isn't smart enough to handle @adds(1) for 'def fn(self, (a, b))'
     if before:
-        fn_args = list(
-            util.flatten_iterator(inspect_getfullargspec(method)[0])
-        )
+        fn_args = list(util.flatten_iterator(inspect_getfullargspec(method)[0]))
         if isinstance(argument, int):
             pos_arg = argument
             named_arg = len(fn_args) > argument and fn_args[argument] or None
@@ -1070,9 +1056,7 @@ def _instrument_membership_mutator(method, before, argument, after):
         if before:
             if pos_arg is None:
                 if named_arg not in kw:
-                    raise sa_exc.ArgumentError(
-                        "Missing argument %s" % argument
-                    )
+                    raise sa_exc.ArgumentError("Missing argument %s" % argument)
                 value = kw[named_arg]
             else:
                 if len(args) > pos_arg:
@@ -1080,9 +1064,7 @@ def _instrument_membership_mutator(method, before, argument, after):
                 elif named_arg in kw:
                     value = kw[named_arg]
                 else:
-                    raise sa_exc.ArgumentError(
-                        "Missing argument %s" % argument
-                    )
+                    raise sa_exc.ArgumentError("Missing argument %s" % argument)
 
         initiator = kw.pop("_sa_initiator", None)
         if initiator is False:
@@ -1224,8 +1206,7 @@ def _list_decorators():
                     if len(value) != len(rng):
                         raise ValueError(
                             "attempt to assign sequence of size %s to "
-                            "extended slice of size %s"
-                            % (len(value), len(rng))
+                            "extended slice of size %s" % (len(value), len(rng))
                         )
                     for i, item in zip(rng, value):
                         self.__setitem__(i, item)
@@ -1638,9 +1619,11 @@ __interfaces = {
         _set_decorators(),
     ),
     # decorators are required for dicts and object collections.
-    dict: ({"iterator": "values"}, _dict_decorators())
-    if util.py3k
-    else ({"iterator": "itervalues"}, _dict_decorators()),
+    dict: (
+        ({"iterator": "values"}, _dict_decorators())
+        if util.py3k
+        else ({"iterator": "itervalues"}, _dict_decorators())
+    ),
 }
 
 

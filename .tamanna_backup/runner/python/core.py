@@ -5,6 +5,7 @@ This is application logic only — safe control and simulation of modules.
 
 import json
 import json as _json
+
 # Load config
 import threading
 import time
@@ -106,8 +107,7 @@ class PowerHubController:
             for k, v in raw.get("modules", {}).items():
                 if k in self.modules:
                     self.modules[k].enabled = v.get("enabled", False)
-                    self.modules[k].last_update = v.get(
-                        "last_update", _now_ts())
+                    self.modules[k].last_update = v.get("last_update", _now_ts())
                     self.modules[k].metadata = v.get("metadata", {})
         except Exception as e:
             print("[PowerHubController] Load error:", e)
@@ -117,8 +117,7 @@ class PowerHubController:
 def create_api_app(controller: PowerHubController):
     app = Flask(
         __name__,
-        template_folder=str(
-            Path(__file__).parent.parent / "web" / "templates"),
+        template_folder=str(Path(__file__).parent.parent / "web" / "templates"),
     )
     CORS(app)
 

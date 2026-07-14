@@ -29,8 +29,7 @@ class TestNmapCoreFunctionality(unittest.TestCase):
         """Test basic TCP SYN scan"""
         try:
             cmd = ["nmap", "-sS", "-p", "22,80,443", self.test_host]
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             self.assertEqual(result.returncode, 0)
             self.assertIn("Nmap scan report", result.stdout)
             print("✓ Basic SYN scan working")

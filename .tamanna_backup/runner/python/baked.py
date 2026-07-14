@@ -26,7 +26,6 @@ from ..sql import literal_column
 from ..sql import util as sql_util
 from ..util import collections_abc
 
-
 log = logging.getLogger(__name__)
 
 
@@ -217,9 +216,7 @@ class BakedQuery(object):
         query = self._bakery.get(self._effective_key(session), None)
         if query is None:
             query = self._as_query(session)
-            self._bakery[self._effective_key(session)] = query.with_session(
-                None
-            )
+            self._bakery[self._effective_key(session)] = query.with_session(None)
         return query.with_session(session)
 
     def _bake(self, session):
@@ -295,8 +292,7 @@ class BakedQuery(object):
                 )
         else:
             raise TypeError(
-                "Query or Session object expected, got %r."
-                % type(query_or_session)
+                "Query or Session object expected, got %r." % type(query_or_session)
             )
         return self._as_query(session)
 
@@ -387,9 +383,7 @@ class Result(object):
         if not self.session.enable_baked_queries or bq._spoiled:
             return self._as_query()._iter()
 
-        query, statement = bq._bakery.get(
-            bq._effective_key(self.session), (None, None)
-        )
+        query, statement = bq._bakery.get(bq._effective_key(self.session), (None, None))
         if query is None:
             query, statement = bq._bake(self.session)
 
@@ -526,9 +520,7 @@ class Result(object):
                 nones = set(
                     [
                         _get_params[col].key
-                        for col, value in zip(
-                            mapper.primary_key, primary_key_identity
-                        )
+                        for col, value in zip(mapper.primary_key, primary_key_identity)
                         if value is None
                     ]
                 )
@@ -563,9 +555,7 @@ class Result(object):
         params = dict(
             [
                 (_get_params[primary_key].key, id_val)
-                for id_val, primary_key in zip(
-                    primary_key_identity, mapper.primary_key
-                )
+                for id_val, primary_key in zip(primary_key_identity, mapper.primary_key)
             ]
         )
 
@@ -579,9 +569,7 @@ class Result(object):
             return None
 
 
-@util.deprecated(
-    "1.2", "Baked lazy loading is now the default implementation."
-)
+@util.deprecated("1.2", "Baked lazy loading is now the default implementation.")
 def bake_lazy_loaders():
     """Enable the use of baked queries for all lazyloaders systemwide.
 
@@ -592,9 +580,7 @@ def bake_lazy_loaders():
     pass
 
 
-@util.deprecated(
-    "1.2", "Baked lazy loading is now the default implementation."
-)
+@util.deprecated("1.2", "Baked lazy loading is now the default implementation.")
 def unbake_lazy_loaders():
     """Disable the use of baked queries for all lazyloaders systemwide.
 
@@ -604,9 +590,7 @@ def unbake_lazy_loaders():
     the caching of queries on a per-relationship basis.
 
     """
-    raise NotImplementedError(
-        "Baked lazy loading is now the default implementation"
-    )
+    raise NotImplementedError("Baked lazy loading is now the default implementation")
 
 
 @strategy_options.loader_option()
@@ -621,8 +605,7 @@ def baked_lazyload(loadopt, attr):
 @baked_lazyload._add_unbound_fn
 @util.deprecated(
     "1.2",
-    "Baked lazy loading is now the default "
-    "implementation for lazy loading.",
+    "Baked lazy loading is now the default " "implementation for lazy loading.",
 )
 def baked_lazyload(*keys):
     return strategy_options._UnboundLoad._from_keys(
@@ -633,8 +616,7 @@ def baked_lazyload(*keys):
 @baked_lazyload._add_unbound_all_fn
 @util.deprecated(
     "1.2",
-    "Baked lazy loading is now the default "
-    "implementation for lazy loading.",
+    "Baked lazy loading is now the default " "implementation for lazy loading.",
 )
 def baked_lazyload_all(*keys):
     return strategy_options._UnboundLoad._from_keys(

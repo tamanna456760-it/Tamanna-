@@ -221,13 +221,13 @@ The above query will render::
     WHERE CAST(person.data ->> %(data_1)s AS INTEGER) < %(param_1)s
 
 """  # noqa
+
 from __future__ import absolute_import
 
 from .. import inspect
 from .. import util
 from ..ext.hybrid import hybrid_property
 from ..orm.attributes import flag_modified
-
 
 __all__ = ["index_property"]
 
@@ -284,9 +284,7 @@ class index_property(hybrid_property):  # noqa
                 self.fget, self.fset, self.fdel, self.expr
             )
         else:
-            super(index_property, self).__init__(
-                self.fget, None, None, self.expr
-            )
+            super(index_property, self).__init__(self.fget, None, None, self.expr)
         self.attr_name = attr_name
         self.index = index
         self.default = default

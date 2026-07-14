@@ -1,11 +1,11 @@
 import cv2
 import mediapipe as mp
 
+
 class FaceAnalyzer:
     def __init__(self):
         self.face_detection = mp.solutions.face_detection.FaceDetection(
-            model_selection=1,
-            min_detection_confidence=0.5
+            model_selection=1, min_detection_confidence=0.5
         )
 
     def analyze(self, image_path):
@@ -18,10 +18,7 @@ class FaceAnalyzer:
 
         results = self.face_detection.process(rgb)
 
-        output = {
-            "faces": 0,
-            "detections": []
-        }
+        output = {"faces": 0, "detections": []}
 
         if results.detections:
             output["faces"] = len(results.detections)
@@ -37,21 +34,17 @@ class FaceAnalyzer:
                 bw = int(box.width * w)
                 bh = int(box.height * h)
 
-                cv2.rectangle(
-                    image,
-                    (x, y),
-                    (x + bw, y + bh),
-                    (0, 255, 0),
-                    2
-                )
+                cv2.rectangle(image, (x, y), (x + bw, y + bh), (0, 255, 0), 2)
 
-                output["detections"].append({
-                    "x": x,
-                    "y": y,
-                    "width": bw,
-                    "height": bh,
-                    "confidence": float(face.score[0])
-                })
+                output["detections"].append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "width": bw,
+                        "height": bh,
+                        "confidence": float(face.score[0]),
+                    }
+                )
 
         cv2.imwrite("static/uploads/result.jpg", image)
 

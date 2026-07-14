@@ -3,6 +3,7 @@ import sys
 import os
 from pathlib import Path
 
+
 def run_pip_cache_command(*args):
     """Run a pip cache subcommand and return output."""
     cmd = [sys.executable, "-m", "pip", "cache"] + list(args)
@@ -12,12 +13,14 @@ def run_pip_cache_command(*args):
         return None
     return result.stdout
 
+
 def get_cache_info():
     """Show pip cache statistics."""
     output = run_pip_cache_command("info")
     if output:
         print("Pip cache info:")
         print(output)
+
 
 def list_cached_packages():
     """List package names and versions stored in cache."""
@@ -26,16 +29,18 @@ def list_cached_packages():
         print("Cached packages (format: package==version):")
         print(output)
 
+
 def remove_all_cached_packages():
     """Clear the entire pip cache."""
     confirm = input("This will delete everything in pip cache. Continue? (y/n): ")
-    if confirm.lower() == 'y':
+    if confirm.lower() == "y":
         output = run_pip_cache_command("purge")
         if output:
             print("Cache cleared.")
             print(output)
     else:
         print("Aborted.")
+
 
 def get_cache_directory():
     """Return the absolute path to pip's cache directory, or None if not found."""
@@ -47,6 +52,7 @@ def get_cache_directory():
                 loc = line.split(":", 1)[1].strip()
                 return Path(loc)
     return None
+
 
 def list_cache_files():
     """List all files inside the cache directory directly (low‑level)."""
@@ -63,6 +69,7 @@ def list_cache_files():
                 print(f"  {f}")
     else:
         print("Cache directory not found or not accessible.")
+
 
 def main():
     if len(sys.argv) < 2:
@@ -84,6 +91,7 @@ def main():
         list_cache_files()
     else:
         print(f"Unknown command: {command}")
+
 
 if __name__ == "__main__":
     main()

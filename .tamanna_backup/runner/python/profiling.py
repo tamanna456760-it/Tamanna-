@@ -24,7 +24,6 @@ from . import config
 from .util import gc_collect
 from ..util import has_compiled_ext
 
-
 try:
     import cProfile
 except ImportError:
@@ -73,9 +72,7 @@ class ProfileStatsFile(object):
         )
         self.fname = os.path.abspath(filename)
         self.short_fname = os.path.split(self.fname)[-1]
-        self.data = collections.defaultdict(
-            lambda: collections.defaultdict(dict)
-        )
+        self.data = collections.defaultdict(lambda: collections.defaultdict(dict))
         self.dump = dump
         self.sort = sort
         self._read()
@@ -106,9 +103,7 @@ class ProfileStatsFile(object):
         ]
 
         platform_tokens.append(
-            "nativeunicode"
-            if config.db.dialect.convert_unicode
-            else "dbapiunicode"
+            "nativeunicode" if config.db.dialect.convert_unicode else "dbapiunicode"
         )
         _has_cext = has_compiled_ext()
         platform_tokens.append(_has_cext and "cextensions" or "nocextensions")
@@ -116,9 +111,7 @@ class ProfileStatsFile(object):
 
     def has_stats(self):
         test_key = _current_test
-        return (
-            test_key in self.data and self.platform_key in self.data[test_key]
-        )
+        return test_key in self.data and self.platform_key in self.data[test_key]
 
     def result(self, callcount):
         test_key = _current_test

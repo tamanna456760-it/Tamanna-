@@ -29,7 +29,6 @@ alternate instrumentation forms.
 
 """
 
-
 import weakref
 
 from . import base
@@ -39,7 +38,6 @@ from . import interfaces
 from . import state
 from .. import util
 from ..util import HasMemoized
-
 
 DEL_ATTR = util.symbol("DEL_ATTR")
 
@@ -180,18 +178,12 @@ class ClassManager(HasMemoized, dict):
 
     @HasMemoized.memoized_attribute
     def _collection_impl_keys(self):
-        return frozenset(
-            [attr.key for attr in self.values() if attr.impl.collection]
-        )
+        return frozenset([attr.key for attr in self.values() if attr.impl.collection])
 
     @HasMemoized.memoized_attribute
     def _scalar_loader_impls(self):
         return frozenset(
-            [
-                attr.impl
-                for attr in self.values()
-                if attr.impl.accepts_scalar_loader
-            ]
+            [attr.impl for attr in self.values() if attr.impl.accepts_scalar_loader]
         )
 
     @HasMemoized.memoized_attribute
@@ -230,10 +222,7 @@ class ClassManager(HasMemoized, dict):
                 if key in inherits.__dict__:
                     continue
                 val = found[key].__dict__[key]
-                if (
-                    isinstance(val, interfaces.InspectionAttr)
-                    and val.is_attribute
-                ):
+                if isinstance(val, interfaces.InspectionAttr) and val.is_attribute:
                     yield key, val
 
     def _get_class_attr_mro(self, key, default=None):
@@ -391,9 +380,7 @@ class ClassManager(HasMemoized, dict):
 
     def initialize_collection(self, key, state, factory):
         user_data = factory()
-        adapter = collections.CollectionAdapter(
-            self.get_impl(key), state, user_data
-        )
+        adapter = collections.CollectionAdapter(self.get_impl(key), state, user_data)
         return adapter, user_data
 
     def is_instrumented(self, key, search=False):
@@ -443,9 +430,9 @@ class ClassManager(HasMemoized, dict):
             # user error situation but allow the object
             # to be constructed, so that it is usable
             # in a non-ORM context at least.
-            return self._subclass_manager(
-                instance.__class__
-            )._new_state_if_none(instance)
+            return self._subclass_manager(instance.__class__)._new_state_if_none(
+                instance
+            )
         else:
             state = self._state_constructor(instance, self)
             self._state_setter(instance, state)
@@ -599,9 +586,7 @@ def is_instrumented(instance, key):
     applied directly to the class, i.e. no descriptors are required.
 
     """
-    return manager_of_class(instance.__class__).is_instrumented(
-        key, search=True
-    )
+    return manager_of_class(instance.__class__).is_instrumented(key, search=True)
 
 
 def _generate_init(class_, class_manager, original_init):

@@ -7,13 +7,10 @@
 
 import sys
 
-from . import config
-from . import exclusions
-from .. import event
-from .. import schema
+from .. import event, schema
 from .. import types as sqltypes
 from ..util import OrderedDict
-
+from . import config, exclusions
 
 __all__ = ["Table", "Column"]
 

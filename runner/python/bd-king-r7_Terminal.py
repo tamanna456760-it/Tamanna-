@@ -71,8 +71,7 @@ class BDKingTerminal:
                     continue
 
                 self.command_history.append(
-                    {"timestamp": datetime.now(), "command": command,
-                     "user": self.user}
+                    {"timestamp": datetime.now(), "command": command, "user": self.user}
                 )
 
                 self.process_command(command)
@@ -201,16 +200,14 @@ class BDKingTerminal:
     def cmd_power(self, args):
         """Power management commands"""
         if not args:
-            print(
-                """
+            print("""
 ⚡ POWER MANAGEMENT:
   power status    - Current power status
   power adjust <1-100> - Adjust power level
   power balance   - Balance power distribution
   power backup    - Backup systems status
   power optimize  - Optimize power usage
-            """
-            )
+            """)
             return
 
         subcommand = args[0].lower()
@@ -284,16 +281,14 @@ class BDKingTerminal:
     def cmd_ai(self, args):
         """AI system commands"""
         if not args:
-            print(
-                """
+            print("""
 🤖 AI SYSTEM COMMANDS:
   ai status       - AI system status
   ai optimize     - Optimize AI performance
   ai deploy <module> - Deploy AI module
   ai train        - Start AI training
   ai analyze      - Run AI analysis
-            """
-            )
+            """)
             return
 
         subcommand = args[0].lower()
@@ -486,16 +481,14 @@ class BDKingTerminal:
     def cmd_monitor(self, args):
         """Real-time monitoring"""
         if not args:
-            print(
-                """
+            print("""
 📊 MONITORING COMMANDS:
   monitor all     - All systems monitoring
   monitor power   - Power systems only
   monitor ai      - AI systems only
   monitor network - Network only
   monitor quantum - Quantum systems only
-            """
-            )
+            """)
             return
 
         monitor_type = args[0].lower()
@@ -575,8 +568,7 @@ class BDKingTerminal:
 
     def show_backup_power(self):
         """Show backup power status"""
-        print(
-            """
+        print("""
 🔋 BACKUP POWER SYSTEMS:
 
 🪫 BATTERIES:
@@ -593,8 +585,7 @@ class BDKingTerminal:
   Main Grid: STABLE
   Backup Grid: READY
   Quantum Grid: SYNCED
-        """
-        )
+        """)
 
     def optimize_power(self):
         """Optimize power usage"""
@@ -690,8 +681,7 @@ class BDKingTerminal:
 
     def display_all_monitoring(self):
         """Display all systems monitoring"""
-        print(
-            f"\n📊 COMPREHENSIVE MONITORING - {datetime.now().strftime('%H:%M:%S')}")
+        print(f"\n📊 COMPREHENSIVE MONITORING - {datetime.now().strftime('%H:%M:%S')}")
         print(
             f"⚡ Power: {self.power_systems['core_power']['level']}% | Stability: {self.power_systems['core_power']['stability']}%"
         )
@@ -718,24 +708,20 @@ class BDKingTerminal:
     def display_ai_monitoring(self):
         """Display AI monitoring"""
         print(f"\n🤖 AI MONITORING - {datetime.now().strftime('%H:%M:%S')}")
-        print(
-            f"Processing Load: {self.power_systems['ai_processing']['load']}%")
-        print(
-            f"Efficiency: {self.power_systems['ai_processing']['efficiency']}%")
+        print(f"Processing Load: {self.power_systems['ai_processing']['load']}%")
+        print(f"Efficiency: {self.power_systems['ai_processing']['efficiency']}%")
         print("Active Models: 247 | Training Sessions: 8")
 
     def display_network_monitoring(self):
         """Display network monitoring"""
-        print(
-            f"\n🌐 NETWORK MONITORING - {datetime.now().strftime('%H:%M:%S')}")
+        print(f"\n🌐 NETWORK MONITORING - {datetime.now().strftime('%H:%M:%S')}")
         print(f"Bandwidth: {self.power_systems['communication']['bandwidth']}")
         print(f"Latency: {self.power_systems['communication']['latency']}")
         print("Connections: 1,247 | Throughput: 8.5Gbps")
 
     def display_quantum_monitoring(self):
         """Display quantum monitoring"""
-        print(
-            f"\n🔮 QUANTUM MONITORING - {datetime.now().strftime('%H:%M:%S')}")
+        print(f"\n🔮 QUANTUM MONITORING - {datetime.now().strftime('%H:%M:%S')}")
         print(f"Coherence: {self.power_systems['quantum_core']['coherence']}%")
         print(f"Qubits: {self.power_systems['quantum_core']['qubits']}")
         print("Operations: 15.8 PetaQubits/sec")

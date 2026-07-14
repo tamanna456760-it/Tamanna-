@@ -6,7 +6,6 @@
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 """Public API functions and helpers for declarative."""
 
-
 from ... import inspection
 from ... import util
 from ...orm import exc as orm_exc
@@ -32,9 +31,7 @@ def instrument_declarative(cls, cls_registry, metadata):
     MetaData object.
 
     """
-    registry(metadata=metadata, class_registry=cls_registry).map_declaratively(
-        cls
-    )
+    registry(metadata=metadata, class_registry=cls_registry).map_declaratively(cls)
 
 
 class ConcreteBase(object):
@@ -104,9 +101,7 @@ class ConcreteBase(object):
     @classmethod
     def _create_polymorphic_union(cls, mappers, discriminator_name):
         return polymorphic_union(
-            OrderedDict(
-                (mp.polymorphic_identity, mp.local_table) for mp in mappers
-            ),
+            OrderedDict((mp.polymorphic_identity, mp.local_table) for mp in mappers),
             discriminator_name,
             "pjoin",
         )
@@ -310,8 +305,7 @@ class AbstractConcreteBase(ConcreteBase):
             "has a mapping pending until all subclasses are defined. "
             "Call the sqlalchemy.orm.configure_mappers() function after "
             "all subclasses have been defined to "
-            "complete the mapping of this class."
-            % orm_exc._safe_cls_name(cls),
+            "complete the mapping of this class." % orm_exc._safe_cls_name(cls),
         )
 
 
@@ -408,9 +402,7 @@ class DeferredReflection(object):
 
                             rel.secondary = resolve_arg(rel.secondary)
                             rel.secondary._resolvers += (
-                                cls._sa_deferred_table_resolver(
-                                    insp, metadata
-                                ),
+                                cls._sa_deferred_table_resolver(insp, metadata),
                             )
 
                             # controversy!  do we resolve it here? or leave
@@ -442,8 +434,7 @@ class DeferredReflection(object):
             cls,
             msg="Class %s is a subclass of DeferredReflection.  "
             "Mappings are not produced until the .prepare() "
-            "method is called on the class hierarchy."
-            % orm_exc._safe_cls_name(cls),
+            "method is called on the class hierarchy." % orm_exc._safe_cls_name(cls),
         )
 
     @classmethod

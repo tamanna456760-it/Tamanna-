@@ -1,6 +1,6 @@
 import smtplib
-from email.mime.text import MIMEText
 from datetime import datetime
+from email.mime.text import MIMEText
 
 # ====== USER INFO ======
 name = "HM Insan Ali"

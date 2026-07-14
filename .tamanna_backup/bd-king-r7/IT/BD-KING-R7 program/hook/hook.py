@@ -10,38 +10,23 @@ REPORT_FILE = "hook_report.json"
 
 def run_command(cmd):
     try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
         return {
             "command": cmd,
             "return_code": result.returncode,
             "stdout": result.stdout,
-            "stderr": result.stderr
+            "stderr": result.stderr,
         }
 
     except Exception as e:
-        return {
-            "command": cmd,
-            "error": str(e)
-        }
+        return {"command": cmd, "error": str(e)}
 
 
 def main():
-    report = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "checks": []
-    }
+    report = {"timestamp": datetime.utcnow().isoformat(), "checks": []}
 
-    commands = [
-        "ruff check .",
-        "python -m compileall .",
-        "git status --short"
-    ]
+    commands = ["ruff check .", "python -m compileall .", "git status --short"]
 
     for cmd in commands:
         report["checks"].append(run_command(cmd))

@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 
 import json
-import time
 import random
+import time
 from datetime import datetime
 
-CONFIG = {
-    "interval": 10,
-    "output_file": "social_100_plus.jsonl"
-}
+CONFIG = {"interval": 10, "output_file": "social_100_plus.jsonl"}
 
 # =========================
 # TIME
 # =========================
 
+
 def now():
     return datetime.utcnow().isoformat()
+
 
 # =========================
 # CORE REAL PLATFORMS
 # =========================
+
 
 def core_platforms():
     return {
@@ -30,21 +30,33 @@ def core_platforms():
         "tiktok": random.randint(5000, 200000),
         "linkedin": random.randint(500, 20000),
         "reddit": random.randint(1000, 15000),
-        "telegram": random.randint(500, 25000)
+        "telegram": random.randint(500, 25000),
     }
+
 
 # =========================
 # 100+ VIRTUAL SOCIAL SOURCES
 # =========================
 
+
 def generate_virtual_sources():
     sources = {}
 
     categories = [
-        "news_page", "fan_page", "crypto_group", "tech_channel",
-        "gaming_community", "ai_forum", "sports_page", "education_group",
-        "entertainment_page", "politics_discussion", "startup_page",
-        "developer_community", "meme_page", "marketing_group"
+        "news_page",
+        "fan_page",
+        "crypto_group",
+        "tech_channel",
+        "gaming_community",
+        "ai_forum",
+        "sports_page",
+        "education_group",
+        "entertainment_page",
+        "politics_discussion",
+        "startup_page",
+        "developer_community",
+        "meme_page",
+        "marketing_group",
     ]
 
     # 100+ simulated sources
@@ -56,43 +68,59 @@ def generate_virtual_sources():
             "id": i,
             "followers": random.randint(100, 50000),
             "engagement": random.randint(10, 5000),
-            "activity_score": round(random.random() * 100, 2)
+            "activity_score": round(random.random() * 100, 2),
         }
 
     return sources
+
 
 # =========================
 # TREND ENGINE
 # =========================
 
+
 def trend_engine():
     trends = []
 
     keywords = [
-        "AI", "Crypto", "Gaming", "Tech", "Sports",
-        "Music", "Movies", "Startups", "Coding", "Memes"
+        "AI",
+        "Crypto",
+        "Gaming",
+        "Tech",
+        "Sports",
+        "Music",
+        "Movies",
+        "Startups",
+        "Coding",
+        "Memes",
     ]
 
     for i in range(20):
-        trends.append({
-            "topic": random.choice(keywords),
-            "score": random.randint(1, 100),
-            "timestamp": now()
-        })
+        trends.append(
+            {
+                "topic": random.choice(keywords),
+                "score": random.randint(1, 100),
+                "timestamp": now(),
+            }
+        )
 
     return trends
+
 
 # =========================
 # SAVE DATA
 # =========================
 
+
 def save(data):
     with open(CONFIG["output_file"], "a") as f:
         f.write(json.dumps(data) + "\n")
 
+
 # =========================
 # MASTER ENGINE
 # =========================
+
 
 def run_system():
     data = {
@@ -100,13 +128,14 @@ def run_system():
         "core_platforms": core_platforms(),
         "virtual_sources": generate_virtual_sources(),
         "trends": trend_engine(),
-        "total_sources": 8 + 120
+        "total_sources": 8 + 120,
     }
 
     save(data)
 
     print("🚀 100+ SOCIAL HOOK RUNNING:", data["timestamp"])
     print("Sources:", data["total_sources"])
+
 
 # =========================
 # LOOP

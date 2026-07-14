@@ -9,6 +9,7 @@ Provide :class:`_expression.Insert`, :class:`_expression.Update` and
 :class:`_expression.Delete`.
 
 """
+
 from sqlalchemy.types import NullType
 from . import coercions
 from . import roles
@@ -106,12 +107,11 @@ class DMLState(CompileState):
 
         for parameters in statement._multi_values:
             multi_parameters = [
-                {
-                    c.key: value
-                    for c, value in zip(statement.table.c, parameter_set)
-                }
-                if isinstance(parameter_set, collections_abc.Sequence)
-                else parameter_set
+                (
+                    {c.key: value for c, value in zip(statement.table.c, parameter_set)}
+                    if isinstance(parameter_set, collections_abc.Sequence)
+                    else parameter_set
+                )
                 for parameter_set in parameters
             ]
 
@@ -238,9 +238,7 @@ class UpdateBase(
 
     __visit_name__ = "update_base"
 
-    _execution_options = Executable._execution_options.union(
-        {"autocommit": True}
-    )
+    _execution_options = Executable._execution_options.union({"autocommit": True})
     _hints = util.immutabledict()
     named_with_column = False
 
@@ -579,9 +577,7 @@ class UpdateBase(
             :ref:`queryguide_inspection` - ORM background
 
         """  # noqa: E501
-        meth = DMLState.get_plugin_class(
-            self
-        ).get_returning_column_descriptions
+        meth = DMLState.get_plugin_class(self).get_returning_column_descriptions
         return meth(self)
 
 
@@ -618,8 +614,7 @@ class ValuesBase(UpdateBase):
         "_ordered_values",
         msgs={
             "_select_names": "This construct already inserts from a SELECT",
-            "_ordered_values": "This statement already has ordered "
-            "values present",
+            "_ordered_values": "This statement already has ordered " "values present",
         },
     )
     def values(self, *args, **kwargs):
@@ -744,8 +739,7 @@ class ValuesBase(UpdateBase):
 
             if kwargs:
                 raise exc.ArgumentError(
-                    "Can't pass positional and kwargs to values() "
-                    "simultaneously"
+                    "Can't pass positional and kwargs to values() " "simultaneously"
                 )
             elif len(args) > 1:
                 raise exc.ArgumentError(
@@ -801,9 +795,7 @@ class ValuesBase(UpdateBase):
     @_generative
     @_exclusive_against(
         "_returning",
-        msgs={
-            "_returning": "RETURNING is already configured on this statement"
-        },
+        msgs={"_returning": "RETURNING is already configured on this statement"},
         defaults={"_returning": _returning},
     )
     def return_defaults(self, *cols):
@@ -1195,9 +1187,7 @@ class DMLWhereBase(object):
 
         """
 
-        return BooleanClauseList._construct_for_whereclause(
-            self._where_criteria
-        )
+        return BooleanClauseList._construct_for_whereclause(self._where_criteria)
 
 
 class Update(DMLWhereBase, ValuesBase):
@@ -1407,13 +1397,9 @@ class Update(DMLWhereBase, ValuesBase):
 
         """
         if self._values:
-            raise exc.ArgumentError(
-                "This statement already has values present"
-            )
+            raise exc.ArgumentError("This statement already has values present")
         elif self._ordered_values:
-            raise exc.ArgumentError(
-                "This statement already has ordered values present"
-            )
+            raise exc.ArgumentError("This statement already has ordered values present")
 
         kv_generator = DMLState.get_plugin_class(self)._get_crud_kv_pairs
         self._ordered_values = kv_generator(self, args)

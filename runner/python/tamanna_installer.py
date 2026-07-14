@@ -8,7 +8,7 @@ import subprocess
 folders = [
     "Tamanna/bd-king-r7/boot/tools",
     "Tamanna/bd-king-r7/boot/tools/logs",
-    "Tamanna/bd-king-r7/boot/tools/sync/backup"
+    "Tamanna/bd-king-r7/boot/tools/sync/backup",
 ]
 
 for folder in folders:
@@ -22,7 +22,7 @@ log_files = [
     "system_log.txt",
     "device_status.txt",
     "system_resources.txt",
-    "network_log.txt"
+    "network_log.txt",
 ]
 
 for log_file in log_files:
@@ -36,6 +36,7 @@ for log_file in log_files:
 # --------------------------
 try:
     import psutil
+
     print("psutil already installed")
 except ImportError:
     print("Installing psutil...")
@@ -44,7 +45,7 @@ except ImportError:
 # --------------------------
 # 4️⃣ Create master script run_all.py
 # --------------------------
-run_all_code = '''import subprocess
+run_all_code = """import subprocess
 
 scripts = [
     "system_log.py",
@@ -56,7 +57,7 @@ scripts = [
 
 for script in scripts:
     subprocess.run(["python", script])
-'''
+"""
 
 run_all_path = "Tamanna_System/boot_tools/run_all.py"
 with open(run_all_path, "w") as f:

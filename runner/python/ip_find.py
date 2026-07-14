@@ -1,9 +1,10 @@
-from scapy.all import sniff, ARP
-import subprocess
 import json
-import time
 import logging
+import subprocess
 import threading
+import time
+
+from scapy.all import ARP, sniff
 
 CONFIG_FILE = "config.json"
 BLOCK_CACHE = {}
@@ -12,12 +13,14 @@ BLOCK_COOLDOWN = 300  # seconds before re-blocking same IP
 logging.basicConfig(
     filename="advanced_blocker.log",
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
+
 
 def load_config():
     with open(CONFIG_FILE, "r") as f:
         return json.load(f)
+
 
 config = load_config()
 BLACKLIST = set(config["blacklist"])
@@ -66,7 +69,9 @@ def handle_arp(pkt):
         if ip in MAC_MAP:
             expected_mac = MAC_MAP[ip]
             if mac.lower() != expected_mac.lower():
-                alert(f"ARP SPOOFING detected! IP {ip} changed MAC {mac} != {expected_mac}")
+                alert(
+                    f"ARP SPOOFING detected! IP {ip} changed MAC {mac} != {expected_mac}"
+                )
                 block_ip(ip)
 
 

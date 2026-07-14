@@ -126,8 +126,7 @@ class BDKingR7System:
     def process_assignment(self, command):
         if "=" in command:
             parts = command.split("=")
-            var_name = parts[0].replace(
-                "নির্ধারণ", "").replace("set", "").strip()
+            var_name = parts[0].replace("নির্ধারণ", "").replace("set", "").strip()
             var_value = parts[1].strip()
             print(f"💾 Variable '{var_name}' = {var_value}")
 

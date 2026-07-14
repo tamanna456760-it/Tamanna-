@@ -225,9 +225,7 @@ class MySQLDialect_mysqldb(MySQLDialect):
 
     def create_connect_args(self, url, _translate_args=None):
         if _translate_args is None:
-            _translate_args = dict(
-                database="db", username="user", password="passwd"
-            )
+            _translate_args = dict(database="db", username="user", password="passwd")
 
         opts = url.translate_connect_args(**_translate_args)
         opts.update(url.query)
@@ -323,9 +321,7 @@ class MySQLDialect_mysqldb(MySQLDialect):
             connection.autocommit(True)
         else:
             connection.autocommit(False)
-            super(MySQLDialect_mysqldb, self)._set_isolation_level(
-                connection, level
-            )
+            super(MySQLDialect_mysqldb, self)._set_isolation_level(connection, level)
 
 
 dialect = MySQLDialect_mysqldb

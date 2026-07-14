@@ -12,6 +12,7 @@ class BDKingR7:
         for m in self.modules:
             print(f" -> {m} active")
 
+
 if __name__ == "__main__":
     r7 = BDKingR7()
     r7.add_module("Tamanna AI")

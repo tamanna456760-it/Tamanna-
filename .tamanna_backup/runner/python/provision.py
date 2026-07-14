@@ -11,7 +11,6 @@ from ..sql import ddl
 from ..sql import schema
 from ..util import compat
 
-
 log = logging.getLogger(__name__)
 
 FOLLOWER_IDENT = None
@@ -235,9 +234,7 @@ def drop_all_schema_objects(cfg, eng):
     else:
         with eng.begin() as conn:
             for vname in view_names:
-                conn.execute(
-                    ddl._DropView(schema.Table(vname, schema.MetaData()))
-                )
+                conn.execute(ddl._DropView(schema.Table(vname, schema.MetaData())))
 
     if config.requirements.schemas.enabled_for_config(cfg):
         try:
@@ -270,13 +267,9 @@ def drop_all_schema_objects(cfg, eng):
                 conn.execute(ddl.DropSequence(schema.Sequence(seq)))
             if config.requirements.schemas.enabled_for_config(cfg):
                 for schema_name in [cfg.test_schema, cfg.test_schema_2]:
-                    for seq in inspector.get_sequence_names(
-                        schema=schema_name
-                    ):
+                    for seq in inspector.get_sequence_names(schema=schema_name):
                         conn.execute(
-                            ddl.DropSequence(
-                                schema.Sequence(seq, schema=schema_name)
-                            )
+                            ddl.DropSequence(schema.Sequence(seq, schema=schema_name))
                         )
 
 
@@ -409,6 +402,5 @@ def get_temp_table_name(cfg, eng, base_name):
 @register.init
 def set_default_schema_on_connection(cfg, dbapi_connection, schema_name):
     raise NotImplementedError(
-        "backend does not implement a schema name set function: %s"
-        % (cfg.db.url,)
+        "backend does not implement a schema name set function: %s" % (cfg.db.url,)
     )

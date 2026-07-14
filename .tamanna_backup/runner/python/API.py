@@ -124,8 +124,7 @@ class RESTAPIClient(APIClient):
             # Handle HMAC authentication
             if hasattr(self, "hmac_key"):
                 data_str = (
-                    json.dumps(kwargs.get("json", {})
-                               ) if kwargs.get("json") else ""
+                    json.dumps(kwargs.get("json", {})) if kwargs.get("json") else ""
                 )
                 self._sign_hmac_request(method, endpoint, data_str)
 
@@ -299,8 +298,7 @@ class WeatherAPIClient(RESTAPIClient):
     def get_forecast(
         self, city: str, days: int = 5, units: str = "metric"
     ) -> APIResponse:
-        params = {"q": city, "appid": self.api_key,
-                  "units": units, "cnt": days}
+        params = {"q": city, "appid": self.api_key, "units": units, "cnt": days}
         return self.get("/forecast", params=params)
 
 
@@ -358,8 +356,7 @@ class APIManager:
                 client = self.clients[client_name]
 
                 if isinstance(client, AsyncAPIClient):
-                    task = client.request(
-                        method, endpoint, **config.get("kwargs", {}))
+                    task = client.request(method, endpoint, **config.get("kwargs", {}))
                 else:
                     # Convert sync client to async
                     task = asyncio.to_thread(
@@ -459,8 +456,7 @@ def main():
         print(f"Error: {response.error}")
 
     # Create a new post
-    new_post = {"title": "Test Post",
-                "body": "This is a test post", "userId": 1}
+    new_post = {"title": "Test Post", "body": "This is a test post", "userId": 1}
     response = json_placeholder.post("/posts", json=new_post)
     if response.success:
         print(f"Created post with ID: {response.data['id']}")

@@ -27,8 +27,7 @@ class TestNmapUpgrade(unittest.TestCase):
         """Test any new features in upgraded Nmap"""
         try:
             # Test if new version has additional capabilities
-            result = subprocess.run(
-                ["nmap", "--help"], capture_output=True, text=True)
+            result = subprocess.run(["nmap", "--help"], capture_output=True, text=True)
             help_output = result.stdout
 
             # Check for common new features

@@ -1,9 +1,9 @@
-import time
 import json
-import threading
 import random
-import uuid
 import socket
+import threading
+import time
+import uuid
 
 # =========================
 # MASTER CONFIG
@@ -21,6 +21,7 @@ DISTRIBUTED_NODES = ["192.168.1.2", "192.168.1.3", "192.168.1.4"]  # Example IPs
 NODES_FILE = "nodes_status.json"
 AI_UNITS_FILE = "ai_units.json"
 
+
 # =========================
 # LOAD / SAVE
 # =========================
@@ -31,9 +32,11 @@ def load(file):
     except:
         return {}
 
+
 def save(file, data):
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
+
 
 # =========================
 # NODE MANAGEMENT
@@ -45,6 +48,7 @@ def connect_nodes():
         save(NODES_FILE, nodes)
     return nodes
 
+
 def broadcast_power(nodes, unit_power):
     for node in nodes:
         nodes[node]["power"] += unit_power
@@ -52,6 +56,7 @@ def broadcast_power(nodes, unit_power):
     # Simulate distributed node communication
     for ip in DISTRIBUTED_NODES:
         print(f"📡 [{MASTER_AI}] Sending {unit_power} power to node {ip}")
+
 
 # =========================
 # AI UNIT CREATION
@@ -68,18 +73,20 @@ def create_ai_unit(unit_id, emergency=False):
         "power": power,
         "status": "active",
         "timestamp": time.time(),
-        "controlled_by": MASTER_AI
+        "controlled_by": MASTER_AI,
     }
     units[unit_id] = unit
     save(AI_UNITS_FILE, units)
     print(f"✅ [{MASTER_AI}] CREATED AI UNIT: {unit_id} | Power: {power}")
     return True
 
+
 # =========================
 # ATTACK DETECTION & DEFENSE
 # =========================
 def attack_detected():
-    return random.choice([False]*9 + [True])
+    return random.choice([False] * 9 + [True])
+
 
 def auto_defense(nodes):
     print(f"🛡️ [{MASTER_AI}] ATTACK DETECTED → DEFENSE ACTIVATED")
@@ -87,6 +94,7 @@ def auto_defense(nodes):
         nodes[node]["power"] += 50
     save(NODES_FILE, nodes)
     print(f"💪 [{MASTER_AI}] NODES POWER BOOSTED")
+
 
 # =========================
 # MASTER CONTROLLED NETWORK
@@ -122,6 +130,7 @@ def ai_network_manager():
 
         time.sleep(CREATE_INTERVAL)
 
+
 # =========================
 # SELF DECISION MONITOR
 # =========================
@@ -130,7 +139,7 @@ def self_decision_monitor():
         units = load(AI_UNITS_FILE)
         nodes = load(NODES_FILE)
         total_power = sum(nodes[n]["power"] for n in nodes)
-        
+
         # POWER BOOST if low
         if total_power < 200:
             print(f"🚨 [{MASTER_AI}] LOW POWER → BOOSTING...")
@@ -142,6 +151,7 @@ def self_decision_monitor():
             MAX_UNITS += 500
             print(f"⚡ [{MASTER_AI}] SYSTEM STRONG → MAX UNITS INCREASED: {MAX_UNITS}")
         time.sleep(3)
+
 
 # =========================
 # START MASTER AI SYSTEM

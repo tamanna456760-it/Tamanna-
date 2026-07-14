@@ -48,8 +48,7 @@ class TestWiresharkAutomation(unittest.TestCase):
         for stat_cmd, description in stats_commands:
             with self.subTest(stats=description):
                 try:
-                    cmd = ["tshark", "-z", stat_cmd,
-                           "-i", "lo", "-a", "duration:5"]
+                    cmd = ["tshark", "-z", stat_cmd, "-i", "lo", "-a", "duration:5"]
                     result = subprocess.run(
                         cmd, capture_output=True, text=True, timeout=20
                     )
@@ -90,8 +89,7 @@ class TestWiresharkAutomation(unittest.TestCase):
                 "-a",
                 "duration:5",
             ]
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=15)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
             self.assertIn(result.returncode, [0, 1])
             print("✓ Lua scripting functionality working")
         except subprocess.TimeoutExpired:

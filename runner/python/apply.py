@@ -5,37 +5,17 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import List, Optional, Union
 
-from mypy.nodes import ARG_NAMED_OPT
-from mypy.nodes import Argument
-from mypy.nodes import AssignmentStmt
-from mypy.nodes import CallExpr
-from mypy.nodes import ClassDef
-from mypy.nodes import MDEF
-from mypy.nodes import MemberExpr
-from mypy.nodes import NameExpr
-from mypy.nodes import RefExpr
-from mypy.nodes import StrExpr
-from mypy.nodes import SymbolTableNode
-from mypy.nodes import TempNode
-from mypy.nodes import TypeInfo
-from mypy.nodes import Var
+from mypy.nodes import (ARG_NAMED_OPT, MDEF, Argument, AssignmentStmt,
+                        CallExpr, ClassDef, MemberExpr, NameExpr, RefExpr,
+                        StrExpr, SymbolTableNode, TempNode, TypeInfo, Var)
 from mypy.plugin import SemanticAnalyzerPluginInterface
 from mypy.plugins.common import add_method_to_class
-from mypy.types import AnyType
-from mypy.types import get_proper_type
-from mypy.types import Instance
-from mypy.types import NoneTyp
-from mypy.types import ProperType
-from mypy.types import TypeOfAny
-from mypy.types import UnboundType
-from mypy.types import UnionType
+from mypy.types import (AnyType, Instance, NoneTyp, ProperType, TypeOfAny,
+                        UnboundType, UnionType, get_proper_type)
 
-from . import infer
-from . import util
+from . import infer, util
 from .names import NAMED_TYPE_SQLA_MAPPED
 
 
@@ -66,16 +46,13 @@ def apply_mypy_mapped_attr(
     if stmt.type is None:
         util.fail(
             api,
-            "Statement linked from _mypy_mapped_attrs has no "
-            "typing information",
+            "Statement linked from _mypy_mapped_attrs has no " "typing information",
             stmt,
         )
         return None
 
     left_hand_explicit_type = get_proper_type(stmt.type)
-    assert isinstance(
-        left_hand_explicit_type, (Instance, UnionType, UnboundType)
-    )
+    assert isinstance(left_hand_explicit_type, (Instance, UnionType, UnboundType))
 
     attributes.append(
         util.SQLAlchemyAttribute(
@@ -117,9 +94,7 @@ def re_apply_declarative_assignments(
         ):
 
             left_node = stmt.lvalues[0].node
-            python_type_for_type = mapped_attr_lookup[
-                stmt.lvalues[0].name
-            ].type
+            python_type_for_type = mapped_attr_lookup[stmt.lvalues[0].name].type
 
             left_node_proper_type = get_proper_type(left_node.type)
 
@@ -134,22 +109,19 @@ def re_apply_declarative_assignments(
                     and isinstance(stmt.rvalue.callee, MemberExpr)
                     and isinstance(stmt.rvalue.callee.expr, NameExpr)
                     and stmt.rvalue.callee.expr.node is not None
-                    and stmt.rvalue.callee.expr.node.fullname
-                    == NAMED_TYPE_SQLA_MAPPED
+                    and stmt.rvalue.callee.expr.node.fullname == NAMED_TYPE_SQLA_MAPPED
                     and stmt.rvalue.callee.name == "_empty_constructor"
                     and isinstance(stmt.rvalue.args[0], CallExpr)
                     and isinstance(stmt.rvalue.args[0].callee, RefExpr)
                 )
             ):
 
-                python_type_for_type = (
-                    infer.infer_type_from_right_hand_nameexpr(
-                        api,
-                        stmt,
-                        left_node,
-                        left_node_proper_type,
-                        stmt.rvalue.args[0].callee,
-                    )
+                python_type_for_type = infer.infer_type_from_right_hand_nameexpr(
+                    api,
+                    stmt,
+                    left_node,
+                    left_node_proper_type,
+                    stmt.rvalue.args[0].callee,
                 )
 
                 if python_type_for_type is None or isinstance(
@@ -158,9 +130,7 @@ def re_apply_declarative_assignments(
                     continue
 
                 # update the SQLAlchemyAttribute with the better information
-                mapped_attr_lookup[
-                    stmt.lvalues[0].name
-                ].type = python_type_for_type
+                mapped_attr_lookup[stmt.lvalues[0].name].type = python_type_for_type
 
                 update_cls_metadata = True
 

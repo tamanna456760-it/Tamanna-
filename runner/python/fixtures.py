@@ -156,9 +156,7 @@ class TestBase(object):
             trans = _connection_fixture_connection.get_transaction()
             trans.rollback()
             with _connection_fixture_connection.begin():
-                drop_all_tables_from_metadata(
-                    metadata, _connection_fixture_connection
-                )
+                drop_all_tables_from_metadata(metadata, _connection_fixture_connection)
         else:
             drop_all_tables_from_metadata(metadata, config.db)
 
@@ -222,9 +220,7 @@ class TestBase(object):
                             ):
                                 if second_operation == "execute":
                                     if execute_on_subject:
-                                        subject.execute(
-                                            t.insert(), {"data": 12}
-                                        )
+                                        subject.execute(t.insert(), {"data": 12})
                                     else:
                                         trans.execute(t.insert(), {"data": 12})
                                 elif second_operation == "begin":

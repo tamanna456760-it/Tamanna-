@@ -88,11 +88,7 @@ class _ClsLevelDispatch(RefCollection):
         self.arg_names = argspec.args[1:]
         self.has_kw = bool(argspec.varkw)
         self.legacy_signatures = list(
-            reversed(
-                sorted(
-                    getattr(fn, "_legacy_signatures", []), key=lambda s: s[0]
-                )
-            )
+            reversed(sorted(getattr(fn, "_legacy_signatures", []), key=lambda s: s[0]))
         )
         fn.__doc__ = legacy._augment_fn_docs(self, parent_dispatch_cls, fn)
 
@@ -120,9 +116,7 @@ class _ClsLevelDispatch(RefCollection):
 
     def insert(self, event_key, propagate):
         target = event_key.dispatch_target
-        assert isinstance(
-            target, type
-        ), "Class-level Event targets must be classes."
+        assert isinstance(target, type), "Class-level Event targets must be classes."
         if not getattr(target, "_sa_propagate_class_events", True):
             raise exc.InvalidRequestError(
                 "Can't assign an event directly to the %s class" % target
@@ -139,9 +133,7 @@ class _ClsLevelDispatch(RefCollection):
 
     def append(self, event_key, propagate):
         target = event_key.dispatch_target
-        assert isinstance(
-            target, type
-        ), "Class-level Event targets must be classes."
+        assert isinstance(target, type), "Class-level Event targets must be classes."
         if not getattr(target, "_sa_propagate_class_events", True):
             raise exc.InvalidRequestError(
                 "Can't assign an event directly to the %s class" % target
@@ -245,9 +237,9 @@ class _EmptyListener(_InstanceLevelDispatch):
     def _needs_modify(self, *args, **kw):
         raise NotImplementedError("need to call for_modify()")
 
-    exec_once = (
-        exec_once_unless_exception
-    ) = insert = append = remove = clear = _needs_modify
+    exec_once = exec_once_unless_exception = insert = append = remove = clear = (
+        _needs_modify
+    )
 
     def __call__(self, *args, **kw):
         """Execute this event."""

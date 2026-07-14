@@ -1,8 +1,9 @@
-from flask import Flask, render_template_string, jsonify
-import threading
-import random
-import time
 import json
+import random
+import threading
+import time
+
+from flask import Flask, jsonify, render_template_string
 
 app = Flask(__name__)
 
@@ -23,6 +24,7 @@ NODES = {
 }
 AI_UNITS = {}
 
+
 # =========================
 # SAVE / LOAD STATE
 # =========================
@@ -31,6 +33,7 @@ def save_state():
         json.dump(NODES, f, indent=2)
     with open("ai_units.json", "w") as f:
         json.dump(AI_UNITS, f, indent=2)
+
 
 def load_state():
     global NODES, AI_UNITS
@@ -45,12 +48,14 @@ def load_state():
     except:
         pass
 
+
 # =========================
 # NODE COMMUNICATION
 # =========================
 def broadcast_power(amount):
     for node in NODES:
         NODES[node]["power"] += amount
+
 
 # =========================
 # UNIT CREATION
@@ -65,16 +70,19 @@ def create_unit(emergency=False):
     node = random.choice(list(NODES.keys()))
     NODES[node]["units"] += 1
 
+
 # =========================
 # ATTACK DETECTION
 # =========================
 def attack_detected():
-    return random.choice([False]*8 + [True]*2)
+    return random.choice([False] * 8 + [True] * 2)
+
 
 def auto_defense():
     broadcast_power(50)
     for node in NODES:
         NODES[node]["status"] = "active"
+
 
 # =========================
 # MASTER AI LOOP
@@ -91,12 +99,14 @@ def master_ai_loop():
         save_state()
         time.sleep(CREATE_INTERVAL)
 
+
 # =========================
 # API ENDPOINTS FOR DASHBOARD
 # =========================
 @app.route("/api/status")
 def api_status():
     return jsonify({"nodes": NODES, "ai_units": len(AI_UNITS)})
+
 
 @app.route("/")
 def dashboard():
@@ -136,6 +146,7 @@ def dashboard():
     </html>
     """
     return render_template_string(html)
+
 
 # =========================
 # START SIMULATION

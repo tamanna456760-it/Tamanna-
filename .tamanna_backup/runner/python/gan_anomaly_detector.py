@@ -100,8 +100,7 @@ class GANAnomalyDetector(BaseNeuralNetwork):
             x = layers.LeakyReLU(alpha=0.2)(x)
 
             if self.config["architecture"].get("dropout_rate", 0) > 0:
-                x = layers.Dropout(
-                    self.config["architecture"]["dropout_rate"])(x)
+                x = layers.Dropout(self.config["architecture"]["dropout_rate"])(x)
 
         output = layers.Dense(
             self.input_dim, activation=self.config["architecture"]["output_activation"]
@@ -119,8 +118,7 @@ class GANAnomalyDetector(BaseNeuralNetwork):
             x = layers.LeakyReLU(alpha=0.2)(x)
 
             if self.config["architecture"].get("dropout_rate", 0) > 0:
-                x = layers.Dropout(
-                    self.config["architecture"]["dropout_rate"])(x)
+                x = layers.Dropout(self.config["architecture"]["dropout_rate"])(x)
 
         validity = layers.Dense(1, activation="sigmoid")(x)
 
@@ -192,8 +190,7 @@ class GANAnomalyDetector(BaseNeuralNetwork):
 
                 for _ in range(config["discriminator_steps"]):
                     # Select random real samples
-                    idx = np.random.randint(
-                        0, X_train.shape[0], config["batch_size"])
+                    idx = np.random.randint(0, X_train.shape[0], config["batch_size"])
                     real_samples = X_train[idx]
 
                     # Generate fake samples
@@ -203,18 +200,15 @@ class GANAnomalyDetector(BaseNeuralNetwork):
                     fake_samples = self.generator.predict(noise, verbose=0)
 
                     # Train discriminator
-                    d_loss_real = self.discriminator.train_on_batch(
-                        real_samples, valid)
-                    d_loss_fake = self.discriminator.train_on_batch(
-                        fake_samples, fake)
+                    d_loss_real = self.discriminator.train_on_batch(real_samples, valid)
+                    d_loss_fake = self.discriminator.train_on_batch(fake_samples, fake)
                     d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
 
                     d_losses.append(d_loss[0])
                     d_accs.append(d_loss[1])
 
                 # Train generator
-                noise = np.random.normal(
-                    0, 1, (config["batch_size"], self.latent_dim))
+                noise = np.random.normal(0, 1, (config["batch_size"], self.latent_dim))
                 g_loss = self.gan.train_on_batch(noise, valid)
 
                 # Store history
@@ -249,22 +243,19 @@ class GANAnomalyDetector(BaseNeuralNetwork):
         """Calculate discriminator confidence threshold"""
         try:
             # Get discriminator predictions on normal data
-            normal_predictions = self.discriminator.predict(
-                X_normal, verbose=0)
+            normal_predictions = self.discriminator.predict(X_normal, verbose=0)
             normal_confidences = normal_predictions.flatten()
 
             # Set threshold based on percentile
             percentile = self.config["anomaly_detection"]["threshold_percentile"]
-            self.discriminator_threshold = np.percentile(
-                normal_confidences, percentile)
+            self.discriminator_threshold = np.percentile(normal_confidences, percentile)
 
             self.logger.info(
                 f"📊 Discriminator threshold set to: {self.discriminator_threshold:.6f}"
             )
 
         except Exception as e:
-            self.logger.error(
-                f"❌ Discriminator threshold calculation failed: {e}")
+            self.logger.error(f"❌ Discriminator threshold calculation failed: {e}")
             raise
 
     async def _execute_prediction(self, X) -> np.ndarray:
@@ -291,8 +282,7 @@ class GANAnomalyDetector(BaseNeuralNetwork):
                 "real_data_mean_confidence": float(np.mean(real_predictions)),
                 "fake_data_mean_confidence": float(np.mean(fake_predictions)),
                 "discrimination_accuracy": float(
-                    np.mean((real_predictions > 0.5) &
-                            (fake_predictions < 0.5))
+                    np.mean((real_predictions > 0.5) & (fake_predictions < 0.5))
                 ),
                 "generator_quality": float(
                     np.mean(fake_predictions)
@@ -316,18 +306,15 @@ class GANAnomalyDetector(BaseNeuralNetwork):
         """
         try:
             if self.discriminator_threshold is None:
-                raise ValueError(
-                    "Model must be trained before anomaly detection")
+                raise ValueError("Model must be trained before anomaly detection")
 
             # Get discriminator predictions
             predictions = await self._execute_prediction(X)
             confidences = predictions.flatten()
 
             # Identify anomalies (low discriminator confidence)
-            anomaly_indices = np.where(
-                confidences < self.discriminator_threshold)[0]
-            normal_indices = np.where(
-                confidences >= self.discriminator_threshold)[0]
+            anomaly_indices = np.where(confidences < self.discriminator_threshold)[0]
+            normal_indices = np.where(confidences >= self.discriminator_threshold)[0]
 
             # Calculate anomaly scores (inverse of confidence)
             anomaly_scores = 1 - confidences
@@ -395,8 +382,7 @@ class GANAnomalyDetector(BaseNeuralNetwork):
     async def _load_model_weights(self, load_path: Path):
         """Load GAN model weights"""
         try:
-            self.generator = tf.keras.models.load_model(
-                load_path / "generator.h5")
+            self.generator = tf.keras.models.load_model(load_path / "generator.h5")
             self.discriminator = tf.keras.models.load_model(
                 load_path / "discriminator.h5"
             )

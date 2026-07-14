@@ -1,5 +1,6 @@
 # deep_packet_inspection.py
-from scapy.all import sniff, IP, TCP, UDP
+from scapy.all import IP, TCP, UDP, sniff
+
 
 def inspect_packet(packet):
     if IP in packet:
@@ -20,9 +21,11 @@ def inspect_packet(packet):
 
         print(f"Packet Size    : {len(packet)} bytes")
 
+
 def main():
     print("[+] Starting packet inspection...")
     sniff(prn=inspect_packet, store=False)
+
 
 if __name__ == "__main__":
     main()

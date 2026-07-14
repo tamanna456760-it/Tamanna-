@@ -49,9 +49,7 @@ class ExceptionTest(fixtures.TablesTest):
         with config.db.connect() as conn:
 
             trans = conn.begin()
-            conn.execute(
-                self.tables.manual_pk.insert(), {"id": 1, "data": "d1"}
-            )
+            conn.execute(self.tables.manual_pk.insert(), {"id": 1, "data": "d1"})
 
             assert_raises(
                 exc.IntegrityError,
@@ -70,7 +68,7 @@ class ExceptionTest(fixtures.TablesTest):
                 # there's no way to make this happen with some drivers like
                 # mysqlclient, pymysql.  this at least does produce a non-
                 # ascii error message for cx_oracle, psycopg2
-                conn.execute(select(literal_column(u"méil")))
+                conn.execute(select(literal_column("méil")))
                 assert False
             except exc.DBAPIError as err:
                 err_str = str(err)
@@ -167,9 +165,7 @@ class AutocommitIsolationTest(fixtures.TablesTest):
 
     def _test_conn_autocommits(self, conn, autocommit):
         trans = conn.begin()
-        conn.execute(
-            self.tables.some_table.insert(), {"id": 1, "data": "some data"}
-        )
+        conn.execute(self.tables.some_table.insert(), {"id": 1, "data": "some data"})
         trans.rollback()
 
         eq_(
@@ -193,17 +189,13 @@ class AutocommitIsolationTest(fixtures.TablesTest):
         conn = connection_no_trans
         self._test_conn_autocommits(conn, False)
 
-    def test_turn_autocommit_off_via_default_iso_level(
-        self, connection_no_trans
-    ):
+    def test_turn_autocommit_off_via_default_iso_level(self, connection_no_trans):
         conn = connection_no_trans
         conn = conn.execution_options(isolation_level="AUTOCOMMIT")
         self._test_conn_autocommits(conn, True)
 
         conn.execution_options(
-            isolation_level=requirements.get_isolation_levels(config)[
-                "default"
-            ]
+            isolation_level=requirements.get_isolation_levels(config)["default"]
         )
         self._test_conn_autocommits(conn, False)
 
@@ -224,9 +216,7 @@ class EscapingTest(fixtures.TestBase):
 
             eq_(
                 conn.scalar(
-                    select(t.c.data).where(
-                        t.c.data == literal_column("'some % value'")
-                    )
+                    select(t.c.data).where(t.c.data == literal_column("'some % value'"))
                 ),
                 "some % value",
             )

@@ -536,8 +536,7 @@ class AdvancedAnalyticsEngine:
             # Generate KPI insights
             await self._generate_kpi_insights(kpi_results)
 
-            self.logger.info(
-                f"🎯 KPIs Calculated: {len(kpi_results)} indicators")
+            self.logger.info(f"🎯 KPIs Calculated: {len(kpi_results)} indicators")
 
             return kpi_results
 
@@ -637,8 +636,7 @@ class AdvancedAnalyticsEngine:
             }
 
         except Exception as e:
-            self.logger.error(
-                f"🔮 Trend prediction error for {metric_name}: {e}")
+            self.logger.error(f"🔮 Trend prediction error for {metric_name}: {e}")
             return {"error": str(e)}
 
     async def detect_anomalies_real_time(self, data_stream: List[Dict]) -> List[Dict]:
@@ -1019,15 +1017,13 @@ async def demo_analytics_engine():
         descriptive_result = await analytics_engine.process_data(
             sample_data, AnalyticsType.DESCRIPTIVE
         )
-        print(
-            f"Descriptive Analysis: {len(descriptive_result.insights)} insights")
+        print(f"Descriptive Analysis: {len(descriptive_result.insights)} insights")
 
         # Perform predictive analytics
         predictive_result = await analytics_engine.process_data(
             sample_data, AnalyticsType.PREDICTIVE
         )
-        print(
-            f"Predictive Analysis: Confidence {predictive_result.confidence:.2f}")
+        print(f"Predictive Analysis: Confidence {predictive_result.confidence:.2f}")
 
         # Track performance metrics
         metric = PerformanceMetric(
@@ -1049,8 +1045,7 @@ async def demo_analytics_engine():
 
         # Predict trends
         trend_prediction = await analytics_engine.predict_trends("sales", 7)
-        print(
-            f"Trend Prediction: {trend_prediction.get('trend_direction', 'unknown')}")
+        print(f"Trend Prediction: {trend_prediction.get('trend_direction', 'unknown')}")
 
         # Keep running for demo
         await asyncio.sleep(30)

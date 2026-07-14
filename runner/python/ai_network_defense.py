@@ -1,7 +1,7 @@
-import time
 import json
-import threading
 import random
+import threading
+import time
 
 # =========================
 # CONFIG
@@ -17,6 +17,7 @@ POWERHUB = "bd-king-r7"
 NODES_FILE = "nodes_status.json"
 AI_UNITS_FILE = "ai_units.json"
 
+
 # =========================
 # LOAD / SAVE
 # =========================
@@ -27,9 +28,11 @@ def load(file):
     except:
         return {}
 
+
 def save(file, data):
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
+
 
 # =========================
 # NODE MANAGEMENT
@@ -41,10 +44,12 @@ def connect_nodes():
         save(NODES_FILE, nodes)
     return nodes
 
+
 def broadcast_power(nodes, unit_power):
     for node in nodes:
         nodes[node]["power"] += unit_power
     save(NODES_FILE, nodes)
+
 
 # =========================
 # AI UNIT CREATION
@@ -56,23 +61,20 @@ def create_ai_unit(unit_id, emergency=False):
     power = 10
     if emergency:
         power *= EMERGENCY_MULTIPLIER
-    unit = {
-        "id": unit_id,
-        "power": power,
-        "status": "active",
-        "timestamp": time.time()
-    }
+    unit = {"id": unit_id, "power": power, "status": "active", "timestamp": time.time()}
     units[unit_id] = unit
     save(AI_UNITS_FILE, units)
     print(f"✅ AI UNIT CREATED: {unit_id} | Power: {power}")
     return True
+
 
 # =========================
 # ATTACK DETECTION
 # =========================
 def attack_detected():
     # Random attack simulation
-    return random.choice([False]*9 + [True])  # 10% chance
+    return random.choice([False] * 9 + [True])  # 10% chance
+
 
 def auto_defense(nodes):
     print("🛡️ ATTACK DETECTED → DEFENSE ACTIVATED")
@@ -80,6 +82,7 @@ def auto_defense(nodes):
         nodes[node]["power"] += 50  # boost all nodes
     save(NODES_FILE, nodes)
     print("💪 NODES POWER BOOSTED")
+
 
 # =========================
 # MAIN LOOP
@@ -114,6 +117,7 @@ def ai_network_manager():
 
         time.sleep(CREATE_INTERVAL)
 
+
 # =========================
 # SELF DECISION MONITOR
 # =========================
@@ -132,6 +136,7 @@ def self_decision_monitor():
             MAX_UNITS += 100
             print(f"⚡ SYSTEM STRONG → MAX UNITS INCREASED: {MAX_UNITS}")
         time.sleep(3)
+
 
 # =========================
 # START SYSTEM

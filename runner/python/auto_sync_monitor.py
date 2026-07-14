@@ -17,7 +17,7 @@ FOLDERS = {
     "node": "runner/node",
     "shell": "runner/shell",
     "html": "runner/web",
-    "json": "runner/data"
+    "json": "runner/data",
 }
 
 

@@ -4,14 +4,13 @@ import firebase_admin
 from firebase_admin import credentials, storage
 
 # Firebase setup
-cred = credentials.Certificate('firebase_key.json')
-firebase_admin.initialize_app(cred, {
-    'storageBucket': 'YOUR_PROJECT.appspot.com'
-})
+cred = credentials.Certificate("firebase_key.json")
+firebase_admin.initialize_app(cred, {"storageBucket": "YOUR_PROJECT.appspot.com"})
 bucket = storage.bucket()
 
 # Folder to sync (example: Internal Storage)
 root_dir = "/sdcard"  # Termux path
+
 
 def sync_folder(root_dir):
     for root, dirs, files in os.walk(root_dir):
@@ -24,6 +23,7 @@ def sync_folder(root_dir):
                 print(f"Uploaded: {blob_path}")
             except Exception as e:
                 print(f"Error uploading {file_path}: {e}")
+
 
 while True:
     sync_folder(root_dir)

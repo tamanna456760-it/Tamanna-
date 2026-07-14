@@ -7,9 +7,9 @@
 
 import weakref
 
-from . import util as orm_util
 from .. import exc as sa_exc
 from .. import util
+from . import util as orm_util
 
 
 class IdentityMap(object):

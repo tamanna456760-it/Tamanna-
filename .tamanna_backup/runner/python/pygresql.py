@@ -60,9 +60,7 @@ class _PGNumeric(Numeric):
                 # PyGreSQL returns Decimal natively for 1700 (numeric)
                 return None
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
         else:
             if coltype in _FLOAT_TYPES:
                 # PyGreSQL returns float natively for 701 (float8)
@@ -70,9 +68,7 @@ class _PGNumeric(Numeric):
             elif coltype in _DECIMAL_TYPES or coltype in _INT_TYPES:
                 return processors.to_float
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
 
 
 class _PGHStore(HSTORE):
@@ -102,9 +98,7 @@ class _PGJSON(JSON):
         def process(value):
             if value is self.NULL:
                 value = None
-            elif isinstance(value, Null) or (
-                value is None and self.none_as_null
-            ):
+            elif isinstance(value, Null) or (value is None and self.none_as_null):
                 return None
             if value is None or isinstance(value, (dict, list)):
                 return json(value)
@@ -126,9 +120,7 @@ class _PGJSONB(JSONB):
         def process(value):
             if value is self.NULL:
                 value = None
-            elif isinstance(value, Null) or (
-                value is None and self.none_as_null
-            ):
+            elif isinstance(value, Null) or (value is None and self.none_as_null):
                 return None
             if value is None or isinstance(value, (dict, list)):
                 return json(value)
@@ -175,9 +167,7 @@ class _PGUUID(UUID):
 class _PGCompiler(PGCompiler):
     def visit_mod_binary(self, binary, operator, **kw):
         return (
-            self.process(binary.left, **kw)
-            + " %% "
-            + self.process(binary.right, **kw)
+            self.process(binary.left, **kw) + " %% " + self.process(binary.right, **kw)
         )
 
     def post_process_text(self, text):

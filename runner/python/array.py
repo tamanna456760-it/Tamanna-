@@ -9,10 +9,7 @@ import re
 
 from ... import types as sqltypes
 from ... import util
-from ...sql import coercions
-from ...sql import expression
-from ...sql import operators
-from ...sql import roles
+from ...sql import coercions, expression, operators, roles
 
 
 def Any(other, arrexpr, operator=operators.eq):
@@ -34,7 +31,6 @@ def All(other, arrexpr, operator=operators.eq):
 
 
 class array(expression.ClauseList, expression.ColumnElement):
-
     """A PostgreSQL ARRAY literal.
 
     This is used to produce ARRAY literals in SQL expressions, e.g.::
@@ -90,9 +86,7 @@ class array(expression.ClauseList, expression.ColumnElement):
     inherit_cache = True
 
     def __init__(self, clauses, **kw):
-        clauses = [
-            coercions.expect(roles.ExpressionElementRole, c) for c in clauses
-        ]
+        clauses = [coercions.expect(roles.ExpressionElementRole, c) for c in clauses]
 
         super(array, self).__init__(*clauses, **kw)
 
@@ -105,9 +99,9 @@ class array(expression.ClauseList, expression.ColumnElement):
         if isinstance(main_type, ARRAY):
             self.type = ARRAY(
                 main_type.item_type,
-                dimensions=main_type.dimensions + 1
-                if main_type.dimensions is not None
-                else 2,
+                dimensions=(
+                    main_type.dimensions + 1 if main_type.dimensions is not None else 2
+                ),
             )
         else:
             self.type = ARRAY(main_type)
@@ -130,9 +124,7 @@ class array(expression.ClauseList, expression.ColumnElement):
         else:
             return array(
                 [
-                    self._bind_param(
-                        operator, o, _assume_scalar=True, type_=type_
-                    )
+                    self._bind_param(operator, o, _assume_scalar=True, type_=type_)
                     for o in obj
                 ]
             )
@@ -152,7 +144,6 @@ OVERLAP = operators.custom_op("&&", precedence=5, is_comparison=True)
 
 
 class ARRAY(sqltypes.ARRAY):
-
     """PostgreSQL ARRAY type.
 
     .. versionchanged:: 1.1 The :class:`_postgresql.ARRAY` type is now
@@ -199,7 +190,6 @@ class ARRAY(sqltypes.ARRAY):
     """
 
     class Comparator(sqltypes.ARRAY.Comparator):
-
         """Define comparison operations for :class:`_types.ARRAY`.
 
         Note that these operations are in addition to those provided
@@ -222,9 +212,7 @@ class ARRAY(sqltypes.ARRAY):
             """Boolean expression.  Test if elements are a proper subset of the
             elements of the argument array expression.
             """
-            return self.operate(
-                CONTAINED_BY, other, result_type=sqltypes.Boolean
-            )
+            return self.operate(CONTAINED_BY, other, result_type=sqltypes.Boolean)
 
         def overlap(self, other):
             """Boolean expression.  Test if array has elements in common with
@@ -234,9 +222,7 @@ class ARRAY(sqltypes.ARRAY):
 
     comparator_factory = Comparator
 
-    def __init__(
-        self, item_type, as_tuple=False, dimensions=None, zero_indexes=False
-    ):
+    def __init__(self, item_type, as_tuple=False, dimensions=None, zero_indexes=False):
         """Construct an ARRAY.
 
         E.g.::
@@ -326,26 +312,19 @@ class ARRAY(sqltypes.ARRAY):
 
     @util.memoized_property
     def _against_native_enum(self):
-        return (
-            isinstance(self.item_type, sqltypes.Enum)
-            and self.item_type.native_enum
-        )
+        return isinstance(self.item_type, sqltypes.Enum) and self.item_type.native_enum
 
     def bind_expression(self, bindvalue):
         return bindvalue
 
     def bind_processor(self, dialect):
-        item_proc = self.item_type.dialect_impl(dialect).bind_processor(
-            dialect
-        )
+        item_proc = self.item_type.dialect_impl(dialect).bind_processor(dialect)
 
         def process(value):
             if value is None:
                 return value
             else:
-                return self._proc_array(
-                    value, item_proc, self.dimensions, list
-                )
+                return self._proc_array(value, item_proc, self.dimensions, list)
 
         return process
 

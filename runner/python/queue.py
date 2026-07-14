@@ -28,7 +28,6 @@ from .concurrency import await_fallback
 from .concurrency import await_only
 from .langhelpers import memoized_property
 
-
 __all__ = ["Empty", "Full", "Queue"]
 
 
@@ -249,9 +248,7 @@ class AsyncAdaptedQueue:
 
         try:
             if timeout is not None:
-                return self.await_(
-                    asyncio.wait_for(self._queue.put(item), timeout)
-                )
+                return self.await_(asyncio.wait_for(self._queue.put(item), timeout))
             else:
                 return self.await_(self._queue.put(item))
         except (asyncio.QueueFull, asyncio.TimeoutError) as err:
@@ -275,9 +272,7 @@ class AsyncAdaptedQueue:
 
         try:
             if timeout is not None:
-                return self.await_(
-                    asyncio.wait_for(self._queue.get(), timeout)
-                )
+                return self.await_(asyncio.wait_for(self._queue.get(), timeout))
             else:
                 return self.await_(self._queue.get())
         except (asyncio.QueueEmpty, asyncio.TimeoutError) as err:

@@ -6,8 +6,4 @@ class User:
         self.role = role
 
     def info(self):
-        return {
-            "username": self.username,
-            "email": self.email,
-            "role": self.role
-        }
+        return {"username": self.username, "email": self.email, "role": self.role}

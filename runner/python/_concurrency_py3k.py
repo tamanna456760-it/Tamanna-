@@ -7,15 +7,13 @@
 
 import asyncio
 import sys
-from typing import Any
-from typing import Callable
-from typing import Coroutine
+from typing import Any, Callable, Coroutine
 
 import greenlet
 
+from .. import exc
 from . import compat
 from .langhelpers import memoized_property
-from .. import exc
 
 # If greenlet.gr_context is present in current version of greenlet,
 # it will be set with the current context on creation.
@@ -92,9 +90,7 @@ def await_fallback(awaitable: Coroutine) -> Any:
     return current.driver.switch(awaitable)
 
 
-async def greenlet_spawn(
-    fn: Callable, *args, _require_await=False, **kwargs
-) -> Any:
+async def greenlet_spawn(fn: Callable, *args, _require_await=False, **kwargs) -> Any:
     """Runs a sync function ``fn`` in a new greenlet.
 
     The sync function can then use :func:`await_only` to wait for async

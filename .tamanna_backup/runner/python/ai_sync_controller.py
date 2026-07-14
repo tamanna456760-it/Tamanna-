@@ -81,8 +81,7 @@ class AIAutoSync:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.FileHandler(
-                "ai-sync.log"), logging.StreamHandler()],
+            handlers=[logging.FileHandler("ai-sync.log"), logging.StreamHandler()],
         )
 
     def analyze_and_fix_code(self, file_path):
@@ -139,8 +138,7 @@ class AIAutoSync:
 
             for cmd in test_commands:
                 try:
-                    result = subprocess.run(
-                        cmd, capture_output=True, text=True)
+                    result = subprocess.run(cmd, capture_output=True, text=True)
                     if result.returncode == 0:
                         logging.info("✅ Tests passed")
                         return True
@@ -176,8 +174,7 @@ class AIAutoSync:
     def _run_periodic(self):
         """Run auto-fix periodically in the background."""
         self._periodic_running = True
-        logging.info(
-            f"⏱️ Starting periodic auto-fix every {self.interval} seconds")
+        logging.info(f"⏱️ Starting periodic auto-fix every {self.interval} seconds")
         try:
             while self._periodic_running:
                 # Run the script if enabled
@@ -216,8 +213,7 @@ class AIAutoSync:
             observer.schedule(event_handler, path=".", recursive=True)
 
         # Start periodic background runner
-        periodic_thread = threading.Thread(
-            target=self._run_periodic, daemon=True)
+        periodic_thread = threading.Thread(target=self._run_periodic, daemon=True)
         periodic_thread.start()
 
         observer.start()

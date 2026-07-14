@@ -32,7 +32,6 @@ from operator import truediv
 
 from .. import util
 
-
 if util.py2k:
     from operator import div
 else:
@@ -121,9 +120,7 @@ class Operators(object):
         """
         return self.operate(inv)
 
-    def op(
-        self, opstring, precedence=0, is_comparison=False, return_type=None
-    ):
+    def op(self, opstring, precedence=0, is_comparison=False, return_type=None):
         """Produce a generic operator function.
 
         e.g.::
@@ -1410,9 +1407,7 @@ def all_op(a):
 def _escaped_like_impl(fn, other, escape, autoescape):
     if autoescape:
         if autoescape is not True:
-            util.warn(
-                "The autoescape parameter is now a simple boolean True/False"
-            )
+            util.warn("The autoescape parameter is now a simple boolean True/False")
         if escape is None:
             escape = "/"
 

@@ -75,8 +75,7 @@ class TestWiresharkCore(unittest.TestCase):
         """Test packet analysis capabilities"""
         try:
             # Create a simple capture with known content
-            test_cmd = ["tshark", "-i",
-                        self.test_interface, "-c", "5", "-w", "-"]
+            test_cmd = ["tshark", "-i", self.test_interface, "-c", "5", "-w", "-"]
             result = subprocess.run(test_cmd, capture_output=True, timeout=30)
 
             if result.returncode == 0 and len(result.stdout) > 0:

@@ -8,7 +8,6 @@ import sys
 from functools import partial
 
 import pytest
-
 from setuptools.archive_util import unpack_archive
 
 from .textwrap import DALS
@@ -71,8 +70,7 @@ class TestWheelCompatibility:
     is the same as the one produced by ``bdist_wheel``.
     """
 
-    SETUPCFG = DALS(
-        """
+    SETUPCFG = DALS("""
     [metadata]
     name = {name}
     version = {version}
@@ -89,8 +87,7 @@ class TestWheelCompatibility:
         executable-name = my_package.module:function
     discover =
         myproj = my_package.other_module:function
-    """
-    )
+    """)
 
     EGG_INFO_OPTS = [
         # Related: #3088 #2872

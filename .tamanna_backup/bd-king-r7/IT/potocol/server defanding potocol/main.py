@@ -1,5 +1,5 @@
-from heartbeat_manager import HeartbeatManager
 from event_logger import log_event
+from heartbeat_manager import HeartbeatManager
 
 heartbeat = HeartbeatManager()
 

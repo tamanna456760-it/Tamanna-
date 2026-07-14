@@ -35,8 +35,7 @@ async def example_usage():
     transfer_result = await learning_system.transfer_learning(
         "system_optimization", "security_optimization"
     )
-    print(
-        f"Transferred {transfer_result['transferred_units']} knowledge units")
+    print(f"Transferred {transfer_result['transferred_units']} knowledge units")
 
     # Get learning metrics
     metrics = await learning_system.get_learning_metrics()

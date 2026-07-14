@@ -3,8 +3,8 @@
 # Auto Fix + Generate File System
 # ==========================================
 
-import os
 import json
+import os
 from datetime import datetime
 
 # ==========================================
@@ -22,15 +22,18 @@ os.makedirs(FIXED_PATH, exist_ok=True)
 # LOGGER
 # ==========================================
 
+
 def write_log(message):
 
     with open(LOG_FILE, "a", encoding="utf-8") as log:
 
         log.write(f"{datetime.now()} : {message}\n")
 
+
 # ==========================================
 # FIX ENGINE
 # ==========================================
+
 
 def fix_code(content):
 
@@ -78,9 +81,11 @@ def fix_code(content):
 
     return content, fixes
 
+
 # ==========================================
 # PROCESS FILE
 # ==========================================
+
 
 def process_file(file_path):
 
@@ -126,9 +131,11 @@ def process_file(file_path):
 
         write_log(str(e))
 
+
 # ==========================================
 # MAIN SYSTEM
 # ==========================================
+
 
 def main():
 
@@ -147,6 +154,7 @@ def main():
             process_file(full_path)
 
     print("\nAll files processed")
+
 
 # ==========================================
 # START

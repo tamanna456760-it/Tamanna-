@@ -1,0 +1,10 @@
+[
+    {
+        "tool": "ruff",
+        "error": "[Errno 2] No such file or directory: 'ruff'"
+    },
+    {
+        "tool": "flake8",
+        "error": "[Errno 2] No such file or directory: 'flake8'"
+    }
+]

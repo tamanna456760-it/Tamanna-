@@ -1,5 +1,4 @@
-from .base import MariaDBIdentifierPreparer
-from .base import MySQLDialect
+from .base import MariaDBIdentifierPreparer, MySQLDialect
 
 
 class MariaDBDialect(MySQLDialect):
@@ -10,9 +9,7 @@ class MariaDBDialect(MySQLDialect):
 
 
 def loader(driver):
-    driver_mod = __import__(
-        "sqlalchemy.dialects.mysql.%s" % driver
-    ).dialects.mysql
+    driver_mod = __import__("sqlalchemy.dialects.mysql.%s" % driver).dialects.mysql
     driver_cls = getattr(driver_mod, driver).dialect
 
     return type(

@@ -5,28 +5,20 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""Foundational utilities common to many sql modules.
-
-"""
-
+"""Foundational utilities common to many sql modules."""
 
 import itertools
 import operator
 import re
 
-from . import roles
-from . import visitors
+from .. import exc, util
+from ..util import HasMemoized, hybridmethod
+from . import roles, visitors
 from .traversals import HasCacheKey  # noqa
 from .traversals import HasCopyInternals  # noqa
 from .traversals import MemoizedHasCacheKey  # noqa
-from .visitors import ClauseVisitor
-from .visitors import ExtendedInternalTraversal
-from .visitors import InternalTraversal
-from .. import exc
-from .. import util
-from ..util import HasMemoized
-from ..util import hybridmethod
-
+from .visitors import (ClauseVisitor, ExtendedInternalTraversal,
+                       InternalTraversal)
 
 coercions = None
 elements = None
@@ -89,9 +81,7 @@ def _select_iterables(elements):
     given list of column expressions.
 
     """
-    return itertools.chain.from_iterable(
-        [c._select_iterable for c in elements]
-    )
+    return itertools.chain.from_iterable([c._select_iterable for c in elements])
 
 
 def _generative(fn):
@@ -122,8 +112,7 @@ def _exclusive_against(*names, **kw):
     defaults = kw.pop("defaults", {})
 
     getters = [
-        (name, operator.attrgetter(name), defaults.get(name, None))
-        for name in names
+        (name, operator.attrgetter(name), defaults.get(name, None)) for name in names
     ]
 
     @util.decorator
@@ -165,16 +154,12 @@ def _cloned_intersection(a, b):
 
     """
     all_overlap = set(_expand_cloned(a)).intersection(_expand_cloned(b))
-    return set(
-        elem for elem in a if all_overlap.intersection(elem._cloned_set)
-    )
+    return set(elem for elem in a if all_overlap.intersection(elem._cloned_set))
 
 
 def _cloned_difference(a, b):
     all_overlap = set(_expand_cloned(a)).intersection(_expand_cloned(b))
-    return set(
-        elem for elem in a if not all_overlap.intersection(elem._cloned_set)
-    )
+    return set(elem for elem in a if not all_overlap.intersection(elem._cloned_set))
 
 
 class _DialectArgView(util.collections_abc.MutableMapping):
@@ -209,9 +194,7 @@ class _DialectArgView(util.collections_abc.MutableMapping):
             dialect, value_key = self._key(key)
         except KeyError as err:
             util.raise_(
-                exc.ArgumentError(
-                    "Keys must be of the form <dialectname>_<argname>"
-                ),
+                exc.ArgumentError("Keys must be of the form <dialectname>_<argname>"),
                 replace_context=err,
             )
         else:
@@ -223,17 +206,14 @@ class _DialectArgView(util.collections_abc.MutableMapping):
 
     def __len__(self):
         return sum(
-            len(args._non_defaults)
-            for args in self.obj.dialect_options.values()
+            len(args._non_defaults) for args in self.obj.dialect_options.values()
         )
 
     def __iter__(self):
         return (
             "%s_%s" % (dialect_name, value_name)
             for dialect_name in self.obj.dialect_options
-            for value_name in self.obj.dialect_options[
-                dialect_name
-            ]._non_defaults
+            for value_name in self.obj.dialect_options[dialect_name]._non_defaults
         )
 
 
@@ -432,8 +412,7 @@ class DialectKWArgs(object):
             except exc.NoSuchModuleError:
                 util.warn(
                     "Can't validate argument %r; can't "
-                    "locate any SQLAlchemy dialect named %r"
-                    % (k, dialect_name)
+                    "locate any SQLAlchemy dialect named %r" % (k, dialect_name)
                 )
                 self.dialect_options[dialect_name] = d = _DialectArgDict()
                 d._defaults.update({"*": None})
@@ -445,8 +424,7 @@ class DialectKWArgs(object):
                 ):
                     raise exc.ArgumentError(
                         "Argument %r is not accepted by "
-                        "dialect %r on behalf of %r"
-                        % (k, dialect_name, self.__class__)
+                        "dialect %r on behalf of %r" % (k, dialect_name, self.__class__)
                     )
                 else:
                     construct_arg_dictionary[arg_name] = kwargs[k]
@@ -495,14 +473,10 @@ class CompileState(object):
                 (plugin_name, statement._effective_plugin_target), None
             )
             if klass is None:
-                klass = cls.plugins[
-                    ("default", statement._effective_plugin_target)
-                ]
+                klass = cls.plugins[("default", statement._effective_plugin_target)]
 
         else:
-            klass = cls.plugins[
-                ("default", statement._effective_plugin_target)
-            ]
+            klass = cls.plugins[("default", statement._effective_plugin_target)]
 
         if klass is cls:
             return cls(statement, compiler, **kw)
@@ -514,9 +488,7 @@ class CompileState(object):
 
     @classmethod
     def get_plugin_class(cls, statement):
-        plugin_name = statement._propagate_attrs.get(
-            "compile_state_plugin", None
-        )
+        plugin_name = statement._propagate_attrs.get("compile_state_plugin", None)
 
         if plugin_name:
             key = (plugin_name, statement._effective_plugin_target)
@@ -535,9 +507,7 @@ class CompileState(object):
     @classmethod
     def _get_plugin_class_for_plugin(cls, statement, plugin_name):
         try:
-            return cls.plugins[
-                (plugin_name, statement._effective_plugin_target)
-            ]
+            return cls.plugins[(plugin_name, statement._effective_plugin_target)]
         except KeyError:
             return None
 
@@ -559,9 +529,7 @@ class Generative(HasMemoized):
         cls = self.__class__
         s = cls.__new__(cls)
         if skip:
-            s.__dict__ = {
-                k: v for k, v in self.__dict__.items() if k not in skip
-            }
+            s.__dict__ = {k: v for k, v in self.__dict__.items() if k not in skip}
         else:
             s.__dict__ = self.__dict__.copy()
         return s
@@ -596,8 +564,7 @@ class _MetaOptions(type):
             sorted(
                 d
                 for d in dict_
-                if not d.startswith("__")
-                and d not in ("_cache_key_traversal",)
+                if not d.startswith("__") and d not in ("_cache_key_traversal",)
             )
         )
         type.__init__(cls, classname, bases, dict_)
@@ -700,9 +667,7 @@ class Options(util.with_metaclass(_MetaOptions)):
         return cls + d
 
     @classmethod
-    def from_execution_options(
-        cls, key, attrs, exec_options, statement_exec_options
-    ):
+    def from_execution_options(cls, key, attrs, exec_options, statement_exec_options):
         """process Options argument in terms of execution options.
 
 
@@ -848,8 +813,7 @@ class Executable(roles.StatementRole, Generative):
 
         """
         self._with_options += tuple(
-            coercions.expect(roles.ExecutableOptionRole, opt)
-            for opt in options
+            coercions.expect(roles.ExecutableOptionRole, opt) for opt in options
         )
 
     @_generative
@@ -952,18 +916,14 @@ class Executable(roles.StatementRole, Generative):
         """Compile and execute this :class:`.Executable`."""
         e = self.bind
         if e is None:
-            label = (
-                getattr(self, "description", None) or self.__class__.__name__
-            )
+            label = getattr(self, "description", None) or self.__class__.__name__
             msg = (
                 "This %s is not directly bound to a Connection or Engine. "
                 "Use the .execute() method of a Connection or Engine "
                 "to execute this construct." % label
             )
             raise exc.UnboundExecutionError(msg)
-        return e._execute_clauseelement(
-            self, multiparams, params, util.immutabledict()
-        )
+        return e._execute_clauseelement(self, multiparams, params, util.immutabledict())
 
     @util.deprecated_20(
         ":meth:`.Executable.scalar`",
@@ -1022,7 +982,7 @@ class prefix_anon_map(dict):
     """
 
     def __missing__(self, key):
-        (ident, derived) = key.split(" ", 1)
+        ident, derived = key.split(" ", 1)
         anonymous_counter = self.get(derived, 1)
         self[derived] = anonymous_counter + 1
         value = derived + "_" + str(anonymous_counter)
@@ -1226,9 +1186,7 @@ class ColumnCollection(object):
     def __contains__(self, key):
         if key not in self._index:
             if not isinstance(key, util.string_types):
-                raise exc.ArgumentError(
-                    "__contains__ requires a string argument"
-                )
+                raise exc.ArgumentError("__contains__ requires a string argument")
             return False
         else:
             return True
@@ -1293,9 +1251,7 @@ class ColumnCollection(object):
         cols = list(iter_)
         self._collection[:] = cols
         self._colset.update(c for k, c in self._collection)
-        self._index.update(
-            (idx, c) for idx, (k, c) in enumerate(self._collection)
-        )
+        self._index.update((idx, c) for idx, (k, c) in enumerate(self._collection))
         self._index.update({k: col for k, col in reversed(self._collection)})
 
     def add(self, column, key=None):
@@ -1326,9 +1282,7 @@ class ColumnCollection(object):
     def __setstate__(self, state):
         object.__setattr__(self, "_index", state["_index"])
         object.__setattr__(self, "_collection", state["_collection"])
-        object.__setattr__(
-            self, "_colset", {col for k, col in self._collection}
-        )
+        object.__setattr__(self, "_colset", {col for k, col in self._collection})
 
     def contains_column(self, col):
         """Checks if a column object exists in this collection"""
@@ -1382,9 +1336,7 @@ class ColumnCollection(object):
 
         def embedded(expanded_proxy_set, target_set):
             for t in target_set.difference(expanded_proxy_set):
-                if not set(_expand_cloned([t])).intersection(
-                    expanded_proxy_set
-                ):
+                if not set(_expand_cloned([t])).intersection(expanded_proxy_set):
                     return False
             return True
 
@@ -1397,10 +1349,7 @@ class ColumnCollection(object):
         for c in cols:
             expanded_proxy_set = set(_expand_cloned(c.proxy_set))
             i = target_set.intersection(expanded_proxy_set)
-            if i and (
-                not require_embedded
-                or embedded(expanded_proxy_set, target_set)
-            ):
+            if i and (not require_embedded or embedded(expanded_proxy_set, target_set)):
                 if col is None:
 
                     # no corresponding column yet, pick this one.
@@ -1469,9 +1418,7 @@ class DedupeColumnCollection(ColumnCollection):
         key = column.key
 
         if key is None:
-            raise exc.ArgumentError(
-                "Can't add unnamed column to column collection"
-            )
+            raise exc.ArgumentError("Can't add unnamed column to column collection")
 
         if key in self._index:
 
@@ -1512,9 +1459,7 @@ class DedupeColumnCollection(ColumnCollection):
                 self._index[k] = col
                 self._collection.append((k, col))
         self._colset.update(c for (k, c) in self._collection)
-        self._index.update(
-            (idx, c) for idx, (k, c) in enumerate(self._collection)
-        )
+        self._index.update((idx, c) for idx, (k, c) in enumerate(self._collection))
         for col in replace_col:
             self.replace(col)
 
@@ -1524,17 +1469,12 @@ class DedupeColumnCollection(ColumnCollection):
     def remove(self, column):
         if column not in self._colset:
             raise ValueError(
-                "Can't remove column %r; column is not in this collection"
-                % column
+                "Can't remove column %r; column is not in this collection" % column
             )
         del self._index[column.key]
         self._colset.remove(column)
-        self._collection[:] = [
-            (k, c) for (k, c) in self._collection if c is not column
-        ]
-        self._index.update(
-            {idx: col for idx, (k, col) in enumerate(self._collection)}
-        )
+        self._collection[:] = [(k, c) for (k, c) in self._collection if c is not column]
+        self._index.update({idx: col for idx, (k, col) in enumerate(self._collection)})
         # delete higher index
         del self._index[len(self._collection)]
 
@@ -1585,9 +1525,7 @@ class DedupeColumnCollection(ColumnCollection):
         self._collection[:] = new_cols
 
         self._index.clear()
-        self._index.update(
-            {idx: col for idx, (k, col) in enumerate(self._collection)}
-        )
+        self._index.update({idx: col for idx, (k, col) in enumerate(self._collection)})
         self._index.update(self._collection)
 
 
@@ -1642,9 +1580,7 @@ def _bind_or_error(schemaitem, msg=None):
     bind = schemaitem.bind
     if not bind:
         name = schemaitem.__class__.__name__
-        label = getattr(
-            schemaitem, "fullname", getattr(schemaitem, "name", None)
-        )
+        label = getattr(schemaitem, "fullname", getattr(schemaitem, "name", None))
         if label:
             item = "%s object %r" % (name, label)
         else:
@@ -1694,8 +1630,7 @@ def _entity_namespace_key(entity, key, default=NO_ARG):
     except AttributeError as err:
         util.raise_(
             exc.InvalidRequestError(
-                'Entity namespace for "%s" has no property "%s"'
-                % (entity, key)
+                'Entity namespace for "%s" has no property "%s"' % (entity, key)
             ),
             replace_context=err,
         )

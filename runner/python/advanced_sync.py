@@ -43,6 +43,8 @@ if __name__ == "__main__":
     print("\n📊 COMPREHENSIVE SYNCPOWER REPORT:")
     print("=" * 50)
     print(report)
+
+
 class TamannaSyncPower:
     def __init__(self):
         self.emotion = "calm"
@@ -68,12 +70,7 @@ class TamannaSyncPower:
 
     def update(self, signal):
         # Emotion
-        emo_map = {
-            "ok": "calm",
-            "warn": "alert",
-            "error": "pain",
-            "deep": "focused"
-        }
+        emo_map = {"ok": "calm", "warn": "alert", "error": "pain", "deep": "focused"}
         self.emotion = emo_map.get(signal, "unknown")
 
         # Intelligence
@@ -81,7 +78,7 @@ class TamannaSyncPower:
             "ok": "stable",
             "warn": "monitoring",
             "error": "critical",
-            "deep": "deep_mode"
+            "deep": "deep_mode",
         }
         self.intel = intel_map.get(signal, "unknown")
 
@@ -95,9 +92,13 @@ class TamannaSyncPower:
             self.sync = "normal"
 
         self.pulse()
+
+
 def main():
     # এখানে ওই module-এর কাজ, ritual, sync, যাই আছে
     print("এই module Tamanna main() থেকে চলছে")
+
+
 class TamannaShield:
     def __init__(self):
         self.state = "calm"
@@ -115,7 +116,7 @@ class TamannaShield:
             "unauthorized",
             "bruteforce",
             "file_change",
-            "config_change"
+            "config_change",
         ]
         event_text = event_text.lower()
         return any(w in event_text for w in bad_words)

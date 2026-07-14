@@ -1,9 +1,11 @@
-from flask import Flask, jsonify
 import subprocess
 import threading
 
+from flask import Flask, jsonify
+
 app = Flask(__name__)
 building = False
+
 
 def run_cmd(cmd):
     try:
@@ -12,6 +14,7 @@ def run_cmd(cmd):
         )
     except subprocess.CalledProcessError as e:
         return e.output
+
 
 @app.route("/build")
 def build():

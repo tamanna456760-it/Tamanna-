@@ -11,11 +11,9 @@ import sys
 import time
 import traceback
 
-from gunicorn.errors import HaltServer, AppImportError
+from gunicorn import SERVER_SOFTWARE, __version__, sock, systemd, util
+from gunicorn.errors import AppImportError, HaltServer
 from gunicorn.pidfile import Pidfile
-from gunicorn import sock, systemd, util
-
-from gunicorn import __version__, SERVER_SOFTWARE
 
 
 class Arbiter(object):
@@ -41,10 +39,13 @@ class Arbiter(object):
 
     # I love dynamic languages
     SIG_QUEUE = []
-    SIGNALS = [getattr(signal, "SIG%s" % x)
-               for x in "HUP QUIT INT TERM TTIN TTOU USR1 USR2 WINCH".split()]
+    SIGNALS = [
+        getattr(signal, "SIG%s" % x)
+        for x in "HUP QUIT INT TERM TTIN TTOU USR1 USR2 WINCH".split()
+    ]
     SIG_NAMES = dict(
-        (getattr(signal, name), name[3:].lower()) for name in dir(signal)
+        (getattr(signal, name), name[3:].lower())
+        for name in dir(signal)
         if name[:3] == "SIG" and name[3] != "_"
     )
 
@@ -70,11 +71,7 @@ class Arbiter(object):
         args.insert(0, sys.executable)
 
         # init start context
-        self.START_CTX = {
-            "args": args,
-            "cwd": cwd,
-            0: sys.executable
-        }
+        self.START_CTX = {"args": args, "cwd": cwd, 0: sys.executable}
 
     def _get_num_workers(self):
         return self._num_workers
@@ -83,6 +80,7 @@ class Arbiter(object):
         old_value = self._num_workers
         self._num_workers = value
         self.cfg.nworkers_changed(self, value, old_value)
+
     num_workers = property(_get_num_workers, _set_num_workers)
 
     def setup(self, app):
@@ -93,7 +91,7 @@ class Arbiter(object):
             self.log = self.cfg.logger_class(app.cfg)
 
         # reopen files
-        if 'GUNICORN_FD' in os.environ:
+        if "GUNICORN_FD" in os.environ:
             self.log.reopen_files()
 
         self.worker_class = self.cfg.worker_class
@@ -102,12 +100,16 @@ class Arbiter(object):
         self.timeout = self.cfg.timeout
         self.proc_name = self.cfg.proc_name
 
-        self.log.debug('Current configuration:\n{0}'.format(
-            '\n'.join(
-                '  {0}: {1}'.format(config, value.value)
-                for config, value
-                in sorted(self.cfg.settings.items(),
-                          key=lambda setting: setting[1]))))
+        self.log.debug(
+            "Current configuration:\n{0}".format(
+                "\n".join(
+                    "  {0}: {1}".format(config, value.value)
+                    for config, value in sorted(
+                        self.cfg.settings.items(), key=lambda setting: setting[1]
+                    )
+                )
+            )
+        )
 
         # set enviroment' variables
         if self.cfg.env:
@@ -123,8 +125,8 @@ class Arbiter(object):
         """
         self.log.info("Starting gunicorn %s", __version__)
 
-        if 'GUNICORN_PID' in os.environ:
-            self.master_pid = int(os.environ.get('GUNICORN_PID'))
+        if "GUNICORN_PID" in os.environ:
+            self.master_pid = int(os.environ.get("GUNICORN_PID"))
             self.proc_name = self.proc_name + ".2"
             self.master_name = "Master.2"
 
@@ -144,12 +146,14 @@ class Arbiter(object):
             listen_fds = systemd.listen_fds()
             if listen_fds:
                 self.systemd = True
-                fds = range(systemd.SD_LISTEN_FDS_START,
-                            systemd.SD_LISTEN_FDS_START + listen_fds)
+                fds = range(
+                    systemd.SD_LISTEN_FDS_START,
+                    systemd.SD_LISTEN_FDS_START + listen_fds,
+                )
 
             elif self.master_pid:
                 fds = []
-                for fd in os.environ.pop('GUNICORN_FD').split(','):
+                for fd in os.environ.pop("GUNICORN_FD").split(","):
                     fds.append(int(fd))
 
             self.LISTENERS = sock.create_sockets(self.cfg, self.log, fds)
@@ -230,8 +234,7 @@ class Arbiter(object):
         except SystemExit:
             raise
         except Exception:
-            self.log.info("Unhandled exception in main loop",
-                          exc_info=True)
+            self.log.info("Unhandled exception in main loop", exc_info=True)
             self.stop(False)
             if self.pidfile is not None:
                 self.pidfile.unlink()
@@ -320,7 +323,7 @@ class Arbiter(object):
             self.master_name = "Master"
             self.master_pid = 0
             self.proc_name = self.cfg.proc_name
-            del os.environ['GUNICORN_PID']
+            del os.environ["GUNICORN_PID"]
             # rename the pidfile
             if self.pidfile is not None:
                 self.pidfile.rename(self.cfg.pidfile)
@@ -332,13 +335,13 @@ class Arbiter(object):
         Wake up the arbiter by writing to the PIPE
         """
         try:
-            os.write(self.PIPE[1], b'.')
+            os.write(self.PIPE[1], b".")
         except IOError as e:
             if e.errno not in [errno.EAGAIN, errno.EINTR]:
                 raise
 
     def halt(self, reason=None, exit_status=0):
-        """ halt arbiter """
+        """halt arbiter"""
         self.stop()
         self.log.info("Shutting down: %s", self.master_name)
         if reason is not None:
@@ -361,7 +364,7 @@ class Arbiter(object):
                 pass
         except (select.error, OSError) as e:
             # TODO: select.error is a subclass of OSError since Python 3.3.
-            error_number = getattr(e, 'errno', e.args[0])
+            error_number = getattr(e, "errno", e.args[0])
             if error_number not in [errno.EAGAIN, errno.EINTR]:
                 raise
         except KeyboardInterrupt:
@@ -414,19 +417,18 @@ class Arbiter(object):
         self.cfg.pre_exec(self)
 
         environ = self.cfg.env_orig.copy()
-        environ['GUNICORN_PID'] = str(master_pid)
+        environ["GUNICORN_PID"] = str(master_pid)
 
         if self.systemd:
-            environ['LISTEN_PID'] = str(os.getpid())
-            environ['LISTEN_FDS'] = str(len(self.LISTENERS))
+            environ["LISTEN_PID"] = str(os.getpid())
+            environ["LISTEN_FDS"] = str(len(self.LISTENERS))
         else:
-            environ['GUNICORN_FD'] = ','.join(
-                str(l.fileno()) for l in self.LISTENERS)
+            environ["GUNICORN_FD"] = ",".join(str(l.fileno()) for l in self.LISTENERS)
 
-        os.chdir(self.START_CTX['cwd'])
+        os.chdir(self.START_CTX["cwd"])
 
         # exec the process using the original environment
-        os.execvpe(self.START_CTX[0], self.START_CTX['args'], environ)
+        os.execvpe(self.START_CTX[0], self.START_CTX["args"], environ)
 
     def reload(self):
         old_address = self.cfg.address
@@ -490,7 +492,7 @@ class Arbiter(object):
         if not self.timeout:
             return
         workers = list(self.WORKERS.items())
-        for (pid, worker) in workers:
+        for pid, worker in workers:
             try:
                 if time.time() - worker.tmp.last_update() <= self.timeout:
                     continue
@@ -530,7 +532,7 @@ class Arbiter(object):
                         self.log.warning(
                             "Worker with pid %s was terminated due to signal %s",
                             wpid,
-                            os.WTERMSIG(status)
+                            os.WTERMSIG(status),
                         )
 
                     worker = self.WORKERS.pop(wpid, None)
@@ -553,22 +555,32 @@ class Arbiter(object):
         workers = self.WORKERS.items()
         workers = sorted(workers, key=lambda w: w[1].age)
         while len(workers) > self.num_workers:
-            (pid, _) = workers.pop(0)
+            pid, _ = workers.pop(0)
             self.kill_worker(pid, signal.SIGTERM)
 
         active_worker_count = len(workers)
         if self._last_logged_active_worker_count != active_worker_count:
             self._last_logged_active_worker_count = active_worker_count
-            self.log.debug("{0} workers".format(active_worker_count),
-                           extra={"metric": "gunicorn.workers",
-                                  "value": active_worker_count,
-                                  "mtype": "gauge"})
+            self.log.debug(
+                "{0} workers".format(active_worker_count),
+                extra={
+                    "metric": "gunicorn.workers",
+                    "value": active_worker_count,
+                    "mtype": "gauge",
+                },
+            )
 
     def spawn_worker(self):
         self.worker_age += 1
-        worker = self.worker_class(self.worker_age, self.pid, self.LISTENERS,
-                                   self.app, self.timeout / 2.0,
-                                   self.cfg, self.log)
+        worker = self.worker_class(
+            self.worker_age,
+            self.pid,
+            self.LISTENERS,
+            self.app,
+            self.timeout / 2.0,
+            self.cfg,
+            self.log,
+        )
         self.cfg.pre_fork(self, worker)
         pid = os.fork()
         if pid != 0:
@@ -591,8 +603,7 @@ class Arbiter(object):
         except SystemExit:
             raise
         except AppImportError as e:
-            self.log.debug("Exception while loading the application",
-                           exc_info=True)
+            self.log.debug("Exception while loading the application", exc_info=True)
             print("%s" % e, file=sys.stderr)
             sys.stderr.flush()
             sys.exit(self.APP_LOAD_ERROR)
@@ -607,8 +618,9 @@ class Arbiter(object):
                 worker.tmp.close()
                 self.cfg.worker_exit(self, worker)
             except Exception:
-                self.log.warning("Exception during worker exit:\n%s",
-                                 traceback.format_exc())
+                self.log.warning(
+                    "Exception during worker exit:\n%s", traceback.format_exc()
+                )
 
     def spawn_workers(self):
         """\

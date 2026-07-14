@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TransmissionParameters:
     """Parameters describing a transmission."""
+
     frequency_hz: float
     power_dbm: float
     modulation: str  # e.g., "BPSK", "QPSK"
@@ -40,7 +41,7 @@ class Sender:
         sample_rate_hz: float,
         power_dbm: float = 20.0,
         modulation: str = "BPSK",
-        use_hardware: bool = False
+        use_hardware: bool = False,
     ):
         """
         Initialize the sender.
@@ -160,7 +161,7 @@ class Sender:
 
         # Length header (2 bytes, big-endian)
         length = len(data)
-        length_bytes = length.to_bytes(2, byteorder='big')
+        length_bytes = length.to_bytes(2, byteorder="big")
         for byte in length_bytes:
             for i in range(7, -1, -1):
                 bits.append((byte >> i) & 1)
@@ -199,7 +200,7 @@ class Sender:
         elif self.modulation.upper() == "QPSK":
             # QPSK: group bits into dibits
             for i in range(0, len(bits) - (len(bits) % 2), 2):
-                bit_pair = (bits[i], bits[i+1])
+                bit_pair = (bits[i], bits[i + 1])
                 # Map dibit to complex symbol
                 if bit_pair == (0, 0):
                     symbol = complex(1, 1) / math.sqrt(2)
@@ -219,7 +220,9 @@ class Sender:
         logger.debug(f"Modulated {len(bits)} bits into {len(samples)} IQ samples")
         return samples
 
-    def _transmit(self, samples: List[complex], duration_sec: Optional[float] = None) -> bool:
+    def _transmit(
+        self, samples: List[complex], duration_sec: Optional[float] = None
+    ) -> bool:
         """
         Transmit IQ samples via hardware or simulate.
 
@@ -239,11 +242,17 @@ class Sender:
             # Simulate transmission: compute duration and log
             tx_time = len(samples) / self.sample_rate_hz
             if duration_sec is not None and abs(tx_time - duration_sec) > 0.01:
-                logger.warning(f"Actual transmission time {tx_time:.3f}s differs from requested {duration_sec:.3f}s")
-            logger.info(f"Simulated transmission of {len(samples)} samples ({tx_time:.3f} seconds)")
+                logger.warning(
+                    f"Actual transmission time {tx_time:.3f}s differs from requested {duration_sec:.3f}s"
+                )
+            logger.info(
+                f"Simulated transmission of {len(samples)} samples ({tx_time:.3f} seconds)"
+            )
             # Optionally, write to a file for debugging
             # write_samples_to_file(samples, "tx_samples.iq")
-            print(f"[SIM] Transmitting {len(samples)} samples at {self.sample_rate_hz} Hz...")
+            print(
+                f"[SIM] Transmitting {len(samples)} samples at {self.sample_rate_hz} Hz..."
+            )
             return True
 
     def get_transmission_parameters(self) -> TransmissionParameters:
@@ -257,14 +266,16 @@ class Sender:
             frequency_hz=self.center_freq_hz,
             power_dbm=self.power_dbm,
             modulation=self.modulation,
-            data_rate_bps=self.sample_rate_hz / 4  # oversampling factor = 4
+            data_rate_bps=self.sample_rate_hz / 4,  # oversampling factor = 4
         )
 
 
 # Example usage (only executed when script is run directly)
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    tx = Sender(center_freq_hz=145.9e6, sample_rate_hz=2.4e6, power_dbm=30, modulation="BPSK")
+    tx = Sender(
+        center_freq_hz=145.9e6, sample_rate_hz=2.4e6, power_dbm=30, modulation="BPSK"
+    )
     message = b"Hello, satellite!"
     success = tx.send(message)
     if success:

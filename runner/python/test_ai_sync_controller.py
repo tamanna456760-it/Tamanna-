@@ -10,8 +10,7 @@ ai_mod_path = (
     / "apps"
     / "ai_sync_controller.py"
 )
-spec = importlib.util.spec_from_file_location(
-    "ai_sync_controller", str(ai_mod_path))
+spec = importlib.util.spec_from_file_location("ai_sync_controller", str(ai_mod_path))
 ai_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ai_mod)
 AIAutoSync = ai_mod.AIAutoSync

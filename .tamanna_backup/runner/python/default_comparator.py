@@ -5,9 +5,7 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""Default implementation of SQL comparison operations.
-"""
-
+"""Default implementation of SQL comparison operations."""
 
 from . import coercions
 from . import operators
@@ -125,9 +123,7 @@ def _custom_op_operate(expr, op, obj, reverse=False, result_type=None, **kw):
 
 
 def _binary_operate(expr, op, obj, reverse=False, result_type=None, **kw):
-    obj = coercions.expect(
-        roles.BinaryElementRole, obj, expr=expr, operator=op
-    )
+    obj = coercions.expect(roles.BinaryElementRole, obj, expr=expr, operator=op)
 
     if reverse:
         left, right = obj, expr
@@ -135,9 +131,7 @@ def _binary_operate(expr, op, obj, reverse=False, result_type=None, **kw):
         left, right = expr, obj
 
     if result_type is None:
-        op, result_type = left.comparator._adapt_expression(
-            op, right.comparator
-        )
+        op, result_type = left.comparator._adapt_expression(op, right.comparator)
 
     return BinaryExpression(left, right, op, type_=result_type, modifiers=kw)
 
@@ -162,16 +156,12 @@ def _in_impl(expr, op, seq_or_selectable, negate_op, **kw):
     if "in_ops" in seq_or_selectable._annotations:
         op, negate_op = seq_or_selectable._annotations["in_ops"]
 
-    return _boolean_compare(
-        expr, op, seq_or_selectable, negate=negate_op, **kw
-    )
+    return _boolean_compare(expr, op, seq_or_selectable, negate=negate_op, **kw)
 
 
 def _getitem_impl(expr, op, other, **kw):
     if isinstance(expr.type, type_api.INDEXABLE):
-        other = coercions.expect(
-            roles.BinaryElementRole, other, expr=expr, operator=op
-        )
+        other = coercions.expect(roles.BinaryElementRole, other, expr=expr, operator=op)
         return _binary_operate(expr, op, other, **kw)
     else:
         _unsupported_impl(expr, op, other, **kw)
@@ -212,18 +202,16 @@ def _match_impl(expr, op, other, **kw):
             operator=operators.match_op,
         ),
         result_type=type_api.MATCHTYPE,
-        negate=operators.not_match_op
-        if op is operators.match_op
-        else operators.match_op,
+        negate=(
+            operators.not_match_op if op is operators.match_op else operators.match_op
+        ),
         **kw
     )
 
 
 def _distinct_impl(expr, op, **kw):
     """See :meth:`.ColumnOperators.distinct`."""
-    return UnaryExpression(
-        expr, operator=operators.distinct_op, type_=expr.type
-    )
+    return UnaryExpression(expr, operator=operators.distinct_op, type_=expr.type)
 
 
 def _between_impl(expr, op, cleft, cright, **kw):
@@ -248,9 +236,11 @@ def _between_impl(expr, op, cleft, cright, **kw):
             group_contents=False,
         ),
         op,
-        negate=operators.not_between_op
-        if op is operators.between_op
-        else operators.between_op,
+        negate=(
+            operators.not_between_op
+            if op is operators.between_op
+            else operators.between_op
+        ),
         modifiers=kw,
     )
 
@@ -272,9 +262,11 @@ def _regexp_match_impl(expr, op, pattern, flags, **kw):
         op,
         pattern,
         flags=flags,
-        negate=operators.not_regexp_match_op
-        if op is operators.regexp_match_op
-        else operators.regexp_match_op,
+        negate=(
+            operators.not_regexp_match_op
+            if op is operators.regexp_match_op
+            else operators.regexp_match_op
+        ),
         **kw
     )
 

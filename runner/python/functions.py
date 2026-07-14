@@ -5,9 +5,8 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""SQL function API, factories, and built-in functions.
+"""SQL function API, factories, and built-in functions."""
 
-"""
 from . import annotation
 from . import coercions
 from . import operators
@@ -39,7 +38,6 @@ from .selectable import TableValuedAlias
 from .visitors import InternalTraversal
 from .visitors import TraversibleType
 from .. import util
-
 
 _registry = util.defaultdict(dict)
 
@@ -129,9 +127,7 @@ class FunctionElement(Executable, ColumnElement, FromClause, Generative):
 
     @property
     def _proxy_key(self):
-        return super(FunctionElement, self)._proxy_key or getattr(
-            self, "name", None
-        )
+        return super(FunctionElement, self)._proxy_key or getattr(self, "name", None)
 
     def _execute_on_connection(
         self, connection, multiparams, params, execution_options
@@ -249,9 +245,7 @@ class FunctionElement(Executable, ColumnElement, FromClause, Generative):
             expr += (with_ordinality,)
             new_func._with_ordinality = True
 
-        new_func.type = new_func._table_value_type = sqltypes.TableValueType(
-            *expr
-        )
+        new_func.type = new_func._table_value_type = sqltypes.TableValueType(*expr)
 
         return new_func.alias(name=name, joins_implicitly=joins_implicitly)
 
@@ -654,9 +648,7 @@ class FunctionElement(Executable, ColumnElement, FromClause, Generative):
         # expressions against getitem.  This may need to be made
         # more portable if in the future we support other DBs
         # besides postgresql.
-        if against is operators.getitem and isinstance(
-            self.type, sqltypes.ARRAY
-        ):
+        if against is operators.getitem and isinstance(self.type, sqltypes.ARRAY):
             return Grouping(self)
         else:
             return super(FunctionElement, self).self_group(against=against)
@@ -1111,9 +1103,7 @@ class next_value(GenericFunction):
     type = sqltypes.Integer()
     name = "next_value"
 
-    _traverse_internals = [
-        ("sequence", InternalTraversal.dp_named_ddl_element)
-    ]
+    _traverse_internals = [("sequence", InternalTraversal.dp_named_ddl_element)]
 
     def __init__(self, seq, **kw):
         assert isinstance(
@@ -1121,14 +1111,11 @@ class next_value(GenericFunction):
         ), "next_value() accepts a Sequence object as input."
         self._bind = self._get_bind(kw)
         self.sequence = seq
-        self.type = sqltypes.to_instance(
-            seq.data_type or getattr(self, "type", None)
-        )
+        self.type = sqltypes.to_instance(seq.data_type or getattr(self, "type", None))
 
     def compare(self, other, **kw):
         return (
-            isinstance(other, next_value)
-            and self.sequence.name == other.sequence.name
+            isinstance(other, next_value) and self.sequence.name == other.sequence.name
         )
 
     @property
@@ -1260,6 +1247,7 @@ class count(GenericFunction):
 
 
     """
+
     type = sqltypes.Integer
     inherit_cache = True
 
@@ -1357,9 +1345,7 @@ class array_agg(GenericFunction):
 
     def __init__(self, *args, **kwargs):
         args = [
-            coercions.expect(
-                roles.ExpressionElementRole, c, apply_propagate_attrs=self
-            )
+            coercions.expect(roles.ExpressionElementRole, c, apply_propagate_attrs=self)
             for c in args
         ]
 
@@ -1444,131 +1430,4 @@ class percentile_disc(OrderedSetAgg):
 
 
 class rank(GenericFunction):
-    """Implement the ``rank`` hypothetical-set aggregate function.
-
-    This function must be used with the :meth:`.FunctionElement.within_group`
-    modifier to supply a sort expression to operate upon.
-
-    The return type of this function is :class:`.Integer`.
-
-    .. versionadded:: 1.1
-
-    """
-
-    type = sqltypes.Integer()
-    inherit_cache = True
-
-
-class dense_rank(GenericFunction):
-    """Implement the ``dense_rank`` hypothetical-set aggregate function.
-
-    This function must be used with the :meth:`.FunctionElement.within_group`
-    modifier to supply a sort expression to operate upon.
-
-    The return type of this function is :class:`.Integer`.
-
-    .. versionadded:: 1.1
-
-    """
-
-    type = sqltypes.Integer()
-    inherit_cache = True
-
-
-class percent_rank(GenericFunction):
-    """Implement the ``percent_rank`` hypothetical-set aggregate function.
-
-    This function must be used with the :meth:`.FunctionElement.within_group`
-    modifier to supply a sort expression to operate upon.
-
-    The return type of this function is :class:`.Numeric`.
-
-    .. versionadded:: 1.1
-
-    """
-
-    type = sqltypes.Numeric()
-    inherit_cache = True
-
-
-class cume_dist(GenericFunction):
-    """Implement the ``cume_dist`` hypothetical-set aggregate function.
-
-    This function must be used with the :meth:`.FunctionElement.within_group`
-    modifier to supply a sort expression to operate upon.
-
-    The return type of this function is :class:`.Numeric`.
-
-    .. versionadded:: 1.1
-
-    """
-
-    type = sqltypes.Numeric()
-    inherit_cache = True
-
-
-class cube(GenericFunction):
-    r"""Implement the ``CUBE`` grouping operation.
-
-    This function is used as part of the GROUP BY of a statement,
-    e.g. :meth:`_expression.Select.group_by`::
-
-        stmt = select(
-            func.sum(table.c.value), table.c.col_1, table.c.col_2
-        ).group_by(func.cube(table.c.col_1, table.c.col_2))
-
-    .. versionadded:: 1.2
-
-    """
-    _has_args = True
-    inherit_cache = True
-
-
-class rollup(GenericFunction):
-    r"""Implement the ``ROLLUP`` grouping operation.
-
-    This function is used as part of the GROUP BY of a statement,
-    e.g. :meth:`_expression.Select.group_by`::
-
-        stmt = select(
-            func.sum(table.c.value), table.c.col_1, table.c.col_2
-        ).group_by(func.rollup(table.c.col_1, table.c.col_2))
-
-    .. versionadded:: 1.2
-
-    """
-    _has_args = True
-    inherit_cache = True
-
-
-class grouping_sets(GenericFunction):
-    r"""Implement the ``GROUPING SETS`` grouping operation.
-
-    This function is used as part of the GROUP BY of a statement,
-    e.g. :meth:`_expression.Select.group_by`::
-
-        stmt = select(
-            func.sum(table.c.value), table.c.col_1, table.c.col_2
-        ).group_by(func.grouping_sets(table.c.col_1, table.c.col_2))
-
-    In order to group by multiple sets, use the :func:`.tuple_` construct::
-
-        from sqlalchemy import tuple_
-
-        stmt = select(
-            func.sum(table.c.value),
-            table.c.col_1, table.c.col_2,
-            table.c.col_3
-        ).group_by(
-            func.grouping_sets(
-                tuple_(table.c.col_1, table.c.col_2),
-                tuple_(table.c.value, table.c.col_3),
-            )
-        )
-
-
-    .. versionadded:: 1.2
-
-    """
-    _has_args = True
-    inherit_cache = True
+    """Implement the ``rank`` hypothetical

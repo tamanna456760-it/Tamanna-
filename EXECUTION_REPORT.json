@@ -1,0 +1,178 @@
+{
+  "python": [
+    {
+      "file": "run.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/run.py",
+      "status": "SUCCESS",
+      "return_code": 0,
+      "output": "==================================================\n🚀 TAMANNA SYSTEM\n==================================================\nStarted : 2026-07-14 20:31:59.583548\nHealth check unavailable: No module named 'tools'\nEnvironment info unavailable: No module named 'tools'\nLogger unavailable: No module named 'tools'\n\n✅ Tamanna System is running.\n==================================================\n",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:31:59.602495"
+    },
+    {
+      "file": "ai_brain_core.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/ai_brain_core.py",
+      "status": "SUCCESS",
+      "return_code": 0,
+      "output": "==================================================\nTamanna AI Brain Core\n==================================================\n{'name': 'Tamanna AI', 'version': '1.0.0', 'started': '2026-07-14T20:32:29.754030', 'memory': {'status': 'online', 'tasks_completed': 0, 'last_command': None}}\n{'success': True, 'status': 'online'}\n{'success': True, 'cpu': 'unknown', 'memory': 'unknown', 'disk': 'unknown'}\n{'success': True, 'message': 'Memory saved.'}\n",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:32:29.781844"
+    },
+    {
+      "file": "ai_system_monitor.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/ai_system_monitor.py",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "psutil is not installed.\nInstall with: pip install psutil\n",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:32:29.923723"
+    },
+    {
+      "file": "tamanna_master_ai.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/tamanna_master_ai.py",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "psutil is not installed.\nInstall with: pip install psutil\n",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:32:30.105239"
+    },
+    {
+      "file": "tamanna_distributed_ai.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/tamanna_distributed_ai.py",
+      "status": "SUCCESS",
+      "return_code": 0,
+      "output": "{\n    \"system\": \"Tamanna Distributed AI\",\n    \"version\": \"1.0.0\",\n    \"tasks\": [\n        {\n            \"task\": \"health_check\",\n            \"status\": \"completed\",\n            \"started\": \"2026-07-14T20:32:30.236079\",\n            \"finished\": \"2026-07-14T20:32:31.236746\"\n        },\n        {\n            \"task\": \"log_scan\",\n            \"status\": \"completed\",\n            \"started\": \"2026-07-14T20:32:30.236712\",\n            \"finished\": \"2026-07-14T20:32:31.237060\"\n        },\n        {\n            \"task",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:32:31.274492"
+    },
+    {
+      "file": "tamanna_head.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/tamanna_head.py",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "No output",
+      "error": "  File \"/data/data/com.termux/files/home/tamanna-/tamanna_head.py\", line 96\n    print(json.dumps\n         ^\nSyntaxError: '(' was never closed\n",
+      "timestamp": "2026-07-14T20:32:31.406037"
+    },
+    {
+      "file": "tamanna_auto_counter.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/tamanna_auto_counter.py",
+      "status": "SUCCESS",
+      "return_code": 0,
+      "output": "==================================================\nTamanna Auto Counter\n==================================================\n{\n    \"timestamp\": \"2026-07-14T20:32:46.545363\",\n    \"status\": \"log_not_found\",\n    \"alerts\": []\n}\n\nReport saved to counter_report.json\n",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:32:46.574289"
+    },
+    {
+      "file": "tamanna_cli.py",
+      "path": "/data/data/com.termux/files/home/tamanna-/tamanna_cli.py",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "psutil is not installed.\nInstall with: pip install psutil\n",
+      "error": "No error",
+      "timestamp": "2026-07-14T20:32:46.743687"
+    }
+  ],
+  "javascript": [
+    {
+      "file": "index.js",
+      "path": "/data/data/com.termux/files/home/tamanna-/index.js",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "No output",
+      "error": "file:///data/data/com.termux/files/home/tamanna-/index.js:3\nconst http = require(\"http\");\n             ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\nThis file is being treated as an ES module because it has a '.js' file extension and '/data/data/com.termux/files/home/package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\n    at file:///data/data/com.termux/files/home/tamanna-/index.js:3:14\n",
+      "timestamp": "2026-07-14T20:32:47.394220"
+    },
+    {
+      "file": "bot.js",
+      "path": "/data/data/com.termux/files/home/tamanna-/bot.js",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "No output",
+      "error": "file:///data/data/com.termux/files/home/tamanna-/bot.js:3\nconst readline = require(\"readline\");\n                 ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\nThis file is being treated as an ES module because it has a '.js' file extension and '/data/data/com.termux/files/home/package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\n    at file:///data/data/com.termux/files/home/tamanna-/bot.",
+      "timestamp": "2026-07-14T20:32:48.023519"
+    },
+    {
+      "file": "watcher.js",
+      "path": "/data/data/com.termux/files/home/tamanna-/watcher.js",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "No output",
+      "error": "file:///data/data/com.termux/files/home/tamanna-/watcher.js:3\nconst fs = require(\"fs\");\n           ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\nThis file is being treated as an ES module because it has a '.js' file extension and '/data/data/com.termux/files/home/package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\n    at file:///data/data/com.termux/files/home/tamanna-/watcher.js:3:12\n  ",
+      "timestamp": "2026-07-14T20:32:48.653600"
+    }
+  ],
+  "shell": [
+    {
+      "file": "tamanna_runner.sh",
+      "path": "/data/data/com.termux/files/home/tamanna-/tamanna_runner.sh",
+      "status": "FAILED",
+      "return_code": 1,
+      "output": "Folder /data/data/com.termux/files/home/Tamanna not found!\n",
+      "error": "/data/data/com.termux/files/home/tamanna-/tamanna_runner.sh: line 9: /data/data/com.termux/files/home/Tamanna/run_terminal.log: No such file or directory\ntee: /data/data/com.termux/files/home/Tamanna/run_terminal.log: No such file or directory\n",
+      "timestamp": "2026-07-14T20:32:48.695192"
+    }
+  ],
+  "errors": [
+    {
+      "file": "auto_code_manager.py",
+      "error": "Execution timeout after 15 seconds",
+      "type": "Python"
+    },
+    {
+      "file": "auto_fix_issues.py",
+      "error": "Execution timeout after 15 seconds",
+      "type": "Python"
+    },
+    {
+      "file": "ai_system_monitor.py",
+      "error": "",
+      "type": "Python"
+    },
+    {
+      "file": "tamanna_master_ai.py",
+      "error": "",
+      "type": "Python"
+    },
+    {
+      "file": "tamanna_head.py",
+      "error": "  File \"/data/data/com.termux/files/home/tamanna-/tamanna_head.py\", line 96\n    print(json.dumps\n         ^\nSyntaxError: '(' was never closed\n",
+      "type": "Python"
+    },
+    {
+      "file": "tamanna_security_ai.py",
+      "error": "Execution timeout after 15 seconds",
+      "type": "Python"
+    },
+    {
+      "file": "tamanna_cli.py",
+      "error": "",
+      "type": "Python"
+    },
+    {
+      "file": "index.js",
+      "error": "file:///data/data/com.termux/files/home/tamanna-/index.js:3\nconst http = require(\"http\");\n             ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\nThis file is being treated as an ES module because it has a '.js' file extension and '/data/data/com.termux/files/home/package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\n    at file:///data/data/com.termux/files/home/tamanna-/index.js:3:14\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.3.1\n",
+      "type": "JavaScript"
+    },
+    {
+      "file": "bot.js",
+      "error": "file:///data/data/com.termux/files/home/tamanna-/bot.js:3\nconst readline = require(\"readline\");\n                 ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\nThis file is being treated as an ES module because it has a '.js' file extension and '/data/data/com.termux/files/home/package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\n    at file:///data/data/com.termux/files/home/tamanna-/bot.js:3:18\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.3.1\n",
+      "type": "JavaScript"
+    },
+    {
+      "file": "watcher.js",
+      "error": "file:///data/data/com.termux/files/home/tamanna-/watcher.js:3\nconst fs = require(\"fs\");\n           ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\nThis file is being treated as an ES module because it has a '.js' file extension and '/data/data/com.termux/files/home/package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\n    at file:///data/data/com.termux/files/home/tamanna-/watcher.js:3:12\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:646:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.3.1\n",
+      "type": "JavaScript"
+    }
+  ],
+  "summary": {
+    "total_python": 8,
+    "total_javascript": 3,
+    "total_shell": 1,
+    "total_errors": 10,
+    "total_successful": 4,
+    "total_failed": 11,
+    "execution_time": "0:01:51.871468",
+    "timestamp": "2026-07-14T20:32:48.695985"
+  }
+}

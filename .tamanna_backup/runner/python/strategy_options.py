@@ -4,9 +4,7 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""
-
-"""
+""" """
 
 from . import util as orm_util
 from .attributes import QueryableAttribute
@@ -176,8 +174,7 @@ class Load(Generative, LoaderOption):
             k1, k2 = ck
 
             opt._extra_criteria = tuple(
-                k2._apply_params_to_element(k1, crit)
-                for crit in opt._extra_criteria
+                k2._apply_params_to_element(k1, crit) for crit in opt._extra_criteria
             )
 
         return self._deep_clone(applied, process)
@@ -201,9 +198,11 @@ class Load(Generative, LoaderOption):
                 [
                     (
                         key,
-                        value._deep_clone(applied, process)
-                        if isinstance(value, Load)
-                        else value,
+                        (
+                            value._deep_clone(applied, process)
+                            if isinstance(value, Load)
+                            else value
+                        ),
                     )
                     for key, value in self.context.items()
                 ]
@@ -238,9 +237,7 @@ class Load(Generative, LoaderOption):
     _of_type = None
     _extra_criteria = ()
 
-    def process_compile_state_replaced_entities(
-        self, compile_state, mapper_entities
-    ):
+    def process_compile_state_replaced_entities(self, compile_state, mapper_entities):
         if not compile_state.compile_options._enable_eagerloads:
             return
 
@@ -273,9 +270,7 @@ class Load(Generative, LoaderOption):
                     continue
                 chopped_start_path = self._chop_path(start_path, current_path)
                 if chopped_start_path is not None:
-                    compile_state.attributes[
-                        (token, chopped_start_path)
-                    ] = loader
+                    compile_state.attributes[(token, chopped_start_path)] = loader
         else:
             compile_state.attributes.update(self.context)
 
@@ -400,8 +395,7 @@ class Load(Generative, LoaderOption):
                                 path.entity,
                                 (
                                     "  Did you mean to use "
-                                    "%s.of_type(%s)?"
-                                    % (path[-2], attr.class_.__name__)
+                                    "%s.of_type(%s)?" % (path[-2], attr.class_.__name__)
                                     if len(path) > 1
                                     and path.entity.is_mapper
                                     and attr.parent.is_aliased_class
@@ -435,9 +429,9 @@ class Load(Generative, LoaderOption):
                             ext_info.mapper,
                             aliased=True,
                             _use_mapper_path=True,
-                            _existing_alias=inspect(existing)
-                            if existing is not None
-                            else None,
+                            _existing_alias=(
+                                inspect(existing) if existing is not None else None
+                            ),
                         )
 
                         ext_info = inspect(ac)
@@ -518,9 +512,7 @@ class Load(Generative, LoaderOption):
             opt._apply_to_parent(self, apply_cache, bound)
 
     @_generative
-    def set_relationship_strategy(
-        self, attr, strategy, propagate_to_loaders=True
-    ):
+    def set_relationship_strategy(self, attr, strategy, propagate_to_loaders=True):
         strategy = self._coerce_strat(strategy)
         self.propagate_to_loaders = propagate_to_loaders
         cloned = self._clone_for_bind_strategy(attr, strategy, "relationship")
@@ -731,9 +723,7 @@ class _UnboundLoad(Load):
 
         return (
             (id_, cls)
-            + vis.visit_multi_list(
-                "path", self.path, self, anon_map, bindparams
-            )
+            + vis.visit_multi_list("path", self.path, self, anon_map, bindparams)
             + ("strategy", self.strategy)
             + (
                 (
@@ -816,9 +806,7 @@ class _UnboundLoad(Load):
         cloned.strategy = self.strategy
         if self.path:
             attr = self.path[-1]
-            if isinstance(attr, util.string_types) and attr.endswith(
-                _DEFAULT_TOKEN
-            ):
+            if isinstance(attr, util.string_types) and attr.endswith(_DEFAULT_TOKEN):
                 attr = attr.split(":")[0] + ":" + _WILDCARD_TOKEN
             cloned._generate_path(
                 parent.path + self.path[0:-1], attr, self.strategy, None
@@ -835,9 +823,7 @@ class _UnboundLoad(Load):
         cloned._to_bind = parent._to_bind
 
         cloned._to_bind[:] = [
-            elem
-            for elem in cloned._to_bind
-            if elem not in uniq and not uniq.add(elem)
+            elem for elem in cloned._to_bind if elem not in uniq and not uniq.add(elem)
         ] + [
             elem._apply_to_parent(parent, applied, bound, to_bind)
             for elem in to_bind
@@ -951,9 +937,7 @@ class _UnboundLoad(Load):
 
     def _chop_path(self, to_chop, path):
         i = -1
-        for i, (c_token, (p_entity, p_prop)) in enumerate(
-            zip(to_chop, path.pairs())
-        ):
+        for i, (c_token, (p_entity, p_prop)) in enumerate(zip(to_chop, path.pairs())):
             if isinstance(c_token, util.string_types):
                 if i == 0 and c_token.endswith(":" + _DEFAULT_TOKEN):
                     return to_chop
@@ -1154,8 +1138,7 @@ class _UnboundLoad(Load):
                         "root entities in this query, e.g. %s. Please "
                         "specify the full path "
                         "from one of the root entities to the target "
-                        "attribute. "
-                        % (prop, ", ".join(str(x) for x in entities))
+                        "attribute. " % (prop, ", ".join(str(x) for x in entities))
                     )
             else:
                 return None
@@ -1172,8 +1155,7 @@ class _UnboundLoad(Load):
                         % (
                             ", ".join(str(ent) for ent in entities),
                             ", ".join(
-                                "Load(%s).some_option('*')" % ent
-                                for ent in entities
+                                "Load(%s).some_option('*')" % ent for ent in entities
                             ),
                         )
                     )
@@ -1216,9 +1198,7 @@ class loader_option(object):
 
 See :func:`_orm.%(name)s` for usage examples.
 
-""" % {
-            "name": self.name
-        }
+""" % {"name": self.name}
 
         fn.__doc__ = fn_doc
         return self
@@ -1237,9 +1217,7 @@ See :func:`_orm.%(name)s` for usage examples.
             %(name)s("someattribute").%(name)s("anotherattribute")
         )
 
-""" % {
-            "name": self.name
-        }
+""" % {"name": self.name}
         fn = util.deprecated(
             # This is used by `baked_lazyload_all` was only deprecated in
             # version 1.2 so this must stick around until that is removed
@@ -1320,9 +1298,7 @@ def contains_eager(loadopt, attr, alias=None):
 
 @contains_eager._add_unbound_fn
 def contains_eager(*keys, **kw):
-    return _UnboundLoad()._from_keys(
-        _UnboundLoad.contains_eager, keys, True, kw
-    )
+    return _UnboundLoad()._from_keys(_UnboundLoad.contains_eager, keys, True, kw)
 
 
 @loader_option()
@@ -1363,9 +1339,7 @@ def load_only(loadopt, *attrs):
     .. versionadded:: 0.9.0
 
     """
-    cloned = loadopt.set_column_strategy(
-        attrs, {"deferred": False, "instrument": True}
-    )
+    cloned = loadopt.set_column_strategy(attrs, {"deferred": False, "instrument": True})
     cloned.set_column_strategy(
         "*", {"deferred": True, "instrument": True}, {"undefer_pks": True}
     )
@@ -1814,9 +1788,7 @@ def defer(key, *addl_attrs, **kw):
             "indicate a path.",
             version="1.3",
         )
-    return _UnboundLoad._from_keys(
-        _UnboundLoad.defer, (key,) + addl_attrs, False, kw
-    )
+    return _UnboundLoad._from_keys(_UnboundLoad.defer, (key,) + addl_attrs, False, kw)
 
 
 @loader_option()
@@ -1863,9 +1835,7 @@ def undefer(loadopt, key):
         :func:`_orm.undefer_group`
 
     """
-    return loadopt.set_column_strategy(
-        (key,), {"deferred": False, "instrument": True}
-    )
+    return loadopt.set_column_strategy((key,), {"deferred": False, "instrument": True})
 
 
 @undefer._add_unbound_fn
@@ -1877,9 +1847,7 @@ def undefer(key, *addl_attrs):
             "indicate a path.",
             version="1.3",
         )
-    return _UnboundLoad._from_keys(
-        _UnboundLoad.undefer, (key,) + addl_attrs, False, {}
-    )
+    return _UnboundLoad._from_keys(_UnboundLoad.undefer, (key,) + addl_attrs, False, {})
 
 
 @loader_option()
@@ -1990,11 +1958,7 @@ def selectin_polymorphic(loadopt, classes):
     """
     loadopt.set_class_strategy(
         {"selectinload_polymorphic": True},
-        opts={
-            "entities": tuple(
-                sorted((inspect(cls) for cls in classes), key=id)
-            )
-        },
+        opts={"entities": tuple(sorted((inspect(cls) for cls in classes), key=id))},
     )
     return loadopt
 

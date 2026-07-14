@@ -6,11 +6,11 @@
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
 """SQLAlchemy ORM exceptions."""
+
 from .. import exc as sa_exc
 from .. import util
 from ..exc import MultipleResultsFound  # noqa
 from ..exc import NoResultFound  # noqa
-
 
 NO_STATE = (AttributeError, KeyError)
 """Exception types that may be raised by instrumentation implementations."""
@@ -162,8 +162,7 @@ class LoaderStrategyException(sa_exc.InvalidRequestError):
         if actual_strategy_type is None:
             sa_exc.InvalidRequestError.__init__(
                 self,
-                "Can't find strategy %s for %s"
-                % (strategy_key, requesting_property),
+                "Can't find strategy %s for %s" % (strategy_key, requesting_property),
             )
         else:
             sa_exc.InvalidRequestError.__init__(

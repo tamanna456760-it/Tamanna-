@@ -1,5 +1,5 @@
-import subprocess
 import json
+import subprocess
 from datetime import datetime
 
 TOOLS = [
@@ -11,25 +11,20 @@ results = []
 
 for tool in TOOLS:
     try:
-        output = subprocess.run(
-            tool,
-            capture_output=True,
-            text=True
+        output = subprocess.run(tool, capture_output=True, text=True)
+
+        results.append(
+            {
+                "tool": tool[0],
+                "return_code": output.returncode,
+                "stdout": output.stdout,
+                "stderr": output.stderr,
+                "timestamp": datetime.utcnow().isoformat(),
+            }
         )
 
-        results.append({
-            "tool": tool[0],
-            "return_code": output.returncode,
-            "stdout": output.stdout,
-            "stderr": output.stderr,
-            "timestamp": datetime.utcnow().isoformat()
-        })
-
     except Exception as e:
-        results.append({
-            "tool": tool[0],
-            "error": str(e)
-        })
+        results.append({"tool": tool[0], "error": str(e)})
 
 with open("lint_report.json", "w") as f:
     json.dump(results, f, indent=4)

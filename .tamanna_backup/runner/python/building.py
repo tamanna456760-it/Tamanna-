@@ -2,6 +2,7 @@
 """
 BD-KING-R7 Build Script
 """
+
 import json
 import os
 from datetime import datetime

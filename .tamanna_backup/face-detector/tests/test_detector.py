@@ -6,8 +6,8 @@ Basic tests for the Face Detector project.
 
 import os
 import unittest
-import cv2
 
+import cv2
 from detector.face_detector import detect_faces
 
 
@@ -15,11 +15,7 @@ class TestFaceDetector(unittest.TestCase):
 
     def test_model_exists(self):
         """Check that the Haar Cascade model file exists."""
-        self.assertTrue(
-            os.path.exists(
-                "models/haarcascade_frontalface_default.xml"
-            )
-        )
+        self.assertTrue(os.path.exists("models/haarcascade_frontalface_default.xml"))
 
     def test_opencv_loaded(self):
         """Check that OpenCV is installed."""

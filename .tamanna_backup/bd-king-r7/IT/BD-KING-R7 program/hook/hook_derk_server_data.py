@@ -6,21 +6,21 @@ import time
 import socket
 from datetime import datetime
 
-CONFIG = {
-    "interval": 5,
-    "output_file": "dark_server_hook.jsonl"
-}
+CONFIG = {"interval": 5, "output_file": "dark_server_hook.jsonl"}
 
 # =========================
 # TIME
 # =========================
 
+
 def ts():
     return datetime.utcnow().isoformat()
+
 
 # =========================
 # SERVER CORE DATA
 # =========================
+
 
 def server_data():
     return {
@@ -28,12 +28,14 @@ def server_data():
         "cpu": psutil.cpu_percent(),
         "ram": psutil.virtual_memory().percent,
         "disk": psutil.disk_usage("/").percent,
-        "process_count": len(psutil.pids())
+        "process_count": len(psutil.pids()),
     }
+
 
 # =========================
 # NETWORK DATA
 # =========================
+
 
 def network_data():
     net = psutil.net_io_counters()
@@ -45,17 +47,21 @@ def network_data():
         "sent": net.bytes_sent,
         "recv": net.bytes_recv,
         "packets_sent": net.packets_sent,
-        "packets_recv": net.packets_recv
+        "packets_recv": net.packets_recv,
     }
+
 
 # =========================
 # PROCESS INTELLIGENCE
 # =========================
 
+
 def process_data():
     top = []
 
-    for p in psutil.process_iter(attrs=['pid', 'name', 'cpu_percent', 'memory_percent']):
+    for p in psutil.process_iter(
+        attrs=["pid", "name", "cpu_percent", "memory_percent"]
+    ):
         try:
             top.append(p.info)
         except:
@@ -63,14 +69,13 @@ def process_data():
 
     top = sorted(top, key=lambda x: x.get("cpu_percent", 0), reverse=True)
 
-    return {
-        "time": ts(),
-        "top_processes": top[:10]
-    }
+    return {"time": ts(), "top_processes": top[:10]}
+
 
 # =========================
 # ANOMALY DETECTOR
 # =========================
+
 
 def anomaly_check(system):
     alerts = []
@@ -86,17 +91,21 @@ def anomaly_check(system):
 
     return alerts if alerts else ["SYSTEM NORMAL"]
 
+
 # =========================
 # DATA WRITER
 # =========================
+
 
 def write(data):
     with open(CONFIG["output_file"], "a") as f:
         f.write(json.dumps(data) + "\n")
 
+
 # =========================
 # MAIN HOOK ENGINE
 # =========================
+
 
 def run_dark_hook():
     system = server_data()
@@ -108,13 +117,14 @@ def run_dark_hook():
         "system": system,
         "network": network,
         "process": process,
-        "alerts": alerts
+        "alerts": alerts,
     }
 
     write(payload)
 
     print("🖤 DARK HOOK ACTIVE:", system["time"])
     print("Alerts:", alerts)
+
 
 # =========================
 # LOOP

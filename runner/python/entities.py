@@ -90,9 +90,7 @@ class ComparableMixin(object):
                 if hasattr(value, "__iter__") and not isinstance(
                     value, compat.string_types
                 ):
-                    if hasattr(value, "__getitem__") and not hasattr(
-                        value, "keys"
-                    ):
+                    if hasattr(value, "__getitem__") and not hasattr(value, "keys"):
                         if list(value) != list(battr):
                             return False
                     else:

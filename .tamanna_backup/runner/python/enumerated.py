@@ -94,9 +94,7 @@ class ENUM(sqltypes.NativeForEmulated, sqltypes.Enum, _StringType):
             return super(ENUM, self)._object_value_for_elem(elem)
 
     def __repr__(self):
-        return util.generic_repr(
-            self, to_inspect=[ENUM, _StringType, sqltypes.Enum]
-        )
+        return util.generic_repr(self, to_inspect=[ENUM, _StringType, sqltypes.Enum])
 
 
 class SET(_StringType):
@@ -169,10 +167,10 @@ class SET(_StringType):
             )
         if self.retrieve_as_bitwise:
             self._bitmap = dict(
-                (value, 2 ** idx) for idx, value in enumerate(self.values)
+                (value, 2**idx) for idx, value in enumerate(self.values)
             )
             self._bitmap.update(
-                (2 ** idx, value) for idx, value in enumerate(self.values)
+                (2**idx, value) for idx, value in enumerate(self.values)
             )
         length = max([len(v) for v in values] + [0])
         kw.setdefault("length", length)
@@ -180,9 +178,7 @@ class SET(_StringType):
 
     def column_expression(self, colexpr):
         if self.retrieve_as_bitwise:
-            return sql.type_coerce(
-                sql.type_coerce(colexpr, sqltypes.Integer) + 0, self
-            )
+            return sql.type_coerce(sql.type_coerce(colexpr, sqltypes.Integer) + 0, self)
         else:
             return colexpr
 

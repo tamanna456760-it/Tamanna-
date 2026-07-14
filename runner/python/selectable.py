@@ -223,9 +223,7 @@ class Selectable(ReturnsRows):
 
         """
 
-        return self.exported_columns.corresponding_column(
-            column, require_embedded
-        )
+        return self.exported_columns.corresponding_column(column, require_embedded)
 
 
 class HasPrefixes(object):
@@ -270,9 +268,7 @@ class HasPrefixes(object):
         """
         dialect = kw.pop("dialect", None)
         if kw:
-            raise exc.ArgumentError(
-                "Unsupported argument(s): %s" % ",".join(kw)
-            )
+            raise exc.ArgumentError("Unsupported argument(s): %s" % ",".join(kw))
         self._setup_prefixes(expr, dialect)
 
     def _setup_prefixes(self, prefixes, dialect=None):
@@ -321,9 +317,7 @@ class HasSuffixes(object):
         """
         dialect = kw.pop("dialect", None)
         if kw:
-            raise exc.ArgumentError(
-                "Unsupported argument(s): %s" % ",".join(kw)
-            )
+            raise exc.ArgumentError("Unsupported argument(s): %s" % ",".join(kw))
         self._setup_suffixes(expr, dialect)
 
     def _setup_suffixes(self, suffixes, dialect=None):
@@ -999,9 +993,7 @@ class Join(roles.DMLTableRole, FromClause):
         :class:`_expression.FromClause` object.
 
         """
-        self.left = coercions.expect(
-            roles.FromClauseRole, left, deannotate=True
-        )
+        self.left = coercions.expect(roles.FromClauseRole, left, deannotate=True)
         self.right = coercions.expect(
             roles.FromClauseRole, right, deannotate=True
         ).self_group()
@@ -1011,9 +1003,9 @@ class Join(roles.DMLTableRole, FromClause):
         else:
             # note: taken from If91f61527236fd4d7ae3cad1f24c38be921c90ba
             # not merged yet
-            self.onclause = coercions.expect(
-                roles.OnClauseRole, onclause
-            ).self_group(against=operators._asbool)
+            self.onclause = coercions.expect(roles.OnClauseRole, onclause).self_group(
+                against=operators._asbool
+            )
 
         self.isouter = isouter
         self.full = full
@@ -1045,9 +1037,7 @@ class Join(roles.DMLTableRole, FromClause):
         return cls(left, right, onclause, isouter=True, full=full)
 
     @classmethod
-    def _create_join(
-        cls, left, right, onclause=None, isouter=False, full=False
-    ):
+    def _create_join(cls, left, right, onclause=None, isouter=False, full=False):
         """Produce a :class:`_expression.Join` object, given two
         :class:`_expression.FromClause`
         expressions.
@@ -1122,14 +1112,10 @@ class Join(roles.DMLTableRole, FromClause):
     @util.preload_module("sqlalchemy.sql.util")
     def _populate_column_collection(self):
         sqlutil = util.preloaded.sql_util
-        columns = [c for c in self.left.columns] + [
-            c for c in self.right.columns
-        ]
+        columns = [c for c in self.left.columns] + [c for c in self.right.columns]
 
         self.primary_key.extend(
-            sqlutil.reduce_columns(
-                (c for c in columns if c.primary_key), self.onclause
-            )
+            sqlutil.reduce_columns((c for c in columns if c.primary_key), self.onclause)
         )
         self._columns._populate_separate_keys(
             (col._tq_key_label, col) for col in columns
@@ -1184,9 +1170,7 @@ class Join(roles.DMLTableRole, FromClause):
         return self._join_condition(left, right, a_subset=left_right)
 
     @classmethod
-    def _join_condition(
-        cls, a, b, a_subset=None, consider_as_foreign_keys=None
-    ):
+    def _join_condition(cls, a, b, a_subset=None, consider_as_foreign_keys=None):
         """Create a join condition between two tables or selectables.
 
         e.g.::
@@ -1214,9 +1198,7 @@ class Join(roles.DMLTableRole, FromClause):
         )
 
         if len(constraints) > 1:
-            cls._joincond_trim_constraints(
-                a, b, constraints, consider_as_foreign_keys
-            )
+            cls._joincond_trim_constraints(a, b, constraints, consider_as_foreign_keys)
 
         if len(constraints) == 0:
             if isinstance(b, FromGrouping):
@@ -1228,8 +1210,7 @@ class Join(roles.DMLTableRole, FromClause):
                 hint = ""
             raise exc.NoForeignKeysError(
                 "Can't find any foreign key relationships "
-                "between '%s' and '%s'.%s"
-                % (a.description, b.description, hint)
+                "between '%s' and '%s'.%s" % (a.description, b.description, hint)
             )
 
         crit = [(x == y) for x, y in list(constraints.values())[0]]
@@ -1256,9 +1237,7 @@ class Join(roles.DMLTableRole, FromClause):
 
     @classmethod
     @util.preload_module("sqlalchemy.sql.util")
-    def _joincond_scan_left_right(
-        cls, a, a_subset, b, consider_as_foreign_keys
-    ):
+    def _joincond_scan_left_right(cls, a, a_subset, b, consider_as_foreign_keys):
         sql_util = util.preloaded.sql_util
 
         a = coercions.expect(roles.FromClauseRole, a)
@@ -1269,9 +1248,7 @@ class Join(roles.DMLTableRole, FromClause):
         for left in (a_subset, a):
             if left is None:
                 continue
-            for fk in sorted(
-                b.foreign_keys, key=lambda fk: fk.parent._creation_order
-            ):
+            for fk in sorted(b.foreign_keys, key=lambda fk: fk.parent._creation_order):
                 if (
                     consider_as_foreign_keys is not None
                     and fk.parent not in consider_as_foreign_keys
@@ -1313,9 +1290,7 @@ class Join(roles.DMLTableRole, FromClause):
         return constraints
 
     @classmethod
-    def _joincond_trim_constraints(
-        cls, a, b, constraints, consider_as_foreign_keys
-    ):
+    def _joincond_trim_constraints(cls, a, b, constraints, consider_as_foreign_keys):
         # more than one constraint matched.  narrow down the list
         # to include just those FKCs that match exactly to
         # "consider_as_foreign_keys".
@@ -1604,10 +1579,7 @@ class AliasedReturnsRows(NoInit, FromClause):
         self.element = selectable
         self._orig_name = name
         if name is None:
-            if (
-                isinstance(selectable, FromClause)
-                and selectable.named_with_column
-            ):
+            if isinstance(selectable, FromClause) and selectable.named_with_column:
                 name = getattr(selectable, "name", None)
                 if isinstance(name, _anonymous_label):
                     name = None
@@ -1785,9 +1757,7 @@ class TableValuedAlias(Alias):
 
         self.joins_implicitly = joins_implicitly
         self._tableval_type = (
-            type_api.TABLEVALUE
-            if table_value_type is None
-            else table_value_type
+            type_api.TABLEVALUE if table_value_type is None else table_value_type
         )
 
     @HasMemoized.memoized_attribute
@@ -2521,9 +2491,7 @@ class HasCTE(roles.HasCTERole):
             :meth:`_expression.HasCTE.cte`.
 
         """
-        return CTE._construct(
-            self, name=name, recursive=recursive, nesting=nesting
-        )
+        return CTE._construct(self, name=name, recursive=recursive, nesting=nesting)
 
 
 class Subquery(AliasedReturnsRows):
@@ -2564,9 +2532,9 @@ class Subquery(AliasedReturnsRows):
     @classmethod
     def _factory(cls, selectable, name=None):
         """Return a :class:`.Subquery` object."""
-        return coercions.expect(
-            roles.SelectStatementRole, selectable
-        ).subquery(name=name)
+        return coercions.expect(roles.SelectStatementRole, selectable).subquery(
+            name=name
+        )
 
     @util.deprecated(
         "1.4",
@@ -2761,8 +2729,7 @@ class TableClause(roles.DMLTableRole, Immutable, FromClause):
         existing = c.table
         if existing is not None and existing is not self:
             raise exc.ArgumentError(
-                "column object '%s' already assigned to table '%s'"
-                % (c.key, existing)
+                "column object '%s' already assigned to table '%s'" % (c.key, existing)
             )
 
         self._columns.add(c)
@@ -2797,11 +2764,7 @@ class TableClause(roles.DMLTableRole, Immutable, FromClause):
 
         """
         return util.preloaded.sql_dml.Update(
-            self,
-            whereclause=whereclause,
-            values=values,
-            inline=inline,
-            **kwargs
+            self, whereclause=whereclause, values=values, inline=inline, **kwargs
         )
 
     @util.preload_module("sqlalchemy.sql.dml")
@@ -3335,9 +3298,7 @@ class SelectStatementGrouping(GroupedElement, SelectBase):
         return self._label_style
 
     def set_label_style(self, label_style):
-        return SelectStatementGrouping(
-            self.element.set_label_style(label_style)
-        )
+        return SelectStatementGrouping(self.element.set_label_style(label_style))
 
     @property
     def _label_style(self):
@@ -3620,8 +3581,7 @@ class GenerativeSelect(DeprecatedSelectBaseGenerations, SelectBase):
 
     @util.deprecated_20(
         ":meth:`_sql.GenerativeSelect.apply_labels`",
-        alternative="Use set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL) "
-        "instead.",
+        alternative="Use set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL) " "instead.",
     )
     def apply_labels(self):
         return self.set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL)
@@ -3629,16 +3589,12 @@ class GenerativeSelect(DeprecatedSelectBaseGenerations, SelectBase):
     @property
     def _group_by_clause(self):
         """ClauseList access to group_by_clauses for legacy dialects"""
-        return ClauseList._construct_raw(
-            operators.comma_op, self._group_by_clauses
-        )
+        return ClauseList._construct_raw(operators.comma_op, self._group_by_clauses)
 
     @property
     def _order_by_clause(self):
         """ClauseList access to order_by_clauses for legacy dialects"""
-        return ClauseList._construct_raw(
-            operators.comma_op, self._order_by_clauses
-        )
+        return ClauseList._construct_raw(operators.comma_op, self._order_by_clauses)
 
     def _offset_or_limit_clause(self, element, name=None, type_=None):
         """Convert the given value to an "offset or limit" clause.
@@ -3647,9 +3603,7 @@ class GenerativeSelect(DeprecatedSelectBaseGenerations, SelectBase):
         an expression is already given, it is passed through.
 
         """
-        return coercions.expect(
-            roles.LimitOffsetRole, element, name=name, type_=type_
-        )
+        return coercions.expect(roles.LimitOffsetRole, element, name=name, type_=type_)
 
     def _offset_or_limit_clause_asint(self, clause, attrname):
         """Convert the "offset or limit" clause of a select construct to an
@@ -3698,9 +3652,7 @@ class GenerativeSelect(DeprecatedSelectBaseGenerations, SelectBase):
         offset isn't currently set to an integer.
 
         """
-        return self._offset_or_limit_clause_asint(
-            self._offset_clause, "offset"
-        )
+        return self._offset_or_limit_clause_asint(self._offset_clause, "offset")
 
     @property
     def _has_row_limiting_clause(self):
@@ -3899,8 +3851,7 @@ class GenerativeSelect(DeprecatedSelectBaseGenerations, SelectBase):
             self._order_by_clauses = ()
         else:
             self._order_by_clauses += tuple(
-                coercions.expect(roles.OrderByRole, clause)
-                for clause in clauses
+                coercions.expect(roles.OrderByRole, clause) for clause in clauses
             )
 
     @_generative
@@ -3932,8 +3883,7 @@ class GenerativeSelect(DeprecatedSelectBaseGenerations, SelectBase):
             self._group_by_clauses = ()
         else:
             self._group_by_clauses += tuple(
-                coercions.expect(roles.GroupByRole, clause)
-                for clause in clauses
+                coercions.expect(roles.GroupByRole, clause) for clause in clauses
             )
 
 
@@ -3996,9 +3946,7 @@ class CompoundSelect(HasCompileState, GenerativeSelect):
         self._auto_correlate = kwargs.pop("correlate", False)
         self.keyword = keyword
         self.selects = [
-            coercions.expect(roles.CompoundElementRole, s).self_group(
-                against=self
-            )
+            coercions.expect(roles.CompoundElementRole, s).self_group(against=self)
             for s in selects
         ]
 
@@ -4178,8 +4126,7 @@ class CompoundSelect(HasCompileState, GenerativeSelect):
             zip(*[s.selected_columns for s in self.selects]),
         ):
             subq_col._proxies = [
-                c._annotate({"weight": i + 1})
-                for (i, c) in enumerate(select_cols)
+                c._annotate({"weight": i + 1}) for (i, c) in enumerate(select_cols)
             ]
 
     def _refresh_for_new_column(self, column):
@@ -4471,16 +4418,10 @@ class SelectState(util.MemoizedSlots, CompileState):
         return self._normalize_froms(
             itertools.chain(
                 itertools.chain.from_iterable(
-                    [
-                        element._from_objects
-                        for element in statement._raw_columns
-                    ]
+                    [element._from_objects for element in statement._raw_columns]
                 ),
                 itertools.chain.from_iterable(
-                    [
-                        element._from_objects
-                        for element in statement._where_criteria
-                    ]
+                    [element._from_objects for element in statement._where_criteria]
                 ),
                 self.from_clauses,
             ),
@@ -4545,9 +4486,7 @@ class SelectState(util.MemoizedSlots, CompileState):
                     for f in froms
                     if f
                     not in _cloned_intersection(
-                        _cloned_intersection(
-                            froms, explicit_correlate_froms or ()
-                        ),
+                        _cloned_intersection(froms, explicit_correlate_froms or ()),
                         to_correlate,
                     )
                 ]
@@ -4559,9 +4498,7 @@ class SelectState(util.MemoizedSlots, CompileState):
                 for f in froms
                 if f
                 not in _cloned_difference(
-                    _cloned_intersection(
-                        froms, explicit_correlate_froms or ()
-                    ),
+                    _cloned_intersection(froms, explicit_correlate_froms or ()),
                     self.statement._correlate_except,
                 )
             ]
@@ -4575,8 +4512,7 @@ class SelectState(util.MemoizedSlots, CompileState):
             froms = [
                 f
                 for f in froms
-                if f
-                not in _cloned_intersection(froms, implicit_correlate_froms)
+                if f not in _cloned_intersection(froms, implicit_correlate_froms)
             ]
 
             if not len(froms):
@@ -4598,9 +4534,7 @@ class SelectState(util.MemoizedSlots, CompileState):
             if c._allow_label_resolve
         )
         only_froms = dict(
-            (c.key, c)
-            for c in _select_iterables(self.froms)
-            if c._allow_label_resolve
+            (c.key, c) for c in _select_iterables(self.froms) if c._allow_label_resolve
         )
         only_cols = with_cols.copy()
         for key, value in only_froms.items():
@@ -4620,7 +4554,7 @@ class SelectState(util.MemoizedSlots, CompileState):
         return [c for c in _select_iterables(statement._raw_columns)]
 
     def _setup_joins(self, args, raw_columns):
-        for (right, onclause, left, flags) in args:
+        for right, onclause, left, flags in args:
             isouter = flags["isouter"]
             full = flags["full"]
 
@@ -4632,9 +4566,7 @@ class SelectState(util.MemoizedSlots, CompileState):
                     raw_columns, left, right, onclause
                 )
             else:
-                (replace_from_obj_index) = self._join_place_explicit_left_side(
-                    left
-                )
+                replace_from_obj_index = self._join_place_explicit_left_side(left)
 
             if replace_from_obj_index is not None:
                 # splice into an existing element in the
@@ -4661,9 +4593,7 @@ class SelectState(util.MemoizedSlots, CompileState):
                 )
 
     @util.preload_module("sqlalchemy.sql.util")
-    def _join_determine_implicit_left_side(
-        self, raw_columns, left, right, onclause
-    ):
+    def _join_determine_implicit_left_side(self, raw_columns, left, right, onclause):
         """When join conditions don't express the left side explicitly,
         determine if an existing FROM or entity in this query
         can serve as the left hand side.
@@ -4694,10 +4624,7 @@ class SelectState(util.MemoizedSlots, CompileState):
                     [element._from_objects for element in raw_columns]
                 ),
                 itertools.chain.from_iterable(
-                    [
-                        element._from_objects
-                        for element in statement._where_criteria
-                    ]
+                    [element._from_objects for element in statement._where_criteria]
                 ),
             ):
 
@@ -4823,9 +4750,7 @@ class _MemoizedSelectEntities(
             self._with_options = select_stmt._with_options
 
             select_stmt._memoized_select_entities += (self,)
-            select_stmt._raw_columns = (
-                select_stmt._setup_joins
-            ) = (
+            select_stmt._raw_columns = select_stmt._setup_joins = (
                 select_stmt._legacy_setup_joins
             ) = select_stmt._with_options = ()
 
@@ -5166,9 +5091,7 @@ class Select(
 
         if cols_present:
             self._raw_columns = [
-                coercions.expect(
-                    roles.ColumnsClauseRole, c, apply_propagate_attrs=self
-                )
+                coercions.expect(roles.ColumnsClauseRole, c, apply_propagate_attrs=self)
                 for c in columns
             ]
         else:
@@ -5230,9 +5153,7 @@ class Select(
 
         self = cls.__new__(cls)
         self._raw_columns = [
-            coercions.expect(
-                roles.ColumnsClauseRole, ent, apply_propagate_attrs=self
-            )
+            coercions.expect(roles.ColumnsClauseRole, ent, apply_propagate_attrs=self)
             for ent in entities
         ]
 
@@ -5301,9 +5222,7 @@ class Select(
                 isinstance(args[0], list)
                 or (
                     hasattr(args[0], "__iter__")
-                    and not isinstance(
-                        args[0], util.string_types + (ClauseElement,)
-                    )
+                    and not isinstance(args[0], util.string_types + (ClauseElement,))
                     and inspect(args[0], raiseerr=False) is None
                     and not hasattr(args[0], "__clause_element__")
                 )
@@ -5328,9 +5247,7 @@ class Select(
 
     def _filter_by_zero(self):
         if self._setup_joins:
-            meth = SelectState.get_plugin_class(
-                self
-            ).determine_last_joined_entity
+            meth = SelectState.get_plugin_class(self).determine_last_joined_entity
             _last_joined_entity = meth(self)
             if _last_joined_entity is not None:
                 return _last_joined_entity
@@ -5497,14 +5414,10 @@ class Select(
         Usage is the same as that of :meth:`_selectable.Select.join_from`.
 
         """
-        return self.join_from(
-            from_, target, onclause=onclause, isouter=True, full=full
-        )
+        return self.join_from(from_, target, onclause=onclause, isouter=True, full=full)
 
     @_generative
-    def join_from(
-        self, from_, target, onclause=None, isouter=False, full=False
-    ):
+    def join_from(self, from_, target, onclause=None, isouter=False, full=False):
         r"""Create a SQL JOIN against this :class:`_expression.Select`
         object's criterion
         and apply generatively, returning the newly resulting
@@ -5670,9 +5583,7 @@ class Select(
 
         """
 
-        return SelectState.get_plugin_class(self).get_columns_clause_froms(
-            self
-        )
+        return SelectState.get_plugin_class(self).get_columns_clause_froms(self)
 
     @property
     def inner_columns(self):
@@ -5784,9 +5695,7 @@ class Select(
 
     def _set_entities(self, entities):
         self._raw_columns = [
-            coercions.expect(
-                roles.ColumnsClauseRole, ent, apply_propagate_attrs=self
-            )
+            coercions.expect(roles.ColumnsClauseRole, ent, apply_propagate_attrs=self)
             for ent in util.to_list(entities)
         ]
 
@@ -5934,9 +5843,7 @@ class Select(
 
         """
 
-        return BooleanClauseList._construct_for_whereclause(
-            self._where_criteria
-        )
+        return BooleanClauseList._construct_for_whereclause(self._where_criteria)
 
     _whereclause = whereclause
 
@@ -5961,9 +5868,7 @@ class Select(
         its HAVING clause, joined to the existing clause via AND, if any.
 
         """
-        self._having_criteria += (
-            coercions.expect(roles.WhereHavingRole, having),
-        )
+        self._having_criteria += (coercions.expect(roles.WhereHavingRole, having),)
 
     @_generative
     def distinct(self, *expr):
@@ -6178,11 +6083,7 @@ class Select(
         conv = SelectState._column_naming_convention(self._label_style)
 
         return ColumnCollection(
-            [
-                (conv(c), c)
-                for c in self._all_selected_columns
-                if not c._is_text_clause
-            ]
+            [(conv(c), c) for c in self._all_selected_columns if not c._is_text_clause]
         ).as_immutable()
 
     @HasMemoized.memoized_attribute
@@ -6207,9 +6108,7 @@ class Select(
         """
         cols = self._all_selected_columns
 
-        key_naming_convention = SelectState._column_naming_convention(
-            self._label_style
-        )
+        key_naming_convention = SelectState._column_naming_convention(self._label_style)
 
         names = {}
 
@@ -6231,17 +6130,15 @@ class Select(
             repeated = False
 
             if not c._render_label_in_columns_clause:
-                effective_name = (
-                    required_label_name
-                ) = fallback_label_name = None
+                effective_name = required_label_name = fallback_label_name = None
             elif label_style_none:
                 effective_name = required_label_name = None
                 fallback_label_name = c._non_anon_label or c._anon_name_label
             else:
                 if table_qualified:
-                    required_label_name = (
-                        effective_name
-                    ) = fallback_label_name = c._tq_label
+                    required_label_name = effective_name = fallback_label_name = (
+                        c._tq_label
+                    )
                 else:
                     effective_name = fallback_label_name = c._non_anon_label
                     required_label_name = None
@@ -6260,8 +6157,8 @@ class Select(
                             # here, "required_label_name" is sent as
                             # "None" and "fallback_label_name" is sent.
                             if table_qualified:
-                                fallback_label_name = (
-                                    c._dedupe_anon_tq_label_idx(dedupe_hash)
+                                fallback_label_name = c._dedupe_anon_tq_label_idx(
+                                    dedupe_hash
                                 )
                                 dedupe_hash += 1
                             else:
@@ -6272,9 +6169,9 @@ class Select(
                         else:
                             fallback_label_name = c._anon_name_label
                     else:
-                        required_label_name = (
-                            effective_name
-                        ) = fallback_label_name = expr_label
+                        required_label_name = effective_name = fallback_label_name = (
+                            expr_label
+                        )
 
             if effective_name is not None:
                 if effective_name in names:
@@ -6286,13 +6183,11 @@ class Select(
                         # different column under the same name.  apply
                         # disambiguating label
                         if table_qualified:
-                            required_label_name = (
-                                fallback_label_name
-                            ) = c._anon_tq_label
+                            required_label_name = fallback_label_name = c._anon_tq_label
                         else:
-                            required_label_name = (
-                                fallback_label_name
-                            ) = c._anon_name_label
+                            required_label_name = fallback_label_name = (
+                                c._anon_name_label
+                            )
 
                         if anon_for_dupe_key and required_label_name in names:
                             # here, c._anon_tq_label is definitely unique to
@@ -6307,14 +6202,14 @@ class Select(
                             # subsequent occurrences of the column so that the
                             # original stays non-ambiguous
                             if table_qualified:
-                                required_label_name = (
-                                    fallback_label_name
-                                ) = c._dedupe_anon_tq_label_idx(dedupe_hash)
+                                required_label_name = fallback_label_name = (
+                                    c._dedupe_anon_tq_label_idx(dedupe_hash)
+                                )
                                 dedupe_hash += 1
                             else:
-                                required_label_name = (
-                                    fallback_label_name
-                                ) = c._dedupe_anon_label_idx(dedupe_hash)
+                                required_label_name = fallback_label_name = (
+                                    c._dedupe_anon_label_idx(dedupe_hash)
+                                )
                                 dedupe_hash += 1
                             repeated = True
                         else:
@@ -6323,14 +6218,14 @@ class Select(
                         # same column under the same name. apply the "dedupe"
                         # label so that the original stays non-ambiguous
                         if table_qualified:
-                            required_label_name = (
-                                fallback_label_name
-                            ) = c._dedupe_anon_tq_label_idx(dedupe_hash)
+                            required_label_name = fallback_label_name = (
+                                c._dedupe_anon_tq_label_idx(dedupe_hash)
+                            )
                             dedupe_hash += 1
                         else:
-                            required_label_name = (
-                                fallback_label_name
-                            ) = c._dedupe_anon_label_idx(dedupe_hash)
+                            required_label_name = fallback_label_name = (
+                                c._dedupe_anon_label_idx(dedupe_hash)
+                            )
                             dedupe_hash += 1
                         repeated = True
                 else:
@@ -6383,9 +6278,7 @@ class Select(
         subquery._columns._populate_separate_keys(prox)
 
     def _needs_parens_for_grouping(self):
-        return self._has_row_limiting_clause or bool(
-            self._order_by_clause.clauses
-        )
+        return self._has_row_limiting_clause or bool(self._order_by_clause.clauses)
 
     def self_group(self, against=None):
         """Return a 'grouping' construct as per the
@@ -6786,9 +6679,7 @@ class Exists(UnaryExpression):
 
         """
         e = self._clone()
-        e.element = self._regroup(
-            lambda element: element.correlate(*fromclause)
-        )
+        e.element = self._regroup(lambda element: element.correlate(*fromclause))
         return e
 
     def correlate_except(self, *fromclause):
@@ -6801,9 +6692,7 @@ class Exists(UnaryExpression):
         """
 
         e = self._clone()
-        e.element = self._regroup(
-            lambda element: element.correlate_except(*fromclause)
-        )
+        e.element = self._regroup(lambda element: element.correlate_except(*fromclause))
         return e
 
     def select_from(self, *froms):
@@ -6912,9 +6801,7 @@ class TextualSelect(SelectBase):
         .. versionadded:: 1.4
 
         """
-        return ColumnCollection(
-            (c.key, c) for c in self.column_args
-        ).as_immutable()
+        return ColumnCollection((c.key, c) for c in self.column_args).as_immutable()
 
     @property
     def _all_selected_columns(self):

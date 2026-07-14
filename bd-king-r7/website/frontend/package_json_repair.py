@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import json
-import shutil
 import re
-from pathlib import Path
+import shutil
 from datetime import datetime
+from pathlib import Path
 
 FILE = Path("package.json")
 
@@ -12,9 +12,7 @@ if not FILE.exists():
     exit(1)
 
 # Backup
-backup = FILE.with_suffix(
-    f".backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
-)
+backup = FILE.with_suffix(f".backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json")
 
 shutil.copy(FILE, backup)
 print(f"✅ Backup created: {backup}")
@@ -32,7 +30,7 @@ except json.JSONDecodeError as e:
     print(e)
 
 # Detect multiple JSON objects
-parts = re.split(r'\n\s*\}\s*\n\s*\{', data)
+parts = re.split(r"\n\s*\}\s*\n\s*\{", data)
 
 if len(parts) > 1:
     print("⚠️ Multiple JSON blocks detected")
@@ -42,9 +40,7 @@ if len(parts) > 1:
     try:
         obj = json.loads(fixed)
 
-        FILE.write_text(
-            json.dumps(obj, indent=2) + "\n"
-        )
+        FILE.write_text(json.dumps(obj, indent=2) + "\n")
 
         print("✅ Auto repaired first JSON block")
         print("Run: npm install")

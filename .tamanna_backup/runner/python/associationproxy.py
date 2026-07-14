@@ -13,6 +13,7 @@ transparent proxied access to the endpoint of an association object.
 See the example ``examples/association/proxied_association.py``.
 
 """
+
 import operator
 
 from .. import exc
@@ -373,9 +374,7 @@ class AssociationProxyInstance(object):
         target_class = prop.mapper.class_
 
         try:
-            target_assoc = cls._cls_unwrap_target_assoc_proxy(
-                target_class, value_attr
-            )
+            target_assoc = cls._cls_unwrap_target_assoc_proxy(target_class, value_attr)
         except AttributeError:
             # the proxied attribute doesn't exist on the target class;
             # return an "ambiguous" instance that will work on a per-object
@@ -429,9 +428,7 @@ class AssociationProxyInstance(object):
             )
 
     def _get_property(self):
-        return orm.class_mapper(self.owning_class).get_property(
-            self.target_collection
-        )
+        return orm.class_mapper(self.owning_class).get_property(self.target_collection)
 
     @property
     def _comparator(self):
@@ -452,9 +449,7 @@ class AssociationProxyInstance(object):
 
     @util.memoized_property
     def _unwrap_target_assoc_proxy(self):
-        return self._cls_unwrap_target_assoc_proxy(
-            self.target_class, self.value_attr
-        )
+        return self._cls_unwrap_target_assoc_proxy(self.target_class, self.value_attr)
 
     @property
     def remote_attr(self):
@@ -527,11 +522,7 @@ class AssociationProxyInstance(object):
 
     @util.memoized_property
     def _value_is_scalar(self):
-        return (
-            not self._get_property()
-            .mapper.get_property(self.value_attr)
-            .uselist
-        )
+        return not self._get_property().mapper.get_property(self.value_attr).uselist
 
     @property
     def _target_is_object(self):
@@ -594,11 +585,7 @@ class AssociationProxyInstance(object):
 
     def set(self, obj, values):
         if self.scalar:
-            creator = (
-                self.parent.creator
-                if self.parent.creator
-                else self.target_class
-            )
+            creator = self.parent.creator if self.parent.creator else self.target_class
             target = getattr(obj, self.target_collection)
             if target is None:
                 if values is None:
@@ -625,9 +612,7 @@ class AssociationProxyInstance(object):
         delattr(obj, self.target_collection)
 
     def _new(self, lazy_collection):
-        creator = (
-            self.parent.creator if self.parent.creator else self.target_class
-        )
+        creator = self.parent.creator if self.parent.creator else self.target_class
         collection_class = util.duck_type_collection(lazy_collection())
 
         if self.parent.proxy_factory:
@@ -646,23 +631,17 @@ class AssociationProxyInstance(object):
         if collection_class is list:
             return (
                 collection_class,
-                _AssociationList(
-                    lazy_collection, creator, getter, setter, self
-                ),
+                _AssociationList(lazy_collection, creator, getter, setter, self),
             )
         elif collection_class is dict:
             return (
                 collection_class,
-                _AssociationDict(
-                    lazy_collection, creator, getter, setter, self
-                ),
+                _AssociationDict(lazy_collection, creator, getter, setter, self),
             )
         elif collection_class is set:
             return (
                 collection_class,
-                _AssociationSet(
-                    lazy_collection, creator, getter, setter, self
-                ),
+                _AssociationSet(lazy_collection, creator, getter, setter, self),
             )
         else:
             raise exc.ArgumentError(
@@ -688,14 +667,10 @@ class AssociationProxyInstance(object):
             )
 
     def _inflate(self, proxy):
-        creator = (
-            self.parent.creator and self.parent.creator or self.target_class
-        )
+        creator = self.parent.creator and self.parent.creator or self.target_class
 
         if self.parent.getset_factory:
-            getter, setter = self.parent.getset_factory(
-                self.collection_class, self
-            )
+            getter, setter = self.parent.getset_factory(self.collection_class, self)
         else:
             getter, setter = self.parent._default_getset(self.collection_class)
 
@@ -708,9 +683,7 @@ class AssociationProxyInstance(object):
 
         target_assoc = self._unwrap_target_assoc_proxy
         if target_assoc is not None:
-            inner = target_assoc._criterion_exists(
-                criterion=criterion, **kwargs
-            )
+            inner = target_assoc._criterion_exists(criterion=criterion, **kwargs)
             return self._comparator._criterion_exists(inner)
 
         if self._target_is_object:
@@ -742,15 +715,12 @@ class AssociationProxyInstance(object):
 
         """
         if self._unwrap_target_assoc_proxy is None and (
-            self.scalar
-            and (not self._target_is_object or self._value_is_scalar)
+            self.scalar and (not self._target_is_object or self._value_is_scalar)
         ):
             raise exc.InvalidRequestError(
                 "'any()' not implemented for scalar " "attributes. Use has()."
             )
-        return self._criterion_exists(
-            criterion=criterion, is_has=False, **kwargs
-        )
+        return self._criterion_exists(criterion=criterion, is_has=False, **kwargs)
 
     def has(self, criterion=None, **kwargs):
         """Produce a proxied 'has' expression using EXISTS.
@@ -762,15 +732,12 @@ class AssociationProxyInstance(object):
 
         """
         if self._unwrap_target_assoc_proxy is None and (
-            not self.scalar
-            or (self._target_is_object and not self._value_is_scalar)
+            not self.scalar or (self._target_is_object and not self._value_is_scalar)
         ):
             raise exc.InvalidRequestError(
                 "'has()' not implemented for collections.  " "Use any()."
             )
-        return self._criterion_exists(
-            criterion=criterion, is_has=True, **kwargs
-        )
+        return self._criterion_exists(criterion=criterion, is_has=True, **kwargs)
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.parent)
@@ -846,9 +813,7 @@ class AmbiguousAssociationProxyInstance(AssociationProxyInstance):
         return self
 
     def _populate_cache(self, instance_class, mapper):
-        prop = orm.class_mapper(self.owning_class).get_property(
-            self.target_collection
-        )
+        prop = orm.class_mapper(self.owning_class).get_property(self.target_collection)
 
         if mapper.isa(prop.mapper):
             target_class = instance_class
@@ -891,11 +856,7 @@ class ObjectAssociationProxyInstance(AssociationProxyInstance):
                 if not target_assoc.scalar
                 else target_assoc == obj
             )
-        elif (
-            self._target_is_object
-            and self.scalar
-            and not self._value_is_scalar
-        ):
+        elif self._target_is_object and self.scalar and not self._value_is_scalar:
             return self._comparator.has(
                 getattr(self.target_class, self.value_attr).contains(obj)
             )
@@ -921,14 +882,10 @@ class ObjectAssociationProxyInstance(AssociationProxyInstance):
     def __ne__(self, obj):
         # note the has() here will fail for collections; eq_()
         # is only allowed with a scalar.
-        return self._comparator.has(
-            getattr(self.target_class, self.value_attr) != obj
-        )
+        return self._comparator.has(getattr(self.target_class, self.value_attr) != obj)
 
 
-class ColumnAssociationProxyInstance(
-    ColumnOperators, AssociationProxyInstance
-):
+class ColumnAssociationProxyInstance(ColumnOperators, AssociationProxyInstance):
     """an :class:`.AssociationProxyInstance` that has a database column as a
     target.
     """
@@ -938,18 +895,14 @@ class ColumnAssociationProxyInstance(
 
     def __eq__(self, other):
         # special case "is None" to check for no related row as well
-        expr = self._criterion_exists(
-            self.remote_attr.operate(operator.eq, other)
-        )
+        expr = self._criterion_exists(self.remote_attr.operate(operator.eq, other))
         if other is None:
             return or_(expr, self._comparator == None)
         else:
             return expr
 
     def operate(self, op, *other, **kwargs):
-        return self._criterion_exists(
-            self.remote_attr.operate(op, *other, **kwargs)
-        )
+        return self._criterion_exists(self.remote_attr.operate(op, *other, **kwargs))
 
 
 class _lazy_collection(object):
@@ -1109,14 +1062,7 @@ class _AssociationList(_AssociationCollection):
         col.append(item)
 
     def count(self, value):
-        return sum(
-            [
-                1
-                for _ in util.itertools_filter(
-                    lambda v: v == value, iter(self)
-                )
-            ]
-        )
+        return sum([1 for _ in util.itertools_filter(lambda v: v == value, iter(self))])
 
     def extend(self, values):
         for v in values:
@@ -1349,9 +1295,7 @@ class _AssociationDict(_AssociationCollection):
 
     def update(self, *a, **kw):
         if len(a) > 1:
-            raise TypeError(
-                "update expected at most 1 arguments, got %i" % len(a)
-            )
+            raise TypeError("update expected at most 1 arguments, got %i" % len(a))
         elif len(a) == 1:
             seq_or_map = a[0]
             # discern dict from sequence - took the advice from
@@ -1367,8 +1311,7 @@ class _AssociationDict(_AssociationCollection):
                 except ValueError as err:
                     util.raise_(
                         ValueError(
-                            "dictionary update sequence "
-                            "requires 2-element tuples"
+                            "dictionary update sequence " "requires 2-element tuples"
                         ),
                         replace_context=err,
                     )

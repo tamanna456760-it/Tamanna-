@@ -1,5 +1,6 @@
 import time
 
+
 class RateLimiter:
     def __init__(self, limit=30):
         self.limit = limit
@@ -9,10 +10,7 @@ class RateLimiter:
         now = time.time()
 
         self.requests.setdefault(ip, [])
-        self.requests[ip] = [
-            t for t in self.requests[ip]
-            if now - t < 60
-        ]
+        self.requests[ip] = [t for t in self.requests[ip] if now - t < 60]
 
         if len(self.requests[ip]) >= self.limit:
             return False

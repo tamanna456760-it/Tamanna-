@@ -5,6 +5,7 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 """Public API functions and helpers for declarative."""
+
 from __future__ import absolute_import
 
 import itertools
@@ -651,8 +652,7 @@ class registry(object):
         self._managers[manager] = True
         if manager.registry is not None and manager.is_mapped:
             raise exc.ArgumentError(
-                "Class '%s' already has a primary mapper defined. "
-                % manager.class_
+                "Class '%s' already has a primary mapper defined. " % manager.class_
             )
         manager.registry = self
 

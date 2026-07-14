@@ -5,6 +5,7 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 """Internal implementation for declarative."""
+
 from __future__ import absolute_import
 
 import collections
@@ -225,9 +226,7 @@ class _ImperativeMapperConfig(_MapperConfig):
         table,
         mapper_kw,
     ):
-        super(_ImperativeMapperConfig, self).__init__(
-            registry, cls_, mapper_kw
-        )
+        super(_ImperativeMapperConfig, self).__init__(registry, cls_, mapper_kw)
 
         self.dict_ = {}
         self.local_table = self.set_cls_attribute("__table__", table)
@@ -320,9 +319,7 @@ class _ClassScanMapperConfig(_MapperConfig):
         self._scan_attributes()
 
         with mapperlib._CONFIGURE_MUTEX:
-            clsregistry.add_class(
-                self.classname, self.cls, registry._class_registry
-            )
+            clsregistry.add_class(self.classname, self.cls, registry._class_registry)
 
             self._extract_mappable_attributes()
 
@@ -403,9 +400,7 @@ class _ClassScanMapperConfig(_MapperConfig):
                 # for dataclasses, this could be the
                 # 'default' of the field.  so filter more specifically
                 # for an already-mapped InstrumentedAttribute
-                if ret is not absent and isinstance(
-                    ret, InstrumentedAttribute
-                ):
+                if ret is not absent and isinstance(ret, InstrumentedAttribute):
                     return True
 
                 if all_field is obj:
@@ -478,9 +473,7 @@ class _ClassScanMapperConfig(_MapperConfig):
 
             for name, obj, is_dataclass in local_attributes_for_class():
                 if name == "__mapper_args__":
-                    check_decl = _check_declared_props_nocascade(
-                        obj, name, cls
-                    )
+                    check_decl = _check_declared_props_nocascade(obj, name, cls)
                     if not mapper_args_fn and (not class_mapped or check_decl):
                         # don't even invoke __mapper_args__ until
                         # after we've determined everything about the
@@ -492,23 +485,16 @@ class _ClassScanMapperConfig(_MapperConfig):
                             return dict(cls.__mapper_args__)
 
                 elif name == "__tablename__":
-                    check_decl = _check_declared_props_nocascade(
-                        obj, name, cls
-                    )
+                    check_decl = _check_declared_props_nocascade(obj, name, cls)
                     if not tablename and (not class_mapped or check_decl):
                         tablename = cls.__tablename__
                 elif name == "__table_args__":
-                    check_decl = _check_declared_props_nocascade(
-                        obj, name, cls
-                    )
+                    check_decl = _check_declared_props_nocascade(obj, name, cls)
                     if not table_args and (not class_mapped or check_decl):
                         table_args = cls.__table_args__
-                        if not isinstance(
-                            table_args, (tuple, dict, type(None))
-                        ):
+                        if not isinstance(table_args, (tuple, dict, type(None))):
                             raise exc.ArgumentError(
-                                "__table_args__ value must be a tuple, "
-                                "dict, or None"
+                                "__table_args__ value must be a tuple, " "dict, or None"
                             )
                         if base is not cls:
                             inherited_table_args = True
@@ -552,9 +538,9 @@ class _ClassScanMapperConfig(_MapperConfig):
                                     "@declared_attr.cascading; "
                                     "skipping" % (name, cls)
                                 )
-                            dict_[name] = column_copies[
-                                obj
-                            ] = ret = obj.__get__(obj, cls)
+                            dict_[name] = column_copies[obj] = ret = obj.__get__(
+                                obj, cls
+                            )
                             setattr(cls, name, ret)
                         else:
                             if is_dataclass:
@@ -601,9 +587,7 @@ class _ClassScanMapperConfig(_MapperConfig):
                     # however, check for some more common mistakes
                     else:
                         self._warn_for_decl_attributes(base, name, obj)
-                elif is_dataclass and (
-                    name not in dict_ or dict_[name] is not obj
-                ):
+                elif is_dataclass and (name not in dict_ or dict_[name] is not obj):
                     # here, we are definitely looking at the target class
                     # and not a superclass.   this is currently a
                     # dataclass-only path.  if the name is only
@@ -631,13 +615,10 @@ class _ClassScanMapperConfig(_MapperConfig):
             util.warn(
                 "Attribute '%s' on class %s appears to be a non-schema "
                 "'sqlalchemy.sql.column()' "
-                "object; this won't be part of the declarative mapping"
-                % (key, cls)
+                "object; this won't be part of the declarative mapping" % (key, cls)
             )
 
-    def _produce_column_copies(
-        self, attributes_for_class, attribute_is_overridden
-    ):
+    def _produce_column_copies(self, attributes_for_class, attribute_is_overridden):
         cls = self.cls
         dict_ = self.dict_
         column_copies = self.column_copies
@@ -658,8 +639,7 @@ class _ClassScanMapperConfig(_MapperConfig):
                         "field() objects, use a lambda:."
                     )
                 elif name not in dict_ and not (
-                    "__table__" in dict_
-                    and (obj.name or name) in dict_["__table__"].c
+                    "__table__" in dict_ and (obj.name or name) in dict_["__table__"].c
                 ):
                     column_copies[obj] = copy_ = obj._copy()
                     copy_._creation_order = obj._creation_order
@@ -739,9 +719,7 @@ class _ClassScanMapperConfig(_MapperConfig):
         our_stuff = self.properties
 
         # set up attributes in the order they were created
-        util.sort_dictionary(
-            our_stuff, key=lambda key: our_stuff[key]._creation_order
-        )
+        util.sort_dictionary(our_stuff, key=lambda key: our_stuff[key]._creation_order)
 
         # extract columns from the class dict
         declared_columns = self.declared_columns
@@ -909,8 +887,7 @@ class _ClassScanMapperConfig(_MapperConfig):
                             continue
                         raise exc.ArgumentError(
                             "Column '%s' on class %s conflicts with "
-                            "existing column '%s'"
-                            % (c, cls, inherited_table.c[c.name])
+                            "existing column '%s'" % (c, cls, inherited_table.c[c.name])
                         )
                     if c.primary_key:
                         raise exc.ArgumentError(
@@ -1002,9 +979,7 @@ class _ClassScanMapperConfig(_MapperConfig):
     def map(self, mapper_kw=util.EMPTY_DICT):
         self._prepare_mapper_arguments(mapper_kw)
         if hasattr(self.cls, "__mapper_cls__"):
-            mapper_cls = util.unbound_method_to_callable(
-                self.cls.__mapper_cls__
-            )
+            mapper_cls = util.unbound_method_to_callable(self.cls.__mapper_cls__)
         else:
             mapper_cls = mapper
 

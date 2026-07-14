@@ -16,8 +16,14 @@ NODES = {}
 AI_UNITS = {}
 NUM_NODES = 20
 
-for i in range(1, NUM_NODES+1):
-    NODES[f"node_{i}"] = {"power": 100, "units": 0, "status": "active", "emergency": False}
+for i in range(1, NUM_NODES + 1):
+    NODES[f"node_{i}"] = {
+        "power": 100,
+        "units": 0,
+        "status": "active",
+        "emergency": False,
+    }
+
 
 # =========================
 # SAVE / LOAD
@@ -27,6 +33,7 @@ def save_state():
         json.dump(NODES, f, indent=2)
     with open("ai_units.json", "w") as f:
         json.dump(AI_UNITS, f, indent=2)
+
 
 def load_state():
     global NODES, AI_UNITS
@@ -41,12 +48,14 @@ def load_state():
     except:
         pass
 
+
 # =========================
 # NODE FUNCTIONS
 # =========================
 def broadcast_power(amount):
     for node in NODES:
         NODES[node]["power"] += amount
+
 
 def create_unit(node_name, emergency=False):
     global AI_UNITS
@@ -57,13 +66,16 @@ def create_unit(node_name, emergency=False):
     AI_UNITS[unit_id] = {"power": power, "controlled_by": node_name, "status": "active"}
     NODES[node_name]["units"] += 1
 
+
 def attack_detected(node_name):
     # 20% chance node under attack
-    return random.choice([False]*8 + [True]*2)
+    return random.choice([False] * 8 + [True] * 2)
+
 
 def auto_defense(node_name):
     NODES[node_name]["status"] = "defending"
     NODES[node_name]["power"] += 50
+
 
 # =========================
 # NODE THREAD
@@ -81,6 +93,7 @@ def node_loop(node_name):
         save_state()
         time.sleep(CREATE_INTERVAL)
 
+
 # =========================
 # MASTER OVERRIDE
 # =========================
@@ -93,22 +106,22 @@ def master_override():
                     create_unit(node_name, emergency=True)
         time.sleep(5)
 
+
 # =========================
 # FLASK DASHBOARD
 # =========================
 app = Flask(__name__)
 
+
 @app.route("/")
 def index():
     return render_template("dashboard.html")
 
+
 @app.route("/status")
 def status():
-    return jsonify({
-        "nodes": NODES,
-        "units": AI_UNITS,
-        "total_units": len(AI_UNITS)
-    })
+    return jsonify({"nodes": NODES, "units": AI_UNITS, "total_units": len(AI_UNITS)})
+
 
 # =========================
 # START SYSTEM

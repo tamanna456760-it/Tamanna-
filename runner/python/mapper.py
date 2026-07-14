@@ -14,6 +14,7 @@ This is a semi-private module; the main configurational API of the ORM is
 available in :class:`~sqlalchemy.orm.`.
 
 """
+
 from __future__ import absolute_import
 
 from collections import deque
@@ -588,9 +589,7 @@ class Mapper(
         self.single = False
         self.inherits = inherits
         if local_table is not None:
-            self.local_table = coercions.expect(
-                roles.StrictFromClauseRole, local_table
-            )
+            self.local_table = coercions.expect(roles.StrictFromClauseRole, local_table)
         else:
             self.local_table = None
 
@@ -971,8 +970,7 @@ class Mapper(
                 np = not self.non_primary and "primary" or "non-primary"
                 raise sa_exc.ArgumentError(
                     "Inheritance of %s mapper for class '%s' is "
-                    "only allowed from a %s mapper"
-                    % (np, self.class_.__name__, np)
+                    "only allowed from a %s mapper" % (np, self.class_.__name__, np)
                 )
             # inherit_condition is optional.
             if self.local_table is None:
@@ -1080,9 +1078,7 @@ class Mapper(
             self.inherits._inheriting_mappers.append(self)
             self.base_mapper = self.inherits.base_mapper
             self.passive_updates = self.inherits.passive_updates
-            self.passive_deletes = (
-                self.inherits.passive_deletes or self.passive_deletes
-            )
+            self.passive_deletes = self.inherits.passive_deletes or self.passive_deletes
             self._all_tables = self.inherits._all_tables
 
             if self.polymorphic_identity is not None:
@@ -1111,8 +1107,7 @@ class Mapper(
                 pass
             elif self.polymorphic_load is not None:
                 raise sa_exc.ArgumentError(
-                    "unknown argument for polymorphic_load: %r"
-                    % self.polymorphic_load
+                    "unknown argument for polymorphic_load: %r" % self.polymorphic_load
                 )
 
         else:
@@ -1125,17 +1120,14 @@ class Mapper(
 
         if self.persist_selectable is None:
             raise sa_exc.ArgumentError(
-                "Mapper '%s' does not have a persist_selectable specified."
-                % self
+                "Mapper '%s' does not have a persist_selectable specified." % self
             )
 
     def _set_with_polymorphic(self, with_polymorphic):
         if with_polymorphic == "*":
             self.with_polymorphic = ("*", None)
         elif isinstance(with_polymorphic, (tuple, list)):
-            if isinstance(
-                with_polymorphic[0], util.string_types + (tuple, list)
-            ):
+            if isinstance(with_polymorphic[0], util.string_types + (tuple, list)):
                 self.with_polymorphic = with_polymorphic
             else:
                 self.with_polymorphic = (with_polymorphic, None)
@@ -1237,8 +1229,7 @@ class Mapper(
                 # is removed as any calls to mapper() / Mapper without
                 # the registry setting up first will be rejected.
                 raise sa_exc.ArgumentError(
-                    "Class '%s' already has a primary mapper defined. "
-                    % self.class_
+                    "Class '%s' already has a primary mapper defined. " % self.class_
                 )
             # else:
             # a ClassManager may already exist as
@@ -1256,9 +1247,7 @@ class Mapper(
         manager = instrumentation.register_class(
             self.class_,
             mapper=self,
-            expired_attribute_loader=util.partial(
-                loading.load_scalar_attributes, self
-            ),
+            expired_attribute_loader=util.partial(loading.load_scalar_attributes, self),
             # finalize flag means instrument the __init__ method
             # and call the class_instrument event
             finalize=True,
@@ -1335,9 +1324,7 @@ class Mapper(
                 self._pks_by_table[t] = util.ordered_column_set(
                     t.primary_key
                 ).intersection(pk_cols)
-            self._cols_by_table[t] = util.ordered_column_set(t.c).intersection(
-                all_cols
-            )
+            self._cols_by_table[t] = util.ordered_column_set(t.c).intersection(all_cols)
 
         # if explicit PK argument sent, add those columns to the
         # primary key mappings
@@ -1367,11 +1354,7 @@ class Mapper(
                 % self.local_table.description
             )
 
-        if (
-            self.inherits
-            and not self.concrete
-            and not self._primary_key_argument
-        ):
+        if self.inherits and not self.concrete and not self._primary_key_argument:
             # if inheriting, the "primary key" for this mapper is
             # that of the inheriting (unless concrete or explicit)
             self.primary_key = self.inherits.primary_key
@@ -1408,10 +1391,7 @@ class Mapper(
             self._columntoproperty[col]
             for col in self._columntoproperty
             if self._columntoproperty[col] not in self._identity_key_props
-            and (
-                not hasattr(col, "table")
-                or col.table not in self._cols_by_table
-            )
+            and (not hasattr(col, "table") or col.table not in self._cols_by_table)
         )
 
     def _configure_properties(self):
@@ -1460,9 +1440,7 @@ class Mapper(
                 if column in mapper._columntoproperty:
                     column_key = mapper._columntoproperty[column].key
 
-            self._configure_property(
-                column_key, column, init=False, setparent=True
-            )
+            self._configure_property(column_key, column, init=False, setparent=True)
 
     def _configure_polymorphic_setter(self, init=False):
         """Configure an attribute on the mapper representing the
@@ -1502,9 +1480,7 @@ class Mapper(
             elif isinstance(self.polymorphic_on, MapperProperty):
                 # polymorphic_on is directly a MapperProperty,
                 # ensure it's a ColumnProperty
-                if not isinstance(
-                    self.polymorphic_on, properties.ColumnProperty
-                ):
+                if not isinstance(self.polymorphic_on, properties.ColumnProperty):
                     raise sa_exc.ArgumentError(
                         "Only direct column-mapped "
                         "property or SQL expression "
@@ -1517,9 +1493,7 @@ class Mapper(
                 # only present in the with_polymorphic selectable or
                 # 2. a totally standalone SQL expression which we'd
                 # hope is compatible with this mapper's persist_selectable
-                col = self.persist_selectable.corresponding_column(
-                    self.polymorphic_on
-                )
+                col = self.persist_selectable.corresponding_column(self.polymorphic_on)
                 if col is None:
                     # polymorphic_on doesn't derive from any
                     # column/expression isn't present in the mapped
@@ -1536,14 +1510,12 @@ class Mapper(
                     col = self.polymorphic_on
                     if isinstance(col, schema.Column) and (
                         self.with_polymorphic is None
-                        or self.with_polymorphic[1].corresponding_column(col)
-                        is None
+                        or self.with_polymorphic[1].corresponding_column(col) is None
                     ):
                         raise sa_exc.InvalidRequestError(
                             "Could not map polymorphic_on column "
                             "'%s' to the mapped table - polymorphic "
-                            "loads will not function properly"
-                            % col.description
+                            "loads will not function properly" % col.description
                         )
                 else:
                     # column/expression that polymorphic_on derives from
@@ -1629,9 +1601,7 @@ class Mapper(
                     )
 
             self._set_polymorphic_identity = _set_polymorphic_identity
-            self._validate_polymorphic_identity = (
-                _validate_polymorphic_identity
-            )
+            self._validate_polymorphic_identity = _validate_polymorphic_identity
         else:
             self._set_polymorphic_identity = None
 
@@ -1674,13 +1644,9 @@ class Mapper(
             # can't use this at the instance level since we are a concrete
             # mapper and we don't map this.  don't trip user-defined
             # descriptors that might have side effects when invoked.
-            implementing_attribute = self.class_manager._get_class_attr_mro(
-                key, prop
-            )
+            implementing_attribute = self.class_manager._get_class_attr_mro(key, prop)
             if implementing_attribute is prop or (
-                isinstance(
-                    implementing_attribute, attributes.InstrumentedAttribute
-                )
+                isinstance(implementing_attribute, attributes.InstrumentedAttribute)
                 and implementing_attribute._parententity is prop.parent
             ):
                 self._configure_property(
@@ -1725,8 +1691,7 @@ class Mapper(
                 # column is coming in after _readonly_props was
                 # initialized; check for 'readonly'
                 if hasattr(self, "_readonly_props") and (
-                    not hasattr(col, "table")
-                    or col.table not in self._cols_by_table
+                    not hasattr(col, "table") or col.table not in self._cols_by_table
                 ):
                     self._readonly_props.add(prop)
 
@@ -1745,8 +1710,7 @@ class Mapper(
             # columns in SELECT statements.
             if not hasattr(prop, "_is_polymorphic_discriminator"):
                 prop._is_polymorphic_discriminator = (
-                    col is self.polymorphic_on
-                    or prop.columns[0] is self.polymorphic_on
+                    col is self.polymorphic_on or prop.columns[0] is self.polymorphic_on
                 )
 
             if isinstance(col, expression.Label):
@@ -1825,8 +1789,7 @@ class Mapper(
             if (
                 (
                     not self._inherits_equated_pairs
-                    or (prop.columns[0], column)
-                    not in self._inherits_equated_pairs
+                    or (prop.columns[0], column) not in self._inherits_equated_pairs
                 )
                 and not prop.columns[0].shares_lineage(column)
                 and prop.columns[0] is not self.version_id_col
@@ -1970,15 +1933,17 @@ class Mapper(
         return "mapped class %s%s->%s" % (
             self.class_.__name__,
             self.non_primary and " (non-primary)" or "",
-            self.local_table.description
-            if self.local_table is not None
-            else self.persist_selectable.description,
+            (
+                self.local_table.description
+                if self.local_table is not None
+                else self.persist_selectable.description
+            ),
         )
 
     def _is_orphan(self, state):
         orphan_possible = False
         for mapper in self.iterate_to_root():
-            for (key, cls) in mapper._delete_orphans:
+            for key, cls in mapper._delete_orphans:
                 orphan_possible = True
 
                 has_parent = attributes.manager_of_class(cls).has_parent(
@@ -2055,9 +2020,7 @@ class Mapper(
             mappers = []
 
         if selectable is not None:
-            tables = set(
-                sql_util.find_tables(selectable, include_aliases=True)
-            )
+            tables = set(sql_util.find_tables(selectable, include_aliases=True))
             mappers = [m for m in mappers if m.local_table in tables]
         return mappers
 
@@ -2078,13 +2041,9 @@ class Mapper(
                 )
             elif not m.single:
                 if innerjoin:
-                    from_obj = from_obj.join(
-                        m.local_table, m.inherit_condition
-                    )
+                    from_obj = from_obj.join(m.local_table, m.inherit_condition)
                 else:
-                    from_obj = from_obj.outerjoin(
-                        m.local_table, m.inherit_condition
-                    )
+                    from_obj = from_obj.outerjoin(m.local_table, m.inherit_condition)
 
         return from_obj
 
@@ -2142,9 +2101,7 @@ class Mapper(
         return dict(
             (
                 table,
-                frozenset(
-                    col for col in columns if col.type.should_evaluate_none
-                ),
+                frozenset(col for col in columns if col.type.should_evaluate_none),
             )
             for table, columns in self._cols_by_table.items()
         )
@@ -2171,9 +2128,7 @@ class Mapper(
         return dict(
             (
                 table,
-                dict(
-                    (self._columntoproperty[col].key, col) for col in columns
-                ),
+                dict((self._columntoproperty[col].key, col) for col in columns),
             )
             for table, columns in self._cols_by_table.items()
         )
@@ -2201,11 +2156,7 @@ class Mapper(
             (
                 table,
                 frozenset(
-                    [
-                        col.key
-                        for col in columns
-                        if col.server_default is not None
-                    ]
+                    [col.key for col in columns if col.server_default is not None]
                 ),
             )
             for table, columns in self._cols_by_table.items()
@@ -2218,8 +2169,7 @@ class Mapper(
         for table, columns in self._cols_by_table.items():
             for col in columns:
                 if (
-                    col.server_default is not None
-                    or col.server_onupdate is not None
+                    col.server_default is not None or col.server_onupdate is not None
                 ) and col in self._columntoproperty:
                     result.add(self._columntoproperty[col].key)
 
@@ -2231,11 +2181,7 @@ class Mapper(
             (
                 table,
                 frozenset(
-                    [
-                        col.key
-                        for col in columns
-                        if col.server_onupdate is not None
-                    ]
+                    [col.key for col in columns if col.server_onupdate is not None]
                 ),
             )
             for table, columns in self._cols_by_table.items()
@@ -2295,9 +2241,7 @@ class Mapper(
         """
         return self._with_polymorphic_selectable
 
-    def _with_polymorphic_args(
-        self, spec=None, selectable=False, innerjoin=False
-    ):
+    def _with_polymorphic_args(self, spec=None, selectable=False, innerjoin=False):
         if selectable not in (None, False):
             selectable = coercions.expect(
                 roles.StrictFromClauseRole, selectable, allow_select=True
@@ -2319,9 +2263,7 @@ class Mapper(
     @HasMemoized.memoized_attribute
     def _polymorphic_properties(self):
         return list(
-            self._iterate_polymorphic_properties(
-                self._with_polymorphic_mappers
-            )
+            self._iterate_polymorphic_properties(self._with_polymorphic_mappers)
         )
 
     @property
@@ -2338,9 +2280,7 @@ class Mapper(
 
     def _columns_plus_keys(self, polymorphic_mappers=()):
         if polymorphic_mappers:
-            poly_properties = self._iterate_polymorphic_properties(
-                polymorphic_mappers
-            )
+            poly_properties = self._iterate_polymorphic_properties(polymorphic_mappers)
         else:
             poly_properties = self._polymorphic_properties
 
@@ -2373,12 +2313,7 @@ class Mapper(
             # from other mappers, as these are sometimes dependent on that
             # mapper's polymorphic selectable (which we don't want rendered)
             for c in util.unique_list(
-                chain(
-                    *[
-                        list(mapper.iterate_properties)
-                        for mapper in [self] + mappers
-                    ]
-                )
+                chain(*[list(mapper.iterate_properties) for mapper in [self] + mappers])
             ):
                 if getattr(c, "_is_polymorphic_discriminator", False) and (
                     self.polymorphic_on is None
@@ -2491,9 +2426,7 @@ class Mapper(
             :attr:`_orm.Mapper.attrs`
 
         """
-        return util.ImmutableProperties(
-            dict(self.class_manager._all_sqla_attributes())
-        )
+        return util.ImmutableProperties(dict(self.class_manager._all_sqla_attributes()))
 
     @HasMemoized.memoized_attribute
     @util.preload_module("sqlalchemy.orm.descriptor_props")
@@ -2683,9 +2616,7 @@ class Mapper(
                 return True
         else:
             attr = self.class_manager._get_class_attr_mro(assigned_name, None)
-            if attr is not None and self._is_userland_descriptor(
-                assigned_name, attr
-            ):
+            if attr is not None and self._is_userland_descriptor(assigned_name, attr):
                 return True
 
         if (
@@ -2867,9 +2798,7 @@ class Mapper(
 
         """
         state = attributes.instance_state(instance)
-        identity_key = self._identity_key_from_state(
-            state, attributes.PASSIVE_OFF
-        )
+        identity_key = self._identity_key_from_state(state, attributes.PASSIVE_OFF)
         return identity_key[1]
 
     @HasMemoized.memoized_attribute
@@ -2986,9 +2915,7 @@ class Mapper(
                 )
                 if leftval in orm_util._none_set:
                     raise _OptGetColumnsNotAvailable()
-                binary.left = sql.bindparam(
-                    None, leftval, type_=binary.right.type
-                )
+                binary.left = sql.bindparam(None, leftval, type_=binary.right.type)
             elif rightcol.table not in tables:
                 rightval = self._get_committed_state_attr_by_column(
                     state,
@@ -2998,9 +2925,7 @@ class Mapper(
                 )
                 if rightval in orm_util._none_set:
                     raise _OptGetColumnsNotAvailable()
-                binary.right = sql.bindparam(
-                    None, rightval, type_=binary.right.type
-                )
+                binary.right = sql.bindparam(None, rightval, type_=binary.right.type)
 
         allconds = []
 
@@ -3067,10 +2992,7 @@ class Mapper(
             for entity in enabled_via_opt.union([polymorphic_from]):
                 mapper = entity.mapper
                 for m in self._iterate_to_target_viawpoly(mapper):
-                    if (
-                        m.polymorphic_load == "selectin"
-                        or m in enabled_via_opt_mappers
-                    ):
+                    if m.polymorphic_load == "selectin" or m in enabled_via_opt_mappers:
                         return enabled_via_opt_mappers.get(m, m)
 
         return None
@@ -3119,8 +3041,7 @@ class Mapper(
                 )
 
         primary_key = [
-            sql_util._deep_annotate(pk, {"_orm_adapt": True})
-            for pk in self.primary_key
+            sql_util._deep_annotate(pk, {"_orm_adapt": True}) for pk in self.primary_key
         ]
 
         if len(primary_key) > 1:
@@ -3131,9 +3052,7 @@ class Mapper(
         if entity.is_aliased_class:
             assert entity.mapper is self
 
-            q = sql.select(entity).set_label_style(
-                LABEL_STYLE_TABLENAME_PLUS_COL
-            )
+            q = sql.select(entity).set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL)
 
             in_expr = entity._adapter.traverse(in_expr)
             primary_key = [entity._adapter.traverse(k) for k in primary_key]
@@ -3142,9 +3061,7 @@ class Mapper(
             ).order_by(*primary_key)
         else:
 
-            q = sql.select(self).set_label_style(
-                LABEL_STYLE_TABLENAME_PLUS_COL
-            )
+            q = sql.select(self).set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL)
             q = q.where(
                 in_expr.in_(sql.bindparam("primary_keys", expanding=True))
             ).order_by(*primary_key)
@@ -3268,9 +3185,7 @@ class Mapper(
             ):
                 cols = set(sql_util._find_columns(dep.inherit_condition))
                 if parent.inherit_condition is not None:
-                    cols = cols.union(
-                        sql_util._find_columns(parent.inherit_condition)
-                    )
+                    cols = cols.union(sql_util._find_columns(parent.inherit_condition))
                     return fk.parent not in cols and fk.column not in cols
                 else:
                     return fk.parent not in cols
@@ -3448,8 +3363,7 @@ def _do_configure_registries(registries, cascade):
                     "One or more mappers failed to initialize - "
                     "can't proceed with initialization of other "
                     "mappers. Triggering mapper: '%s'. "
-                    "Original exception was: %s"
-                    % (mapper, mapper._configure_failed)
+                    "Original exception was: %s" % (mapper, mapper._configure_failed)
                 )
                 e._configure_failed = mapper._configure_failed
                 raise e
@@ -3625,6 +3539,5 @@ class _ColumnMapping(dict):
                 % (column.table.name, column.name, column.key, prop)
             )
         raise orm_exc.UnmappedColumnError(
-            "No column %s is configured on mapper %s..."
-            % (column, self.mapper)
+            "No column %s is configured on mapper %s..." % (column, self.mapper)
         )

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SignalParameters:
     """Parameters describing a received signal."""
+
     frequency_hz: float
     bandwidth_hz: float
     snr_db: float
@@ -37,7 +38,7 @@ class Receiver:
         center_freq_hz: float,
         sample_rate_hz: float,
         gain_db: float = 20.0,
-        use_hardware: bool = False
+        use_hardware: bool = False,
     ):
         """
         Initialize the receiver.
@@ -105,7 +106,9 @@ class Receiver:
         Returns:
             Decoded data as bytes, or None if no valid frame found.
         """
-        logger.info(f"Starting reception for {duration_sec} seconds at {self.center_freq_hz} Hz")
+        logger.info(
+            f"Starting reception for {duration_sec} seconds at {self.center_freq_hz} Hz"
+        )
         raw_signal = self._capture_signal(duration_sec)
         if raw_signal is None:
             logger.warning("No signal captured")
@@ -144,6 +147,7 @@ class Receiver:
             # Simulate a simple sine wave plus noise (placeholder)
             import math
             import random
+
             num_samples = int(self.sample_rate_hz * duration_sec)
             frequency_offset = 1000.0  # Hz offset from center
             samples = []
@@ -217,7 +221,7 @@ class Receiver:
                 frequency_hz=self.center_freq_hz,
                 bandwidth_hz=self.sample_rate_hz / 2.0,
                 snr_db=10.0,
-                timestamp=0.0
+                timestamp=0.0,
             )
         return None
 

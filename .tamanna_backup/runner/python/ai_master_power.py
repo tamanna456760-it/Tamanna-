@@ -98,8 +98,7 @@ class AIMasterPowerController:
                 power_data = self.collect_power_metrics()
 
                 # AI decision making
-                optimization_decision = self.ai_optimize_power_distribution(
-                    power_data)
+                optimization_decision = self.ai_optimize_power_distribution(power_data)
 
                 # Execute AI decision
                 self.execute_ai_directive(optimization_decision)

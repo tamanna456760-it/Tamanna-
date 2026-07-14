@@ -2,6 +2,7 @@
 """
 JSON File Synchronization
 """
+
 import hashlib
 import json
 import os

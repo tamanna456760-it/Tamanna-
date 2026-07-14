@@ -10,6 +10,7 @@ def explain_error(line):
     else:
         return "Unknown Error → manually check করো"
 
+
 report = []
 
 try:

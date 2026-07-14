@@ -41,7 +41,6 @@ from ..sql import visitors
 from ..sql.base import ExecutableOption
 from ..sql.traversals import HasCacheKey
 
-
 __all__ = (
     "EXT_CONTINUE",
     "EXT_STOP",
@@ -60,9 +59,7 @@ __all__ = (
 
 
 class ORMStatementRole(roles.StatementRole):
-    _role_name = (
-        "Executable SQL or text() construct, including ORM " "aware objects"
-    )
+    _role_name = "Executable SQL or text() construct, including ORM " "aware objects"
 
 
 class ORMColumnsClauseRole(roles.ColumnsClauseRole):
@@ -78,9 +75,7 @@ class ORMFromClauseRole(roles.StrictFromClauseRole):
 
 
 @inspection._self_inspects
-class MapperProperty(
-    HasCacheKey, _MappedAttribute, InspectionAttr, util.MemoizedSlots
-):
+class MapperProperty(HasCacheKey, _MappedAttribute, InspectionAttr, util.MemoizedSlots):
     """Represent a particular class attribute mapped by :class:`_orm.Mapper`.
 
     The most common occurrences of :class:`.MapperProperty` are the
@@ -170,9 +165,7 @@ class MapperProperty(
 
         """
 
-    def cascade_iterator(
-        self, type_, state, dict_, visited_states, halt_on=None
-    ):
+    def cascade_iterator(self, type_, state, dict_, visited_states, halt_on=None):
         """Iterate through instances related to the given instance for
         a particular 'cascade', starting with this MapperProperty.
 
@@ -591,18 +584,12 @@ class StrategizedProperty(MapperProperty):
     strategy_wildcard_key = None
 
     def _memoized_attr__wildcard_token(self):
-        return (
-            "%s:%s"
-            % (self.strategy_wildcard_key, path_registry._WILDCARD_TOKEN),
-        )
+        return ("%s:%s" % (self.strategy_wildcard_key, path_registry._WILDCARD_TOKEN),)
 
     def _memoized_attr__default_path_loader_key(self):
         return (
             "loader",
-            (
-                "%s:%s"
-                % (self.strategy_wildcard_key, path_registry._DEFAULT_TOKEN),
-            ),
+            ("%s:%s" % (self.strategy_wildcard_key, path_registry._DEFAULT_TOKEN),),
         )
 
     def _get_context_loader(self, context, path):
@@ -643,9 +630,7 @@ class StrategizedProperty(MapperProperty):
             strat = self._get_strategy(loader.strategy)
         else:
             strat = self.strategy
-        strat.setup_query(
-            context, query_entity, path, loader, adapter, **kwargs
-        )
+        strat.setup_query(context, query_entity, path, loader, adapter, **kwargs)
 
     def create_row_processor(
         self, context, query_entity, path, mapper, result, adapter, populators
@@ -671,9 +656,8 @@ class StrategizedProperty(MapperProperty):
         self.strategy = self._get_strategy(self.strategy_key)
 
     def post_instrument_class(self, mapper):
-        if (
-            not self.parent.non_primary
-            and not mapper.class_manager._attr_has_impl(self.key)
+        if not self.parent.non_primary and not mapper.class_manager._attr_has_impl(
+            self.key
         ):
             self.strategy.init_class_attribute(mapper)
 
@@ -784,9 +768,7 @@ class CompileStateOption(HasCacheKey, ORMOption):
     def process_compile_state(self, compile_state):
         """Apply a modification to a given :class:`.CompileState`."""
 
-    def process_compile_state_replaced_entities(
-        self, compile_state, mapper_entities
-    ):
+    def process_compile_state_replaced_entities(self, compile_state, mapper_entities):
         """Apply a modification to a given :class:`.CompileState`,
         given entities that were replaced by with_only_columns() or
         with_entities().
@@ -803,9 +785,7 @@ class LoaderOption(CompileStateOption):
 
     """
 
-    def process_compile_state_replaced_entities(
-        self, compile_state, mapper_entities
-    ):
+    def process_compile_state_replaced_entities(self, compile_state, mapper_entities):
         """Apply a modification to a given :class:`.CompileState`,
         given entities that were replaced by with_only_columns() or
         with_entities().

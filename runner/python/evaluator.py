@@ -47,9 +47,7 @@ _straight_ops = set(
 
 _extended_ops = {
     operators.in_op: (lambda a, b: a in b if a is not _NO_OBJECT else None),
-    operators.not_in_op: (
-        lambda a, b: a not in b if a is not _NO_OBJECT else None
-    ),
+    operators.not_in_op: (lambda a, b: a not in b if a is not _NO_OBJECT else None),
 }
 
 _notimplemented_ops = set(
@@ -79,9 +77,7 @@ class EvaluatorCompiler(object):
 
         meth = getattr(self, "visit_%s" % clause.__visit_name__, None)
         if not meth:
-            raise UnevaluatableError(
-                "Cannot evaluate %s" % type(clause).__name__
-            )
+            raise UnevaluatableError("Cannot evaluate %s" % type(clause).__name__)
         return meth(clause)
 
     def visit_grouping(self, clause):
@@ -99,9 +95,7 @@ class EvaluatorCompiler(object):
     def visit_column(self, clause):
         if "parentmapper" in clause._annotations:
             parentmapper = clause._annotations["parentmapper"]
-            if self.target_cls and not issubclass(
-                self.target_cls, parentmapper.class_
-            ):
+            if self.target_cls and not issubclass(self.target_cls, parentmapper.class_):
                 raise UnevaluatableError(
                     "Can't evaluate criteria against alternate class %s"
                     % parentmapper.class_
@@ -109,10 +103,7 @@ class EvaluatorCompiler(object):
             key = parentmapper._columntoproperty[clause].key
         else:
             key = clause.key
-            if (
-                self.target_cls
-                and key in inspect(self.target_cls).column_attrs
-            ):
+            if self.target_cls and key in inspect(self.target_cls).column_attrs:
                 util.warn(
                     "Evaluating non-mapped column expression '%s' onto "
                     "ORM instances; this is a deprecated use case.  Please "
@@ -123,10 +114,8 @@ class EvaluatorCompiler(object):
                 raise UnevaluatableError("Cannot evaluate column: %s" % clause)
 
         get_corresponding_attr = operator.attrgetter(key)
-        return (
-            lambda obj: get_corresponding_attr(obj)
-            if obj is not None
-            else _NO_OBJECT
+        return lambda obj: (
+            get_corresponding_attr(obj) if obj is not None else _NO_OBJECT
         )
 
     def visit_tuple(self, clause):
@@ -177,9 +166,7 @@ class EvaluatorCompiler(object):
         return evaluate
 
     def visit_binary(self, clause):
-        eval_left, eval_right = list(
-            map(self.process, [clause.left, clause.right])
-        )
+        eval_left, eval_right = list(map(self.process, [clause.left, clause.right]))
         operator = clause.operator
         if operator is operators.is_:
 

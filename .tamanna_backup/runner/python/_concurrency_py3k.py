@@ -92,9 +92,7 @@ def await_fallback(awaitable: Coroutine) -> Any:
     return current.driver.switch(awaitable)
 
 
-async def greenlet_spawn(
-    fn: Callable, *args, _require_await=False, **kwargs
-) -> Any:
+async def greenlet_spawn(fn: Callable, *args, _require_await=False, **kwargs) -> Any:
     """Runs a sync function ``fn`` in a new greenlet.
 
     The sync function can then use :func:`await_only` to wait for async

@@ -592,10 +592,7 @@ class SQLiteDialect_pysqlite(SQLiteDialect):
             if uri_opts:
                 # sorting of keys is for unit test support
                 filename += "?" + (
-                    "&".join(
-                        "%s=%s" % (key, uri_opts[key])
-                        for key in sorted(uri_opts)
-                    )
+                    "&".join("%s=%s" % (key, uri_opts[key]) for key in sorted(uri_opts))
                 )
         else:
             filename = url.database or ":memory:"

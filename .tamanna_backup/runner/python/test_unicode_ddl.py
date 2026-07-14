@@ -59,9 +59,7 @@ class UnicodeSchemaTest(fixtures.TablesTest):
                     Integer,
                     ForeignKey(ue("unitable1.\u6e2c\u8a66")),
                 ),
-                Column(
-                    u("Unitéble2_b"), Integer, ForeignKey(u("Unitéble2.b"))
-                ),
+                Column(u("Unitéble2_b"), Integer, ForeignKey(u("Unitéble2.b"))),
                 Column(
                     ue("\u6e2c\u8a66_self"),
                     Integer,
@@ -160,15 +158,11 @@ class UnicodeSchemaTest(fixtures.TablesTest):
         )
 
         eq_(
-            connection.execute(
-                tt1.select().order_by(desc(u("méil")))
-            ).fetchall(),
+            connection.execute(tt1.select().order_by(desc(u("méil")))).fetchall(),
             [(2, 7), (1, 5)],
         )
         eq_(
-            connection.execute(
-                tt2.select().order_by(desc(u("méil")))
-            ).fetchall(),
+            connection.execute(tt2.select().order_by(desc(u("méil")))).fetchall(),
             [(2, 2), (1, 1)],
         )
         eq_(
@@ -180,9 +174,7 @@ class UnicodeSchemaTest(fixtures.TablesTest):
 
     def test_repr(self):
         meta = MetaData()
-        t = Table(
-            ue("\u6e2c\u8a66"), meta, Column(ue("\u6e2c\u8a66_id"), Integer)
-        )
+        t = Table(ue("\u6e2c\u8a66"), meta, Column(ue("\u6e2c\u8a66_id"), Integer))
 
         if util.py2k:
             eq_(

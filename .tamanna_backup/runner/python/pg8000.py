@@ -89,6 +89,7 @@ of the :ref:`psycopg2 <psycopg2_isolation_level>` dialect:
 
 
 """  # noqa
+
 import decimal
 import re
 from uuid import UUID as _python_UUID
@@ -126,9 +127,7 @@ class _PGNumeric(sqltypes.Numeric):
                 # pg8000 returns Decimal natively for 1700
                 return None
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
         else:
             if coltype in _FLOAT_TYPES:
                 # pg8000 returns float natively for 701
@@ -136,9 +135,7 @@ class _PGNumeric(sqltypes.Numeric):
             elif coltype in _DECIMAL_TYPES or coltype in _INT_TYPES:
                 return processors.to_float
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
 
 
 class _PGNumericNoBind(_PGNumeric):
@@ -335,9 +332,7 @@ class ServerSideCursor:
 class PGCompiler_pg8000(PGCompiler):
     def visit_mod_binary(self, binary, operator, **kw):
         return (
-            self.process(binary.left, **kw)
-            + " %% "
-            + self.process(binary.right, **kw)
+            self.process(binary.left, **kw) + " %% " + self.process(binary.right, **kw)
         )
 
 
@@ -408,9 +403,7 @@ class PGDialect_pg8000(PGDialect):
             return tuple(
                 [
                     int(x)
-                    for x in re.findall(
-                        r"(\d+)(?:[-\.]?|$)", self.dbapi.__version__
-                    )
+                    for x in re.findall(r"(\d+)(?:[-\.]?|$)", self.dbapi.__version__)
                 ]
             )
         else:
@@ -428,9 +421,7 @@ class PGDialect_pg8000(PGDialect):
         return ([], opts)
 
     def is_disconnect(self, e, connection, cursor):
-        if isinstance(e, self.dbapi.InterfaceError) and "network error" in str(
-            e
-        ):
+        if isinstance(e, self.dbapi.InterfaceError) and "network error" in str(e):
             # new as of pg8000 1.19.0 for broken connections
             return True
 
@@ -516,16 +507,10 @@ class PGDialect_pg8000(PGDialect):
 
     def do_set_input_sizes(self, cursor, list_of_tuples, context):
         if self.positional:
-            cursor.setinputsizes(
-                *[dbtype for key, dbtype, sqltype in list_of_tuples]
-            )
+            cursor.setinputsizes(*[dbtype for key, dbtype, sqltype in list_of_tuples])
         else:
             cursor.setinputsizes(
-                **{
-                    key: dbtype
-                    for key, dbtype, sqltype in list_of_tuples
-                    if dbtype
-                }
+                **{key: dbtype for key, dbtype, sqltype in list_of_tuples if dbtype}
             )
 
     def do_begin_twophase(self, connection, xid):
@@ -534,14 +519,10 @@ class PGDialect_pg8000(PGDialect):
     def do_prepare_twophase(self, connection, xid):
         connection.connection.tpc_prepare()
 
-    def do_rollback_twophase(
-        self, connection, xid, is_prepared=True, recover=False
-    ):
+    def do_rollback_twophase(self, connection, xid, is_prepared=True, recover=False):
         connection.connection.tpc_rollback((0, xid, ""))
 
-    def do_commit_twophase(
-        self, connection, xid, is_prepared=True, recover=False
-    ):
+    def do_commit_twophase(self, connection, xid, is_prepared=True, recover=False):
         connection.connection.tpc_commit((0, xid, ""))
 
     def do_recover_twophase(self, connection):

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import sys, csv, re
+
+
 def main():
     threat_file = None
     for i, arg in enumerate(sys.argv):
         if arg == "--threats":
-            threat_file = sys.argv[i+1]
+            threat_file = sys.argv[i + 1]
     if not threat_file:
         print("No threat file")
         sys.exit(0)
@@ -19,6 +21,8 @@ def main():
     print("✅ No zero‑day patterns found")
     sys.exit(0)
 
+
 if __name__ == "__main__":
     import subprocess
+
     main()

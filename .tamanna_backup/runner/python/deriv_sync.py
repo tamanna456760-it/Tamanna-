@@ -6,6 +6,7 @@ from google.auth.transport.requests import Request
 
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
+
 def drive_service():
     creds = None
     if os.path.exists("token.pickle"):
@@ -20,6 +21,7 @@ def drive_service():
         pickle.dump(creds, open("token.pickle", "wb"))
 
     return build("drive", "v3", credentials=creds)
+
 
 def upload_books():
     service = drive_service()

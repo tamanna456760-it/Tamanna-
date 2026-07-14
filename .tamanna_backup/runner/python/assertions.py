@@ -346,8 +346,7 @@ def _assert_proper_exception_context(exception):
     ):
         assert False, (
             "Exception %r was correctly raised but did not set a cause, "
-            "within context %r as its cause."
-            % (exception, exception.__context__)
+            "within context %r as its cause." % (exception, exception.__context__)
         )
 
 
@@ -399,15 +398,11 @@ def assert_warns_message(except_cls, msg, callable_, *args, **kwargs):
         return callable_(*args, **kwargs)
 
 
-def assert_raises_message_context_ok(
-    except_cls, msg, callable_, *args, **kwargs
-):
+def assert_raises_message_context_ok(except_cls, msg, callable_, *args, **kwargs):
     return _assert_raises(except_cls, callable_, args, kwargs, msg=msg)
 
 
-def _assert_raises(
-    except_cls, callable_, args, kwargs, msg=None, check_context=False
-):
+def _assert_raises(except_cls, callable_, args, kwargs, msg=None, check_context=False):
 
     with _expect_raises(except_cls, msg, check_context) as ec:
         callable_(*args, **kwargs)
@@ -426,8 +421,7 @@ def _expect_raises(except_cls, msg=None, check_context=False):
         or isinstance(except_cls, Warning)
     ):
         raise TypeError(
-            "Use expect_warnings for warnings, not "
-            "expect_raises / assert_raises"
+            "Use expect_warnings for warnings, not " "expect_raises / assert_raises"
         )
     ec = _ErrorContainer()
     if check_context:
@@ -439,9 +433,10 @@ def _expect_raises(except_cls, msg=None, check_context=False):
         ec.error = err
         success = True
         if msg is not None:
-            assert re.search(
-                msg, util.text_type(err), re.UNICODE
-            ), "%r !~ %s" % (msg, err)
+            assert re.search(msg, util.text_type(err), re.UNICODE), "%r !~ %s" % (
+                msg,
+                err,
+            )
         if check_context and not are_we_already_in_a_traceback:
             _assert_proper_exception_context(err)
         print(util.text_type(err).encode("utf-8"))
@@ -550,8 +545,7 @@ class AssertsCompiledSQL(object):
         class DontAccess(object):
             def __getattribute__(self, key):
                 raise NotImplementedError(
-                    "compiler accessed .statement; use "
-                    "compiler.current_executable"
+                    "compiler accessed .statement; use " "compiler.current_executable"
                 )
 
         class CheckCompilerAccess(object):
@@ -576,27 +570,19 @@ class AssertsCompiledSQL(object):
                 return self.test_statement._default_dialect()
 
             def compile(self, dialect, **kw):
-                return self.test_statement.compile.__func__(
-                    self, dialect=dialect, **kw
-                )
+                return self.test_statement.compile.__func__(self, dialect=dialect, **kw)
 
             def _compiler(self, dialect, **kw):
-                return self.test_statement._compiler.__func__(
-                    self, dialect, **kw
-                )
+                return self.test_statement._compiler.__func__(self, dialect, **kw)
 
             def _compiler_dispatch(self, compiler, **kwargs):
                 if hasattr(compiler, "statement"):
-                    with mock.patch.object(
-                        compiler, "statement", DontAccess()
-                    ):
+                    with mock.patch.object(compiler, "statement", DontAccess()):
                         return self.test_statement._compiler_dispatch(
                             compiler, **kwargs
                         )
                 else:
-                    return self.test_statement._compiler_dispatch(
-                        compiler, **kwargs
-                    )
+                    return self.test_statement._compiler_dispatch(compiler, **kwargs)
 
         # no construct can assume it's the "top level" construct in all cases
         # as anything can be nested.  ensure constructs don't assume they
@@ -615,17 +601,9 @@ class AssertsCompiledSQL(object):
         param_str = repr(getattr(c, "params", {}))
         if util.py3k:
             param_str = param_str.encode("utf-8").decode("ascii", "ignore")
-            print(
-                ("\nSQL String:\n" + util.text_type(c) + param_str).encode(
-                    "utf-8"
-                )
-            )
+            print(("\nSQL String:\n" + util.text_type(c) + param_str).encode("utf-8"))
         else:
-            print(
-                "\nSQL String:\n"
-                + util.text_type(c).encode("utf-8")
-                + param_str
-            )
+            print("\nSQL String:\n" + util.text_type(c).encode("utf-8") + param_str)
 
         cc = re.sub(r"[\n\t]", "", util.text_type(c))
 
@@ -640,18 +618,12 @@ class AssertsCompiledSQL(object):
             eq_(c.prefetch, check_prefetch)
         if check_literal_execute is not None:
             eq_(
-                {
-                    c.bind_names[b]: b.effective_value
-                    for b in c.literal_execute_params
-                },
+                {c.bind_names[b]: b.effective_value for b in c.literal_execute_params},
                 check_literal_execute,
             )
         if check_post_param is not None:
             eq_(
-                {
-                    c.bind_names[b]: b.effective_value
-                    for b in c.post_compile_params
-                },
+                {c.bind_names[b]: b.effective_value for b in c.post_compile_params},
                 check_post_param,
             )
 
@@ -682,9 +654,7 @@ class ComparesTables(object):
                 {f.column.name for f in reflected_c.foreign_keys},
             )
             if c.server_default:
-                assert isinstance(
-                    reflected_c.server_default, schema.FetchedValue
-                )
+                assert isinstance(reflected_c.server_default, schema.FetchedValue)
 
         assert len(table.primary_key) == len(reflected_table.primary_key)
         for c in table.primary_key:
@@ -717,9 +687,7 @@ class AssertsExecutionResults(object):
             self.assert_row(class_, result[i], list_[i])
 
     def assert_row(self, class_, rowobj, desc):
-        self.assert_(
-            rowobj.__class__ is class_, "item class is not " + repr(class_)
-        )
+        self.assert_(rowobj.__class__ is class_, "item class is not " + repr(class_))
         for key, value in desc.items():
             if isinstance(value, tuple):
                 if isinstance(value[1], list):
@@ -747,9 +715,7 @@ class AssertsExecutionResults(object):
         found = util.IdentitySet(result)
         expected = {immutabledict(e) for e in expected}
 
-        for wrong in util.itertools_filterfalse(
-            lambda o: isinstance(o, cls), found
-        ):
+        for wrong in util.itertools_filterfalse(lambda o: isinstance(o, cls), found):
             fail(
                 'Unexpected type "%s", expected "%s"'
                 % (type(wrong).__name__, cls.__name__)
@@ -816,9 +782,7 @@ class AssertsExecutionResults(object):
         return self.assert_sql_execution(db, callable_, *newrules)
 
     def assert_sql_count(self, db, callable_, count):
-        self.assert_sql_execution(
-            db, callable_, assertsql.CountStatements(count)
-        )
+        self.assert_sql_execution(db, callable_, assertsql.CountStatements(count))
 
     def assert_multiple_sql_count(self, dbs, callable_, counts):
         recs = [

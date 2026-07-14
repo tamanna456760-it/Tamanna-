@@ -48,8 +48,7 @@ class TestWiresharkAdvanced(unittest.TestCase):
                         "-a",
                         "duration:5",
                     ]
-                    result = subprocess.run(
-                        cmd, capture_output=True, timeout=10)
+                    result = subprocess.run(cmd, capture_output=True, timeout=10)
                     self.assertIn(result.returncode, [0, 1])
                     print(f"✓ Capture filter '{filter_expr}' working")
                 except subprocess.TimeoutExpired:

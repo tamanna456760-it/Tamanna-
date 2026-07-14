@@ -1,8 +1,8 @@
-import os
 import hashlib
+import os
 import shutil
 
-ROOT_DIR = "./"   # repo root
+ROOT_DIR = "./"  # repo root
 DUP_FOLDER = "./_duplicates_removed"
 SORTED_FOLDER = "./_sorted"
 
@@ -11,15 +11,18 @@ os.makedirs(SORTED_FOLDER, exist_ok=True)
 
 file_hashes = {}
 
+
 def get_hash(filepath):
     with open(filepath, "rb") as f:
         return hashlib.md5(f.read()).hexdigest()
+
 
 def move_sorted(filepath):
     ext = filepath.split(".")[-1]
     target_folder = os.path.join(SORTED_FOLDER, ext)
     os.makedirs(target_folder, exist_ok=True)
     shutil.copy(filepath, target_folder)
+
 
 def scan_and_clean():
     for root, dirs, files in os.walk(ROOT_DIR):
@@ -35,6 +38,7 @@ def scan_and_clean():
                 else:
                     file_hashes[file_hash] = full_path
                     move_sorted(full_path)
+
 
 if __name__ == "__main__":
     scan_and_clean()

@@ -308,8 +308,7 @@ class ClauseElement(
     @property
     def entity_namespace(self):
         raise AttributeError(
-            "This SQL expression has no entity namespace "
-            "with which to filter from."
+            "This SQL expression has no entity namespace " "with which to filter from."
         )
 
     def __getstate__(self):
@@ -487,9 +486,7 @@ class ClauseElement(
                     dialect = default.StrCompileDialect()
                 else:
                     url = util.preloaded.engine_url
-                    dialect = url.URL.create(
-                        self.stringify_dialect
-                    ).get_dialect()()
+                    dialect = url.URL.create(self.stringify_dialect).get_dialect()()
 
         return self._compiler(dialect, **kw)
 
@@ -921,9 +918,7 @@ class ColumnElement(
         when targeting within a result row."""
 
         return (
-            hasattr(other, "name")
-            and hasattr(self, "name")
-            and other.name == self.name
+            hasattr(other, "name") and hasattr(self, "name") and other.name == self.name
         )
 
     @HasMemoized.memoized_attribute
@@ -978,9 +973,11 @@ class ColumnElement(
             key = name
 
         co = ColumnClause(
-            coercions.expect(roles.TruncatedLabelRole, name)
-            if name_is_truncatable
-            else name,
+            (
+                coercions.expect(roles.TruncatedLabelRole, name)
+                if name_is_truncatable
+                else name
+            ),
             type_=getattr(self, "type", None),
             _selectable=selectable,
         )
@@ -1047,9 +1044,7 @@ class ColumnElement(
             seed = seed + "_"
 
         if isinstance(seed, _anonymous_label):
-            return _anonymous_label.safe_construct(
-                hash_value, "", enclosing_label=seed
-            )
+            return _anonymous_label.safe_construct(hash_value, "", enclosing_label=seed)
 
         return _anonymous_label.safe_construct(hash_value, seed or "anon")
 
@@ -1499,9 +1494,11 @@ class BindParameter(roles.InElementRole, ColumnElement):
         if unique:
             self.key = _anonymous_label.safe_construct(
                 id(self),
-                key
-                if key is not None and not isinstance(key, _anonymous_label)
-                else "param",
+                (
+                    key
+                    if key is not None and not isinstance(key, _anonymous_label)
+                    else "param"
+                ),
                 sanitize_key=True,
             )
             self._key_is_anon = True
@@ -2157,14 +2154,10 @@ class TextClause(
         """
         selectable = util.preloaded.sql_selectable
         positional_input_cols = [
-            ColumnClause(col.key, types.pop(col.key))
-            if col.key in types
-            else col
+            ColumnClause(col.key, types.pop(col.key)) if col.key in types else col
             for col in cols
         ]
-        keyed_input_cols = [
-            ColumnClause(key, type_) for key, type_ in types.items()
-        ]
+        keyed_input_cols = [ColumnClause(key, type_) for key, type_ in types.items()]
 
         return selectable.TextualSelect(
             self,
@@ -2418,9 +2411,7 @@ class ClauseList(
                 )
             )
         else:
-            self.clauses.append(
-                coercions.expect(self._text_converter_role, clause)
-            )
+            self.clauses.append(coercions.expect(self._text_converter_role, clause))
 
     @property
     def _from_objects(self):
@@ -2438,14 +2429,10 @@ class BooleanClauseList(ClauseList, ColumnElement):
     inherit_cache = True
 
     def __init__(self, *arg, **kw):
-        raise NotImplementedError(
-            "BooleanClauseList has a private constructor"
-        )
+        raise NotImplementedError("BooleanClauseList has a private constructor")
 
     @classmethod
-    def _process_clauses_for_boolean(
-        cls, operator, continue_on, skip_on, clauses
-    ):
+    def _process_clauses_for_boolean(cls, operator, continue_on, skip_on, clauses):
         has_continue_on = None
 
         convert_clauses = []
@@ -2511,9 +2498,9 @@ class BooleanClauseList(ClauseList, ColumnElement):
                 "%(name)s() construct, use %(name)s(%(continue_on)s, *args)."
                 % {
                     "name": operator.__name__,
-                    "continue_on": "True"
-                    if continue_on is True_._singleton
-                    else "False",
+                    "continue_on": (
+                        "True" if continue_on is True_._singleton else "False"
+                    ),
                 },
                 version="1.4",
             )
@@ -2726,14 +2713,12 @@ class Tuple(ClauseList, ColumnElement):
         types = kw.pop("types", None)
         if types is None:
             clauses = [
-                coercions.expect(roles.ExpressionElementRole, c)
-                for c in clauses
+                coercions.expect(roles.ExpressionElementRole, c) for c in clauses
             ]
         else:
             if len(types) != len(clauses):
                 raise exc.ArgumentError(
-                    "Wrong number of elements for %d-tuple: %r "
-                    % (len(types), clauses)
+                    "Wrong number of elements for %d-tuple: %r " % (len(types), clauses)
                 )
             clauses = [
                 coercions.expect(
@@ -2947,9 +2932,7 @@ class Case(ColumnElement):
             )
             whens = (kw.pop("whens"),)
 
-        whens = coercions._expression_collection_was_a_list(
-            "whens", "case", whens
-        )
+        whens = coercions._expression_collection_was_a_list("whens", "case", whens)
 
         try:
             whens = util.dictlike_iteritems(whens)
@@ -2994,9 +2977,7 @@ class Case(ColumnElement):
 
     @property
     def _from_objects(self):
-        return list(
-            itertools.chain(*[x._from_objects for x in self.get_children()])
-        )
+        return list(itertools.chain(*[x._from_objects for x in self.get_children()]))
 
 
 def literal_column(text, type_=None):
@@ -3397,9 +3378,7 @@ class UnaryExpression(ColumnElement):
         self.operator = operator
         self.modifier = modifier
         self._propagate_attrs = element._propagate_attrs
-        self.element = element.self_group(
-            against=self.operator or self.modifier
-        )
+        self.element = element.self_group(against=self.operator or self.modifier)
         self.type = type_api.to_instance(type_)
         self.wraps_column_expression = wraps_column_expression
 
@@ -3808,9 +3787,7 @@ class CollectionAggregate(UnaryExpression):
     def reverse_operate(self, op, other, **kwargs):
         # comparison operators should never call reverse_operate
         assert not operators.is_comparison(op)
-        raise exc.ArgumentError(
-            "Only comparison operators may be used with ANY/ALL"
-        )
+        raise exc.ArgumentError("Only comparison operators may be used with ANY/ALL")
 
 
 class AsBoolean(WrapsColumnExpression, UnaryExpression):
@@ -3873,9 +3850,7 @@ class BinaryExpression(ColumnElement):
 
     """
 
-    def __init__(
-        self, left, right, operator, type_=None, negate=None, modifiers=None
-    ):
+    def __init__(self, left, right, operator, type_=None, negate=None, modifiers=None):
         # allow compatibility with libraries that
         # refer to BinaryExpression directly and pass strings
         if isinstance(operator, util.string_types):
@@ -4013,9 +3988,7 @@ class Grouping(GroupedElement, ColumnElement):
 
     @property
     def _tq_label(self):
-        return (
-            getattr(self.element, "_tq_label", None) or self._anon_name_label
-        )
+        return getattr(self.element, "_tq_label", None) or self._anon_name_label
 
     @property
     def _proxies(self):
@@ -4162,16 +4135,13 @@ class Over(ColumnElement):
             )
         if partition_by is not None:
             self.partition_by = ClauseList(
-                *util.to_list(partition_by),
-                _literal_as_text_role=roles.ByOfRole
+                *util.to_list(partition_by), _literal_as_text_role=roles.ByOfRole
             )
 
         if range_:
             self.range_ = self._interpret_range(range_)
             if rows:
-                raise exc.ArgumentError(
-                    "'range_' and 'rows' are mutually exclusive"
-                )
+                raise exc.ArgumentError("'range_' and 'rows' are mutually exclusive")
             else:
                 self.rows = None
         elif rows:
@@ -4200,9 +4170,7 @@ class Over(ColumnElement):
                 lower = int(range_[0])
             except ValueError as err:
                 util.raise_(
-                    exc.ArgumentError(
-                        "Integer or None expected for range value"
-                    ),
+                    exc.ArgumentError("Integer or None expected for range value"),
                     replace_context=err,
                 )
             else:
@@ -4216,9 +4184,7 @@ class Over(ColumnElement):
                 upper = int(range_[1])
             except ValueError as err:
                 util.raise_(
-                    exc.ArgumentError(
-                        "Integer or None expected for range value"
-                    ),
+                    exc.ArgumentError("Integer or None expected for range value"),
                     replace_context=err,
                 )
             else:
@@ -4475,11 +4441,7 @@ class FunctionFilter(ColumnElement):
     def _from_objects(self):
         return list(
             itertools.chain(
-                *[
-                    c._from_objects
-                    for c in (self.func, self.criterion)
-                    if c is not None
-                ]
+                *[c._from_objects for c in (self.func, self.criterion) if c is not None]
             )
         )
 
@@ -4561,9 +4523,7 @@ class Label(roles.LabeledColumnExprRole, ColumnElement):
 
     @util.memoized_property
     def type(self):
-        return type_api.to_instance(
-            self._type or getattr(self._element, "type", None)
-        )
+        return type_api.to_instance(self._type or getattr(self._element, "type", None))
 
     @HasMemoized.memoized_attribute
     def element(self):
@@ -4708,9 +4668,11 @@ class NamedColumn(ColumnElement):
         **kw
     ):
         c = ColumnClause(
-            coercions.expect(roles.TruncatedLabelRole, name or self.name)
-            if name_is_truncatable
-            else (name or self.name),
+            (
+                coercions.expect(roles.TruncatedLabelRole, name or self.name)
+                if name_is_truncatable
+                else (name or self.name)
+            ),
             type_=self.type,
             _selectable=selectable,
             is_literal=False,
@@ -4895,11 +4857,7 @@ class ColumnClause(
             return super(ColumnClause, self).entity_namespace
 
     def _clone(self, detect_subquery_cols=False, **kw):
-        if (
-            detect_subquery_cols
-            and self.table is not None
-            and self.table._is_subquery
-        ):
+        if detect_subquery_cols and self.table is not None and self.table._is_subquery:
             clone = kw.pop("clone")
             table = clone(self.table, **kw)
             new = table.c.corresponding_column(self)
@@ -4931,16 +4889,11 @@ class ColumnClause(
             or not hasattr(other, "proxy_set")
             or (
                 isinstance(other, ColumnClause)
-                and (
-                    other.is_literal
-                    or other.table is None
-                    or other.table._is_textual
-                )
+                and (other.is_literal or other.table is None or other.table._is_textual)
             )
         ):
             return (hasattr(other, "name") and self.name == other.name) or (
-                hasattr(other, "_tq_label")
-                and self._tq_label == other._tq_label
+                hasattr(other, "_tq_label") and self._tq_label == other._tq_label
             )
         else:
             return other.proxy_set.intersection(self.proxy_set)
@@ -5022,9 +4975,11 @@ class ColumnClause(
             )
         )
         c = self._constructor(
-            coercions.expect(roles.TruncatedLabelRole, name or self.name)
-            if name_is_truncatable
-            else (name or self.name),
+            (
+                coercions.expect(roles.TruncatedLabelRole, name or self.name)
+                if name_is_truncatable
+                else (name or self.name)
+            ),
             type_=self.type,
             _selectable=selectable,
             is_literal=is_literal,
@@ -5073,9 +5028,7 @@ class CollationClause(ColumnElement):
 class _IdentifiedClause(Executable, ClauseElement):
 
     __visit_name__ = "identified"
-    _execution_options = Executable._execution_options.union(
-        {"autocommit": False}
-    )
+    _execution_options = Executable._execution_options.union({"autocommit": False})
 
     def __init__(self, ident):
         self.ident = ident
@@ -5156,9 +5109,7 @@ class quoted_name(util.MemoizedSlots, util.text_type):
         # in performance however
         # elif not sprcls and quote is None:
         #   return value
-        elif isinstance(value, cls) and (
-            quote is None or value.quote == quote
-        ):
+        elif isinstance(value, cls) and (quote is None or value.quote == quote):
             return value
         self = super(quoted_name, cls).__new__(cls, value)
 
@@ -5207,9 +5158,7 @@ def _type_from_args(args):
 
 
 def _corresponding_column_or_error(fromclause, column, require_embedded=False):
-    c = fromclause.corresponding_column(
-        column, require_embedded=require_embedded
-    )
+    c = fromclause.corresponding_column(column, require_embedded=require_embedded)
     if c is None:
         raise exc.InvalidRequestError(
             "Given column '%s', attached to table '%s', "
@@ -5346,9 +5295,7 @@ class _anonymous_label(_truncated_label):
     __slots__ = ()
 
     @classmethod
-    def safe_construct(
-        cls, seed, body, enclosing_label=None, sanitize_key=False
-    ):
+    def safe_construct(cls, seed, body, enclosing_label=None, sanitize_key=False):
 
         if sanitize_key:
             body = re.sub(r"[%\(\) \$]+", "_", body).strip("_")

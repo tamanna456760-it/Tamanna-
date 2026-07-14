@@ -1,9 +1,10 @@
-from scapy.all import sniff, ARP
-import subprocess
 import json
-import time
+import subprocess
 import threading
+import time
 from datetime import datetime
+
+from scapy.all import ARP, sniff
 
 BLACKLIST = {
     "192.168.1.100": "AA:BB:CC:DD:EE:FF",  # IP : Expected MAC
@@ -71,7 +72,10 @@ def handle_arp(pkt):
             expected_mac = BLACKLIST[ip]
 
             if mac.lower() != expected_mac.lower():
-                log(f"MAC mismatch for {ip}! Possible spoofing. Got {mac}, expected {expected_mac}", "CRITICAL")
+                log(
+                    f"MAC mismatch for {ip}! Possible spoofing. Got {mac}, expected {expected_mac}",
+                    "CRITICAL",
+                )
                 alert(ip, mac)
                 block_ip(ip)
             else:

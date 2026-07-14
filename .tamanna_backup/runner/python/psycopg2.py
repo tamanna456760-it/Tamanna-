@@ -466,6 +466,7 @@ place within SQLAlchemy's own marshalling logic, and not that of ``psycopg2``
 which may be more performant.
 
 """  # noqa
+
 from __future__ import absolute_import
 
 import decimal
@@ -494,7 +495,6 @@ from ... import util
 from ...engine import cursor as _cursor
 from ...util import collections_abc
 
-
 logger = logging.getLogger("sqlalchemy.dialects.postgresql")
 
 
@@ -512,9 +512,7 @@ class _PGNumeric(sqltypes.Numeric):
                 # pg8000 returns Decimal natively for 1700
                 return None
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
         else:
             if coltype in _FLOAT_TYPES:
                 # pg8000 returns float natively for 701
@@ -522,9 +520,7 @@ class _PGNumeric(sqltypes.Numeric):
             elif coltype in _DECIMAL_TYPES or coltype in _INT_TYPES:
                 return processors.to_float
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
 
 
 class _PGEnum(ENUM):
@@ -607,11 +603,7 @@ class PGExecutionContext_psycopg2(PGExecutionContext):
         return self._dbapi_connection.cursor(ident)
 
     def post_exec(self):
-        if (
-            self._psycopg2_fetched_rows
-            and self.compiled
-            and self.compiled.returning
-        ):
+        if self._psycopg2_fetched_rows and self.compiled and self.compiled.returning:
             # psycopg2 execute_values will provide for a real cursor where
             # cursor.description works correctly. however, it executes the
             # INSERT statement multiple times for multiple pages of rows, so
@@ -756,9 +748,7 @@ class PGDialect_psycopg2(PGDialect):
                 )
 
             if self.psycopg2_version < (2, 7):
-                raise ImportError(
-                    "psycopg2 version 2.7 or higher is required."
-                )
+                raise ImportError("psycopg2 version 2.7 or higher is required.")
 
     def initialize(self, connection):
         super(PGDialect_psycopg2, self).initialize(connection)
@@ -905,12 +895,8 @@ class PGDialect_psycopg2(PGDialect):
         if self.dbapi and self._json_deserializer:
 
             def on_connect(conn):
-                extras.register_default_json(
-                    conn, loads=self._json_deserializer
-                )
-                extras.register_default_jsonb(
-                    conn, loads=self._json_deserializer
-                )
+                extras.register_default_json(conn, loads=self._json_deserializer)
+                extras.register_default_jsonb(conn, loads=self._json_deserializer)
 
             fns.append(on_connect)
 
@@ -931,9 +917,7 @@ class PGDialect_psycopg2(PGDialect):
             and context.isinsert
             and context.compiled._is_safe_for_fast_insert_values_helper
         ):
-            executemany_values = (
-                "(%s)" % context.compiled.insert_single_values_expr
-            )
+            executemany_values = "(%s)" % context.compiled.insert_single_values_expr
             if not self.supports_unicode_statements:
                 executemany_values = executemany_values.encode(self.encoding)
 

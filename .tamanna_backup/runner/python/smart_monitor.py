@@ -7,24 +7,16 @@ WATCH_PATH = "."
 LOG_FILE = "smart_monitor.log"
 SCAN_INTERVAL = 5
 
-IGNORE_DIRS = {
-    ".git",
-    "__pycache__",
-    "node_modules",
-    "runner"
-}
+IGNORE_DIRS = {".git", "__pycache__", "node_modules", "runner"}
 
-IGNORE_FILES = {
-    LOG_FILE,
-    "smart_monitor.py"
-}
+IGNORE_FILES = {LOG_FILE, "smart_monitor.py"}
 
 FOLDERS = {
     "python": "runner/python",
     "node": "runner/node",
     "shell": "runner/shell",
     "html": "runner/web",
-    "json": "runner/data"
+    "json": "runner/data",
 }
 
 

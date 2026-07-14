@@ -2,6 +2,7 @@ import time
 from collections import defaultdict
 import requests
 
+
 class FirewallCore:
     def __init__(self, node_url):
         self.logs = defaultdict(list)

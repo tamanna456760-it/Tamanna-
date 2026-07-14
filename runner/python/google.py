@@ -14,8 +14,7 @@ try:
 
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
-    from google.oauth2.service_account import \
-        Credentials as ServiceAccountCredentials
+    from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 except ImportError:
     print(
         "Some dependencies missing. Install with: pip install googlesearch-python google-api-python-client gspread google-auth-httplib2 google-auth-oauthlib beautifulsoup4 requests"
@@ -110,8 +109,7 @@ class GoogleServices:
                     if link.startswith("/url?q="):
                         link = link.split("/url?q=")[1].split("&")[0]
 
-                    results.append(
-                        {"title": title, "link": link, "snippet": snippet})
+                    results.append({"title": title, "link": link, "snippet": snippet})
 
             return results
         except Exception as e:
@@ -137,8 +135,7 @@ class GoogleServices:
             elif sheet_name:
                 sheet = client.open(sheet_name).sheet1
             else:
-                raise ValueError(
-                    "Either sheet_name or sheet_url must be provided")
+                raise ValueError("Either sheet_name or sheet_url must be provided")
 
             self.services["sheets"] = sheet
             return sheet
@@ -367,18 +364,4 @@ def search_and_save(query: str, filename: str = "results.json", num_results: int
     """Search and save results to file"""
     google = GoogleServices()
     results = google.search_with_details(query, num_results)
-    google.save_results_to_file(results, filename)
-    return results
-
-
-# Example credentials file structure reminder
-CREDENTIALS_EXAMPLE = {
-    "type": "service_account",
-    "project_id": "your-project-id",
-    "private_key_id": "key-id",
-    "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
-    "client_email": "service-account@your-project.iam.gserviceaccount.com",
-    "client_id": "client-id",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-}
+    google.save_results_t

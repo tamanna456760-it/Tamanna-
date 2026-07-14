@@ -33,13 +33,10 @@ This dialect should normally be used only with the
 
 """  # noqa
 
-from .pymysql import MySQLDialect_pymysql
-from ... import pool
-from ... import util
+from ... import pool, util
 from ...engine import AdaptedConnection
-from ...util.concurrency import asyncio
-from ...util.concurrency import await_fallback
-from ...util.concurrency import await_only
+from ...util.concurrency import asyncio, await_fallback, await_only
+from .pymysql import MySQLDialect_pymysql
 
 
 class AsyncAdapt_aiomysql_cursor:
@@ -97,9 +94,7 @@ class AsyncAdapt_aiomysql_cursor:
         return self.await_(self._execute_async(operation, parameters))
 
     def executemany(self, operation, seq_of_parameters):
-        return self.await_(
-            self._executemany_async(operation, seq_of_parameters)
-        )
+        return self.await_(self._executemany_async(operation, seq_of_parameters))
 
     async def _execute_async(self, operation, parameters):
         async with self._adapt_connection._execute_mutex:
@@ -156,9 +151,7 @@ class AsyncAdapt_aiomysql_ss_cursor(AsyncAdapt_aiomysql_cursor):
         self._connection = adapt_connection._connection
         self.await_ = adapt_connection.await_
 
-        cursor = self._connection.cursor(
-            adapt_connection.dbapi.aiomysql.SSCursor
-        )
+        cursor = self._connection.cursor(adapt_connection.dbapi.aiomysql.SSCursor)
 
         self._cursor = self.await_(cursor.__aenter__())
 
@@ -277,9 +270,7 @@ class MySQLDialect_aiomysql(MySQLDialect_pymysql):
 
     @classmethod
     def dbapi(cls):
-        return AsyncAdapt_aiomysql_dbapi(
-            __import__("aiomysql"), __import__("pymysql")
-        )
+        return AsyncAdapt_aiomysql_dbapi(__import__("aiomysql"), __import__("pymysql"))
 
     @classmethod
     def get_pool_class(cls, url):
@@ -297,9 +288,7 @@ class MySQLDialect_aiomysql(MySQLDialect_pymysql):
         )
 
     def is_disconnect(self, e, connection, cursor):
-        if super(MySQLDialect_aiomysql, self).is_disconnect(
-            e, connection, cursor
-        ):
+        if super(MySQLDialect_aiomysql, self).is_disconnect(e, connection, cursor):
             return True
         else:
             str_e = str(e).lower()

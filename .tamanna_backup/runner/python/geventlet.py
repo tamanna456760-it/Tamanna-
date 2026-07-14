@@ -12,7 +12,8 @@ except ImportError:
     raise RuntimeError("eventlet worker requires eventlet 0.24.1 or higher")
 else:
     from pkg_resources import parse_version
-    if parse_version(eventlet.__version__) < parse_version('0.24.1'):
+
+    if parse_version(eventlet.__version__) < parse_version("0.24.1"):
         raise RuntimeError("eventlet worker requires eventlet 0.24.1 or higher")
 
 from eventlet import hubs, greenthread
@@ -57,9 +58,8 @@ def _eventlet_socket_sendfile(self, file, offset=0, count=None):
                         break
         return total_sent
     finally:
-        if total_sent > 0 and hasattr(file, 'seek'):
+        if total_sent > 0 and hasattr(file, "seek"):
             file.seek(offset + total_sent)
-
 
 
 def _eventlet_serve(sock, handle, concurrency):
@@ -113,7 +113,7 @@ def patch_sendfile():
     # properly cooperative. So we have to monkey-patch a working socket.sendfile()
     # into GreenSocket; in this method, `self.send` will be the GreenSocket's
     # send method which is properly cooperative.
-    if not hasattr(GreenSocket, 'sendfile'):
+    if not hasattr(GreenSocket, "sendfile"):
         GreenSocket.sendfile = _eventlet_socket_sendfile
 
 
@@ -144,8 +144,7 @@ class EventletWorker(AsyncWorker):
 
     def handle(self, listener, client, addr):
         if self.cfg.is_ssl:
-            client = eventlet.wrap_ssl(client, server_side=True,
-                                       **self.cfg.ssl_options)
+            client = eventlet.wrap_ssl(client, server_side=True, **self.cfg.ssl_options)
 
         super().handle(listener, client, addr)
 
@@ -155,8 +154,9 @@ class EventletWorker(AsyncWorker):
             gsock = GreenSocket(sock)
             gsock.setblocking(1)
             hfun = partial(self.handle, gsock)
-            acceptor = eventlet.spawn(_eventlet_serve, gsock, hfun,
-                                      self.worker_connections)
+            acceptor = eventlet.spawn(
+                _eventlet_serve, gsock, hfun, self.worker_connections
+            )
 
             acceptors.append(acceptor)
             eventlet.sleep(0.0)

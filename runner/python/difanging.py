@@ -13,8 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or "change_this_secret"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL") or "sqlite:///data.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") or "sqlite:///data.db"
 app.config["SESSION_COOKIE_SECURE"] = True  # send cookie only over HTTPS
 app.config["SESSION_COOKIE_HTTPONLY"] = True  # prevent JS access to cookies
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -33,8 +32,7 @@ Talisman(
 
 db = SQLAlchemy(app)
 limiter = Limiter(
-    app, key_func=get_remote_address, default_limits=[
-        "200 per day", "50 per hour"]
+    app, key_func=get_remote_address, default_limits=["200 per day", "50 per hour"]
 )
 ph = PasswordHasher()
 

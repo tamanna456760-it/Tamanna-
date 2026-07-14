@@ -1,5 +1,6 @@
-import face_recognition
 import cv2
+import face_recognition
+
 
 def verify_face(known_image, live_image):
     known = face_recognition.load_image_file(known_image)

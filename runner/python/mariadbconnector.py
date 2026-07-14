@@ -27,6 +27,7 @@ be ``mysqldb``. ``mariadb+mariadbconnector://`` is required to use this driver.
 .. mariadb: https://github.com/mariadb-corporation/mariadb-connector-python
 
 """  # noqa
+
 import re
 
 from .base import MySQLCompiler
@@ -91,9 +92,7 @@ class MySQLDialect_mariadbconnector(MySQLDialect):
             return tuple(
                 [
                     int(x)
-                    for x in re.findall(
-                        r"(\d+)(?:[-\.]?|$)", self.dbapi.__version__
-                    )
+                    for x in re.findall(r"(\d+)(?:[-\.]?|$)", self.dbapi.__version__)
                 ]
             )
         else:
@@ -210,9 +209,7 @@ class MySQLDialect_mariadbconnector(MySQLDialect):
             )
         )
 
-    def do_rollback_twophase(
-        self, connection, xid, is_prepared=True, recover=False
-    ):
+    def do_rollback_twophase(self, connection, xid, is_prepared=True, recover=False):
         if not is_prepared:
             connection.execute(
                 sql.text("XA END :xid").bindparams(
@@ -225,9 +222,7 @@ class MySQLDialect_mariadbconnector(MySQLDialect):
             )
         )
 
-    def do_commit_twophase(
-        self, connection, xid, is_prepared=True, recover=False
-    ):
+    def do_commit_twophase(self, connection, xid, is_prepared=True, recover=False):
         if not is_prepared:
             self.do_prepare_twophase(connection, xid)
         connection.execute(

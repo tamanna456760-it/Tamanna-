@@ -25,26 +25,13 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
 
 MAX_CONTENT_LENGTH = 20 * 1024 * 1024  # 20 MB
 
-ALLOWED_EXTENSIONS = {
-    "jpg",
-    "jpeg",
-    "png",
-    "bmp",
-    "webp",
-    "mp4",
-    "avi",
-    "mov"
-}
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "bmp", "webp", "mp4", "avi", "mov"}
 
 # =========================
 # OpenCV Model
 # =========================
 
-CASCADE_PATH = os.path.join(
-    BASE_DIR,
-    "models",
-    "haarcascade_frontalface_default.xml"
-)
+CASCADE_PATH = os.path.join(BASE_DIR, "models", "haarcascade_frontalface_default.xml")
 
 # =========================
 # Detection Settings
@@ -71,16 +58,6 @@ CAMERA_INDEX = 0
 # Supported File Types
 # =========================
 
-IMAGE_EXTENSIONS = (
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".bmp",
-    ".webp"
-)
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".bmp", ".webp")
 
-VIDEO_EXTENSIONS = (
-    ".mp4",
-    ".avi",
-    ".mov"
-)
+VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov")

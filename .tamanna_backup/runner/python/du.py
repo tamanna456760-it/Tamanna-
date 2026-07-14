@@ -8,8 +8,7 @@ import time
 from flask import Flask, jsonify
 
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s %(levelname)s %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 stop_event = threading.Event()
 worker_status = {"last_run": None, "runs": 0, "error": None}

@@ -5,20 +5,10 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from ... import cast
-from ... import Column
-from ... import MetaData
-from ... import Table
-from ... import util
+from ... import Column, MetaData, Table, cast, util
 from ...ext.compiler import compiles
 from ...sql import expression
-from ...types import Boolean
-from ...types import Integer
-from ...types import Numeric
-from ...types import String
-from ...types import TypeDecorator
-from ...types import Unicode
-
+from ...types import Boolean, Integer, Numeric, String, TypeDecorator, Unicode
 
 ischema = MetaData()
 
@@ -82,9 +72,7 @@ columns = Table(
     Column("IS_NULLABLE", Integer, key="is_nullable"),
     Column("DATA_TYPE", String, key="data_type"),
     Column("ORDINAL_POSITION", Integer, key="ordinal_position"),
-    Column(
-        "CHARACTER_MAXIMUM_LENGTH", Integer, key="character_maximum_length"
-    ),
+    Column("CHARACTER_MAXIMUM_LENGTH", Integer, key="character_maximum_length"),
     Column("NUMERIC_PRECISION", Integer, key="numeric_precision"),
     Column("NUMERIC_SCALE", Integer, key="numeric_scale"),
     Column("COLUMN_DEFAULT", Integer, key="column_default"),
@@ -101,9 +89,7 @@ mssql_temp_table_columns = Table(
     Column("IS_NULLABLE", Integer, key="is_nullable"),
     Column("DATA_TYPE", String, key="data_type"),
     Column("ORDINAL_POSITION", Integer, key="ordinal_position"),
-    Column(
-        "CHARACTER_MAXIMUM_LENGTH", Integer, key="character_maximum_length"
-    ),
+    Column("CHARACTER_MAXIMUM_LENGTH", Integer, key="character_maximum_length"),
     Column("NUMERIC_PRECISION", Integer, key="numeric_precision"),
     Column("NUMERIC_SCALE", Integer, key="numeric_scale"),
     Column("COLUMN_DEFAULT", Integer, key="column_default"),
@@ -160,9 +146,7 @@ ref_constraints = Table(
         CoerceUnicode,
         key="unique_constraint_schema",
     ),
-    Column(
-        "UNIQUE_CONSTRAINT_NAME", CoerceUnicode, key="unique_constraint_name"
-    ),
+    Column("UNIQUE_CONSTRAINT_NAME", CoerceUnicode, key="unique_constraint_name"),
     Column("MATCH_OPTION", String, key="match_option"),
     Column("UPDATE_RULE", String, key="update_rule"),
     Column("DELETE_RULE", String, key="delete_rule"),
@@ -211,6 +195,7 @@ class IdentitySqlVariant(TypeDecorator):
       int 1 is returned as "\x01\x00\x00\x00". On python 3 it returns the
       correct value as string.
     """
+
     impl = Unicode
     cache_ok = True
 

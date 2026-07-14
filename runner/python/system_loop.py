@@ -1,11 +1,14 @@
 import time
 from datetime import datetime
 
+
 def heartbeat():
     print("System heartbeat:", datetime.utcnow().isoformat() + "Z")
 
+
 def check_status():
     print("System status: OK")
+
 
 def run_system():
     print("System runner started.")
@@ -24,6 +27,7 @@ def run_system():
             last_check = now
 
         time.sleep(1)
+
 
 if __name__ == "__main__":
     run_system()

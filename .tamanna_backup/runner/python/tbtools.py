@@ -92,18 +92,14 @@ PAGE_HTML = (
 """
 )
 
-CONSOLE_HTML = (
-    HEADER
-    + """\
+CONSOLE_HTML = HEADER + """\
 <h1>Interactive Console</h1>
 <div class="explanation">
 In this console you can execute Python expressions in the context of the
 application.  The initial namespace was created by the debugger automatically.
 </div>
 <div class="console"><div class="inner">The Console requires JavaScript.</div></div>
-"""
-    + FOOTER
-)
+""" + FOOTER
 
 SUMMARY_HTML = """\
 <div class="%(classes)s">
@@ -264,9 +260,7 @@ class DebugTraceback:
     @cached_property
     def all_frames(self) -> list[DebugFrameSummary]:
         return [
-            f  # type: ignore[misc]
-            for _, te in self.all_tracebacks
-            for f in te.stack
+            f for _, te in self.all_tracebacks for f in te.stack  # type: ignore[misc]
         ]
 
     def render_traceback_text(self) -> str:

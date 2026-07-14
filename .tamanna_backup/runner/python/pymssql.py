@@ -39,6 +39,7 @@ ODBC Driver for SQL Server (msodbcsql), which is now available for Windows,
 
 
 """  # noqa
+
 import re
 
 from .base import MSDialect
@@ -130,9 +131,7 @@ class MSDialect_pymssql(MSDialect):
             connection.autocommit(True)
         else:
             connection.autocommit(False)
-            super(MSDialect_pymssql, self).set_isolation_level(
-                connection, level
-            )
+            super(MSDialect_pymssql, self).set_isolation_level(connection, level)
 
 
 dialect = MSDialect_pymssql

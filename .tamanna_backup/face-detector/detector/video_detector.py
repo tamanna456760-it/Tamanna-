@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 
 CASCADE_PATH = "models/haarcascade_frontalface_default.xml"
 
@@ -12,7 +13,9 @@ class VideoFaceDetector:
         if face_cascade.empty():
             raise RuntimeError("Haar cascade model not loaded properly")
 
-    def detect_from_video(self, video_path=None, output_path="static/uploads/output.mp4"):
+    def detect_from_video(
+        self, video_path=None, output_path="static/uploads/output.mp4"
+    ):
 
         # If video_path is None → use webcam
         cap = cv2.VideoCapture(0 if video_path is None else video_path)
@@ -42,22 +45,13 @@ class VideoFaceDetector:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             faces = face_cascade.detectMultiScale(
-                gray,
-                scaleFactor=1.1,
-                minNeighbors=5,
-                minSize=(30, 30)
+                gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
             )
 
             face_count_total += len(faces)
 
-            for (x, y, w, h) in faces:
-                cv2.rectangle(
-                    frame,
-                    (x, y),
-                    (x + w, y + h),
-                    (0, 255, 0),
-                    2
-                )
+            for x, y, w, h in faces:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                 cv2.putText(
                     frame,
@@ -66,7 +60,7 @@ class VideoFaceDetector:
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.6,
                     (0, 255, 0),
-                    2
+                    2,
                 )
 
             out.write(frame)
@@ -80,10 +74,7 @@ class VideoFaceDetector:
         out.release()
         cv2.destroyAllWindows()
 
-        return {
-            "total_faces_detected": face_count_total,
-            "output_video": output_path
-        }
+        return {"total_faces_detected": face_count_total, "output_video": output_path}
 
 
 if __name__ == "__main__":

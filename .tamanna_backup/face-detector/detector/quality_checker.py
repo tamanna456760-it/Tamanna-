@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 class QualityChecker:
 
     def analyze(self, image_path):
@@ -25,5 +26,5 @@ class QualityChecker:
         return {
             "blur_score": float(blur),
             "brightness": float(brightness),
-            "quality": quality
+            "quality": quality,
         }

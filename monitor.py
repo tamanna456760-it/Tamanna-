@@ -1,22 +1,26 @@
 import os
-import time
 import shutil
 import subprocess
-from watchdog.observers import Observer
+import time
+
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 CONFIG_PATH = "config.json"
 
 import json
 
+
 def load_config():
     with open(CONFIG_PATH, "r") as f:
         return json.load(f)
+
 
 config = load_config()
 
 WATCH_FOLDER = config["watch_folder"]
 RULES = config["rules"]
+
 
 def run_file(file_path):
     try:
@@ -28,9 +32,11 @@ def run_file(file_path):
     except Exception as e:
         print("Run error:", e)
 
+
 def move_file(file_path, dest_folder):
     os.makedirs(dest_folder, exist_ok=True)
     shutil.move(file_path, os.path.join(dest_folder, os.path.basename(file_path)))
+
 
 class Handler(FileSystemEventHandler):
 
@@ -58,6 +64,7 @@ class Handler(FileSystemEventHandler):
         if config["auto_run"]:
             run_file(path)
             print(f"Executed: {path}")
+
 
 if __name__ == "__main__":
     event_handler = Handler()

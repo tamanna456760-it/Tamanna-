@@ -34,6 +34,7 @@ CONFIG = {
 # UTILITY FUNCTIONS
 # =========================
 
+
 def now_iso() -> str:
     return datetime.utcnow().isoformat() + "Z"
 
@@ -57,6 +58,7 @@ def file_sha256(path: str) -> Optional[str]:
 # MYTH LOG (RITUAL LOGGING)
 # =========================
 
+
 def myth_log(event_type: str, data: Dict[str, Any]) -> None:
     """
     Every event is a myth entry.
@@ -75,6 +77,7 @@ def myth_log(event_type: str, data: Dict[str, Any]) -> None:
 # =========================
 # EMOTION ENGINE (TAMANNĀ LAYER)
 # =========================
+
 
 def map_state_to_emotion(technical_state: str) -> str:
     """
@@ -95,6 +98,7 @@ def map_state_to_emotion(technical_state: str) -> str:
 # ALERT SYSTEM
 # =========================
 
+
 def send_alert(module_name: str, technical_state: str, message: str) -> None:
     emotion = map_state_to_emotion(technical_state)
     alert_text = (
@@ -102,31 +106,39 @@ def send_alert(module_name: str, technical_state: str, message: str) -> None:
         f"Module: {module_name} | State: {technical_state} | Emotion: {emotion} | Message: {message}"
     )
     print(alert_text)
-    myth_log("alert", {
-        "module": module_name,
-        "technical_state": technical_state,
-        "emotion": emotion,
-        "message": message,
-    })
+    myth_log(
+        "alert",
+        {
+            "module": module_name,
+            "technical_state": technical_state,
+            "emotion": emotion,
+            "message": message,
+        },
+    )
 
 
 # =========================
 # HEARTBEAT PROTOCOL
 # =========================
 
+
 def heartbeat() -> None:
     """
     System heartbeat – runs periodically.
     """
-    myth_log("heartbeat", {
-        "message": "BD-KING-R7 is alive.",
-    })
+    myth_log(
+        "heartbeat",
+        {
+            "message": "BD-KING-R7 is alive.",
+        },
+    )
     print(f"[{CONFIG['system_name']}] Heartbeat: alive at {now_iso()}")
 
 
 # =========================
 # INTEGRITY & HASH MANIFEST
 # =========================
+
 
 def load_hash_manifest() -> Dict[str, str]:
     path = CONFIG["hash_manifest_path"]
@@ -169,11 +181,16 @@ def integrity_init() -> None:
     """
     manifest = build_hash_manifest()
     save_hash_manifest(manifest)
-    myth_log("integrity_init", {
-        "message": "Integrity manifest initialized.",
-        "file_count": len(manifest),
-    })
-    print(f"[{CONFIG['system_name']}] Integrity manifest initialized with {len(manifest)} files.")
+    myth_log(
+        "integrity_init",
+        {
+            "message": "Integrity manifest initialized.",
+            "file_count": len(manifest),
+        },
+    )
+    print(
+        f"[{CONFIG['system_name']}] Integrity manifest initialized with {len(manifest)} files."
+    )
 
 
 def integrity_check() -> None:
@@ -186,14 +203,18 @@ def integrity_check() -> None:
     # Added / removed / changed
     added = set(current.keys()) - set(stored.keys())
     removed = set(stored.keys()) - set(current.keys())
-    changed = {path for path in current.keys() & stored.keys()
-               if current[path] != stored[path]}
+    changed = {
+        path for path in current.keys() & stored.keys() if current[path] != stored[path]
+    }
 
     if not added and not removed and not changed:
-        myth_log("integrity_check", {
-            "status": "ok",
-            "message": "All modules match manifest.",
-        })
+        myth_log(
+            "integrity_check",
+            {
+                "status": "ok",
+                "message": "All modules match manifest.",
+            },
+        )
         return
 
     # Log changes
@@ -203,8 +224,11 @@ def integrity_check() -> None:
         "changed": sorted(list(changed)),
     }
     myth_log("integrity_violation", issues)
-    send_alert("INTEGRITY_ENGINE", "warning",
-               f"Integrity deviation detected. Added: {len(added)}, Removed: {len(removed)}, Changed: {len(changed)}")
+    send_alert(
+        "INTEGRITY_ENGINE",
+        "warning",
+        f"Integrity deviation detected. Added: {len(added)}, Removed: {len(removed)}, Changed: {len(changed)}",
+    )
 
     # Here you can hook auto-restore from backup per file
 
@@ -213,6 +237,7 @@ def integrity_check() -> None:
 # BACKUP & RESURRECTION HOOKS
 # =========================
 
+
 def backup_snapshot(label: str = "auto") -> str:
     """
     Create a simple snapshot of modules directory.
@@ -220,7 +245,9 @@ def backup_snapshot(label: str = "auto") -> str:
     """
     root = CONFIG["modules_root"]
     if not os.path.isdir(root):
-        send_alert("BACKUP_ENGINE", "error", "Modules root does not exist; backup aborted.")
+        send_alert(
+            "BACKUP_ENGINE", "error", "Modules root does not exist; backup aborted."
+        )
         return ""
 
     ensure_dir(CONFIG["backup_root"])
@@ -238,10 +265,13 @@ def backup_snapshot(label: str = "auto") -> str:
             with open(src, "rb") as fsrc, open(dst, "wb") as fdst:
                 fdst.write(fsrc.read())
 
-    myth_log("backup_snapshot", {
-        "label": label,
-        "path": backup_dir,
-    })
+    myth_log(
+        "backup_snapshot",
+        {
+            "label": label,
+            "path": backup_dir,
+        },
+    )
     send_alert("BACKUP_ENGINE", "healing", f"Backup snapshot created at {backup_dir}")
     return backup_dir
 
@@ -252,7 +282,9 @@ def resurrection_from_backup(backup_path: str) -> None:
     """
     root = CONFIG["modules_root"]
     if not os.path.isdir(backup_path):
-        send_alert("RESURRECTION_ENGINE", "error", f"Backup path not found: {backup_path}")
+        send_alert(
+            "RESURRECTION_ENGINE", "error", f"Backup path not found: {backup_path}"
+        )
         return
 
     # Delete existing modules root (careful)
@@ -278,16 +310,20 @@ def resurrection_from_backup(backup_path: str) -> None:
             with open(src, "rb") as fsrc, open(dst, "wb") as fdst:
                 fdst.write(fsrc.read())
 
-    myth_log("resurrection", {
-        "backup_path": backup_path,
-        "message": "Modules restored from backup.",
-    })
+    myth_log(
+        "resurrection",
+        {
+            "backup_path": backup_path,
+            "message": "Modules restored from backup.",
+        },
+    )
     send_alert("RESURRECTION_ENGINE", "resurrecting", "Modules restored from backup.")
 
 
 # =========================
 # AUTO-FIX PLACEHOLDER
 # =========================
+
 
 def auto_fix_module(module_name: str) -> None:
     """
@@ -297,24 +333,35 @@ def auto_fix_module(module_name: str) -> None:
     - Reset configuration
     - Call a local script
     """
-    myth_log("auto_fix_attempt", {
-        "module": module_name,
-        "message": "Auto-fix placeholder invoked.",
-    })
-    send_alert(module_name, "healing", "Auto-fix ritual placeholder invoked. Implement your fix here.")
+    myth_log(
+        "auto_fix_attempt",
+        {
+            "module": module_name,
+            "message": "Auto-fix placeholder invoked.",
+        },
+    )
+    send_alert(
+        module_name,
+        "healing",
+        "Auto-fix ritual placeholder invoked. Implement your fix here.",
+    )
 
 
 # =========================
 # WATCHDOG LOOP
 # =========================
 
+
 def watchdog_loop() -> None:
     """
     Main loop: heartbeat + integrity check + hooks.
     """
-    myth_log("system_start", {
-        "message": "BD-KING-R7 security spine started.",
-    })
+    myth_log(
+        "system_start",
+        {
+            "message": "BD-KING-R7 security spine started.",
+        },
+    )
     print(f"[{CONFIG['system_name']}] Security spine started.")
 
     last_heartbeat = 0.0
@@ -340,6 +387,7 @@ def watchdog_loop() -> None:
 # =========================
 # MAIN ENTRY
 # =========================
+
 
 def main() -> None:
     # First-time setup steps you can call manually:

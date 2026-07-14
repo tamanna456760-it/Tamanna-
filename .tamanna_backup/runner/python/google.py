@@ -14,8 +14,7 @@ try:
 
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
-    from google.oauth2.service_account import \
-        Credentials as ServiceAccountCredentials
+    from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 except ImportError:
     print(
         "Some dependencies missing. Install with: pip install googlesearch-python google-api-python-client gspread google-auth-httplib2 google-auth-oauthlib beautifulsoup4 requests"
@@ -110,8 +109,7 @@ class GoogleServices:
                     if link.startswith("/url?q="):
                         link = link.split("/url?q=")[1].split("&")[0]
 
-                    results.append(
-                        {"title": title, "link": link, "snippet": snippet})
+                    results.append({"title": title, "link": link, "snippet": snippet})
 
             return results
         except Exception as e:
@@ -137,8 +135,7 @@ class GoogleServices:
             elif sheet_name:
                 sheet = client.open(sheet_name).sheet1
             else:
-                raise ValueError(
-                    "Either sheet_name or sheet_url must be provided")
+                raise ValueError("Either sheet_name or sheet_url must be provided")
 
             self.services["sheets"] = sheet
             return sheet

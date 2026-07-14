@@ -140,9 +140,7 @@ class compound(object):
         for fail in self.fails:
             if fail(config):
                 if util.py2k:
-                    str_ex = unicode(ex).encode(  # noqa: F821
-                        "utf-8", errors="ignore"
-                    )
+                    str_ex = unicode(ex).encode("utf-8", errors="ignore")  # noqa: F821
                 else:
                     str_ex = str(ex)
                 print(
@@ -165,9 +163,7 @@ class compound(object):
                     "Unexpected success for '%s' (%s)"
                     % (
                         name,
-                        " and ".join(
-                            fail._as_string(config) for fail in self.fails
-                        ),
+                        " and ".join(fail._as_string(config) for fail in self.fails),
                     )
                 )
 
@@ -212,9 +208,7 @@ class Predicate(object):
                 r"([\+\w]+)\s*(?:(>=|==|!=|<=|<|>)\s*([\d\.]+))?", predicate
             )
             if not tokens:
-                raise ValueError(
-                    "Couldn't locate DB name in predicate: %r" % predicate
-                )
+                raise ValueError("Couldn't locate DB name in predicate: %r" % predicate)
             db = tokens.group(1)
             op = tokens.group(2)
             spec = (
@@ -234,12 +228,8 @@ class Predicate(object):
         if negate:
             bool_ = not negate
         return self.description % {
-            "driver": config.db.url.get_driver_name()
-            if config
-            else "<no driver>",
-            "database": config.db.url.get_backend_name()
-            if config
-            else "<no database>",
+            "driver": config.db.url.get_driver_name() if config else "<no driver>",
+            "database": config.db.url.get_backend_name() if config else "<no database>",
             "doesnt_support": "doesn't support" if bool_ else "does support",
             "does_support": "does support" if bool_ else "doesn't support",
         }
@@ -298,9 +288,7 @@ class SpecPredicate(Predicate):
             assert driver is None, "DBAPI version specs not supported yet"
 
             version = _server_version(engine)
-            oper = (
-                hasattr(self.op, "__call__") and self.op or self._ops[self.op]
-            )
+            oper = hasattr(self.op, "__call__") and self.op or self._ops[self.op]
             return oper(version, self.spec)
         else:
             return True
@@ -448,9 +436,7 @@ def skip(db, reason=None):
 
 def only_on(dbs, reason=None):
     return only_if(
-        OrPredicate(
-            [Predicate.as_predicate(db, reason) for db in util.to_list(dbs)]
-        )
+        OrPredicate([Predicate.as_predicate(db, reason) for db in util.to_list(dbs)])
     )
 
 
@@ -460,6 +446,4 @@ def exclude(db, op, spec, reason=None):
 
 def against(config, *queries):
     assert queries, "no queries sent!"
-    return OrPredicate([Predicate.as_predicate(query) for query in queries])(
-        config
-    )
+    return OrPredicate([Predicate.as_predicate(query) for query in queries])(config)

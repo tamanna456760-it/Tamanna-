@@ -42,8 +42,7 @@ def str_to_datetime_processor_factory(regexp, type_):
                 )
             if m is None:
                 raise ValueError(
-                    "Couldn't parse %s string: "
-                    "'%s'" % (type_.__name__, value)
+                    "Couldn't parse %s string: " "'%s'" % (type_.__name__, value)
                 )
             if has_named_groups:
                 groups = m.groupdict(0)
@@ -123,9 +122,7 @@ def py_fallback():
         else:
             return bool(value)
 
-    DATETIME_RE = re.compile(
-        r"(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)(?:\.(\d+))?"
-    )
+    DATETIME_RE = re.compile(r"(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)(?:\.(\d+))?")
     TIME_RE = re.compile(r"(\d+):(\d+):(\d+)(?:\.(\d+))?")
     DATE_RE = re.compile(r"(\d+)-(\d+)-(\d+)")
 
@@ -143,13 +140,13 @@ def py_fallback():
 
 try:
     from sqlalchemy.cprocessors import DecimalResultProcessor  # noqa
+    from sqlalchemy.cprocessors import UnicodeResultProcessor  # noqa
     from sqlalchemy.cprocessors import int_to_boolean  # noqa
     from sqlalchemy.cprocessors import str_to_date  # noqa
     from sqlalchemy.cprocessors import str_to_datetime  # noqa
     from sqlalchemy.cprocessors import str_to_time  # noqa
     from sqlalchemy.cprocessors import to_float  # noqa
     from sqlalchemy.cprocessors import to_str  # noqa
-    from sqlalchemy.cprocessors import UnicodeResultProcessor  # noqa
 
     def to_unicode_processor_factory(encoding, errors=None):
         if errors is not None:
@@ -170,7 +167,6 @@ try:
         # Decimal('5.00000') whereas the C implementation will
         # return Decimal('5'). These are equivalent of course.
         return DecimalResultProcessor(target_class, "%%.%df" % scale).process
-
 
 except ImportError:
     globals().update(py_fallback())

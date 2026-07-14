@@ -1,6 +1,7 @@
 import os
 from config import WATCH_FOLDER
 
+
 def scan_files():
     if not os.path.exists(WATCH_FOLDER):
         os.makedirs(WATCH_FOLDER)

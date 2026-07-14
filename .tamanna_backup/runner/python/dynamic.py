@@ -188,9 +188,7 @@ class DynamicAttributeImpl(attributes.AttributeImpl):
         if not state.has_identity:
             old_collection = collection_history.added_items
         else:
-            old_collection = old_collection.union(
-                collection_history.added_items
-            )
+            old_collection = old_collection.union(collection_history.added_items)
 
         idset = util.IdentitySet
         constants = old_collection.intersection(new_values)
@@ -228,9 +226,7 @@ class DynamicAttributeImpl(attributes.AttributeImpl):
         c = self._get_collection_history(state, passive)
         return c.as_history()
 
-    def get_all_pending(
-        self, state, dict_, passive=attributes.PASSIVE_NO_INITIALIZE
-    ):
+    def get_all_pending(self, state, dict_, passive=attributes.PASSIVE_NO_INITIALIZE):
         c = self._get_collection_history(state, passive)
         return [(attributes.instance_state(x), x) for x in c.all_items]
 
@@ -245,21 +241,15 @@ class DynamicAttributeImpl(attributes.AttributeImpl):
         else:
             return c
 
-    def append(
-        self, state, dict_, value, initiator, passive=attributes.PASSIVE_OFF
-    ):
+    def append(self, state, dict_, value, initiator, passive=attributes.PASSIVE_OFF):
         if initiator is not self:
             self.fire_append_event(state, dict_, value, initiator)
 
-    def remove(
-        self, state, dict_, value, initiator, passive=attributes.PASSIVE_OFF
-    ):
+    def remove(self, state, dict_, value, initiator, passive=attributes.PASSIVE_OFF):
         if initiator is not self:
             self.fire_remove_event(state, dict_, value, initiator)
 
-    def pop(
-        self, state, dict_, value, initiator, passive=attributes.PASSIVE_OFF
-    ):
+    def pop(self, state, dict_, value, initiator, passive=attributes.PASSIVE_OFF):
         self.remove(state, dict_, value, initiator, passive=passive)
 
 
@@ -307,9 +297,7 @@ class AppenderMixin(object):
             # from __clause_element__(), see #7868
             self._from_obj = (prop.mapper.__clause_element__(), prop.secondary)
 
-        self._where_criteria = (
-            prop._with_parent(instance, alias_secondary=False),
-        )
+        self._where_criteria = (prop._with_parent(instance, alias_secondary=False),)
 
         if self.attr.order_by:
             self._order_by_clauses = self.attr.order_by
@@ -460,9 +448,7 @@ class CollectionHistory(object):
     @property
     def all_items(self):
         return list(
-            self.added_items.union(self.unchanged_items).union(
-                self.deleted_items
-            )
+            self.added_items.union(self.unchanged_items).union(self.deleted_items)
         )
 
     def as_history(self):

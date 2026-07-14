@@ -31,15 +31,18 @@ os.makedirs(BACKUP_PATH, exist_ok=True)
 # LOGGER
 # ==========================================
 
+
 def write_log(message):
 
     with open(LOG_FILE, "a", encoding="utf-8") as log:
 
         log.write(f"{datetime.now()} : {message}\n")
 
+
 # ==========================================
 # FILE DETECTION
 # ==========================================
+
 
 def detect_files():
 
@@ -67,9 +70,11 @@ def detect_files():
 
     return files_found
 
+
 # ==========================================
 # PROBLEM DETECTION
 # ==========================================
+
 
 def detect_problems(file_path):
 
@@ -105,9 +110,11 @@ def detect_problems(file_path):
 
     return problems
 
+
 # ==========================================
 # FILE BACKUP
 # ==========================================
+
 
 def backup_file(file_path):
 
@@ -121,9 +128,11 @@ def backup_file(file_path):
 
     write_log(f"Backup created: {filename}")
 
+
 # ==========================================
 # OUTPUT REPORT
 # ==========================================
+
 
 def generate_report(scan_results):
 
@@ -137,9 +146,11 @@ def generate_report(scan_results):
 
     write_log("Report generated")
 
+
 # ==========================================
 # MAIN SYSTEM
 # ==========================================
+
 
 def main():
 
@@ -174,6 +185,7 @@ def main():
             print(" No problems detected")
 
     generate_report(all_results)
+
 
 # ==========================================
 # START

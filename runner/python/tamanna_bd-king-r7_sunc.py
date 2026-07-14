@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import os
-import time
 import hashlib
 import json
+import os
 import shutil
+import time
 from datetime import datetime
 
 # ================= CONFIG: EDIT FOR YOUR SYSTEM =================
@@ -16,7 +16,7 @@ WATCH_PATHS = [
     os.path.join(BD_KING_ROOT, "code"),
     os.path.join(BD_KING_ROOT, "engines"),
     os.path.join(BD_KING_ROOT, "build"),
-    os.path.join(BD_KING_ROOT, "panels")  # if you have this
+    os.path.join(BD_KING_ROOT, "panels"),  # if you have this
 ]
 
 # Where to sync (central mirror)
@@ -39,6 +39,7 @@ BUILD_COMMANDS = [
 ]
 
 # ================== UTILITY FUNCTIONS ===========================
+
 
 def log(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -105,7 +106,7 @@ def diff_states(old, new):
     removed = sorted(list(old_keys - new_keys))
 
     changed = []
-    for path in (old_keys & new_keys):
+    for path in old_keys & new_keys:
         if old[path] != new[path]:
             changed.append(path)
     changed.sort()
@@ -158,6 +159,7 @@ def run_build_commands():
 
 
 # ================== MAIN LOOP ==================================
+
 
 def main_loop():
     log("Tamanna Sync Engine for BD KING R7 :: START")

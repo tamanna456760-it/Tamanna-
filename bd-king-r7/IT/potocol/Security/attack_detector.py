@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict, deque
 
+
 class AttackDetector:
     def __init__(self, max_requests=30, window=60):
         # প্রতি IP এর request history
@@ -27,7 +28,7 @@ class AttackDetector:
                 "risk": "HIGH",
                 "ip": ip,
                 "reason": "Too many requests in short time",
-                "count": len(q)
+                "count": len(q),
             }
 
         # light suspicious behavior
@@ -36,11 +37,7 @@ class AttackDetector:
                 "risk": "MEDIUM",
                 "ip": ip,
                 "reason": "High traffic detected",
-                "count": len(q)
+                "count": len(q),
             }
 
-        return {
-            "risk": "LOW",
-            "ip": ip,
-            "count": len(q)
-        }
+        return {"risk": "LOW", "ip": ip, "count": len(q)}

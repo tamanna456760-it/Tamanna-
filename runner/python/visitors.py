@@ -81,9 +81,7 @@ def _generate_compiler_dispatch(cls):
         else:
             return meth(self, **kw)
 
-    cls._compiler_dispatch = (
-        cls._original_compiler_dispatch
-    ) = _compiler_dispatch
+    cls._compiler_dispatch = cls._original_compiler_dispatch = _compiler_dispatch
 
 
 class TraversibleType(type):
@@ -186,8 +184,7 @@ def _generate_dispatcher(visitor, internal_dispatch, method_name):
         ("    return [\n")
         + (
             ", \n".join(
-                "        (%r, self.%s, visitor.%s)"
-                % (attrname, attrname, visit_name)
+                "        (%r, self.%s, visitor.%s)" % (attrname, attrname, visit_name)
                 for attrname, visit_name in names
             )
         )
@@ -584,9 +581,7 @@ class CloningExternalTraversal(ExternalTraversal):
     def traverse(self, obj):
         """Traverse and visit the given expression structure."""
 
-        return cloned_traverse(
-            obj, self.__traverse_options__, self._visitor_dict
-        )
+        return cloned_traverse(obj, self.__traverse_options__, self._visitor_dict)
 
 
 class ReplacingExternalTraversal(CloningExternalTraversal):
@@ -780,9 +775,7 @@ def cloned_traverse(obj, opts, visitors):
             return cloned[id(elem)]
 
     if obj is not None:
-        obj = clone(
-            obj, deferred_copy_internals=deferred_copy_internals, **opts
-        )
+        obj = clone(obj, deferred_copy_internals=deferred_copy_internals, **opts)
     clone = None  # remove gc cycles
     return obj
 
@@ -818,10 +811,7 @@ def replacement_traverse(obj, opts, replace):
         return replacement_traverse(obj, opts, replace)
 
     def clone(elem, **kw):
-        if (
-            id(elem) in stop_on
-            or "no_replacement_traverse" in elem._annotations
-        ):
+        if id(elem) in stop_on or "no_replacement_traverse" in elem._annotations:
             return elem
         else:
             newelem = replace(elem)
@@ -845,8 +835,6 @@ def replacement_traverse(obj, opts, replace):
                 return cloned[id_elem]
 
     if obj is not None:
-        obj = clone(
-            obj, deferred_copy_internals=deferred_copy_internals, **opts
-        )
+        obj = clone(obj, deferred_copy_internals=deferred_copy_internals, **opts)
     clone = None  # remove gc cycles
     return obj

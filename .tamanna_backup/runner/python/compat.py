@@ -174,9 +174,7 @@ if py3k:
     def cmp(a, b):
         return (a > b) - (a < b)
 
-    def raise_(
-        exception, with_traceback=None, replace_context=None, from_=False
-    ):
+    def raise_(exception, with_traceback=None, replace_context=None, from_=False):
         r"""implement "raise" with cause support.
 
         :param exception: exception to raise
@@ -226,7 +224,6 @@ if py3k:
 
     def _qualname(fn):
         return fn.__qualname__
-
 
 else:
     import base64
@@ -431,7 +428,6 @@ if py3k:
             result += formatreturns(formatannotation(annotations["return"]))
         return result
 
-
 else:
     from inspect import formatargspec as _inspect_formatargspec
 
@@ -468,12 +464,9 @@ if py37:
             super_fields = set()
             for sup in cls.__bases__:
                 super_fields.update(dataclass_fields(sup))
-            return [
-                f for f in dataclasses.fields(cls) if f not in super_fields
-            ]
+            return [f for f in dataclasses.fields(cls) if f not in super_fields]
         else:
             return []
-
 
 else:
 
@@ -582,9 +575,7 @@ else:
                 if dt.tzinfo is not self:
                     raise ValueError("fromutc: dt.tzinfo " "is not self")
                 return dt + self._offset
-            raise TypeError(
-                "fromutc() argument must be a datetime instance" " or None"
-            )
+            raise TypeError("fromutc() argument must be a datetime instance" " or None")
 
         @staticmethod
         def _timedelta_to_microseconds(timedelta):
@@ -612,12 +603,8 @@ else:
                 delta = -delta
             else:
                 sign = "+"
-            hours, rest = timezone._divmod_timedeltas(
-                delta, timedelta(hours=1)
-            )
-            minutes, rest = timezone._divmod_timedeltas(
-                rest, timedelta(minutes=1)
-            )
+            hours, rest = timezone._divmod_timedeltas(delta, timedelta(hours=1))
+            minutes, rest = timezone._divmod_timedeltas(rest, timedelta(minutes=1))
             result = "UTC%s%02d:%02d" % (sign, hours, minutes)
             if rest.seconds:
                 result += ":%02d" % (rest.seconds,)

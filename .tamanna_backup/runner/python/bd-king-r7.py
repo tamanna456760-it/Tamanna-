@@ -8,14 +8,17 @@ MODULES = "modules"
 MANIFEST = "manifest.json"
 LOG = "system_log.jsonl"
 
+
 # ---------- Time ----------
 def now():
     return datetime.utcnow().isoformat() + "Z"
+
 
 # ---------- Logging ----------
 def log(event, data):
     with open(LOG, "a", encoding="utf-8") as f:
         f.write(json.dumps({"time": now(), "event": event, "data": data}) + "\n")
+
 
 # ---------- Hash ----------
 def sha256(path):
@@ -24,6 +27,7 @@ def sha256(path):
         for chunk in iter(lambda: f.read(4096), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 # ---------- Manifest Build ----------
 def build_manifest():
@@ -37,10 +41,12 @@ def build_manifest():
             m[r] = sha256(p)
     return m
 
+
 # ---------- Save Manifest ----------
 def save_manifest(m):
     with open(MANIFEST, "w") as f:
         json.dump(m, f, indent=2)
+
 
 # ---------- First Time Setup ----------
 def init_manifest():
@@ -48,6 +54,7 @@ def init_manifest():
     save_manifest(m)
     log("manifest_init", {"files": len(m)})
     print("✅ Manifest created.")
+
 
 # ---------- Integrity Check ----------
 def check_integrity():
@@ -68,16 +75,17 @@ def check_integrity():
         return
 
     print("❌ Integrity deviation detected.")
-    log("integrity_violation", {
-        "added": list(added),
-        "removed": list(removed),
-        "changed": list(changed)
-    })
+    log(
+        "integrity_violation",
+        {"added": list(added), "removed": list(removed), "changed": list(changed)},
+    )
+
 
 # ---------- Heartbeat ----------
 def heartbeat():
     print(f"❤️ {SYSTEM} heartbeat at {now()}")
     log("heartbeat", {"alive": True})
+
 
 # ---------- Main Loop ----------
 def run():
@@ -97,6 +105,7 @@ def run():
             last_chk = t
 
         time.sleep(1)
+
 
 # ---------- Entry ----------
 if __name__ == "__main__":

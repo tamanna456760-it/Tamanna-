@@ -1,18 +1,19 @@
-import requests
 import base64
-import time
-import json
 import hashlib
+import json
 import random
+import time
+
+import requests
 
 # 🔐 CONFIG
-GITHUB_TOKEN = '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'
-REPO_OWNER = 'tamanna456760-it'
-REPO_NAME = 'tamanna-'
+GITHUB_TOKEN = "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"
+REPO_OWNER = "tamanna456760-it"
+REPO_NAME = "tamanna-"
 
 HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
+    "Authorization": f"token {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github.v3+json",
 }
 
 # 📦 Backup Storage
@@ -29,6 +30,7 @@ def load_json(file):
             return json.load(f)
     except:
         return {}
+
 
 def save_json(file, data):
     with open(file, "w") as f:
@@ -54,11 +56,11 @@ def get_repo_files():
 
 
 def get_file_content(file):
-    res = requests.get(file['url'], headers=HEADERS)
+    res = requests.get(file["url"], headers=HEADERS)
     if res.status_code != 200:
         return None
     data = res.json()
-    return base64.b64decode(data['content']).decode('utf-8')
+    return base64.b64decode(data["content"]).decode("utf-8")
 
 
 # =========================
@@ -68,7 +70,7 @@ def create_dual_backup(path, content, backup_db):
     backup_db[path] = {
         "primary": content,
         "secondary": content[::-1],  # simple mirrored backup
-        "hash": get_hash(content)
+        "hash": get_hash(content),
     }
 
 
@@ -92,7 +94,7 @@ def broadcast_status(network_state, file, status):
     network_state[file] = {
         "status": status,
         "timestamp": time.time(),
-        "node_id": random.randint(1000, 9999)
+        "node_id": random.randint(1000, 9999),
     }
 
 
@@ -113,13 +115,17 @@ def update_file(path, content, message):
     if res.status_code != 200:
         return
 
-    sha = res.json()['sha']
+    sha = res.json()["sha"]
 
-    requests.put(url, headers=HEADERS, json={
-        "message": message,
-        "content": base64.b64encode(content.encode()).decode(),
-        "sha": sha
-    })
+    requests.put(
+        url,
+        headers=HEADERS,
+        json={
+            "message": message,
+            "content": base64.b64encode(content.encode()).decode(),
+            "sha": sha,
+        },
+    )
 
 
 # =========================
@@ -132,10 +138,10 @@ def ai_backup_network():
     files = get_repo_files()
 
     for file in files:
-        if file['type'] != 'file':
+        if file["type"] != "file":
             continue
 
-        path = file['path']
+        path = file["path"]
         content = get_file_content(file)
 
         if not content:

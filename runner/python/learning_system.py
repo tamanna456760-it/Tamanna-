@@ -96,10 +96,8 @@ class AdaptiveLearningSystem:
 
         # Configuration
         self.learning_rate = self.config.get("base_learning_rate", 0.001)
-        self.exploration_rate = self.config.get(
-            "initial_exploration_rate", 0.1)
-        self.min_exploration_rate = self.config.get(
-            "min_exploration_rate", 0.01)
+        self.exploration_rate = self.config.get("initial_exploration_rate", 0.1)
+        self.min_exploration_rate = self.config.get("min_exploration_rate", 0.01)
 
         self.logger.info("Adaptive Learning System initialized")
 
@@ -149,8 +147,7 @@ class AdaptiveLearningSystem:
             asyncio.create_task(self._knowledge_maintenance_loop())
 
             self.learning_state = LearningState.IDLE
-            self.logger.info(
-                "Adaptive Learning System initialized successfully")
+            self.logger.info("Adaptive Learning System initialized successfully")
 
         except Exception as e:
             self.logger.error(f"Learning system initialization failed: {e}")
@@ -191,8 +188,7 @@ class AdaptiveLearningSystem:
         """
         try:
             episode = LearningEpisode(
-                episode_id=hashlib.md5(
-                    str(episode_data).encode()).hexdigest()[:16],
+                episode_id=hashlib.md5(str(episode_data).encode()).hexdigest()[:16],
                 timestamp=datetime.now(),
                 mode=LearningMode(episode_data.get("mode", "supervised")),
                 input_data=episode_data.get("input", {}),
@@ -268,8 +264,7 @@ class AdaptiveLearningSystem:
             if len(self.experience_replay) >= self.config["batch_size"]:
                 batch = np.random.choice(
                     self.experience_replay,
-                    min(self.config["batch_size"],
-                        len(self.experience_replay)),
+                    min(self.config["batch_size"], len(self.experience_replay)),
                     replace=False,
                 )
 
@@ -410,8 +405,7 @@ class AdaptiveLearningSystem:
                         usage_count=1,
                     )
 
-            self.logger.debug(
-                f"Updated knowledge base with {len(insights)} insights")
+            self.logger.debug(f"Updated knowledge base with {len(insights)} insights")
 
         except Exception as e:
             self.logger.error(f"Knowledge base update error: {e}")
@@ -470,21 +464,18 @@ class AdaptiveLearningSystem:
 
                 if adapted_concept not in self.knowledge_base:
                     self.knowledge_base[adapted_concept] = KnowledgeUnit(
-                        unit_id=hashlib.md5(
-                            adapted_concept.encode()).hexdigest()[:16],
+                        unit_id=hashlib.md5(adapted_concept.encode()).hexdigest()[:16],
                         concept=adapted_concept,
                         confidence=knowledge.confidence
                         * 0.8,  # Reduced confidence for transfer
-                        evidence=[{"type": "transferred",
-                                   "source": knowledge.unit_id}],
+                        evidence=[{"type": "transferred", "source": knowledge.unit_id}],
                         created=datetime.now(),
                         last_used=datetime.now(),
                         usage_count=0,
                     )
                     transferred_count += 1
 
-            self.logger.info(
-                f"Transferred {transferred_count} knowledge units")
+            self.logger.info(f"Transferred {transferred_count} knowledge units")
 
             return {
                 "transferred_units": transferred_count,
@@ -616,8 +607,7 @@ class AdaptiveLearningSystem:
             await self._update_global_parameters(batch_learning_results)
 
             self.learning_state = LearningState.IDLE
-            self.logger.debug(
-                f"Batch learning completed for {len(batch)} episodes")
+            self.logger.debug(f"Batch learning completed for {len(batch)} episodes")
 
         except Exception as e:
             self.logger.error(f"Batch learning error: {e}")
@@ -662,8 +652,7 @@ class AdaptiveLearningSystem:
             del self.knowledge_base[concept]
 
         if to_remove:
-            self.logger.info(
-                f"Pruned {len(to_remove)} outdated knowledge units")
+            self.logger.info(f"Pruned {len(to_remove)} outdated knowledge units")
 
     async def save_learning_state(
         self, filepath: str = "data/models/learning_state.pkl"
@@ -710,8 +699,7 @@ class AdaptiveLearningSystem:
             self.logger.info(f"Learning state loaded from {filepath}")
 
         except FileNotFoundError:
-            self.logger.warning(
-                f"No previous learning state found at {filepath}")
+            self.logger.warning(f"No previous learning state found at {filepath}")
         except Exception as e:
             self.logger.error(f"Error loading learning state: {e}")
 
@@ -825,8 +813,7 @@ class AdaptiveLearningSystem:
                             confidence=kb_data["confidence"],
                             evidence=kb_data["evidence"],
                             created=datetime.fromisoformat(kb_data["created"]),
-                            last_used=datetime.fromisoformat(
-                                kb_data["last_used"]),
+                            last_used=datetime.fromisoformat(kb_data["last_used"]),
                             usage_count=kb_data["usage_count"],
                         )
         except Exception as e:

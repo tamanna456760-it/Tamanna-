@@ -1,6 +1,6 @@
+import datetime
 import os
 import subprocess
-import datetime
 import sys
 
 LOG_FILE = "logs/git_sync.log"
@@ -19,12 +19,7 @@ def log(msg):
 
 def run(cmd):
     try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
         if result.returncode != 0:
             log(f"ERROR: {cmd}")

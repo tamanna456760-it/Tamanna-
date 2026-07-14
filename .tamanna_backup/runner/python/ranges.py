@@ -6,7 +6,6 @@
 
 from ... import types as sqltypes
 
-
 __all__ = ("INT4RANGE", "INT8RANGE", "NUMRANGE")
 
 
@@ -32,9 +31,7 @@ class RangeOperators(object):
         def __ne__(self, other):
             "Boolean expression. Returns true if two ranges are not equal"
             if other is None:
-                return super(RangeOperators.comparator_factory, self).__ne__(
-                    other
-                )
+                return super(RangeOperators.comparator_factory, self).__ne__(other)
             else:
                 return self.expr.op("<>", is_comparison=True)(other)
 

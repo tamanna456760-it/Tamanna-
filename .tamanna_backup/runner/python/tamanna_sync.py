@@ -1,6 +1,7 @@
+import hashlib
 import os
 import time
-import hashlib
+
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -24,11 +25,13 @@ print("☁️ Tamanna Advanced Sync Started")
 # ---------------- HASH SYSTEM ----------------
 file_hashes = {}
 
+
 def get_hash(path):
     h = hashlib.md5()
     with open(path, "rb") as f:
         h.update(f.read())
     return h.hexdigest()
+
 
 # ---------------- LOG ----------------
 def log(msg):
@@ -36,20 +39,20 @@ def log(msg):
         f.write(msg + "\n")
     print(msg)
 
+
 # ---------------- UPLOAD ----------------
 def upload_file(path):
     try:
         file_name = os.path.basename(path)
         media = MediaFileUpload(path, resumable=True)
         drive.files().create(
-            body={"name": file_name},
-            media_body=media,
-            fields="id"
+            body={"name": file_name}, media_body=media, fields="id"
         ).execute()
 
         log(f"✅ Uploaded: {path}")
     except Exception as e:
         log(f"❌ Error uploading {path}: {e}")
+
 
 # ---------------- SYNC LOOP ----------------
 while True:

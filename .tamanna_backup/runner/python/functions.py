@@ -5,9 +5,8 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""SQL function API, factories, and built-in functions.
+"""SQL function API, factories, and built-in functions."""
 
-"""
 from . import annotation
 from . import coercions
 from . import operators
@@ -39,7 +38,6 @@ from .selectable import TableValuedAlias
 from .visitors import InternalTraversal
 from .visitors import TraversibleType
 from .. import util
-
 
 _registry = util.defaultdict(dict)
 
@@ -129,9 +127,7 @@ class FunctionElement(Executable, ColumnElement, FromClause, Generative):
 
     @property
     def _proxy_key(self):
-        return super(FunctionElement, self)._proxy_key or getattr(
-            self, "name", None
-        )
+        return super(FunctionElement, self)._proxy_key or getattr(self, "name", None)
 
     def _execute_on_connection(
         self, connection, multiparams, params, execution_options
@@ -249,9 +245,7 @@ class FunctionElement(Executable, ColumnElement, FromClause, Generative):
             expr += (with_ordinality,)
             new_func._with_ordinality = True
 
-        new_func.type = new_func._table_value_type = sqltypes.TableValueType(
-            *expr
-        )
+        new_func.type = new_func._table_value_type = sqltypes.TableValueType(*expr)
 
         return new_func.alias(name=name, joins_implicitly=joins_implicitly)
 
@@ -654,9 +648,7 @@ class FunctionElement(Executable, ColumnElement, FromClause, Generative):
         # expressions against getitem.  This may need to be made
         # more portable if in the future we support other DBs
         # besides postgresql.
-        if against is operators.getitem and isinstance(
-            self.type, sqltypes.ARRAY
-        ):
+        if against is operators.getitem and isinstance(self.type, sqltypes.ARRAY):
             return Grouping(self)
         else:
             return super(FunctionElement, self).self_group(against=against)
@@ -1111,9 +1103,7 @@ class next_value(GenericFunction):
     type = sqltypes.Integer()
     name = "next_value"
 
-    _traverse_internals = [
-        ("sequence", InternalTraversal.dp_named_ddl_element)
-    ]
+    _traverse_internals = [("sequence", InternalTraversal.dp_named_ddl_element)]
 
     def __init__(self, seq, **kw):
         assert isinstance(
@@ -1121,14 +1111,11 @@ class next_value(GenericFunction):
         ), "next_value() accepts a Sequence object as input."
         self._bind = self._get_bind(kw)
         self.sequence = seq
-        self.type = sqltypes.to_instance(
-            seq.data_type or getattr(self, "type", None)
-        )
+        self.type = sqltypes.to_instance(seq.data_type or getattr(self, "type", None))
 
     def compare(self, other, **kw):
         return (
-            isinstance(other, next_value)
-            and self.sequence.name == other.sequence.name
+            isinstance(other, next_value) and self.sequence.name == other.sequence.name
         )
 
     @property
@@ -1260,6 +1247,7 @@ class count(GenericFunction):
 
 
     """
+
     type = sqltypes.Integer
     inherit_cache = True
 
@@ -1357,9 +1345,7 @@ class array_agg(GenericFunction):
 
     def __init__(self, *args, **kwargs):
         args = [
-            coercions.expect(
-                roles.ExpressionElementRole, c, apply_propagate_attrs=self
-            )
+            coercions.expect(roles.ExpressionElementRole, c, apply_propagate_attrs=self)
             for c in args
         ]
 
@@ -1520,6 +1506,7 @@ class cube(GenericFunction):
     .. versionadded:: 1.2
 
     """
+
     _has_args = True
     inherit_cache = True
 
@@ -1537,6 +1524,7 @@ class rollup(GenericFunction):
     .. versionadded:: 1.2
 
     """
+
     _has_args = True
     inherit_cache = True
 
@@ -1570,5 +1558,6 @@ class grouping_sets(GenericFunction):
     .. versionadded:: 1.2
 
     """
+
     _has_args = True
     inherit_cache = True

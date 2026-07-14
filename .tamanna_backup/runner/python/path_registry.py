@@ -4,9 +4,7 @@
 #
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
-"""Path tracking utilities, representing mapper graph traversals.
-
-"""
+"""Path tracking utilities, representing mapper graph traversals."""
 
 from itertools import chain
 import logging
@@ -69,8 +67,7 @@ class PathRegistry(HasCacheKey):
             return other is not None and self.path == other._path_for_compare
         except AttributeError:
             util.warn(
-                "Comparison of PathRegistry to %r is not supported"
-                % (type(other))
+                "Comparison of PathRegistry to %r is not supported" % (type(other))
             )
             return False
 
@@ -79,8 +76,7 @@ class PathRegistry(HasCacheKey):
             return other is None or self.path != other._path_for_compare
         except AttributeError:
             util.warn(
-                "Comparison of PathRegistry to %r is not supported"
-                % (type(other))
+                "Comparison of PathRegistry to %r is not supported" % (type(other))
             )
             return True
 
@@ -164,9 +160,7 @@ class PathRegistry(HasCacheKey):
             elif key in PathToken._intern:
                 return PathToken._intern[key]
             else:
-                return orm_base._inspect_mapped_class(
-                    mcls, configure=True
-                ).attrs[key]
+                return orm_base._inspect_mapped_class(mcls, configure=True).attrs[key]
 
         p = tuple(
             chain(
@@ -303,10 +297,7 @@ class TokenRegistry(PathRegistry):
         if not self.parent.is_aliased_class and not self.parent.is_root:
             for ent in self.parent.mapper.iterate_to_root():
                 yield TokenRegistry(self.parent.parent[ent], self.token)
-        elif (
-            self.parent.is_aliased_class
-            and self.parent.entity._is_with_polymorphic
-        ):
+        elif self.parent.is_aliased_class and self.parent.entity._is_with_polymorphic:
             yield self
             for ent in self.parent.entity._with_polymorphic_entities:
                 yield TokenRegistry(self.parent.parent[ent], self.token)
@@ -375,8 +366,7 @@ class PropRegistry(PathRegistry):
         elif (
             natural_parent.parent
             and insp.is_aliased_class
-            and prop.parent  # this should always be the case here
-            is not insp.mapper
+            and prop.parent is not insp.mapper  # this should always be the case here
             and insp.mapper.isa(prop.parent)
         ):
             natural_parent = parent.parent[prop.parent]

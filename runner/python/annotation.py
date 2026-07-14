@@ -11,11 +11,11 @@ associations.
 
 """
 
+from .. import util
 from . import operators
 from .base import HasCacheKey
 from .traversals import anon_map
 from .visitors import InternalTraversal
-from .. import util
 
 EMPTY_ANNOTATIONS = util.immutabledict()
 
@@ -31,13 +31,14 @@ class SupportsAnnotations(object):
             tuple(
                 (
                     key,
-                    value._gen_cache_key(anon_map_, [])
-                    if isinstance(value, HasCacheKey)
-                    else value,
+                    (
+                        value._gen_cache_key(anon_map_, [])
+                        if isinstance(value, HasCacheKey)
+                        else value
+                    ),
                 )
                 for key, value in [
-                    (key, self._annotations[key])
-                    for key in sorted(self._annotations)
+                    (key, self._annotations[key]) for key in sorted(self._annotations)
                 ]
             ),
         )
@@ -238,9 +239,7 @@ class Annotated(object):
 annotated_classes = {}
 
 
-def _deep_annotate(
-    element, annotations, exclude=None, detect_subquery_cols=False
-):
+def _deep_annotate(element, annotations, exclude=None, detect_subquery_cols=False):
     """Deep copy the given ClauseElement, annotating each element
     with the given annotations dictionary.
 

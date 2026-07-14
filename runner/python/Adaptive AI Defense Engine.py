@@ -1,6 +1,7 @@
-import time
 import random
+import time
 from collections import defaultdict
+
 
 class AdaptiveDefenseCore:
     def __init__(self, config):
@@ -50,5 +51,7 @@ class AdaptiveDefenseCore:
     # ⚡ self upgrade trigger
     def auto_upgrade(self):
         if len(self.blocked) > 10:
-            self.config["risk_threshold"] = max(0.5, self.config["risk_threshold"] - 0.05)
+            self.config["risk_threshold"] = max(
+                0.5, self.config["risk_threshold"] - 0.05
+            )
             print("[UPGRADE] Defense sensitivity increased")

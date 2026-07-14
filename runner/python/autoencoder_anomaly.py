@@ -126,22 +126,19 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
             )(x)
 
             # Create models
-            autoencoder = models.Model(
-                input_layer, output_layer, name="autoencoder")
+            autoencoder = models.Model(input_layer, output_layer, name="autoencoder")
             encoder = models.Model(input_layer, latent, name="encoder")
 
             # Decoder model
-            latent_input = layers.Input(
-                shape=(self.latent_dim,), name="latent_input")
+            latent_input = layers.Input(shape=(self.latent_dim,), name="latent_input")
             decoder_output = autoencoder.layers[
                 -len(self.config["architecture"]["decoder_layers"]) - 1
             ](latent_input)
             for layer in autoencoder.layers[
-                -len(self.config["architecture"]["decoder_layers"]):
+                -len(self.config["architecture"]["decoder_layers"]) :
             ]:
                 decoder_output = layer(decoder_output)
-            decoder = models.Model(
-                latent_input, decoder_output, name="decoder")
+            decoder = models.Model(latent_input, decoder_output, name="decoder")
 
             self.encoder = encoder
             self.decoder = decoder
@@ -276,8 +273,7 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
             )
 
         except Exception as e:
-            self.logger.error(
-                f"❌ Reconstruction threshold calculation failed: {e}")
+            self.logger.error(f"❌ Reconstruction threshold calculation failed: {e}")
             raise
 
     async def _execute_prediction(self, X) -> np.ndarray:
@@ -299,8 +295,7 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
 
             # Calculate reconstruction metrics
             reconstructions = await self._execute_prediction(X_test)
-            reconstruction_errors = np.mean(
-                np.square(X_test - reconstructions), axis=1)
+            reconstruction_errors = np.mean(np.square(X_test - reconstructions), axis=1)
 
             evaluation_results = {
                 "reconstruction_loss": float(loss),
@@ -324,15 +319,13 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
         """
         try:
             if self.reconstruction_threshold is None:
-                raise ValueError(
-                    "Model must be trained before anomaly detection")
+                raise ValueError("Model must be trained before anomaly detection")
 
             # Get reconstructions
             reconstructions = await self._execute_prediction(X)
 
             # Calculate reconstruction errors
-            reconstruction_errors = np.mean(
-                np.square(X - reconstructions), axis=1)
+            reconstruction_errors = np.mean(np.square(X - reconstructions), axis=1)
 
             # Calculate anomaly scores (normalized reconstruction errors)
             anomaly_scores = (
@@ -348,10 +341,8 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
                 current_threshold = self.reconstruction_threshold
 
             # Identify anomalies
-            anomaly_indices = np.where(
-                reconstruction_errors > current_threshold)[0]
-            normal_indices = np.where(
-                reconstruction_errors <= current_threshold)[0]
+            anomaly_indices = np.where(reconstruction_errors > current_threshold)[0]
+            normal_indices = np.where(reconstruction_errors <= current_threshold)[0]
 
             anomaly_analysis = {
                 "total_samples": len(X),
@@ -386,8 +377,7 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
             latent_representations = self.encoder.predict(X, verbose=0)
             return latent_representations
         except Exception as e:
-            self.logger.error(
-                f"❌ Latent representation extraction failed: {e}")
+            self.logger.error(f"❌ Latent representation extraction failed: {e}")
             raise
 
     async def reconstruct_from_latent(self, latent_vectors: np.ndarray) -> np.ndarray:
@@ -456,8 +446,7 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
                 "cluster_analysis": cluster_analysis,
                 "total_anomalies": len(anomaly_indices),
                 "silhouette_score": float(
-                    self._calculate_silhouette_score(
-                        anomaly_latent, cluster_labels)
+                    self._calculate_silhouette_score(anomaly_latent, cluster_labels)
                 ),
             }
 
@@ -511,8 +500,7 @@ class AutoencoderAnomalyDetector(BaseNeuralNetwork):
     async def _load_model_weights(self, load_path: Path):
         """Load Autoencoder model weights"""
         try:
-            self.model = tf.keras.models.load_model(
-                load_path / "autoencoder.h5")
+            self.model = tf.keras.models.load_model(load_path / "autoencoder.h5")
             self.encoder = tf.keras.models.load_model(load_path / "encoder.h5")
             self.decoder = tf.keras.models.load_model(load_path / "decoder.h5")
 

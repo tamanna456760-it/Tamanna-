@@ -5,26 +5,15 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""Establish constraint and index naming conventions.
-
-
-"""
+"""Establish constraint and index naming conventions."""
 
 import re
 
+from .. import event, exc
 from . import events  # noqa
-from .elements import _NONE_NAME
-from .elements import conv
-from .schema import CheckConstraint
-from .schema import Column
-from .schema import Constraint
-from .schema import ForeignKeyConstraint
-from .schema import Index
-from .schema import PrimaryKeyConstraint
-from .schema import Table
-from .schema import UniqueConstraint
-from .. import event
-from .. import exc
+from .elements import _NONE_NAME, conv
+from .schema import (CheckConstraint, Column, Constraint, ForeignKeyConstraint,
+                     Index, PrimaryKeyConstraint, Table, UniqueConstraint)
 
 
 class ConventionDict(object):
@@ -163,16 +152,13 @@ def _constraint_name_for_table(const, table):
         )
     ):
         return conv(
-            convention
-            % ConventionDict(const, table, metadata.naming_convention)
+            convention % ConventionDict(const, table, metadata.naming_convention)
         )
     elif convention is _NONE_NAME:
         return None
 
 
-@event.listens_for(
-    PrimaryKeyConstraint, "_sa_event_column_added_to_pk_constraint"
-)
+@event.listens_for(PrimaryKeyConstraint, "_sa_event_column_added_to_pk_constraint")
 def _column_added_to_pk_constraint(pk_constraint, col):
     if pk_constraint._implicit_generated:
         # only operate upon the "implicit" pk constraint for now,

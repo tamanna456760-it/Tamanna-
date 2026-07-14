@@ -33,8 +33,7 @@ class SyncEngine:
         watch_paths = self.config["sync"]["watch_paths"]
         for path in watch_paths:
             if os.path.exists(path):
-                self.observer.schedule(
-                    self.event_handler, path, recursive=True)
+                self.observer.schedule(self.event_handler, path, recursive=True)
                 self.logger.info(f"Monitoring path: {path}")
 
         self.observer.start()
@@ -76,8 +75,7 @@ class SyncEngine:
                 await self._sync_file(sync_item)
                 self.sync_queues[environment].task_done()
             except Exception as e:
-                self.logger.error(
-                    f"Error processing sync queue for {environment}: {e}")
+                self.logger.error(f"Error processing sync queue for {environment}: {e}")
 
     async def _sync_file(self, sync_item: Dict):
         """Sync individual file to target environment"""
@@ -177,8 +175,7 @@ class SyncEngine:
         try:
             import subprocess
 
-            subprocess.run(["rsync", "--version"],
-                           capture_output=True, check=True)
+            subprocess.run(["rsync", "--version"], capture_output=True, check=True)
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False

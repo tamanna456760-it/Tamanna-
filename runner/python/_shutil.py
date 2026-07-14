@@ -2,14 +2,14 @@
 
 import os
 import stat
+from distutils import log
 from typing import Callable, TypeVar
 
 from .compat import py311
 
-from distutils import log
-
 try:
     from os import chmod  # pyright: ignore[reportAssignmentType]
+
     # Losing type-safety w/ pyright, but that's ok
 except ImportError:  # pragma: no cover
     # Jython compatibility
@@ -34,7 +34,7 @@ def _auto_chmod(
 ) -> _T:  # pragma: no cover
     """shutils onexc callback to automatically call chmod for certain functions."""
     # Only retry for scenarios known to have an issue
-    if func in [os.unlink, os.remove] and os.name == 'nt':
+    if func in [os.unlink, os.remove] and os.name == "nt":
         attempt_chmod_verbose(arg, stat.S_IWRITE)
         return func(arg)
     raise exc

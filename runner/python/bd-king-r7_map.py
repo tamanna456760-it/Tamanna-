@@ -12,8 +12,7 @@ def test_bd_king_r7_specific():
 
     for location in key_locations:
         # Test if locations are accessible
-        assert fullmap.is_within_bounds(
-            *location), f"Location {location} out of bounds"
+        assert fullmap.is_within_bounds(*location), f"Location {location} out of bounds"
         assert not fullmap.check_collision(
             location
         ), f"Location {location} has collision"

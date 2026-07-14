@@ -354,6 +354,7 @@ pickling process of the parent's object-relational state so that the
 :meth:`MutableBase._parents` collection is restored to all ``Point`` objects.
 
 """
+
 import weakref
 
 from .. import event
@@ -505,19 +506,11 @@ class MutableBase(object):
                     val._parents[state] = key
 
         event.listen(parent_cls, "load", load, raw=True, propagate=True)
-        event.listen(
-            parent_cls, "refresh", load_attrs, raw=True, propagate=True
-        )
-        event.listen(
-            parent_cls, "refresh_flush", load_attrs, raw=True, propagate=True
-        )
-        event.listen(
-            attribute, "set", set_, raw=True, retval=True, propagate=True
-        )
+        event.listen(parent_cls, "refresh", load_attrs, raw=True, propagate=True)
+        event.listen(parent_cls, "refresh_flush", load_attrs, raw=True, propagate=True)
+        event.listen(attribute, "set", set_, raw=True, retval=True, propagate=True)
         event.listen(parent_cls, "pickle", pickle, raw=True, propagate=True)
-        event.listen(
-            parent_cls, "unpickle", unpickle, raw=True, propagate=True
-        )
+        event.listen(parent_cls, "unpickle", unpickle, raw=True, propagate=True)
 
 
 class Mutable(MutableBase):
@@ -624,8 +617,7 @@ class Mutable(MutableBase):
                 if (
                     schema_event_check
                     and hasattr(prop.expression, "info")
-                    and prop.expression.info.get("_ext_mutable_orig_type")
-                    is sqltype
+                    and prop.expression.info.get("_ext_mutable_orig_type") is sqltype
                 ) or (prop.columns[0].type is sqltype):
                     cls.associate_with_attribute(getattr(class_, prop.key))
 

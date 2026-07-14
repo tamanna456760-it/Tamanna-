@@ -2,9 +2,7 @@ import requests
 
 token = "tamanna"
 
-headers = {
-    "Authorization": f"token {token}"
-}
+headers = {"Authorization": f"token {token}"}
 
 response = requests.get("https://api.github.com/user", headers=headers)
 

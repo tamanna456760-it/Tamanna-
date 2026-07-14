@@ -77,16 +77,14 @@ class KnowledgeBaseManager:
 
                     knowledge_unit = KnowledgeUnit(
                         knowledge_id=knowledge_data["knowledge_id"],
-                        knowledge_type=KnowledgeType(
-                            knowledge_data["knowledge_type"]),
+                        knowledge_type=KnowledgeType(knowledge_data["knowledge_type"]),
                         content=knowledge_data["content"],
                         confidence=knowledge_data["confidence"],
                         source=knowledge_data["source"],
                         created_date=datetime.fromisoformat(
                             knowledge_data["created_date"]
                         ),
-                        last_used=datetime.fromisoformat(
-                            knowledge_data["last_used"]),
+                        last_used=datetime.fromisoformat(knowledge_data["last_used"]),
                         usage_count=knowledge_data["usage_count"],
                         tags=knowledge_data.get("tags", []),
                         metadata=knowledge_data.get("metadata", {}),

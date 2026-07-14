@@ -119,9 +119,9 @@ start numbering at 1 or some other integer, provide ``count_from=1``.
 
 
 """
+
 from ..orm.collections import collection
 from ..orm.collections import collection_adapter
-
 
 __all__ = ["ordering_list"]
 
@@ -216,9 +216,7 @@ class OrderingList(list):
 
     """
 
-    def __init__(
-        self, ordering_attr=None, ordering_func=None, reorder_on_append=False
-    ):
+    def __init__(self, ordering_attr=None, ordering_func=None, reorder_on_append=False):
         """A custom list that manages position information for its children.
 
         ``OrderingList`` is a ``collection_class`` list implementation that

@@ -9,9 +9,9 @@ from __future__ import absolute_import
 
 import warnings
 
-from . import assertions
 from .. import exc as sa_exc
 from ..util.langhelpers import _warnings_warn
+from . import assertions
 
 
 class SATestSuiteWarning(Warning):
@@ -35,17 +35,13 @@ def setup_filters():
 
     origin = r"^(?:test|sqlalchemy)\..*"
 
-    warnings.filterwarnings(
-        "ignore", category=sa_exc.SAPendingDeprecationWarning
-    )
+    warnings.filterwarnings("ignore", category=sa_exc.SAPendingDeprecationWarning)
     warnings.filterwarnings("error", category=sa_exc.SADeprecationWarning)
     warnings.filterwarnings("error", category=sa_exc.SAWarning)
 
     warnings.filterwarnings("always", category=SATestSuiteWarning)
 
-    warnings.filterwarnings(
-        "error", category=DeprecationWarning, module=origin
-    )
+    warnings.filterwarnings("error", category=DeprecationWarning, module=origin)
 
     # ignore things that are deprecated *as of* 2.0 :)
     warnings.filterwarnings(
@@ -76,7 +72,5 @@ def assert_warnings(fn, warning_msgs, regex=False):
 
     """
 
-    with assertions._expect_warnings(
-        sa_exc.SAWarning, warning_msgs, regex=regex
-    ):
+    with assertions._expect_warnings(sa_exc.SAWarning, warning_msgs, regex=regex):
         return fn()

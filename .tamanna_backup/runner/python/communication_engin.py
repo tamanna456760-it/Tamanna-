@@ -1,6 +1,7 @@
 # Tamanna Communication Engine
 import socket
 
+
 class CommunicationEngine:
     def __init__(self, host="localhost", port=8080):
         self.host = host
@@ -20,6 +21,7 @@ class CommunicationEngine:
                         break
                     print(f"[COMM] Received: {data.decode()}")
                     conn.sendall(b"Tamanna Response")
+
 
 if __name__ == "__main__":
     CommunicationEngine().start_server()

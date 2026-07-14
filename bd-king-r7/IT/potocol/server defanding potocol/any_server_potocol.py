@@ -1,7 +1,7 @@
 # Any_server_protocol.py
 
-import socket
 import json
+import socket
 from datetime import datetime
 
 
@@ -19,16 +19,13 @@ class ServerProtocol:
                 "version": self.version,
                 "timestamp": datetime.utcnow().isoformat(),
                 "status": "success",
-                "received": packet
+                "received": packet,
             }
 
             return json.dumps(response)
 
         except Exception as e:
-            return json.dumps({
-                "status": "error",
-                "message": str(e)
-            })
+            return json.dumps({"status": "error", "message": str(e)})
 
 
 def start_server(host="0.0.0.0", port=9000):

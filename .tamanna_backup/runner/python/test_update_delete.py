@@ -1,9 +1,7 @@
+from ... import Integer, String
 from .. import fixtures
 from ..assertions import eq_
-from ..schema import Column
-from ..schema import Table
-from ... import Integer
-from ... import String
+from ..schema import Column, Table
 
 
 class SimpleUpdateDeleteTest(fixtures.TablesTest):
@@ -33,9 +31,7 @@ class SimpleUpdateDeleteTest(fixtures.TablesTest):
 
     def test_update(self, connection):
         t = self.tables.plain_pk
-        r = connection.execute(
-            t.update().where(t.c.id == 2), dict(data="d2_new")
-        )
+        r = connection.execute(t.update().where(t.c.id == 2), dict(data="d2_new"))
         assert not r.is_insert
         assert not r.returns_rows
         assert r.rowcount == 1

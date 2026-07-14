@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
-from users import register_user, login_user
+from flask import Blueprint, jsonify, request
+from users import login_user, register_user
 
 api = Blueprint("api", __name__)
+
 
 @api.route("/register", methods=["POST"])
 def api_register():
@@ -9,6 +10,7 @@ def api_register():
     if register_user(data["username"], data["password"]):
         return jsonify({"status": "registered"})
     return jsonify({"error": "user exists"}), 400
+
 
 @api.route("/login", methods=["POST"])
 def api_login():

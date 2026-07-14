@@ -5,16 +5,14 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""Public API functions for the event system.
+"""Public API functions for the event system."""
 
-"""
 from __future__ import absolute_import
 
 from .base import _registrars
 from .registry import _EventKey
 from .. import exc
 from .. import util
-
 
 CANCEL = util.symbol("CANCEL")
 NO_RETVAL = util.symbol("NO_RETVAL")

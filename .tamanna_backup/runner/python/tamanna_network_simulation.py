@@ -21,6 +21,7 @@ NODES = {
 
 AI_UNITS = {}
 
+
 # =========================
 # SAVE / LOAD FUNCTIONS
 # =========================
@@ -29,6 +30,7 @@ def save_state():
         json.dump(NODES, f, indent=2)
     with open("ai_units.json", "w") as f:
         json.dump(AI_UNITS, f, indent=2)
+
 
 def load_state():
     global NODES, AI_UNITS
@@ -43,6 +45,7 @@ def load_state():
     except:
         pass
 
+
 # =========================
 # NODE COMMUNICATION
 # =========================
@@ -50,6 +53,7 @@ def broadcast_power(amount):
     for node in NODES:
         NODES[node]["power"] += amount
     print(f"📡 [{MASTER_AI}] Broadcasting {amount} power to all nodes")
+
 
 # =========================
 # UNIT CREATION
@@ -67,17 +71,20 @@ def create_unit(emergency=False):
     NODES[node]["units"] += 1
     print(f"✅ [{MASTER_AI}] Created {unit_id} | Power: {power} | Assigned to {node}")
 
+
 # =========================
 # ATTACK DETECTION & DEFENSE
 # =========================
 def attack_detected():
-    return random.choice([False]*8 + [True]*2)
+    return random.choice([False] * 8 + [True] * 2)
+
 
 def auto_defense():
     print(f"🛡️ [{MASTER_AI}] ATTACK DETECTED → DEFENSE ACTIVATED")
     broadcast_power(50)
     for node in NODES:
         NODES[node]["status"] = "active"
+
 
 # =========================
 # MASTER AI NETWORK LOOP
@@ -96,6 +103,7 @@ def master_ai_loop():
         save_state()
         time.sleep(CREATE_INTERVAL)
 
+
 # =========================
 # REAL-TIME MONITOR
 # =========================
@@ -103,9 +111,12 @@ def monitor_loop():
     while True:
         print("\n=== SYSTEM STATUS ===")
         for node, data in NODES.items():
-            print(f"{node}: Power={data['power']} | Units={data['units']} | Status={data['status']}")
+            print(
+                f"{node}: Power={data['power']} | Units={data['units']} | Status={data['status']}"
+            )
         print(f"Total AI Units: {len(AI_UNITS)}\n")
         time.sleep(5)
+
 
 # =========================
 # START SIMULATION

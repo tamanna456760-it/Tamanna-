@@ -1,18 +1,11 @@
+import json
 import os
 import time
-import json
 from datetime import datetime
 
 LOG_FILE = "protocol_monitor.log"
 
-WATCH_EXTENSIONS = [
-    ".py",
-    ".js",
-    ".json",
-    ".html",
-    ".css",
-    ".sh"
-]
+WATCH_EXTENSIONS = [".py", ".js", ".json", ".html", ".css", ".sh"]
 
 file_state = {}
 

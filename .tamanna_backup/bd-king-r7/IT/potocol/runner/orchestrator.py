@@ -1,9 +1,11 @@
-import time
 import subprocess
+import time
+
 
 def run(cmd):
     print(f"[RUN] {cmd}")
     subprocess.call(cmd, shell=True)
+
 
 def main_loop():
     while True:
@@ -25,6 +27,7 @@ def main_loop():
         run("python3 sync/git_sync.py")
 
         time.sleep(10)
+
 
 if __name__ == "__main__":
     main_loop()

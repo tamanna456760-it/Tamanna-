@@ -3,9 +3,10 @@
 
 from datetime import datetime
 
+
 class TamannaMasterBus:
     def __init__(self):
-        self.receivers = {}   # name -> handler function
+        self.receivers = {}  # name -> handler function
         self.log_stream = []  # সব মেসেজের ইতিহাস
 
     # ---------- Utility ----------
@@ -13,11 +14,7 @@ class TamannaMasterBus:
         return datetime.utcnow().isoformat() + "Z"
 
     def log(self, kind, detail):
-        entry = {
-            "time": self.now(),
-            "kind": kind,
-            "detail": detail
-        }
+        entry = {"time": self.now(), "kind": kind, "detail": detail}
         self.log_stream.append(entry)
         print("📡 BUS:", entry)
 
@@ -37,11 +34,7 @@ class TamannaMasterBus:
         dest: কাকে পাঠাচ্ছে (str)
         message: dict বা str – যা ইচ্ছা
         """
-        payload = {
-            "from": src,
-            "to": dest,
-            "body": message
-        }
+        payload = {"from": src, "to": dest, "body": message}
         self.log("send", payload)
 
         if dest in self.receivers:
@@ -59,11 +52,7 @@ class TamannaMasterBus:
 
     # ---------- Broadcast message to all ----------
     def broadcast(self, src, message):
-        payload = {
-            "from": src,
-            "to": "ALL",
-            "body": message
-        }
+        payload = {"from": src, "to": "ALL", "body": message}
         self.log("broadcast", payload)
 
         responses = {}
@@ -75,6 +64,7 @@ class TamannaMasterBus:
                 responses[name] = f"ERROR: {e}"
         self.log("broadcast_responses", responses)
         return responses
+
 
 # ---- ডেমো ইউজ ----
 if __name__ == "__main__":
@@ -101,6 +91,7 @@ if __name__ == "__main__":
 
     # ব্রডকাস্ট
     bus.broadcast("Head", {"sync": "heartbeat"})
+
 
 class TamannaDeepPowerV2:
     def __init__(self):
@@ -129,16 +120,17 @@ class TamannaDeepPowerV2:
             "warn": "alert",
             "error": "pain",
             "recover": "healing",
-            "deep": "deep"
+            "deep": "deep",
         }
         self.set_state(mapping.get(signal, "unknown"))
+
+
 def compare_snapshots(old, new):
-    added   = set(new) - set(old)
+    added = set(new) - set(old)
     removed = set(old) - set(new)
-    changed = {
-        p for p in new
-        if p in old and new[p]["hash"] != old[p]["hash"]
-    }
+    changed = {p for p in new if p in old and new[p]["hash"] != old[p]["hash"]}
     return added, removed, changed
+
+
 bus.send("Monitor", "DefenseCore", {"alert": True, "reason": "failed_login"})
 bus.send("Monitor", "EmotionCore", {"state": "alert"})

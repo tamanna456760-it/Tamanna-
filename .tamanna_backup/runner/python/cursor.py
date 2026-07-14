@@ -8,7 +8,6 @@
 """Define cursor-specific result set constructs including
 :class:`.BaseCursorResult`, :class:`.CursorResult`."""
 
-
 import collections
 import functools
 
@@ -53,7 +52,7 @@ class CursorResultMetaData(ResultMetaData):
         "_keymap_by_result_column_idx",
         "_tuplefilter",
         "_translated_indexes",
-        "_safe_for_cache"
+        "_safe_for_cache",
         # don't need _unique_filters support here for now.  Can be added
         # if a need arises.
     )
@@ -97,11 +96,7 @@ class CursorResultMetaData(ResultMetaData):
         # result = connection.execute("raw sql, no columns").scalars()
         # without the "or ()" it's failing because MD_OBJECTS is None
         new_metadata._keymap.update(
-            {
-                e: new_rec
-                for new_rec in new_recs
-                for e in new_rec[MD_OBJECTS] or ()
-            }
+            {e: new_rec for new_rec in new_recs for e in new_rec[MD_OBJECTS] or ()}
         )
 
         return new_metadata
@@ -169,11 +164,9 @@ class CursorResultMetaData(ResultMetaData):
             ) = context.result_column_struct
             num_ctx_cols = len(result_columns)
         else:
-            result_columns = (
-                cols_are_ordered
-            ) = (
-                num_ctx_cols
-            ) = loose_column_name_matching = textual_ordered = False
+            result_columns = cols_are_ordered = num_ctx_cols = (
+                loose_column_name_matching
+            ) = textual_ordered = False
 
         # merge cursor.description with the column info
         # present in the compiled structure, if any
@@ -191,9 +184,7 @@ class CursorResultMetaData(ResultMetaData):
 
         # processors in key order for certain per-row
         # views like __iter__ and slices
-        self._processors = [
-            metadata_entry[MD_PROCESSOR] for metadata_entry in raw
-        ]
+        self._processors = [metadata_entry[MD_PROCESSOR] for metadata_entry in raw]
 
         if context.compiled:
             self._keymap_by_result_column_idx = {
@@ -203,10 +194,7 @@ class CursorResultMetaData(ResultMetaData):
 
         # keymap by primary string...
         by_key = dict(
-            [
-                (metadata_entry[MD_LOOKUP_KEY], metadata_entry)
-                for metadata_entry in raw
-            ]
+            [(metadata_entry[MD_LOOKUP_KEY], metadata_entry) for metadata_entry in raw]
         )
 
         # for compiled SQL constructs, copy additional lookup keys into
@@ -368,9 +356,11 @@ class CursorResultMetaData(ResultMetaData):
                     idx,
                     idx,
                     rmap_entry[RM_OBJECTS],
-                    rmap_entry[RM_NAME].lower()
-                    if not case_sensitive
-                    else rmap_entry[RM_NAME],
+                    (
+                        rmap_entry[RM_NAME].lower()
+                        if not case_sensitive
+                        else rmap_entry[RM_NAME]
+                    ),
                     rmap_entry[RM_RENDERED_NAME],
                     context.get_result_processor(
                         rmap_entry[RM_TYPE],
@@ -408,9 +398,7 @@ class CursorResultMetaData(ResultMetaData):
                 # no compiled SQL, just a raw string, order of columns
                 # can change for "select *"
                 self._safe_for_cache = False
-                raw_iterator = self._merge_cols_by_none(
-                    context, cursor_description
-                )
+                raw_iterator = self._merge_cols_by_none(context, cursor_description)
 
             return [
                 (
@@ -419,9 +407,7 @@ class CursorResultMetaData(ResultMetaData):
                     obj,
                     cursor_colname,
                     cursor_colname,
-                    context.get_result_processor(
-                        mapped_type, cursor_colname, coltype
-                    ),
+                    context.get_result_processor(mapped_type, cursor_colname, coltype),
                     untranslated,
                 )
                 for (
@@ -447,9 +433,7 @@ class CursorResultMetaData(ResultMetaData):
         case_sensitive = dialect.case_sensitive
         translate_colname = context._translate_colname
         description_decoder = (
-            dialect._description_decoder
-            if dialect.description_encoding
-            else None
+            dialect._description_decoder if dialect.description_encoding else None
         )
         normalize_name = (
             dialect.normalize_name if dialect.requires_name_normalize else None
@@ -729,27 +713,18 @@ class LegacyCursorResultMetaData(CursorResultMetaData):
         elif isinstance(key, expression.ColumnElement):
             if (
                 key._tq_label
-                and (
-                    key._tq_label
-                    if self.case_sensitive
-                    else key._tq_label.lower()
-                )
+                and (key._tq_label if self.case_sensitive else key._tq_label.lower())
                 in map_
             ):
                 result = map_[
-                    key._tq_label
-                    if self.case_sensitive
-                    else key._tq_label.lower()
+                    key._tq_label if self.case_sensitive else key._tq_label.lower()
                 ]
             elif (
                 hasattr(key, "name")
-                and (key.name if self.case_sensitive else key.name.lower())
-                in map_
+                and (key.name if self.case_sensitive else key.name.lower()) in map_
             ):
                 # match is only on name.
-                result = map_[
-                    key.name if self.case_sensitive else key.name.lower()
-                ]
+                result = map_[key.name if self.case_sensitive else key.name.lower()]
 
             # search extra hard to make sure this
             # isn't a column/label name overlap.
@@ -1058,9 +1033,7 @@ class BufferedRowCursorFetchStrategy(CursorFetchStrategy):
             return
         self._rowbuffer = collections.deque(new_rows)
         if self._growth_factor and size < self._max_row_buffer:
-            self._bufsize = min(
-                self._max_row_buffer, size * self._growth_factor
-            )
+            self._bufsize = min(self._max_row_buffer, size * self._growth_factor)
 
     def yield_per(self, result, dbapi_cursor, num):
         self._growth_factor = 0
@@ -1068,15 +1041,11 @@ class BufferedRowCursorFetchStrategy(CursorFetchStrategy):
 
     def soft_close(self, result, dbapi_cursor):
         self._rowbuffer.clear()
-        super(BufferedRowCursorFetchStrategy, self).soft_close(
-            result, dbapi_cursor
-        )
+        super(BufferedRowCursorFetchStrategy, self).soft_close(result, dbapi_cursor)
 
     def hard_close(self, result, dbapi_cursor):
         self._rowbuffer.clear()
-        super(BufferedRowCursorFetchStrategy, self).hard_close(
-            result, dbapi_cursor
-        )
+        super(BufferedRowCursorFetchStrategy, self).hard_close(result, dbapi_cursor)
 
     def fetchone(self, result, dbapi_cursor, hard_close=False):
         if not self._rowbuffer:
@@ -1131,9 +1100,7 @@ class FullyBufferedCursorFetchStrategy(CursorFetchStrategy):
 
     __slots__ = ("_rowbuffer", "alternate_cursor_description")
 
-    def __init__(
-        self, dbapi_cursor, alternate_description=None, initial_buffer=None
-    ):
+    def __init__(self, dbapi_cursor, alternate_description=None, initial_buffer=None):
         self.alternate_cursor_description = alternate_description
         if initial_buffer is not None:
             self._rowbuffer = collections.deque(initial_buffer)
@@ -1145,15 +1112,11 @@ class FullyBufferedCursorFetchStrategy(CursorFetchStrategy):
 
     def soft_close(self, result, dbapi_cursor):
         self._rowbuffer.clear()
-        super(FullyBufferedCursorFetchStrategy, self).soft_close(
-            result, dbapi_cursor
-        )
+        super(FullyBufferedCursorFetchStrategy, self).soft_close(result, dbapi_cursor)
 
     def hard_close(self, result, dbapi_cursor):
         self._rowbuffer.clear()
-        super(FullyBufferedCursorFetchStrategy, self).hard_close(
-            result, dbapi_cursor
-        )
+        super(FullyBufferedCursorFetchStrategy, self).hard_close(result, dbapi_cursor)
 
     def fetchone(self, result, dbapi_cursor, hard_close=False):
         if self._rowbuffer:
@@ -1241,9 +1204,7 @@ class BaseCursorResult(object):
         self.cursor = context.cursor
         self.cursor_strategy = cursor_strategy
         self.connection = context.root_connection
-        self._echo = echo = (
-            self.connection._echo and context.engine._should_log_debug()
-        )
+        self._echo = echo = self.connection._echo and context.engine._should_log_debug()
 
         if cursor_description is not None:
             # inline of Result._row_getter(), set up an initial row
@@ -1323,9 +1284,7 @@ class BaseCursorResult(object):
             self._metadata = metadata
 
         else:
-            self._metadata = metadata = self._cursor_metadata(
-                self, cursor_description
-            )
+            self._metadata = metadata = self._cursor_metadata(self, cursor_description)
         if self._echo:
             context.connection._log_debug(
                 "Col %r", tuple(x[0] for x in cursor_description)
@@ -1425,9 +1384,7 @@ class BaseCursorResult(object):
             )
         elif self.context._is_explicit_returning:
             raise exc.InvalidRequestError(
-                "Can't call inserted_primary_key "
-                "when returning() "
-                "is used."
+                "Can't call inserted_primary_key " "when returning() " "is used."
             )
         return self.context.inserted_primary_key_rows
 
@@ -1591,8 +1548,7 @@ class BaseCursorResult(object):
             )
         elif not self.context.isinsert and not self.context.isupdate:
             raise exc.InvalidRequestError(
-                "Statement is not an insert() or update() "
-                "expression construct."
+                "Statement is not an insert() or update() " "expression construct."
             )
         return self.context.postfetch_cols
 
@@ -1614,8 +1570,7 @@ class BaseCursorResult(object):
             )
         elif not self.context.isinsert and not self.context.isupdate:
             raise exc.InvalidRequestError(
-                "Statement is not an insert() or update() "
-                "expression construct."
+                "Statement is not an insert() or update() " "expression construct."
             )
         return self.context.prefetch_cols
 
@@ -1813,9 +1768,7 @@ class CursorResult(BaseCursorResult, Result):
         merged_result = super(CursorResult, self).merge(*others)
         setup_rowcounts = not self._metadata.returns_rows
         if setup_rowcounts:
-            merged_result.rowcount = sum(
-                result.rowcount for result in (self,) + others
-            )
+            merged_result.rowcount = sum(result.rowcount for result in (self,) + others)
         return merged_result
 
     def close(self):
@@ -1893,11 +1846,7 @@ class LegacyCursorResult(CursorResult):
     def _soft_close(self, hard=False):
         soft_closed = self._soft_closed
         super(LegacyCursorResult, self)._soft_close(hard=hard)
-        if (
-            not soft_closed
-            and self._soft_closed
-            and self._autoclose_connection
-        ):
+        if not soft_closed and self._soft_closed and self._autoclose_connection:
             self.connection.close()
 
 

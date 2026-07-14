@@ -1,6 +1,7 @@
-import customtkinter as ctk
 import json
 import os
+
+import customtkinter as ctk
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -8,15 +9,18 @@ ctk.set_default_color_theme("blue")
 # ---------- Database ----------
 DB_FILE = "data.json"
 
+
 def load_data():
     if not os.path.exists(DB_FILE):
         return {}
     with open(DB_FILE, "r") as f:
         return json.load(f)
 
+
 def save_data(data):
     with open(DB_FILE, "w") as f:
         json.dump(data, f, indent=4)
+
 
 db = load_data()
 
@@ -31,6 +35,7 @@ main_frame = ctk.CTkFrame(app)
 
 login_frame.pack(fill="both", expand=True)
 
+
 # ---------- Login ----------
 def login():
     user = username.get()
@@ -41,6 +46,7 @@ def login():
     else:
         output_login.configure(text="❌ Login Failed")
 
+
 def register():
     user = username.get()
     pwd = password.get()
@@ -49,13 +55,10 @@ def register():
         output_login.configure(text="⚠️ User Exists")
         return
 
-    db[user] = {
-        "password": pwd,
-        "uid": "6642083257",
-        "bundles": []
-    }
+    db[user] = {"password": pwd, "uid": "6642083257", "bundles": []}
     save_data(db)
     output_login.configure(text="✅ Registered")
+
 
 username = ctk.CTkEntry(login_frame, placeholder_text="Username")
 username.pack(pady=10)
@@ -69,6 +72,7 @@ ctk.CTkButton(login_frame, text="Register", command=register).pack(pady=5)
 output_login = ctk.CTkLabel(login_frame, text="")
 output_login.pack(pady=10)
 
+
 # ---------- Main Panel ----------
 def open_main(user):
     login_frame.pack_forget()
@@ -79,7 +83,9 @@ def open_main(user):
     uid_label.configure(text=f"UID: {user_data['uid']}")
     show_bundles(user)
 
+
 current_user = None
+
 
 def show_bundles(user):
     bundle_box.delete("1.0", "end")
@@ -89,6 +95,7 @@ def show_bundles(user):
     else:
         for b in bundles:
             bundle_box.insert("end", f"{b}\n")
+
 
 def unlock_bundle():
     bundle = bundle_entry.get()
@@ -100,9 +107,11 @@ def unlock_bundle():
 
     show_bundles(current_user)
 
+
 def set_user(user):
     global current_user
     current_user = user
+
 
 # ---------- Main UI ----------
 uid_label = ctk.CTkLabel(main_frame, text="UID:")
@@ -114,16 +123,21 @@ bundle_box.pack(pady=10)
 bundle_entry = ctk.CTkEntry(main_frame, placeholder_text="Enter Bundle Name")
 bundle_entry.pack(pady=5)
 
+
 def unlock_click():
     unlock_bundle()
 
+
 ctk.CTkButton(main_frame, text="Unlock Bundle", command=unlock_click).pack(pady=5)
+
 
 def logout():
     main_frame.pack_forget()
     login_frame.pack(fill="both", expand=True)
 
+
 ctk.CTkButton(main_frame, text="Logout", command=logout).pack(pady=10)
+
 
 # Fix user setting
 def open_main(user):
@@ -135,5 +149,6 @@ def open_main(user):
 
     uid_label.configure(text=f"UID: {db[user]['uid']}")
     show_bundles(user)
+
 
 app.mainloop()

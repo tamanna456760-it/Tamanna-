@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import os
 import json
-import time
-import psutil
+import os
 import socket
+import time
 from datetime import datetime
+
+import psutil
 
 CONFIG = {
     "interval": 5,

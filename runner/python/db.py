@@ -1,3 +1,1 @@
-DATABASE = {
-    "users": []
-}
+DATABASE = {"users": []}

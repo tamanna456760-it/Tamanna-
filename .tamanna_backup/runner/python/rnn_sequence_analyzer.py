@@ -66,8 +66,7 @@ class RNNSequenceAnalyzer(BaseNeuralNetwork):
 
             # Input layer
             model.add(
-                layers.InputLayer(input_shape=(
-                    self.sequence_length, self.num_features))
+                layers.InputLayer(input_shape=(self.sequence_length, self.num_features))
             )
 
             # RNN layers
@@ -83,25 +82,21 @@ class RNNSequenceAnalyzer(BaseNeuralNetwork):
                 if i < len(
                     self.config["architecture"]["rnn_layers"]
                 ) - 1 or rnn_config.get("return_sequences", False):
-                    dropout_rate = self.config["architecture"].get(
-                        "dropout_rate", 0)
+                    dropout_rate = self.config["architecture"].get("dropout_rate", 0)
                     if dropout_rate > 0:
                         model.add(layers.Dropout(dropout_rate))
 
             # Dense layers
             for i, units in enumerate(self.config["architecture"]["dense_layers"]):
-                model.add(layers.Dense(
-                    units, activation="relu", name=f"dense_{i}"))
+                model.add(layers.Dense(units, activation="relu", name=f"dense_{i}"))
 
-                dropout_rate = self.config["architecture"].get(
-                    "dropout_rate", 0)
+                dropout_rate = self.config["architecture"].get("dropout_rate", 0)
                 if dropout_rate > 0:
                     model.add(layers.Dropout(dropout_rate))
 
             # Output layer
             model.add(
-                layers.Dense(self.num_classes,
-                             activation="softmax", name="output")
+                layers.Dense(self.num_classes, activation="softmax", name="output")
             )
 
             self.logger.info("✅ RNN model built successfully")
@@ -119,8 +114,7 @@ class RNNSequenceAnalyzer(BaseNeuralNetwork):
             return layers.LSTM(
                 units=config["units"],
                 return_sequences=config.get("return_sequences", False),
-                dropout=self.config["architecture"].get(
-                    "recurrent_dropout", 0),
+                dropout=self.config["architecture"].get("recurrent_dropout", 0),
                 recurrent_dropout=self.config["architecture"].get(
                     "recurrent_dropout", 0
                 ),
@@ -130,8 +124,7 @@ class RNNSequenceAnalyzer(BaseNeuralNetwork):
             return layers.GRU(
                 units=config["units"],
                 return_sequences=config.get("return_sequences", False),
-                dropout=self.config["architecture"].get(
-                    "recurrent_dropout", 0),
+                dropout=self.config["architecture"].get("recurrent_dropout", 0),
                 recurrent_dropout=self.config["architecture"].get(
                     "recurrent_dropout", 0
                 ),
@@ -141,8 +134,7 @@ class RNNSequenceAnalyzer(BaseNeuralNetwork):
             return layers.SimpleRNN(
                 units=config["units"],
                 return_sequences=config.get("return_sequences", False),
-                dropout=self.config["architecture"].get(
-                    "recurrent_dropout", 0),
+                dropout=self.config["architecture"].get("recurrent_dropout", 0),
                 recurrent_dropout=self.config["architecture"].get(
                     "recurrent_dropout", 0
                 ),

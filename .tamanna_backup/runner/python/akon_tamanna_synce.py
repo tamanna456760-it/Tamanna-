@@ -39,8 +39,7 @@ class AkonCodeMonitor:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.FileHandler(
-                "akon_sync.log"), logging.StreamHandler()],
+            handlers=[logging.FileHandler("akon_sync.log"), logging.StreamHandler()],
         )
         self.logger = logging.getLogger(__name__)
 
@@ -53,15 +52,13 @@ class AkonCodeMonitor:
         event_handler = AkonFileHandler(self)
         for watch_dir in self.watch_dirs:
             if watch_dir.exists():
-                self.observer.schedule(
-                    event_handler, str(watch_dir), recursive=True)
+                self.observer.schedule(event_handler, str(watch_dir), recursive=True)
                 self.logger.info(f"Monitoring directory: {watch_dir}")
 
         self.observer.start()
 
         # Start sync processor thread
-        sync_thread = threading.Thread(
-            target=self._process_sync_queue, daemon=True)
+        sync_thread = threading.Thread(target=self._process_sync_queue, daemon=True)
         sync_thread.start()
 
         self.logger.info("Akon Code Auto-Sync started successfully!")
@@ -109,8 +106,7 @@ class AkonCodeMonitor:
             self.logger.info(f"Successfully processed: {file_path}")
 
         except Exception as e:
-            self.logger.error(
-                f"Error processing {sync_item['file_path']}: {e}")
+            self.logger.error(f"Error processing {sync_item['file_path']}: {e}")
 
     def _sync_with_tamanna(self, file_path: Path):
         """Sync file content with Tamanna AI"""

@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+
 
 # Simple AI brain
 def ai_reply(message):
@@ -15,6 +16,7 @@ def ai_reply(message):
     else:
         return "You said: " + message
 
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
@@ -22,6 +24,7 @@ def chat():
 
     reply = ai_reply(msg)
     return jsonify({"reply": reply})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -5,6 +5,7 @@ import threading
 app = Flask(__name__)
 building = False
 
+
 def run_cmd(cmd):
     try:
         return subprocess.check_output(
@@ -12,6 +13,7 @@ def run_cmd(cmd):
         )
     except subprocess.CalledProcessError as e:
         return e.output
+
 
 @app.route("/build")
 def build():

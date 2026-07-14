@@ -3,7 +3,7 @@ import time
 
 from flask import Flask, jsonify, request
 
-app = Flask(bd-king-r7)
+app = Flask(bd - king - r7)
 
 # In-memory sync database
 sync_store = {}

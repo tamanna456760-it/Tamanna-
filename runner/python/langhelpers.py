@@ -109,9 +109,7 @@ def string_or_unprintable(element):
 
 
 def clsname_as_plain_name(cls):
-    return " ".join(
-        n.lower() for n in re.findall(r"([A-Z][a-z]+)", cls.__name__)
-    )
+    return " ".join(n.lower() for n in re.findall(r"([A-Z][a-z]+)", cls.__name__))
 
 
 def method_is_overridden(instance_or_cls, against_method):
@@ -186,13 +184,10 @@ def decorator(target):
         metadata = dict(target=targ_name, fn=fn_name)
         metadata.update(format_argspec_plus(spec, grouped=False))
         metadata["name"] = fn.__name__
-        code = (
-            """\
+        code = """\
 def %(name)s(%(args)s):
     return %(target)s(%(fn)s, %(apply_kw)s)
-"""
-            % metadata
-        )
+""" % metadata
         env.update({targ_name: target, fn_name: fn, "__name__": fn.__module__})
 
         decorated = _exec_code_in_env(code, env, fn.__name__)
@@ -262,13 +257,10 @@ def public_factory(target, location, class_location=None):
     del spec[0][0]
     metadata = format_argspec_plus(spec, grouped=False)
     metadata["name"] = location_name
-    code = (
-        """\
+    code = """\
 def %(name)s(%(args)s):
     return cls(%(apply_kw)s)
-"""
-        % metadata
-    )
+""" % metadata
     env = {
         "cls": callable_,
         "symbol": symbol,
@@ -300,8 +292,7 @@ def %(name)s(%(args)s):
     decorated.__module__ = "sqlalchemy" + location.rsplit(".", 1)[0]
     if decorated.__module__ not in sys.modules:
         raise ImportError(
-            "public_factory location %s is not in sys.modules"
-            % (decorated.__module__,)
+            "public_factory location %s is not in sys.modules" % (decorated.__module__,)
         )
 
     if compat.py2k or hasattr(fn, "__func__"):
@@ -340,9 +331,7 @@ class PluginLoader(object):
                 self.impls[name] = impl.load
                 return impl.load()
 
-        raise exc.NoSuchModuleError(
-            "Can't load plugin: %s:%s" % (self.group, name)
-        )
+        raise exc.NoSuchModuleError("Can't load plugin: %s:%s" % (self.group, name))
 
     def register(self, name, modulepath, objname):
         def load():
@@ -468,9 +457,7 @@ def get_callable_argspec(fn, no_self=False, _is_init=False):
         else:
             return compat.inspect_getfullargspec(fn.__func__)
     elif inspect.isclass(fn):
-        return get_callable_argspec(
-            fn.__init__, no_self=no_self, _is_init=True
-        )
+        return get_callable_argspec(fn.__init__, no_self=no_self, _is_init=True)
     elif hasattr(fn, "__func__"):
         return compat.inspect_getfullargspec(fn.__func__)
     elif hasattr(fn, "__call__"):
@@ -523,9 +510,7 @@ def format_argspec_plus(fn, grouped=True):
 
     args = compat.inspect_formatargspec(*spec)
 
-    apply_pos = compat.inspect_formatargspec(
-        spec[0], spec[1], spec[2], None, spec[4]
-    )
+    apply_pos = compat.inspect_formatargspec(spec[0], spec[1], spec[2], None, spec[4])
 
     if spec[0]:
         self_arg = spec[0][0]
@@ -611,11 +596,7 @@ def format_argspec_init(method, grouped=True):
         try:
             return format_argspec_plus(method, grouped=grouped)
         except TypeError:
-            args = (
-                "(self, *args, **kwargs)"
-                if grouped
-                else "self, *args, **kwargs"
-            )
+            args = "(self, *args, **kwargs)" if grouped else "self, *args, **kwargs"
             proxied = "(*args, **kwargs)" if grouped else "*args, **kwargs"
     return dict(
         self_arg="self",
@@ -661,8 +642,7 @@ def create_proxy_methods(
             if clslevel:
                 code = (
                     "def %(name)s(%(args)s):\n"
-                    "    return target_cls.%(name)s(%(apply_kw_proxied)s)"
-                    % metadata
+                    "    return target_cls.%(name)s(%(apply_kw_proxied)s)" % metadata
                 )
                 env["target_cls"] = target_cls
             else:
@@ -719,23 +699,17 @@ def create_proxy_methods(
 
         for meth in methods:
             if hasattr(cls, meth):
-                raise TypeError(
-                    "class %s already has a method %s" % (cls, meth)
-                )
+                raise TypeError("class %s already has a method %s" % (cls, meth))
             setattr(cls, meth, instrument(meth))
 
         for prop in attributes:
             if hasattr(cls, prop):
-                raise TypeError(
-                    "class %s already has a method %s" % (cls, prop)
-                )
+                raise TypeError("class %s already has a method %s" % (cls, prop))
             setattr(cls, prop, makeprop(prop))
 
         for prop in classmethods:
             if hasattr(cls, prop):
-                raise TypeError(
-                    "class %s already has a method %s" % (cls, prop)
-                )
+                raise TypeError("class %s already has a method %s" % (cls, prop))
             setattr(cls, prop, instrument(prop, clslevel=True))
 
         return cls
@@ -803,17 +777,13 @@ def generic_repr(obj, additional_kw=(), to_inspect=None, omit_kwarg=()):
                 else:
                     pos_args.extend(spec.args[1:])
             else:
-                kw_args.update(
-                    [(arg, missing) for arg in spec.args[1:-default_len]]
-                )
+                kw_args.update([(arg, missing) for arg in spec.args[1:-default_len]])
 
             if default_len:
                 kw_args.update(
                     [
                         (arg, default)
-                        for arg, default in zip(
-                            spec.args[-default_len:], spec.defaults
-                        )
+                        for arg, default in zip(spec.args[-default_len:], spec.defaults)
                     ]
                 )
     output = []
@@ -915,9 +885,7 @@ def class_hierarchy(cls):
             if c.__module__ == "builtins" or not hasattr(c, "__subclasses__"):
                 continue
         else:
-            if c.__module__ == "__builtin__" or not hasattr(
-                c, "__subclasses__"
-            ):
+            if c.__module__ == "__builtin__" or not hasattr(c, "__subclasses__"):
                 continue
 
         for s in [_ for _ in c.__subclasses__() if _ not in hier]:
@@ -1008,9 +976,7 @@ def monkeypatch_proxied_specials(
 def methods_equivalent(meth1, meth2):
     """Return True if the two methods are the same implementation."""
 
-    return getattr(meth1, "__func__", meth1) is getattr(
-        meth2, "__func__", meth2
-    )
+    return getattr(meth1, "__func__", meth1) is getattr(meth2, "__func__", meth2)
 
 
 def as_interface(obj, cls=None, methods=None, required=None):
@@ -1071,8 +1037,7 @@ def as_interface(obj, cls=None, methods=None, required=None):
     if not isinstance(obj, dict):
         qualifier = complies is operator.gt and "any of" or "all of"
         raise TypeError(
-            "%r does not implement %s: %s"
-            % (obj, qualifier, ", ".join(interface))
+            "%r does not implement %s: %s" % (obj, qualifier, ", ".join(interface))
         )
 
     class AnonymousInterface(object):
@@ -1094,8 +1059,7 @@ def as_interface(obj, cls=None, methods=None, required=None):
         return AnonymousInterface
 
     raise TypeError(
-        "dictionary does not contain required keys %s"
-        % ", ".join(required - found)
+        "dictionary does not contain required keys %s" % ", ".join(required - found)
     )
 
 
@@ -1302,9 +1266,7 @@ def constructor_key(obj, cls):
 
     """
     names = get_cls_kwargs(cls)
-    return (cls,) + tuple(
-        (k, obj.__dict__[k]) for k in names if k in obj.__dict__
-    )
+    return (cls,) + tuple((k, obj.__dict__[k]) for k in names if k in obj.__dict__)
 
 
 def constructor_copy(obj, cls, *args, **kw):
@@ -1315,9 +1277,7 @@ def constructor_copy(obj, cls, *args, **kw):
     """
 
     names = get_cls_kwargs(cls)
-    kw.update(
-        (k, obj.__dict__[k]) for k in names.difference(kw) if k in obj.__dict__
-    )
+    kw.update((k, obj.__dict__[k]) for k in names.difference(kw) if k in obj.__dict__)
     return cls(*args, **kw)
 
 
@@ -1343,9 +1303,7 @@ def duck_type_collection(specimen, default=None):
 
     if hasattr(specimen, "__emulates__"):
         # canonicalize set vs sets.Set to a standard: the builtin set
-        if specimen.__emulates__ is not None and issubclass(
-            specimen.__emulates__, set
-        ):
+        if specimen.__emulates__ is not None and issubclass(specimen.__emulates__, set):
             return set
         else:
             return specimen.__emulates__
@@ -1525,9 +1483,7 @@ class symbol(object):
             return sym
 
     @classmethod
-    def parse_user_argument(
-        cls, arg, choices, name, resolve_symbol_names=False
-    ):
+    def parse_user_argument(cls, arg, choices, name, resolve_symbol_names=False):
         """Given a user parameter, parse the parameter into a chosen symbol.
 
         The user argument can be a string name that matches the name of a

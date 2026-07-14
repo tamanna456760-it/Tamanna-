@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-import os, glob
+import glob
+import os
+
 from openai import OpenAI
+
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
 
 def refactor_file(path):
     with open(path) as f:
@@ -12,12 +16,13 @@ def refactor_file(path):
     prompt = f"Refactor this Python code for readability, performance, and modern patterns (3.10+). Keep functionality identical. Output only code:\n{code}"
     response = client.chat.completions.create(
         model=os.environ.get("OPENAI_MODEL", "gpt-4-turbo-preview"),
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
     )
     new_code = response.choices[0].message.content
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         f.write(new_code)
     print(f"Refactored {path}")
+
 
 def main():
     py_files = glob.glob("**/*.py", recursive=True)
@@ -31,6 +36,7 @@ def main():
     # Git add all changed files
     os.system("git add .")
     os.system("git commit -m '🧠 AI full refactor' || true")
+
 
 if __name__ == "__main__":
     main()

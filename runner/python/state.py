@@ -30,7 +30,6 @@ from .. import exc as sa_exc
 from .. import inspection
 from .. import util
 
-
 # late-populated by session.py
 _sessions = None
 
@@ -374,14 +373,10 @@ class InstanceState(interfaces.InspectionAttrInfo):
 
     @classmethod
     def _detach_states(self, states, session, to_transient=False):
-        persistent_to_detached = (
-            session.dispatch.persistent_to_detached or None
-        )
+        persistent_to_detached = session.dispatch.persistent_to_detached or None
         deleted_to_detached = session.dispatch.deleted_to_detached or None
         pending_to_transient = session.dispatch.pending_to_transient or None
-        persistent_to_transient = (
-            session.dispatch.persistent_to_transient or None
-        )
+        persistent_to_transient = session.dispatch.persistent_to_transient or None
 
         for state in states:
             deleted = state._deleted
@@ -554,11 +549,7 @@ class InstanceState(interfaces.InspectionAttrInfo):
                 self.expired_attributes = set()
 
         self.__dict__.update(
-            [
-                (k, state_dict[k])
-                for k in ("key", "load_options")
-                if k in state_dict
-            ]
+            [(k, state_dict[k]) for k in ("key", "load_options") if k in state_dict]
         )
         if self.key:
             try:
@@ -702,9 +693,7 @@ class InstanceState(interfaces.InspectionAttrInfo):
 
         toload = self.expired_attributes.intersection(self.unmodified)
         toload = toload.difference(
-            attr
-            for attr in toload
-            if not self.manager[attr].impl.load_on_unexpire
+            attr for attr in toload if not self.manager[attr].impl.load_on_unexpire
         )
 
         self.manager.expired_attribute_loader(self, toload, passive)
@@ -726,11 +715,7 @@ class InstanceState(interfaces.InspectionAttrInfo):
     def unmodified_intersection(self, keys):
         """Return self.unmodified.intersection(keys)."""
 
-        return (
-            set(keys)
-            .intersection(self.manager)
-            .difference(self.committed_state)
-        )
+        return set(keys).intersection(self.manager).difference(self.committed_state)
 
     @property
     def unloaded(self):
@@ -740,11 +725,7 @@ class InstanceState(interfaces.InspectionAttrInfo):
         was never populated or modified.
 
         """
-        return (
-            set(self.manager)
-            .difference(self.committed_state)
-            .difference(self.dict)
-        )
+        return set(self.manager).difference(self.committed_state).difference(self.dict)
 
     @property
     def unloaded_expirable(self):
@@ -827,8 +808,7 @@ class InstanceState(interfaces.InspectionAttrInfo):
                 raise orm_exc.ObjectDereferencedError(
                     "Can't emit change event for attribute '%s' - "
                     "parent object of type %s has been garbage "
-                    "collected."
-                    % (self.manager[attr.key], base.state_class_str(self))
+                    "collected." % (self.manager[attr.key], base.state_class_str(self))
                 )
 
     def _commit(self, dict_, keys):
@@ -846,18 +826,14 @@ class InstanceState(interfaces.InspectionAttrInfo):
 
         self.expired = False
 
-        self.expired_attributes.difference_update(
-            set(keys).intersection(dict_)
-        )
+        self.expired_attributes.difference_update(set(keys).intersection(dict_))
 
         # the per-keys commit removes object-level callables,
         # while that of commit_all does not.  it's not clear
         # if this behavior has a clear rationale, however tests do
         # ensure this is what it does.
         if self.callables:
-            for key in (
-                set(self.callables).intersection(keys).intersection(dict_)
-            ):
+            for key in set(self.callables).intersection(keys).intersection(dict_):
                 del self.callables[key]
 
     def _commit_all(self, dict_, instance_dict=None):
@@ -937,9 +913,7 @@ class AttributeState(object):
         off any pending loader callables if needed.
 
         """
-        return self.state.manager[self.key].__get__(
-            self.state.obj(), self.state.class_
-        )
+        return self.state.manager[self.key].__get__(self.state.obj(), self.state.class_)
 
     @property
     def history(self):

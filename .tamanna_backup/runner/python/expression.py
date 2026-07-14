@@ -190,9 +190,7 @@ all_ = public_factory(CollectionAggregate._create_all, ".sql.expression.all_")
 any_ = public_factory(CollectionAggregate._create_any, ".sql.expression.any_")
 and_ = public_factory(BooleanClauseList.and_, ".sql.expression.and_")
 alias = public_factory(Alias._factory, ".sql.expression.alias")
-tablesample = public_factory(
-    TableSample._factory, ".sql.expression.tablesample"
-)
+tablesample = public_factory(TableSample._factory, ".sql.expression.tablesample")
 lateral = public_factory(Lateral._factory, ".sql.expression.lateral")
 or_ = public_factory(BooleanClauseList.or_, ".sql.expression.or_")
 bindparam = public_factory(BindParameter, ".sql.expression.bindparam")
@@ -209,9 +207,7 @@ cte = public_factory(CTE._factory, ".sql.expression.cte")
 values = public_factory(Values, ".sql.expression.values")
 extract = public_factory(Extract, ".sql.expression.extract")
 tuple_ = public_factory(Tuple, ".sql.expression.tuple_")
-except_ = public_factory(
-    CompoundSelect._create_except, ".sql.expression.except_"
-)
+except_ = public_factory(CompoundSelect._create_except, ".sql.expression.except_")
 except_all = public_factory(
     CompoundSelect._create_except_all, ".sql.expression.except_all"
 )
@@ -236,9 +232,7 @@ nulls_last = public_factory(
 nullslast = nulls_last  # deprecated 1.4; see #5435
 asc = public_factory(UnaryExpression._create_asc, ".sql.expression.asc")
 desc = public_factory(UnaryExpression._create_desc, ".sql.expression.desc")
-distinct = public_factory(
-    UnaryExpression._create_distinct, ".sql.expression.distinct"
-)
+distinct = public_factory(UnaryExpression._create_distinct, ".sql.expression.distinct")
 type_coerce = public_factory(TypeCoerce, ".sql.expression.type_coerce")
 true = public_factory(True_._instance, ".sql.expression.true")
 false = public_factory(False_._instance, ".sql.expression.false")

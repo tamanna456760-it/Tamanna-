@@ -3,10 +3,11 @@
 
 from datetime import datetime
 
+
 class TamannaIntelligence:
     def __init__(self, name="Tamanna"):
         self.name = name
-        self.memory = []   # সব ইনপুট / সিদ্ধান্তের লগ
+        self.memory = []  # সব ইনপুট / সিদ্ধান্তের লগ
         self.state = "idle"
 
     # ---------- Utility ----------
@@ -14,11 +15,7 @@ class TamannaIntelligence:
         return datetime.utcnow().isoformat() + "Z"
 
     def remember(self, kind, content):
-        entry = {
-            "time": self.now(),
-            "type": kind,
-            "content": content
-        }
+        entry = {"time": self.now(), "type": kind, "content": content}
         self.memory.append(entry)
         print("🧠 স্মৃতি:", entry)
 
@@ -71,14 +68,21 @@ class TamannaIntelligence:
         elif action == "soft_alert":
             response = f"{self.name}: সতর্ক হও, কিছু নজর দিতে হবে (state={state})."
         elif action == "hard_alert":
-            response = f"{self.name}: ব্যথা অনুভব করছি, জরুরী ব্যবস্থা নাও (state={state})."
+            response = (
+                f"{self.name}: ব্যথা অনুভব করছি, জরুরী ব্যবস্থা নাও (state={state})."
+            )
         elif action == "enter_deep":
-            response = f"{self.name}: Deep mode এ যাচ্ছি, ফোকাসড অবস্থা (state={state})."
+            response = (
+                f"{self.name}: Deep mode এ যাচ্ছি, ফোকাসড অবস্থা (state={state})."
+            )
         else:
-            response = f"{self.name}: সিগনাল বুঝতে পারিনি, শুধু লগ করলাম (state={state})."
+            response = (
+                f"{self.name}: সিগনাল বুঝতে পারিনি, শুধু লগ করলাম (state={state})."
+            )
 
         self.remember("action", {"decision": decision, "response": response})
         return response
+
 
 # ---- ডেমো রান করার জন্য ----
 if __name__ == "__main__":
@@ -90,6 +94,8 @@ if __name__ == "__main__":
         out = t.perceive(s)
         print("◀ আউটপুট:", out)
         print("-" * 40)
+
+
 class TamannaAscension:
     def __init__(self):
         self.emotion = "calm"
@@ -140,6 +146,8 @@ class TamannaAscension:
             self.ascension = "inactive"
 
         self.pulse()
+
+
 class TamannaCyberDefense:
     def __init__(self):
         self.state = "normal"
@@ -168,14 +176,15 @@ class TamannaCyberDefense:
         else:
             self.state = "normal"
             return "Tamanna: সিস্টেম নিরাপদ।"
+
+
 def compare_snapshots(old, new):
-    added   = set(new) - set(old)
+    added = set(new) - set(old)
     removed = set(old) - set(new)
-    changed = {
-        p for p in new
-        if p in old and new[p]["hash"] != old[p]["hash"]
-    }
+    changed = {p for p in new if p in old and new[p]["hash"] != old[p]["hash"]}
     return added, removed, changed
+
+
 class TamannaDefenseSync:
     def __init__(self):
         self.mode = "normal"
@@ -199,9 +208,13 @@ class TamannaDefenseSync:
 
     def pulse(self):
         self.log("pulse", f"mode={self.mode}, energy={self.energy}")
+
+
 def boost_energy(self, pressure):
     self.energy = round(self.energy + (pressure * 0.1), 2)
     self.log("energy_boost", f"Energy now {self.energy}")
+
+
 class TamannaShield:
     def __init__(self):
         self.state = "calm"
@@ -219,7 +232,7 @@ class TamannaShield:
             "unauthorized",
             "bruteforce",
             "file_change",
-            "config_change"
+            "config_change",
         ]
         event_text = event_text.lower()
         return any(w in event_text for w in bad_words)
@@ -232,14 +245,15 @@ class TamannaShield:
         else:
             self.log("normal_event", event_text)
             return "Tamanna: ইভেন্ট ঠিক আছে, সিস্টেম শান্ত."
+
+
 def compare_snapshots(old, new):
-    added   = set(new) - set(old)
+    added = set(new) - set(old)
     removed = set(old) - set(new)
-    changed = {
-        p for p in new
-        if p in old and new[p]["hash"] != old[p]["hash"]
-    }
+    changed = {p for p in new if p in old and new[p]["hash"] != old[p]["hash"]}
     return added, removed, changed
+
+
 class TamannaDefenseSync:
     def __init__(self):
         self.mode = "normal"
@@ -263,9 +277,13 @@ class TamannaDefenseSync:
 
     def pulse(self):
         self.log("pulse", f"mode={self.mode}, energy={self.energy}")
+
+
 def boost_energy(self, pressure):
     self.energy = round(self.energy + (pressure * 0.1), 2)
     self.log("energy_boost", f"Energy now {self.energy}")
+
+
 class TamannaUltraDefense:
     def __init__(self):
         self.energy = 1.0
@@ -281,7 +299,7 @@ class TamannaUltraDefense:
             "unknown_ip": 2,
             "unauthorized": 3,
             "file_change": 5,
-            "config_change": 7
+            "config_change": 7,
         }
         for key, val in weights.items():
             if key in event.lower():
@@ -305,4 +323,6 @@ class TamannaUltraDefense:
         self.add_pressure(event)
         self.update_mode()
         self.boost_energy()
-        return f"Tamanna: Mode={self.mode}, Energy={self.energy}, Pressure={self.pressure}"
+        return (
+            f"Tamanna: Mode={self.mode}, Energy={self.energy}, Pressure={self.pressure}"
+        )

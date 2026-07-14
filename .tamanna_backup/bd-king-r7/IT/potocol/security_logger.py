@@ -2,6 +2,7 @@ from datetime import datetime
 
 LOG_FILE = "security.log"
 
+
 def write_log(event, level="INFO"):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

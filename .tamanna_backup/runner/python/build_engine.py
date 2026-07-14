@@ -157,8 +157,7 @@ class BuildEngine:
     async def _handle_artifacts(self, language: str, environment: str):
         """Handle build artifacts"""
         try:
-            output_dir = self.config["build"]["languages"][language].get(
-                "output_dir")
+            output_dir = self.config["build"]["languages"][language].get("output_dir")
             if output_dir and os.path.exists(output_dir):
                 # Archive artifacts
                 await self._archive_artifacts(output_dir, environment)

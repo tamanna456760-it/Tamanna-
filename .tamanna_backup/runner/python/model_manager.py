@@ -168,8 +168,7 @@ class AdvancedModelManager:
         Register a new model in the model registry
         """
         try:
-            model_id = model_config.get(
-                "model_id", f"MODEL_{uuid.uuid4().hex[:8]}")
+            model_id = model_config.get("model_id", f"MODEL_{uuid.uuid4().hex[:8]}")
 
             # Validate model configuration
             validation_result = await self._validate_model_config(model_config)
@@ -188,8 +187,7 @@ class AdvancedModelManager:
                 created_date=datetime.now(),
                 last_updated=datetime.now(),
                 status=ModelStatus.TRAINING,
-                performance_metrics=model_config.get(
-                    "performance_metrics", {}),
+                performance_metrics=model_config.get("performance_metrics", {}),
                 hyperparameters=model_config.get("hyperparameters", {}),
                 data_sources=model_config.get("data_sources", []),
                 dependencies=model_config.get("dependencies", []),
@@ -206,8 +204,7 @@ class AdvancedModelManager:
             # Save model metadata
             await self._save_model_metadata(metadata)
 
-            self.logger.info(
-                f"📝 Model Registered: {metadata.name} (ID: {model_id})")
+            self.logger.info(f"📝 Model Registered: {metadata.name} (ID: {model_id})")
 
             return model_id
 
@@ -278,8 +275,7 @@ class AdvancedModelManager:
                 version = metadata.version
 
             # Get model path
-            model_path = self._get_model_path(
-                metadata.model_type, model_id, version)
+            model_path = self._get_model_path(metadata.model_type, model_id, version)
 
             if not model_path.exists():
                 raise FileNotFoundError(f"Model not found: {model_path}")
@@ -630,8 +626,7 @@ class AdvancedModelManager:
         with open(model_path / "model_architecture.pkl", "rb") as f:
             model_architecture = pickle.load(f)
 
-        model_architecture.load_state_dict(
-            torch.load(model_path / "model.pth"))
+        model_architecture.load_state_dict(torch.load(model_path / "model.pth"))
         return model_architecture
 
     async def _load_sklearn_model(self, model_path: Path):
@@ -707,10 +702,8 @@ class AdvancedModelManager:
     ):
         """Copy model files for versioning"""
         metadata = self.model_registry[model_id]
-        from_path = self._get_model_path(
-            metadata.model_type, model_id, from_version)
-        to_path = self._get_model_path(
-            metadata.model_type, model_id, to_version)
+        from_path = self._get_model_path(metadata.model_type, model_id, from_version)
+        to_path = self._get_model_path(metadata.model_type, model_id, to_version)
 
         if from_path.exists():
             shutil.copytree(from_path, to_path)

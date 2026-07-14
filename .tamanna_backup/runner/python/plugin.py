@@ -9,6 +9,7 @@
 Mypy plugin for SQLAlchemy ORM.
 
 """
+
 from typing import Callable
 from typing import List
 from typing import Optional
@@ -101,16 +102,12 @@ class SQLAlchemyPlugin(Plugin):
     def get_attribute_hook(
         self, fullname: str
     ) -> Optional[Callable[[AttributeContext], Type]]:
-        if fullname.startswith(
-            "sqlalchemy.orm.attributes.QueryableAttribute."
-        ):
+        if fullname.startswith("sqlalchemy.orm.attributes.QueryableAttribute."):
             return _queryable_getattr_hook
 
         return None
 
-    def get_additional_deps(
-        self, file: MypyFile
-    ) -> List[Tuple[int, str, int]]:
+    def get_additional_deps(self, file: MypyFile) -> List[Tuple[int, str, int]]:
         return [
             (10, "sqlalchemy.orm.attributes", -1),
             (10, "sqlalchemy.orm.decl_api", -1),
@@ -149,9 +146,7 @@ def _dynamic_class_hook(ctx: DynamicClassDefContext) -> None:
     try:
         calculate_mro(info)
     except MroError:
-        util.fail(
-            ctx.api, "Not able to calculate MRO for declarative base", ctx.call
-        )
+        util.fail(ctx.api, "Not able to calculate MRO for declarative base", ctx.call)
         obj = ctx.api.named_type(names.NAMED_TYPE_BUILTINS_OBJECT)
         info.bases = [obj]
         info.fallback_to_any = True
@@ -176,18 +171,13 @@ def _fill_in_decorators(ctx: ClassDefContext) -> None:
             and decorator.callee.name == "as_declarative_base"
         ):
             target = decorator.callee
-        elif (
-            isinstance(decorator, nodes.MemberExpr)
-            and decorator.name == "mapped"
-        ):
+        elif isinstance(decorator, nodes.MemberExpr) and decorator.name == "mapped":
             target = decorator
         else:
             continue
 
         assert isinstance(target.expr, NameExpr)
-        sym = ctx.api.lookup_qualified(
-            target.expr.name, target, suppress_errors=True
-        )
+        sym = ctx.api.lookup_qualified(target.expr.name, target, suppress_errors=True)
         if sym and sym.node:
             sym_type = get_proper_type(sym.type)
             if isinstance(sym_type, Instance):
@@ -277,8 +267,6 @@ def _set_declarative_metaclass(
     api: SemanticAnalyzerPluginInterface, target_cls: ClassDef
 ) -> None:
     info = target_cls.info
-    sym = api.lookup_fully_qualified_or_none(
-        "sqlalchemy.orm.decl_api.DeclarativeMeta"
-    )
+    sym = api.lookup_fully_qualified_or_none("sqlalchemy.orm.decl_api.DeclarativeMeta")
     assert sym is not None and isinstance(sym.node, TypeInfo)
     info.declared_metaclass = info.metaclass_type = Instance(sym.node, [])

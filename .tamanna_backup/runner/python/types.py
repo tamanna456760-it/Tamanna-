@@ -26,9 +26,7 @@ class _NumericType(object):
         super(_NumericType, self).__init__(**kw)
 
     def __repr__(self):
-        return util.generic_repr(
-            self, to_inspect=[_NumericType, sqltypes.Numeric]
-        )
+        return util.generic_repr(self, to_inspect=[_NumericType, sqltypes.Numeric])
 
 
 class _FloatType(_NumericType, sqltypes.Float):
@@ -38,12 +36,9 @@ class _FloatType(_NumericType, sqltypes.Float):
             or (precision is not None and scale is None)
         ):
             raise exc.ArgumentError(
-                "You must specify both precision and scale or omit "
-                "both altogether."
+                "You must specify both precision and scale or omit " "both altogether."
             )
-        super(_FloatType, self).__init__(
-            precision=precision, asdecimal=asdecimal, **kw
-        )
+        super(_FloatType, self).__init__(precision=precision, asdecimal=asdecimal, **kw)
         self.scale = scale
 
     def __repr__(self):
@@ -88,9 +83,7 @@ class _StringType(sqltypes.String):
         super(_StringType, self).__init__(**kw)
 
     def __repr__(self):
-        return util.generic_repr(
-            self, to_inspect=[_StringType, sqltypes.String]
-        )
+        return util.generic_repr(self, to_inspect=[_StringType, sqltypes.String])
 
 
 class _MatchType(sqltypes.Float, sqltypes.MatchType):

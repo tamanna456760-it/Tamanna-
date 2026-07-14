@@ -196,13 +196,11 @@ def main():
     reports = []
     for module in CONFIG["modules"]:
         if not os.path.isdir(module["path"]):
-            print(
-                f"[WARN] Missing module path: {module['name']} -> {module['path']}")
+            print(f"[WARN] Missing module path: {module['name']} -> {module['path']}")
             continue
         reports.append(backup_module(session_dir, module))
 
-    manifest_path, seals_path, entries_path = write_manifest(
-        session_dir, reports)
+    manifest_path, seals_path, entries_path = write_manifest(session_dir, reports)
     print(
         f"\n[COMPLETE] Backup sealed.\nSession:   {session_dir}\nManifest:  {manifest_path}\nSeals:     {seals_path}\nEntries:   {entries_path}"
     )

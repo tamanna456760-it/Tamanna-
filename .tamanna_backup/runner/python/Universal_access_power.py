@@ -217,8 +217,7 @@ class UniversalAccessPower:
                     if altitude < -5000:  # Below surface
                         direction = "UP"
 
-                vertical_power = self.calculate_vertical_power(
-                    altitude, direction)
+                vertical_power = self.calculate_vertical_power(altitude, direction)
                 stability = self.maintain_vertical_stability(altitude)
 
                 self.power_dimensions["up_down_access"].update(
@@ -276,8 +275,7 @@ class UniversalAccessPower:
         while True:
             try:
                 current_direction = directions[active_direction]
-                directional_power = self.calculate_directional_power(
-                    current_direction)
+                directional_power = self.calculate_directional_power(current_direction)
                 coverage_efficiency = self.analyze_omni_coverage()
 
                 self.power_dimensions["all_side_access"].update(
@@ -316,10 +314,8 @@ class UniversalAccessPower:
         while True:
             try:
                 target_system = system_types[current_system]
-                access_success = self.establish_system_connection(
-                    target_system)
-                protocol_handshake = self.perform_universal_handshake(
-                    target_system)
+                access_success = self.establish_system_connection(target_system)
+                protocol_handshake = self.perform_universal_handshake(target_system)
 
                 self.power_dimensions["any_system_access"].update(
                     {
@@ -540,8 +536,7 @@ def main():
 
             print(f"⚡ TOTAL UNIVERSAL POWER: {total_power:,}W")
             print(f"📈 ACCESS EFFICIENCY: {efficiency:.2f}%")
-            print(
-                f"🔗 ACTIVE QUANTUM TUNNELS: {len(universal_power.quantum_tunnels)}")
+            print(f"🔗 ACTIVE QUANTUM TUNNELS: {len(universal_power.quantum_tunnels)}")
             print(
                 f"🌐 SYSTEMS ACCESSED: {universal_power.power_dimensions['any_system_access']['systems_accessed']}"
             )

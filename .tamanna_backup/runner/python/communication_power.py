@@ -166,8 +166,7 @@ class MasterCommunicationPower:
                 )
 
                 # Execute optimizations
-                self.implement_communication_optimizations(
-                    optimization_commands)
+                self.implement_communication_optimizations(optimization_commands)
 
                 time.sleep(2)
 
@@ -291,8 +290,7 @@ class MasterCommunicationPower:
                 system_state = self.collect_system_state()
 
                 # Get AI decisions
-                ai_decisions = self.ai_controller.process_master_decisions(
-                    system_state)
+                ai_decisions = self.ai_controller.process_master_decisions(system_state)
 
                 # Execute AI commands
                 self.execute_ai_master_commands(ai_decisions)
@@ -354,12 +352,9 @@ class CommAIController:
         optimization_plan = {
             "timestamp": datetime.now().isoformat(),
             "optimizations": [
-                {"channel": "primary_rf",
-                    "adjustment": np.random.uniform(-2, 2)},
-                {"channel": "secondary_rf",
-                    "adjustment": np.random.uniform(-1, 1)},
-                {"channel": "satellite_comms",
-                    "adjustment": np.random.uniform(-3, 3)},
+                {"channel": "primary_rf", "adjustment": np.random.uniform(-2, 2)},
+                {"channel": "secondary_rf", "adjustment": np.random.uniform(-1, 1)},
+                {"channel": "satellite_comms", "adjustment": np.random.uniform(-3, 3)},
             ],
             "confidence": np.random.uniform(0.85, 0.98),
         }
@@ -479,12 +474,10 @@ def main():
     print("=" * 50)
 
     for channel, data in master_comm_power.power_channels.items():
-        print(
-            f"📶 {channel.upper()}: {data['status']} - {data['power_dBm']}dBm")
+        print(f"📶 {channel.upper()}: {data['status']} - {data['power_dBm']}dBm")
 
     for node, data in master_comm_power.communication_nodes.items():
-        print(
-            f"🖥️  {node.upper()}: {data['status']} - Power: {data['power_level']}%")
+        print(f"🖥️  {node.upper()}: {data['status']} - Power: {data['power_level']}%")
 
     # Keep system running
     try:

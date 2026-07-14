@@ -6,13 +6,14 @@ import hashlib
 import json
 from datetime import datetime
 
-TAMANNAPATH = "Tamanna"         # তোমার Tamanna ফোল্ডার
-HEAD_INDEX  = "tamanna_head_index.jsonl"  # head sync log
+TAMANNAPATH = "Tamanna"  # তোমার Tamanna ফোল্ডার
+HEAD_INDEX = "tamanna_head_index.jsonl"  # head sync log
+
 
 class TamannaHead:
     def __init__(self, root=TAMANNAPATH):
         self.root = root
-        self.files = {}   # key = rel_path, value = info dict
+        self.files = {}  # key = rel_path, value = info dict
         self.last_snapshot = {}
 
     # ---------- Utility ----------
@@ -27,11 +28,7 @@ class TamannaHead:
         return h.hexdigest()
 
     def log_head(self, kind, detail):
-        entry = {
-            "time": self.now(),
-            "kind": kind,
-            "detail": detail
-        }
+        entry = {"time": self.now(), "kind": kind, "detail": detail}
         print("🧠 HEAD:", entry)
         with open(HEAD_INDEX, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -70,34 +67,39 @@ class TamannaHead:
         if not self.last_snapshot:
             self.last_snapshot = current
             self.files = current
-            self.log_head("sync_init", {
-                "file_count": len(current),
-                "message": "Tamanna head initialized with all files."
-            })
+            self.log_head(
+                "sync_init",
+                {
+                    "file_count": len(current),
+                    "message": "Tamanna head initialized with all files.",
+                },
+            )
             return
 
         # Compare previous vs current
         prev = self.last_snapshot
-        added   = set(current) - set(prev)
-        removed = set(prev)    - set(current)
-        changed = {p for p in current if p in prev and current[p]["hash"] != prev[p]["hash"]}
+        added = set(current) - set(prev)
+        removed = set(prev) - set(current)
+        changed = {
+            p for p in current if p in prev and current[p]["hash"] != prev[p]["hash"]
+        }
 
         self.files = current
         self.last_snapshot = current
 
-        self.log_head("sync_result", {
-            "total": len(current),
-            "added": sorted(list(added)),
-            "removed": sorted(list(removed)),
-            "changed": sorted(list(changed)),
-        })
+        self.log_head(
+            "sync_result",
+            {
+                "total": len(current),
+                "added": sorted(list(added)),
+                "removed": sorted(list(removed)),
+                "changed": sorted(list(changed)),
+            },
+        )
 
     # ---------- Heartbeat ----------
     def heartbeat(self):
-        info = {
-            "files_total": len(self.files),
-            "time": self.now()
-        }
+        info = {"files_total": len(self.files), "time": self.now()}
         self.log_head("heartbeat", info)
 
     # ---------- Integrity check ----------
@@ -106,24 +108,30 @@ class TamannaHead:
         current = self.scan_files()
         prev = self.files
 
-        added   = set(current) - set(prev)
-        removed = set(prev)    - set(current)
-        changed = {p for p in current if p in prev and current[p]["hash"] != prev[p]["hash"]}
+        added = set(current) - set(prev)
+        removed = set(prev) - set(current)
+        changed = {
+            p for p in current if p in prev and current[p]["hash"] != prev[p]["hash"]
+        }
 
         if not added and not removed and not changed:
             self.log_head("integrity_ok", "All files match head state.")
         else:
-            self.log_head("integrity_alert", {
-                "added": sorted(list(added)),
-                "removed": sorted(list(removed)),
-                "changed": sorted(list(changed)),
-            })
+            self.log_head(
+                "integrity_alert",
+                {
+                    "added": sorted(list(added)),
+                    "removed": sorted(list(removed)),
+                    "changed": sorted(list(changed)),
+                },
+            )
         # head update করতে চাইলে:
         self.files = current
+
 
 # ---- ডেমো রান ----
 if __name__ == "__main__":
     head = TamannaHead()
-    head.sync_head()        # প্রথমবার সব sync
-    head.heartbeat()        # এখনকার head অবস্থা
+    head.sync_head()  # প্রথমবার সব sync
+    head.heartbeat()  # এখনকার head অবস্থা
     head.integrity_check()  # আবার দেখে সব ঠিক আছে কিনা

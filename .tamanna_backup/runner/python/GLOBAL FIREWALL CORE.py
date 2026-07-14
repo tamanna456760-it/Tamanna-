@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict
 
+
 class TamannaGlobalFirewall:
     def __init__(self, config):
         self.config = config
@@ -18,10 +19,7 @@ class TamannaGlobalFirewall:
         self.ip_logs[ip].append(now)
 
         # keep last 60 sec
-        self.ip_logs[ip] = [
-            t for t in self.ip_logs[ip]
-            if now - t < 60
-        ]
+        self.ip_logs[ip] = [t for t in self.ip_logs[ip] if now - t < 60]
 
     # 🧠 detect attack
     def detect(self, ip):

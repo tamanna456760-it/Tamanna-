@@ -29,7 +29,6 @@ from ...sql.schema import BLANK_SCHEMA
 from ...testing import is_false
 from ...testing import is_true
 
-
 metadata, users = None, None
 
 
@@ -105,12 +104,8 @@ class HasIndexTest(fixtures.TablesTest):
     def test_has_index(self):
         with config.db.begin() as conn:
             assert config.db.dialect.has_index(conn, "test_table", "my_idx")
-            assert not config.db.dialect.has_index(
-                conn, "test_table", "my_idx_s"
-            )
-            assert not config.db.dialect.has_index(
-                conn, "nonexistent_table", "my_idx"
-            )
+            assert not config.db.dialect.has_index(conn, "test_table", "my_idx_s")
+            assert not config.db.dialect.has_index(conn, "nonexistent_table", "my_idx")
             assert not config.db.dialect.has_index(
                 conn, "test_table", "nonexistent_idx"
             )
@@ -157,9 +152,7 @@ class QuotedNameArgumentTest(fixtures.TablesTest):
                 "data",
                 name="uq quote' one",
             ),
-            sa.ForeignKeyConstraint(
-                ["id"], ["related.id"], name="fk quote ' one"
-            ),
+            sa.ForeignKeyConstraint(["id"], ["related.id"], name="fk quote ' one"),
             sa.CheckConstraint("name != 'foo'", name="ck quote ' one"),
             comment=r"""quote ' one comment""",
             test_needs_fk=True,
@@ -179,9 +172,7 @@ class QuotedNameArgumentTest(fixtures.TablesTest):
                     "data",
                     name='uq quote" two',
                 ),
-                sa.ForeignKeyConstraint(
-                    ["id"], ["related.id"], name='fk quote " two'
-                ),
+                sa.ForeignKeyConstraint(["id"], ["related.id"], name='fk quote " two'),
                 sa.CheckConstraint("name != 'foo'", name='ck quote " two '),
                 comment=r"""quote " two comment""",
                 test_needs_fk=True,
@@ -208,9 +199,7 @@ class QuotedNameArgumentTest(fixtures.TablesTest):
                 ]
             for name in names:
                 query = "CREATE VIEW %s AS SELECT * FROM %s" % (
-                    config.db.dialect.identifier_preparer.quote(
-                        "view %s" % name
-                    ),
+                    config.db.dialect.identifier_preparer.quote("view %s" % name),
                     config.db.dialect.identifier_preparer.quote(name),
                 )
 
@@ -220,9 +209,7 @@ class QuotedNameArgumentTest(fixtures.TablesTest):
                     "before_drop",
                     DDL(
                         "DROP VIEW %s"
-                        % config.db.dialect.identifier_preparer.quote(
-                            "view %s" % name
-                        )
+                        % config.db.dialect.identifier_preparer.quote("view %s" % name)
                     ),
                 )
 
@@ -322,9 +309,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
                 Column(
                     "parent_user_id",
                     sa.Integer,
-                    sa.ForeignKey(
-                        "%susers.user_id" % schema_prefix, name="user_id_fk"
-                    ),
+                    sa.ForeignKey("%susers.user_id" % schema_prefix, name="user_id_fk"),
                 ),
                 schema=schema,
                 test_needs_fk=True,
@@ -357,9 +342,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
             "email_addresses",
             metadata,
             Column("address_id", sa.Integer),
-            Column(
-                "remote_user_id", sa.Integer, sa.ForeignKey(users.c.user_id)
-            ),
+            Column("remote_user_id", sa.Integer, sa.ForeignKey(users.c.user_id)),
             Column("email_address", sa.String(20)),
             sa.PrimaryKeyConstraint("address_id", name="email_ad_pk"),
             schema=schema,
@@ -388,9 +371,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
                     Column("data", sa.String(20)),
                     Column(
                         "remote_id",
-                        ForeignKey(
-                            "%s.remote_table_2.id" % testing.config.test_schema
-                        ),
+                        ForeignKey("%s.remote_table_2.id" % testing.config.test_schema),
                     ),
                     test_needs_fk=True,
                     schema=config.db.dialect.default_schema_name,
@@ -403,8 +384,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
                     Column(
                         "local_id",
                         ForeignKey(
-                            "%s.local_table.id"
-                            % config.db.dialect.default_schema_name
+                            "%s.local_table.id" % config.db.dialect.default_schema_name
                         ),
                     ),
                     Column("data", sa.String(20)),
@@ -503,9 +483,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
             )
 
             event.listen(metadata, "after_create", DDL(query))
-            event.listen(
-                metadata, "before_drop", DDL("DROP VIEW %s" % view_name)
-            )
+            event.listen(metadata, "before_drop", DDL("DROP VIEW %s" % view_name))
 
     @testing.requires.schema_reflection
     def test_get_schema_names(self):
@@ -635,9 +613,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
                 {"comment": "id comment", "name": "id"},
                 {"comment": "data % comment", "name": "data"},
                 {
-                    "comment": (
-                        r"""Comment types type speedily ' " \ '' Fun!"""
-                    ),
+                    "comment": (r"""Comment types type speedily ' " \ '' Fun!"""),
                     "name": "d2",
                 },
             ],
@@ -710,8 +686,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
                         )
                     )
                     > 0,
-                    "%s(%s), %s(%s)"
-                    % (col.name, col.type, cols[i]["name"], ctype),
+                    "%s(%s), %s(%s)" % (col.name, col.type, cols[i]["name"], ctype),
                 )
 
                 if not col.primary_key:
@@ -923,9 +898,7 @@ class ComponentReflectionTest(fixtures.TablesTest):
         indexes = insp.get_indexes(table_name)
         for ind in indexes:
             ind.pop("dialect_options", None)
-        expected = [
-            {"unique": False, "column_names": ["foo"], "name": "user_tmp_ix"}
-        ]
+        expected = [{"unique": False, "column_names": ["foo"], "name": "user_tmp_ix"}]
         if testing.requires.index_reflects_included_columns.enabled:
             expected[0]["include_columns"] = []
         eq_(
@@ -1101,9 +1074,7 @@ class TableNoColumnsTest(fixtures.TestBase):
 
         # for transactional DDL the transaction is rolled back before this
         # drop statement is invoked
-        event.listen(
-            metadata, "before_drop", DDL("DROP VIEW IF EXISTS empty_v")
-        )
+        event.listen(metadata, "before_drop", DDL("DROP VIEW IF EXISTS empty_v"))
         metadata.create_all(connection)
 
     @testing.requires.reflect_tables_no_columns
@@ -1152,9 +1123,7 @@ class ComponentReflectionTestExtra(fixtures.TestBase):
             metadata,
             Column("a", Integer()),
             sa.CheckConstraint("a > 1 AND a < 5", name="cc1"),
-            sa.CheckConstraint(
-                "a = 1 OR (a > 2 AND a < 5)", name="UsesCasing"
-            ),
+            sa.CheckConstraint("a = 1 OR (a > 2 AND a < 5)", name="UsesCasing"),
             schema=schema,
         )
 
@@ -1170,9 +1139,7 @@ class ComponentReflectionTestExtra(fixtures.TestBase):
         # may need to add more to this as new dialects get CHECK
         # constraint reflection support
         def normalize(sqltext):
-            return " ".join(
-                re.findall(r"and|\d|=|a|or|<|>", sqltext.lower(), re.I)
-            )
+            return " ".join(re.findall(r"and|\d|=|a|or|<|>", sqltext.lower(), re.I))
 
         reflected = [
             {"name": item["name"], "sqltext": normalize(item["sqltext"])}
@@ -1203,14 +1170,10 @@ class ComponentReflectionTestExtra(fixtures.TestBase):
 
         insp = inspect(connection)
 
-        expected = [
-            {"name": "t_idx_2", "column_names": ["x"], "unique": False}
-        ]
+        expected = [{"name": "t_idx_2", "column_names": ["x"], "unique": False}]
         if testing.requires.index_reflects_included_columns.enabled:
             expected[0]["include_columns"] = []
-            expected[0]["dialect_options"] = {
-                "%s_include" % connection.engine.name: []
-            }
+            expected[0]["dialect_options"] = {"%s_include" % connection.engine.name: []}
 
         with expect_warnings(
             "Skipped unsupported reflection of expression-based index t_idx"
@@ -1243,26 +1206,20 @@ class ComponentReflectionTestExtra(fixtures.TestBase):
                     "column_names": ["x"],
                     "include_columns": ["y"],
                     "unique": False,
-                    "dialect_options": {
-                        "%s_include" % connection.engine.name: ["y"]
-                    },
+                    "dialect_options": {"%s_include" % connection.engine.name: ["y"]},
                 }
             ],
         )
 
         t2 = Table("t", MetaData(), autoload_with=connection)
         eq_(
-            list(t2.indexes)[0].dialect_options[connection.engine.name][
-                "include"
-            ],
+            list(t2.indexes)[0].dialect_options[connection.engine.name]["include"],
             ["y"],
         )
 
     def _type_round_trip(self, connection, metadata, *types):
         t = Table(
-            "t",
-            metadata,
-            *[Column("t%d" % i, type_) for i, type_ in enumerate(types)]
+            "t", metadata, *[Column("t%d" % i, type_) for i, type_ in enumerate(types)]
         )
         t.create(connection)
 
@@ -1279,9 +1236,7 @@ class ComponentReflectionTestExtra(fixtures.TestBase):
 
     @testing.requires.table_reflection
     def test_varchar_reflection(self, connection, metadata):
-        typ = self._type_round_trip(
-            connection, metadata, sql_types.String(52)
-        )[0]
+        typ = self._type_round_trip(connection, metadata, sql_types.String(52))[0]
         assert isinstance(typ, sql_types.String)
         eq_(typ.length, 52)
 
@@ -1375,9 +1330,7 @@ class ComponentReflectionTestExtra(fixtures.TestBase):
             Column("id", Integer, primary_key=True),
             Column("name", String(50), nullable=False),
             Column("tid", Integer),
-            sa.ForeignKeyConstraint(
-                ["tid"], ["table.id"], name="myfk", **options
-            ),
+            sa.ForeignKeyConstraint(["tid"], ["table.id"], name="myfk", **options),
             test_needs_fk=True,
         )
 
@@ -1417,23 +1370,17 @@ class NormalizedNameTest(fixtures.TablesTest):
     def test_reflect_lowercase_forced_tables(self):
 
         m2 = MetaData()
-        t2_ref = Table(
-            quoted_name("t2", quote=True), m2, autoload_with=config.db
-        )
+        t2_ref = Table(quoted_name("t2", quote=True), m2, autoload_with=config.db)
         t1_ref = m2.tables["t1"]
         assert t2_ref.c.t1id.references(t1_ref.c.id)
 
         m3 = MetaData()
-        m3.reflect(
-            config.db, only=lambda name, m: name.lower() in ("t1", "t2")
-        )
+        m3.reflect(config.db, only=lambda name, m: name.lower() in ("t1", "t2"))
         assert m3.tables["t2"].c.t1id.references(m3.tables["t1"].c.id)
 
     def test_get_table_names(self):
         tablenames = [
-            t
-            for t in inspect(config.db).get_table_names()
-            if t.lower() in ("t1", "t2")
+            t for t in inspect(config.db).get_table_names() if t.lower() in ("t1", "t2")
         ]
 
         eq_(tablenames[0].upper(), tablenames[0].lower())
@@ -1510,9 +1457,7 @@ class ComputedReflectionTest(fixtures.ComputedReflectionFixtureTest):
     def test_get_column_returns_persisted_with_schema(self):
         insp = inspect(config.db)
 
-        cols = insp.get_columns(
-            "computed_column_table", schema=config.test_schema
-        )
+        cols = insp.get_columns("computed_column_table", schema=config.test_schema)
         data = {c["name"]: c for c in cols}
 
         self.check_column(

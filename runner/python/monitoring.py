@@ -884,8 +884,7 @@ class AdvancedMonitoringSystem:
                 elif channel == "webhook":
                     await self._send_webhook_notification(notification_message)
             except Exception as e:
-                self.logger.error(
-                    f"❌ Notification failed for channel {channel}: {e}")
+                self.logger.error(f"❌ Notification failed for channel {channel}: {e}")
 
     async def get_system_health(self) -> SystemHealth:
         """Get comprehensive system health status"""
@@ -1046,8 +1045,7 @@ class AdvancedMonitoringSystem:
             # Validate rule configuration
             validation_result = await self._validate_alert_rule(rule_config)
             if not validation_result["valid"]:
-                raise ValueError(
-                    f"Alert rule invalid: {validation_result['errors']}")
+                raise ValueError(f"Alert rule invalid: {validation_result['errors']}")
 
             # Register alert rule
             self.alert_rules[rule_id] = rule_config
@@ -1124,8 +1122,7 @@ class AdvancedMonitoringSystem:
                 )
             )
 
-        memory_metrics = [
-            m for m in system_metrics if m.metric_id == "memory_usage"]
+        memory_metrics = [m for m in system_metrics if m.metric_id == "memory_usage"]
         if memory_metrics:
             memory_usage = memory_metrics[-1].value
             component_status["memory"] = (
@@ -1175,8 +1172,7 @@ class AdvancedMonitoringSystem:
         }
 
         # Get the worst status
-        worst_status = max(component_status.values(),
-                           key=lambda x: status_priority[x])
+        worst_status = max(component_status.values(), key=lambda x: status_priority[x])
         return worst_status
 
     async def _generate_health_recommendations(
@@ -1292,8 +1288,7 @@ class AdvancedMonitoringSystem:
 
         memory_metrics = list(self.metrics_store.get("memory_usage", []))
         if memory_metrics:
-            avg_memory = statistics.mean(
-                [m.value for m in memory_metrics[-10:]])
+            avg_memory = statistics.mean([m.value for m in memory_metrics[-10:]])
             if avg_memory > 85:
                 score -= 25
             elif avg_memory > 70:
@@ -1311,8 +1306,7 @@ class AdvancedMonitoringSystem:
         cpu_metrics = list(self.metrics_store.get("cpu_usage", []))
         if len(cpu_metrics) >= 10:
             recent_avg = statistics.mean([m.value for m in cpu_metrics[-5:]])
-            previous_avg = statistics.mean(
-                [m.value for m in cpu_metrics[-10:-5]])
+            previous_avg = statistics.mean([m.value for m in cpu_metrics[-10:-5]])
             trends["cpu_trend"] = (
                 "increasing" if recent_avg > previous_avg else "decreasing"
             )
@@ -1453,8 +1447,7 @@ class PrometheusExporter:
     async def update_metric(self, metric: MetricData):
         """Update Prometheus metric"""
         if metric.metric_id not in self.metrics:
-            self.metrics[metric.metric_id] = Gauge(
-                metric.metric_id, metric.name)
+            self.metrics[metric.metric_id] = Gauge(metric.metric_id, metric.name)
 
         self.metrics[metric.metric_id].set(metric.value)
 

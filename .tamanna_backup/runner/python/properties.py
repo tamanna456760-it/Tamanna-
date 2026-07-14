@@ -11,6 +11,7 @@ This is a private module which defines the behavior of individual ORM-
 mapped attributes.
 
 """
+
 from __future__ import absolute_import
 
 from . import attributes
@@ -25,7 +26,6 @@ from .. import log
 from .. import util
 from ..sql import coercions
 from ..sql import roles
-
 
 __all__ = [
     "ColumnProperty",
@@ -159,9 +159,7 @@ class ColumnProperty(StrategizedProperty):
             coercions.expect(roles.LabeledColumnExprRole, c) for c in columns
         ]
         self.columns = [
-            coercions.expect(
-                roles.LabeledColumnExprRole, _orm_full_deannotate(c)
-            )
+            coercions.expect(roles.LabeledColumnExprRole, _orm_full_deannotate(c))
             for c in columns
         ]
         self.group = kwargs.pop("group", None)
@@ -294,9 +292,7 @@ class ColumnProperty(StrategizedProperty):
             *self.columns
         )
 
-    def _getcommitted(
-        self, state, dict_, column, passive=attributes.PASSIVE_OFF
-    ):
+    def _getcommitted(self, state, dict_, column, passive=attributes.PASSIVE_OFF):
         return state.get_impl(self.key).get_committed_value(
             state, dict_, passive=passive
         )
@@ -323,9 +319,7 @@ class ColumnProperty(StrategizedProperty):
                 impl = dest_state.get_impl(self.key)
                 impl.set(dest_state, dest_dict, value, None)
         elif dest_state.has_identity and self.key not in dest_dict:
-            dest_state._expire_attributes(
-                dest_dict, [self.key], no_loader=True
-            )
+            dest_state._expire_attributes(dest_dict, [self.key], no_loader=True)
 
     class Comparator(util.MemoizedSlots, PropComparator):
         """Produce boolean, comparison, and other operators for
@@ -411,14 +405,9 @@ class ColumnProperty(StrategizedProperty):
 
             """
             if self.adapter:
-                return [
-                    self.adapter(col, self.prop.key)
-                    for col in self.prop.columns
-                ]
+                return [self.adapter(col, self.prop.key) for col in self.prop.columns]
             else:
-                return [
-                    self._orm_annotate_column(col) for col in self.prop.columns
-                ]
+                return [self._orm_annotate_column(col) for col in self.prop.columns]
 
         def _fallback_getattr(self, key):
             """proxy attribute access down to the mapped column.

@@ -76,8 +76,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
             model = models.Sequential()
 
             # Input layer
-            model.add(layers.Input(
-                shape=(self.sequence_length, self.n_features)))
+            model.add(layers.Input(shape=(self.sequence_length, self.n_features)))
 
             # LSTM layers
             for i, units in enumerate(self.config["architecture"]["lstm_layers"]):
@@ -102,19 +101,16 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
 
             # Dense layers
             for i, units in enumerate(self.config["architecture"]["dense_layers"]):
-                model.add(layers.Dense(
-                    units, activation="relu", name=f"dense_{i}"))
+                model.add(layers.Dense(units, activation="relu", name=f"dense_{i}"))
 
                 if self.config["architecture"].get("dropout_rate", 0) > 0:
                     model.add(
-                        layers.Dropout(
-                            self.config["architecture"]["dropout_rate"])
+                        layers.Dropout(self.config["architecture"]["dropout_rate"])
                     )
 
             # Output layer
             model.add(
-                layers.Dense(self.n_features *
-                             self.prediction_horizon, name="output")
+                layers.Dense(self.n_features * self.prediction_horizon, name="output")
             )
 
             self.logger.info("✅ LSTM model built successfully")
@@ -215,8 +211,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
             targets = []
             for i in range(len(X)):
                 if i + self.prediction_horizon < len(X):
-                    target = X[i + 1: i +
-                               self.prediction_horizon + 1].flatten()
+                    target = X[i + 1 : i + self.prediction_horizon + 1].flatten()
                     targets.append(target)
             return np.array(targets)
 
@@ -229,15 +224,14 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
             # Calculate prediction errors
             if self.prediction_horizon == 1:
                 actual = X_normal[:, -1, :]  # Last step
-                prediction_errors = np.mean(
-                    np.square(actual - predictions), axis=1)
+                prediction_errors = np.mean(np.square(actual - predictions), axis=1)
             else:
                 # For multi-step prediction, calculate error for each sequence
                 prediction_errors = []
                 for i in range(len(X_normal)):
                     if i + self.prediction_horizon < len(X_normal):
                         actual = X_normal[
-                            i + 1: i + self.prediction_horizon + 1
+                            i + 1 : i + self.prediction_horizon + 1
                         ].flatten()
                         error = np.mean(np.square(actual - predictions[i]))
                         prediction_errors.append(error)
@@ -248,8 +242,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
 
             if threshold_method == "percentile":
                 percentile = self.config["anomaly_detection"]["threshold_percentile"]
-                self.prediction_threshold = np.percentile(
-                    prediction_errors, percentile)
+                self.prediction_threshold = np.percentile(prediction_errors, percentile)
 
             elif threshold_method == "std_dev":
                 multiplier = self.config["anomaly_detection"][
@@ -267,8 +260,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
             )
 
         except Exception as e:
-            self.logger.error(
-                f"❌ Prediction threshold calculation failed: {e}")
+            self.logger.error(f"❌ Prediction threshold calculation failed: {e}")
             raise
 
     async def _execute_prediction(self, X) -> np.ndarray:
@@ -292,14 +284,13 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
             predictions = await self._execute_prediction(X_test)
 
             if self.prediction_horizon == 1:
-                prediction_errors = np.mean(
-                    np.square(y_test - predictions), axis=1)
+                prediction_errors = np.mean(np.square(y_test - predictions), axis=1)
             else:
                 prediction_errors = []
                 for i in range(len(X_test)):
                     if i + self.prediction_horizon < len(X_test):
                         actual = X_test[
-                            i + 1: i + self.prediction_horizon + 1
+                            i + 1 : i + self.prediction_horizon + 1
                         ].flatten()
                         error = np.mean(np.square(actual - predictions[i]))
                         prediction_errors.append(error)
@@ -331,8 +322,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
         """
         try:
             if self.prediction_threshold is None:
-                raise ValueError(
-                    "Model must be trained before anomaly detection")
+                raise ValueError("Model must be trained before anomaly detection")
 
             if use_rolling_window is None:
                 use_rolling_window = self.config["anomaly_detection"].get(
@@ -345,14 +335,13 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
             # Calculate prediction errors
             if self.prediction_horizon == 1:
                 actual = sequences[:, -1, :]  # Last step
-                prediction_errors = np.mean(
-                    np.square(actual - predictions), axis=1)
+                prediction_errors = np.mean(np.square(actual - predictions), axis=1)
             else:
                 prediction_errors = []
                 for i in range(len(sequences)):
                     if i + self.prediction_horizon < len(sequences):
                         actual = sequences[
-                            i + 1: i + self.prediction_horizon + 1
+                            i + 1 : i + self.prediction_horizon + 1
                         ].flatten()
                         error = np.mean(np.square(actual - predictions[i]))
                         prediction_errors.append(error)
@@ -360,8 +349,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
 
             # Apply rolling window if requested
             if use_rolling_window and len(prediction_errors) > 1:
-                window_size = self.config["anomaly_detection"].get(
-                    "window_size", 10)
+                window_size = self.config["anomaly_detection"].get("window_size", 10)
                 smoothed_errors = self._apply_rolling_window(
                     prediction_errors, window_size
                 )
@@ -382,10 +370,8 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
                 )
 
             # Identify anomalies
-            anomaly_indices = np.where(
-                errors_to_use > self.prediction_threshold)[0]
-            normal_indices = np.where(
-                errors_to_use <= self.prediction_threshold)[0]
+            anomaly_indices = np.where(errors_to_use > self.prediction_threshold)[0]
+            normal_indices = np.where(errors_to_use <= self.prediction_threshold)[0]
 
             anomaly_analysis = {
                 "total_sequences": len(sequences),
@@ -420,8 +406,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
         if len(values) < window_size:
             return values
 
-        smoothed = np.convolve(values, np.ones(
-            window_size) / window_size, mode="valid")
+        smoothed = np.convolve(values, np.ones(window_size) / window_size, mode="valid")
         # Pad to maintain original length
         pad_size = len(values) - len(smoothed)
         padded = np.pad(smoothed, (pad_size, 0), mode="edge")
@@ -489,8 +474,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
     async def _load_model_weights(self, load_path: Path):
         """Load LSTM model weights"""
         try:
-            self.model = tf.keras.models.load_model(
-                load_path / "lstm_model.h5")
+            self.model = tf.keras.models.load_model(load_path / "lstm_model.h5")
 
             # Load threshold and statistics
             data_path = load_path / "lstm_detector_data.json"
@@ -499,8 +483,7 @@ class LSTMAnomalyDetector(BaseNeuralNetwork):
                     import json
 
                     model_data = json.load(f)
-                    self.prediction_threshold = model_data.get(
-                        "prediction_threshold")
+                    self.prediction_threshold = model_data.get("prediction_threshold")
                     normal_errors = model_data.get("normal_prediction_errors")
                     if normal_errors:
                         self.normal_prediction_errors = np.array(normal_errors)

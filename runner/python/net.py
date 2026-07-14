@@ -135,8 +135,7 @@ class EnhancedNetworkSecurityMonitor:
 
     def _assess_port_risk(self, port):
         """Assess security risk level for an open port"""
-        high_risk_ports = {21, 23, 1433, 3389,
-                           5900}  # FTP, Telnet, MSSQL, RDP, VNC
+        high_risk_ports = {21, 23, 1433, 3389, 5900}  # FTP, Telnet, MSSQL, RDP, VNC
         medium_risk_ports = {
             22,
             25,
@@ -165,8 +164,7 @@ class EnhancedNetworkSecurityMonitor:
                     conn_info = self._analyze_connection(conn)
                     if conn_info["suspicious"]:
                         suspicious_connections.append(conn_info)
-                        self.logger.warning(
-                            f"Suspicious connection: {conn_info}")
+                        self.logger.warning(f"Suspicious connection: {conn_info}")
 
             return suspicious_connections
 

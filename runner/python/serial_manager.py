@@ -1,6 +1,8 @@
 import os
-from config import WATCH_FOLDER, SERIAL_PREFIX
+
+from config import SERIAL_PREFIX, WATCH_FOLDER
 from logger import log
+
 
 def fix_serial(files):
 

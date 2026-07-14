@@ -71,7 +71,10 @@ def handle_arp(pkt):
             expected_mac = BLACKLIST[ip]
 
             if mac.lower() != expected_mac.lower():
-                log(f"MAC mismatch for {ip}! Possible spoofing. Got {mac}, expected {expected_mac}", "CRITICAL")
+                log(
+                    f"MAC mismatch for {ip}! Possible spoofing. Got {mac}, expected {expected_mac}",
+                    "CRITICAL",
+                )
                 alert(ip, mac)
                 block_ip(ip)
             else:

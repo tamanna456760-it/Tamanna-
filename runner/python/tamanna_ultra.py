@@ -1,10 +1,10 @@
-import os
-import json
-import time
 import hashlib
+import json
+import os
+import time
 import zipfile
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -31,11 +31,13 @@ drive = build("drive", "v3", credentials=creds)
 # ================= UTIL =================
 os.makedirs(ZIP_FOLDER, exist_ok=True)
 
+
 def log(msg):
     line = f"[{datetime.now()}] {msg}"
     print(line)
     with open(LOG_FILE, "a") as f:
         f.write(line + "\n")
+
 
 def sha256(path):
     h = hashlib.sha256()
@@ -44,11 +46,13 @@ def sha256(path):
             h.update(chunk)
     return h.hexdigest()
 
+
 def zip_file(src, rel):
     zip_path = os.path.join(ZIP_FOLDER, rel.replace("/", "_") + ".zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
         z.write(src, arcname=os.path.basename(src))
     return zip_path
+
 
 # ================= LOAD STATE =================
 if os.path.exists(STATE_FILE):
@@ -56,6 +60,7 @@ if os.path.exists(STATE_FILE):
         state = json.load(f)
 else:
     state = {}
+
 
 # ================= UPLOAD =================
 def upload_task(full_path, rel_path):
@@ -74,9 +79,7 @@ def upload_task(full_path, rel_path):
 
         media = MediaFileUpload(zip_path, resumable=True)
         drive.files().create(
-            body={"name": rel_path + ".zip"},
-            media_body=media,
-            fields="id"
+            body={"name": rel_path + ".zip"}, media_body=media, fields="id"
         ).execute()
 
         state[rel_path] = file_hash
@@ -84,6 +87,7 @@ def upload_task(full_path, rel_path):
 
     except Exception as e:
         log(f"❌ ERROR {rel_path}: {e}")
+
 
 # ================= MAIN LOOP =================
 log("🔥 TAMANNA ULTRA POWER MODE STARTED")

@@ -5,9 +5,7 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""SQL specific types.
-
-"""
+"""SQL specific types."""
 
 import codecs
 import datetime as dt
@@ -46,7 +44,6 @@ from ..util import pickle
 
 
 class _LookupExpressionAdapter(object):
-
     """Mixin expression adaptations based on lookup tables.
 
     These rules are currently used by the numeric, integer and date types
@@ -63,9 +60,9 @@ class _LookupExpressionAdapter(object):
 
         def _adapt_expression(self, op, other_comparator):
             othertype = other_comparator.type._type_affinity
-            lookup = self.type._expression_adaptations.get(
-                op, self._blank_dict
-            ).get(othertype, self.type)
+            lookup = self.type._expression_adaptations.get(op, self._blank_dict).get(
+                othertype, self.type
+            )
             if lookup is othertype:
                 return (op, other_comparator.type)
             elif lookup is self.type._type_affinity:
@@ -77,7 +74,6 @@ class _LookupExpressionAdapter(object):
 
 
 class Concatenable(object):
-
     """A mixin that marks a type as supporting 'concatenation',
     typically strings."""
 
@@ -124,7 +120,6 @@ class Indexable(object):
 
 
 class String(Concatenable, TypeEngine):
-
     """The base for all string and character types.
 
     In SQL, corresponds to VARCHAR.  Can also take Python unicode objects
@@ -318,10 +313,7 @@ class String(Concatenable, TypeEngine):
 
     def bind_processor(self, dialect):
         if self._expect_unicode or dialect.convert_unicode:
-            if (
-                dialect.supports_unicode_binds
-                and self._expect_unicode != "force"
-            ):
+            if dialect.supports_unicode_binds and self._expect_unicode != "force":
                 if self._warn_on_bytestring:
 
                     def process(value):
@@ -345,8 +337,7 @@ class String(Concatenable, TypeEngine):
                         return encoder(value, self._expect_unicode_error)[0]
                     elif warn_on_bytestring and value is not None:
                         util.warn_limited(
-                            "Unicode type received non-unicode bind "
-                            "param value %r.",
+                            "Unicode type received non-unicode bind " "param value %r.",
                             (util.ellipses_string(value),),
                         )
                     return value
@@ -405,7 +396,6 @@ class String(Concatenable, TypeEngine):
 
 
 class Text(String):
-
     """A variably sized string type.
 
     In SQL, usually corresponds to CLOB or TEXT. Can also take Python
@@ -420,7 +410,6 @@ class Text(String):
 
 
 class Unicode(String):
-
     """A variable length Unicode string type.
 
     The :class:`.Unicode` type is a :class:`.String` subclass that assumes
@@ -490,7 +479,6 @@ class Unicode(String):
 
 
 class UnicodeText(Text):
-
     """An unbounded-length Unicode string type.
 
     See :class:`.Unicode` for details on the unicode
@@ -522,7 +510,6 @@ class UnicodeText(Text):
 
 
 class Integer(_LookupExpressionAdapter, TypeEngine):
-
     """A type for ``int`` integers."""
 
     __visit_name__ = "integer"
@@ -562,7 +549,6 @@ class Integer(_LookupExpressionAdapter, TypeEngine):
 
 
 class SmallInteger(Integer):
-
     """A type for smaller ``int`` integers.
 
     Typically generates a ``SMALLINT`` in DDL, and otherwise acts like
@@ -574,7 +560,6 @@ class SmallInteger(Integer):
 
 
 class BigInteger(Integer):
-
     """A type for bigger ``int`` integers.
 
     Typically generates a ``BIGINT`` in DDL, and otherwise acts like
@@ -586,7 +571,6 @@ class BigInteger(Integer):
 
 
 class Numeric(_LookupExpressionAdapter, TypeEngine):
-
     """Base for non-integer numeric types, such as
     ``NUMERIC``, ``FLOAT``, ``DECIMAL``, and other variants.
 
@@ -726,9 +710,11 @@ class Numeric(_LookupExpressionAdapter, TypeEngine):
                 # we're a "numeric", DBAPI returns floats, convert.
                 return processors.to_decimal_processor_factory(
                     decimal.Decimal,
-                    self.scale
-                    if self.scale is not None
-                    else self._default_decimal_return_scale,
+                    (
+                        self.scale
+                        if self.scale is not None
+                        else self._default_decimal_return_scale
+                    ),
                 )
         else:
             if dialect.supports_native_decimal:
@@ -755,7 +741,6 @@ class Numeric(_LookupExpressionAdapter, TypeEngine):
 
 
 class Float(Numeric):
-
     """Type representing floating point types, such as ``FLOAT`` or ``REAL``.
 
     This type returns Python ``float`` objects by default, unless the
@@ -769,9 +754,7 @@ class Float(Numeric):
 
     scale = None
 
-    def __init__(
-        self, precision=None, asdecimal=False, decimal_return_scale=None
-    ):
+    def __init__(self, precision=None, asdecimal=False, decimal_return_scale=None):
         r"""
         Construct a Float.
 
@@ -810,7 +793,6 @@ class Float(Numeric):
 
 
 class DateTime(_LookupExpressionAdapter, TypeEngine):
-
     """A type for ``datetime.datetime()`` objects.
 
     Date and time types return objects from the Python ``datetime``
@@ -872,7 +854,6 @@ class DateTime(_LookupExpressionAdapter, TypeEngine):
 
 
 class Date(_LookupExpressionAdapter, TypeEngine):
-
     """A type for ``datetime.date()`` objects."""
 
     __visit_name__ = "date"
@@ -910,7 +891,6 @@ class Date(_LookupExpressionAdapter, TypeEngine):
 
 
 class Time(_LookupExpressionAdapter, TypeEngine):
-
     """A type for ``datetime.time()`` objects."""
 
     __visit_name__ = "time"
@@ -944,7 +924,6 @@ class Time(_LookupExpressionAdapter, TypeEngine):
 
 
 class _Binary(TypeEngine):
-
     """Define base behavior for binary types."""
 
     def __init__(self, length=None):
@@ -1008,7 +987,6 @@ class _Binary(TypeEngine):
 
 
 class LargeBinary(_Binary):
-
     """A type for large binary byte data.
 
     The :class:`.LargeBinary` type corresponds to a large and/or unlengthed
@@ -1032,7 +1010,6 @@ class LargeBinary(_Binary):
 
 
 class SchemaType(SchemaEventTarget):
-
     """Mark a type as possibly requiring schema-level DDL for usage.
 
     Supports types that must be explicitly created/dropped (i.e. PG ENUM type)
@@ -1220,9 +1197,7 @@ class SchemaType(SchemaEventTarget):
         # since PostgreSQL is the only DB that has ARRAY this can only
         # be integration tested by PG-specific tests
         def _we_are_the_impl(typ):
-            return (
-                typ is self or isinstance(typ, ARRAY) and typ.item_type is self
-            )
+            return typ is self or isinstance(typ, ARRAY) and typ.item_type is self
 
         if dialect.name in variant_mapping and _we_are_the_impl(
             variant_mapping[dialect.name]
@@ -1526,9 +1501,7 @@ class Enum(Emulated, String, SchemaType):
 
         self._valid_lookup[None] = self._object_lookup[None] = None
 
-        super(Enum, self).__init__(
-            length=length, _expect_unicode=_expect_unicode
-        )
+        super(Enum, self).__init__(length=length, _expect_unicode=_expect_unicode)
 
         if self.enum_class:
             kw.setdefault("name", self.enum_class.__name__.lower())
@@ -1613,9 +1586,7 @@ class Enum(Emulated, String, SchemaType):
             # here between an INSERT statement and a criteria used in a SELECT,
             # for now we're staying conservative w/ behavioral changes (perhaps
             # someone has a trigger that handles strings on INSERT)
-            if not self.validate_strings and isinstance(
-                elem, compat.string_types
-            ):
+            if not self.validate_strings and isinstance(elem, compat.string_types):
                 return elem
             else:
                 util.raise_(
@@ -1711,9 +1682,7 @@ class Enum(Emulated, String, SchemaType):
     def _should_create_constraint(self, compiler, **kw):
         if not self._is_impl_for_variant(compiler.dialect, kw):
             return False
-        return (
-            not self.native_enum or not compiler.dialect.supports_native_enum
-        )
+        return not self.native_enum or not compiler.dialect.supports_native_enum
 
     @util.preload_module("sqlalchemy.sql.schema")
     def _set_table(self, column, table):
@@ -1884,7 +1853,6 @@ class PickleType(TypeDecorator):
 
 
 class Boolean(Emulated, TypeEngine, SchemaType):
-
     """A bool datatype.
 
     :class:`.Boolean` typically uses BOOLEAN or SMALLINT on the DDL side,
@@ -1906,9 +1874,7 @@ class Boolean(Emulated, TypeEngine, SchemaType):
     __visit_name__ = "boolean"
     native = True
 
-    def __init__(
-        self, create_constraint=False, name=None, _create_events=True
-    ):
+    def __init__(self, create_constraint=False, name=None, _create_events=True):
         """Construct a Boolean.
 
         :param create_constraint: defaults to False.  If the boolean
@@ -1972,9 +1938,7 @@ class Boolean(Emulated, TypeEngine, SchemaType):
             if not isinstance(value, int):
                 raise TypeError("Not a boolean value: %r" % (value,))
             else:
-                raise ValueError(
-                    "Value %r is not None, True, or False" % (value,)
-                )
+                raise ValueError("Value %r is not None, True, or False" % (value,))
         return value
 
     def literal_processor(self, dialect):
@@ -2038,7 +2002,6 @@ class _AbstractInterval(_LookupExpressionAdapter, TypeEngine):
 
 
 class Interval(Emulated, _AbstractInterval, TypeDecorator):
-
     """A type for ``datetime.timedelta()`` objects.
 
     The Interval type deals with ``datetime.timedelta`` objects.  In
@@ -2497,9 +2460,11 @@ class JSON(Indexable, TypeEngine):
                     index,
                     expr=self.expr,
                     operator=operators.json_getitem_op,
-                    bindparam_type=JSON.JSONIntIndexType
-                    if isinstance(index, int)
-                    else JSON.JSONStrIndexType,
+                    bindparam_type=(
+                        JSON.JSONIntIndexType
+                        if isinstance(index, int)
+                        else JSON.JSONStrIndexType
+                    ),
                 )
                 operator = operators.json_getitem_op
 
@@ -2616,8 +2581,7 @@ class JSON(Indexable, TypeEngine):
             ):
                 raise exc.InvalidRequestError(
                     "The JSON cast operator JSON.%s() only works with a JSON "
-                    "index expression e.g. col['q'].%s()"
-                    % (method_name, method_name)
+                    "index expression e.g. col['q'].%s()" % (method_name, method_name)
                 )
             expr = self.expr._clone()
             expr.type = typ
@@ -2779,7 +2743,6 @@ class ARRAY(SchemaEventTarget, Indexable, Concatenable, TypeEngine):
     on the SQL expression side."""
 
     class Comparator(Indexable.Comparator, Concatenable.Comparator):
-
         """Define comparison operations for :class:`_types.ARRAY`.
 
         More operators are available on the dialect-specific form
@@ -2792,9 +2755,7 @@ class ARRAY(SchemaEventTarget, Indexable, Concatenable, TypeEngine):
                 return_type = self.type
                 if self.type.zero_indexes:
                     index = slice(index.start + 1, index.stop + 1, index.step)
-                slice_ = Slice(
-                    index.start, index.stop, index.step, _name=self.expr.key
-                )
+                slice_ = Slice(index.start, index.stop, index.step, _name=self.expr.key)
                 return operators.getitem, slice_, return_type
             else:
                 if self.type.zero_indexes:
@@ -2803,9 +2764,7 @@ class ARRAY(SchemaEventTarget, Indexable, Concatenable, TypeEngine):
                     return_type = self.type.item_type
                 else:
                     adapt_kw = {"dimensions": self.type.dimensions - 1}
-                    return_type = self.type.adapt(
-                        self.type.__class__, **adapt_kw
-                    )
+                    return_type = self.type.adapt(self.type.__class__, **adapt_kw)
 
                 return operators.getitem, index, return_type
 
@@ -2921,9 +2880,7 @@ class ARRAY(SchemaEventTarget, Indexable, Concatenable, TypeEngine):
 
     comparator_factory = Comparator
 
-    def __init__(
-        self, item_type, as_tuple=False, dimensions=None, zero_indexes=False
-    ):
+    def __init__(self, item_type, as_tuple=False, dimensions=None, zero_indexes=False):
         """Construct an :class:`_types.ARRAY`.
 
         E.g.::
@@ -3024,35 +2981,30 @@ class TupleType(TypeEngine):
 
 
 class REAL(Float):
-
     """The SQL REAL type."""
 
     __visit_name__ = "REAL"
 
 
 class FLOAT(Float):
-
     """The SQL FLOAT type."""
 
     __visit_name__ = "FLOAT"
 
 
 class NUMERIC(Numeric):
-
     """The SQL NUMERIC type."""
 
     __visit_name__ = "NUMERIC"
 
 
 class DECIMAL(Numeric):
-
     """The SQL DECIMAL type."""
 
     __visit_name__ = "DECIMAL"
 
 
 class INTEGER(Integer):
-
     """The SQL INT or INTEGER type."""
 
     __visit_name__ = "INTEGER"
@@ -3062,21 +3014,18 @@ INT = INTEGER
 
 
 class SMALLINT(SmallInteger):
-
     """The SQL SMALLINT type."""
 
     __visit_name__ = "SMALLINT"
 
 
 class BIGINT(BigInteger):
-
     """The SQL BIGINT type."""
 
     __visit_name__ = "BIGINT"
 
 
 class TIMESTAMP(DateTime):
-
     """The SQL TIMESTAMP type.
 
     :class:`_types.TIMESTAMP` datatypes have support for timezone
@@ -3106,35 +3055,30 @@ class TIMESTAMP(DateTime):
 
 
 class DATETIME(DateTime):
-
     """The SQL DATETIME type."""
 
     __visit_name__ = "DATETIME"
 
 
 class DATE(Date):
-
     """The SQL DATE type."""
 
     __visit_name__ = "DATE"
 
 
 class TIME(Time):
-
     """The SQL TIME type."""
 
     __visit_name__ = "TIME"
 
 
 class TEXT(Text):
-
     """The SQL TEXT type."""
 
     __visit_name__ = "TEXT"
 
 
 class CLOB(Text):
-
     """The CLOB type.
 
     This type is found in Oracle and Informix.
@@ -3144,63 +3088,54 @@ class CLOB(Text):
 
 
 class VARCHAR(String):
-
     """The SQL VARCHAR type."""
 
     __visit_name__ = "VARCHAR"
 
 
 class NVARCHAR(Unicode):
-
     """The SQL NVARCHAR type."""
 
     __visit_name__ = "NVARCHAR"
 
 
 class CHAR(String):
-
     """The SQL CHAR type."""
 
     __visit_name__ = "CHAR"
 
 
 class NCHAR(Unicode):
-
     """The SQL NCHAR type."""
 
     __visit_name__ = "NCHAR"
 
 
 class BLOB(LargeBinary):
-
     """The SQL BLOB type."""
 
     __visit_name__ = "BLOB"
 
 
 class BINARY(_Binary):
-
     """The SQL BINARY type."""
 
     __visit_name__ = "BINARY"
 
 
 class VARBINARY(_Binary):
-
     """The SQL VARBINARY type."""
 
     __visit_name__ = "VARBINARY"
 
 
 class BOOLEAN(Boolean):
-
     """The SQL BOOLEAN type."""
 
     __visit_name__ = "BOOLEAN"
 
 
 class NullType(TypeEngine):
-
     """An unknown type.
 
     :class:`.NullType` is used as a default type for those cases where
@@ -3261,8 +3196,7 @@ class TableValueType(HasCacheKey, TypeEngine):
 
     def __init__(self, *elements):
         self._elements = [
-            coercions.expect(roles.StrAsPlainColumnRole, elem)
-            for elem in elements
+            coercions.expect(roles.StrAsPlainColumnRole, elem) for elem in elements
         ]
 
 

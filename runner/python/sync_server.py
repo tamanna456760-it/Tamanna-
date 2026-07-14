@@ -50,10 +50,8 @@ def run_sync_server(controller=None):
         if key.startswith("module."):
             mname = key.split(".", 1)[1]
             enabled = value.get("enabled") if isinstance(value, dict) else None
-            metadata = value.get("metadata") if isinstance(
-                value, dict) else None
-            m = controller.set_module(
-                mname, enabled=enabled, metadata=metadata)
+            metadata = value.get("metadata") if isinstance(value, dict) else None
+            m = controller.set_module(mname, enabled=enabled, metadata=metadata)
             if not m:
                 return jsonify({"error": "module_not_found"}), 404
             return jsonify({"synced": True, "module": m})

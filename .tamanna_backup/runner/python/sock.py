@@ -38,8 +38,7 @@ class BaseSocket(object):
 
     def set_options(self, sock, bound=False):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        if (self.conf.reuse_port
-            and hasattr(socket, 'SO_REUSEPORT')):  # pragma: no cover
+        if self.conf.reuse_port and hasattr(socket, "SO_REUSEPORT"):  # pragma: no cover
             try:
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             except socket.error as err:
@@ -94,7 +93,7 @@ class TCP6Socket(TCPSocket):
     FAMILY = socket.AF_INET6
 
     def __str__(self):
-        (host, port, _, _) = self.sock.getsockname()
+        host, port, _, _ = self.sock.getsockname()
         return "http://[%s]:%d" % (host, port)
 
 

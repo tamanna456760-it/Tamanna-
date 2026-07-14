@@ -75,8 +75,7 @@ def main():
         if rel_root == ".":
             rel_root = ""
         # Apply exclude filter to dirs
-        dirs[:] = [d for d in dirs if should_include(
-            os.path.join(rel_root, d))]
+        dirs[:] = [d for d in dirs if should_include(os.path.join(rel_root, d))]
         for name in files:
             relpath = os.path.join(rel_root, name)
             if not should_include(relpath):

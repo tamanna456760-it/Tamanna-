@@ -1,18 +1,11 @@
 # detector/emotion_detector.py
 
-import cv2
-import numpy as np
 import os
 
-EMOTIONS = [
-    "Angry",
-    "Disgust",
-    "Fear",
-    "Happy",
-    "Sad",
-    "Surprise",
-    "Neutral"
-]
+import cv2
+import numpy as np
+
+EMOTIONS = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
 
 
 class EmotionDetector:
@@ -20,7 +13,7 @@ class EmotionDetector:
     def __init__(
         self,
         cascade_path="models/haarcascade_frontalface_default.xml",
-        model_path="models/emotion.onnx"
+        model_path="models/emotion.onnx",
     ):
 
         self.face_detector = cv2.CascadeClassifier(cascade_path)
@@ -40,29 +33,23 @@ class EmotionDetector:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         faces = self.face_detector.detectMultiScale(
-            gray,
-            scaleFactor=1.1,
-            minNeighbors=5
+            gray, scaleFactor=1.1, minNeighbors=5
         )
 
         results = []
 
-        for (x, y, w, h) in faces:
+        for x, y, w, h in faces:
 
             emotion = "Unknown"
             confidence = 0.0
 
             if self.model is not None:
 
-                face = gray[y:y+h, x:x+w]
+                face = gray[y : y + h, x : x + w]
 
                 face = cv2.resize(face, (64, 64))
 
-                blob = cv2.dnn.blobFromImage(
-                    face,
-                    scalefactor=1/255.0,
-                    size=(64,64)
-                )
+                blob = cv2.dnn.blobFromImage(face, scalefactor=1 / 255.0, size=(64, 64))
 
                 self.model.setInput(blob)
 
@@ -74,29 +61,21 @@ class EmotionDetector:
 
                 confidence = float(prediction[idx])
 
-            cv2.rectangle(
-                image,
-                (x, y),
-                (x+w, y+h),
-                (0,255,0),
-                2
-            )
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             cv2.putText(
                 image,
                 emotion,
-                (x, y-10),
+                (x, y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.7,
-                (0,255,0),
-                2
+                (0, 255, 0),
+                2,
             )
 
-            results.append({
-                "emotion": emotion,
-                "confidence": confidence,
-                "box": [x, y, w, h]
-            })
+            results.append(
+                {"emotion": emotion, "confidence": confidence, "box": [x, y, w, h]}
+            )
 
         os.makedirs("static/uploads", exist_ok=True)
 
@@ -104,11 +83,7 @@ class EmotionDetector:
 
         cv2.imwrite(output, image)
 
-        return {
-            "faces": len(results),
-            "results": results,
-            "output": output
-        }
+        return {"faces": len(results), "results": results, "output": output}
 
 
 if __name__ == "__main__":

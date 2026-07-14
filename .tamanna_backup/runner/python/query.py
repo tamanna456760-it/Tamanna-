@@ -18,6 +18,7 @@ ORM session, whereas the ``Select`` construct interacts directly with the
 database to return iterable result sets.
 
 """
+
 import itertools
 import operator
 import types
@@ -83,7 +84,6 @@ class Query(
     HasHints,
     Executable,
 ):
-
     """ORM-level SQL construction object.
 
     :class:`_query.Query`
@@ -130,9 +130,7 @@ class Query(
 
     _compile_options = ORMCompileState.default_compile_options
 
-    load_options = QueryContext.default_load_options + {
-        "_legacy_uniquing": True
-    }
+    load_options = QueryContext.default_load_options + {"_legacy_uniquing": True}
 
     _params = util.EMPTY_DICT
 
@@ -221,8 +219,7 @@ class Query(
             or not self._raw_columns[0].is_selectable
         ):
             raise sa_exc.InvalidRequestError(
-                "%s() can only be used against "
-                "a single mapped class." % methname
+                "%s() can only be used against " "a single mapped class." % methname
             )
 
         return self._raw_columns[0]._annotations["parententity"]
@@ -246,9 +243,7 @@ class Query(
         self.load_options += {"_lazy_loaded_from": state}
 
     def _get_condition(self):
-        return self._no_criterion_condition(
-            "get", order_by=False, distinct=False
-        )
+        return self._no_criterion_condition("get", order_by=False, distinct=False)
 
     def _get_existing_condition(self):
         self._no_criterion_assertion("get", order_by=False, distinct=False)
@@ -268,8 +263,7 @@ class Query(
             or (distinct and self._distinct)
         ):
             raise sa_exc.InvalidRequestError(
-                "Query.%s() being called on a "
-                "Query with existing criterion. " % meth
+                "Query.%s() being called on a " "Query with existing criterion. " % meth
             )
 
     def _no_criterion_condition(self, meth, order_by=True, distinct=True):
@@ -288,8 +282,7 @@ class Query(
             return
         if self._order_by_clauses:
             raise sa_exc.InvalidRequestError(
-                "Query.%s() being called on a "
-                "Query with existing criterion. " % meth
+                "Query.%s() being called on a " "Query with existing criterion. " % meth
             )
         self._no_criterion_condition(meth)
 
@@ -317,9 +310,7 @@ class Query(
 
     @property
     def _has_row_limiting_clause(self):
-        return (
-            self._limit_clause is not None or self._offset_clause is not None
-        )
+        return self._limit_clause is not None or self._offset_clause is not None
 
     def _get_options(
         self,
@@ -411,9 +402,7 @@ class Query(
 
         q = self._clone()
 
-        return q._compile_state(
-            use_legacy_query_style=legacy_query_style
-        ).statement
+        return q._compile_state(use_legacy_query_style=legacy_query_style).statement
 
     def _statement_20(self, for_statement=False, use_legacy_query_style=True):
         # TODO: this event needs to be deprecated, as it currently applies
@@ -684,8 +673,7 @@ class Query(
 
     @util.deprecated_20(
         ":meth:`_orm.Query.with_labels` and :meth:`_orm.Query.apply_labels`",
-        alternative="Use set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL) "
-        "instead.",
+        alternative="Use set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL) " "instead.",
     )
     def with_labels(self):
         return self.set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL)
@@ -790,9 +778,7 @@ class Query(
         ":meth:`_orm.Query.with_polymorphic`",
         alternative="Use the orm.with_polymorphic() standalone function",
     )
-    def with_polymorphic(
-        self, cls_or_mappers, selectable=None, polymorphic_on=None
-    ):
+    def with_polymorphic(self, cls_or_mappers, selectable=None, polymorphic_on=None):
         """Load columns for inheriting classes.
 
         This is a legacy method which is replaced by the
@@ -1837,8 +1823,7 @@ class Query(
             self._order_by_clauses = ()
         else:
             criterion = tuple(
-                coercions.expect(roles.OrderByRole, clause)
-                for clause in clauses
+                coercions.expect(roles.OrderByRole, clause) for clause in clauses
             )
             # legacy vvvvvvvvvvvvvvvvvvvvvvvvvvv
             if self._aliased_generation:
@@ -1880,8 +1865,7 @@ class Query(
             self._group_by_clauses = ()
         else:
             criterion = tuple(
-                coercions.expect(roles.GroupByRole, clause)
-                for clause in clauses
+                coercions.expect(roles.GroupByRole, clause) for clause in clauses
             )
             # legacy vvvvvvvvvvvvvvvvvvvvvvvvvvv
             if self._aliased_generation:
@@ -2327,9 +2311,7 @@ class Query(
             )
 
         if kwargs:
-            raise TypeError(
-                "unknown arguments: %s" % ", ".join(sorted(kwargs))
-            )
+            raise TypeError("unknown arguments: %s" % ", ".join(sorted(kwargs)))
 
         # legacy vvvvvvvvvvvvvvvvvvvvvvvvvvv
         if not from_joinpoint:
@@ -2400,16 +2382,20 @@ class Query(
         if self._aliased_generation:
             _props = [
                 (
-                    prop[0],
-                    sql_util._deep_annotate(
-                        prop[1],
-                        {"aliased_generation": self._aliased_generation},
+                    (
+                        prop[0],
+                        (
+                            sql_util._deep_annotate(
+                                prop[1],
+                                {"aliased_generation": self._aliased_generation},
+                            )
+                            if isinstance(prop[1], expression.ClauseElement)
+                            else prop[1]
+                        ),
                     )
-                    if isinstance(prop[1], expression.ClauseElement)
-                    else prop[1],
+                    if len(prop) == 2
+                    else prop
                 )
-                if len(prop) == 2
-                else prop
                 for prop in _props
             ]
 
@@ -2424,12 +2410,14 @@ class Query(
                     apply_propagate_attrs=self,
                 ),
                 (
-                    coercions.expect(roles.OnClauseRole, prop[1], legacy=True)
-                    #                    if not isinstance(prop[1], str)
-                    #                    else prop[1]
-                )
-                if len(prop) == 2
-                else None,
+                    (
+                        coercions.expect(roles.OnClauseRole, prop[1], legacy=True)
+                        #                    if not isinstance(prop[1], str)
+                        #                    else prop[1]
+                    )
+                    if len(prop) == 2
+                    else None
+                ),
                 None,
                 {
                     "isouter": isouter,
@@ -3325,9 +3313,7 @@ class Query(
         # ORMSelectCompileState.  We could also base this on
         # query._statement is not None as we have the ORM Query here
         # however this is the more general path.
-        compile_state_cls = ORMCompileState._get_plugin_class_for_plugin(
-            stmt, "orm"
-        )
+        compile_state_cls = ORMCompileState._get_plugin_class_for_plugin(stmt, "orm")
 
         return compile_state_cls.create_for_statement(stmt, None)
 
@@ -3383,16 +3369,13 @@ class FromStatement(GroupedElement, SelectBase, Executable):
         return self._label_style
 
     def set_label_style(self, label_style):
-        return SelectStatementGrouping(
-            self.element.set_label_style(label_style)
-        )
+        return SelectStatementGrouping(self.element.set_label_style(label_style))
 
     @property
     def _label_style(self):
         return self.element._label_style
 
     def _compiler_dispatch(self, compiler, **kw):
-
         """provide a fixed _compiler_dispatch method.
 
         This is roughly similar to using the sqlalchemy.ext.compiler

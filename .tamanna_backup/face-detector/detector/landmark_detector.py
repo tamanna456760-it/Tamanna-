@@ -1,8 +1,9 @@
 # detector/landmark_detector.py
 
+import os
+
 import cv2
 import mediapipe as mp
-import os
 
 mp_face_mesh = mp.solutions.face_mesh
 
@@ -42,18 +43,9 @@ class LandmarkDetector:
                     x = int(point.x * w)
                     y = int(point.y * h)
 
-                    landmarks.append({
-                        "x": x,
-                        "y": y
-                    })
+                    landmarks.append({"x": x, "y": y})
 
-                    cv2.circle(
-                        image,
-                        (x, y),
-                        1,
-                        (0, 255, 0),
-                        -1
-                    )
+                    cv2.circle(image, (x, y), 1, (0, 255, 0), -1)
 
                 faces.append(landmarks)
 
@@ -61,11 +53,7 @@ class LandmarkDetector:
 
         cv2.imwrite(output_path, image)
 
-        return {
-            "face_count": len(faces),
-            "landmarks": faces,
-            "output": output_path
-        }
+        return {"face_count": len(faces), "landmarks": faces, "output": output_path}
 
 
 if __name__ == "__main__":

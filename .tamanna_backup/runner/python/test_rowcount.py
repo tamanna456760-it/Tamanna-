@@ -1,13 +1,6 @@
-from sqlalchemy import bindparam
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import select
-from sqlalchemy import String
-from sqlalchemy import Table
-from sqlalchemy import testing
-from sqlalchemy import text
-from sqlalchemy.testing import eq_
-from sqlalchemy.testing import fixtures
+from sqlalchemy import (Column, Integer, String, Table, bindparam, select,
+                        testing, text)
+from sqlalchemy.testing import eq_, fixtures
 
 
 class RowCountTest(fixtures.TablesTest):
@@ -56,9 +49,9 @@ class RowCountTest(fixtures.TablesTest):
 
     def test_basic(self, connection):
         employees_table = self.tables.employees
-        s = select(
-            employees_table.c.name, employees_table.c.department
-        ).order_by(employees_table.c.employee_id)
+        s = select(employees_table.c.name, employees_table.c.department).order_by(
+            employees_table.c.employee_id
+        )
         rows = connection.execute(s).fetchall()
 
         eq_(rows, self.data)
@@ -120,9 +113,7 @@ class RowCountTest(fixtures.TablesTest):
 
         # WHERE matches 3, 3 rows deleted
         department = employees_table.c.department
-        r = connection.execute(
-            employees_table.delete().where(department == "C")
-        )
+        r = connection.execute(employees_table.delete().where(department == "C"))
         eq_(r.rowcount, 3)
 
     @testing.requires.sane_multi_rowcount

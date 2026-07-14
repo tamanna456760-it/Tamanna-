@@ -4,9 +4,10 @@ class ResponseEngine:
         responses = {
             "status": "System is running",
             "backup": "Backup initiated",
-            "error": "Fixing missing code..."
+            "error": "Fixing missing code...",
         }
         return responses.get(query, "Unknown command")
+
 
 if __name__ == "__main__":
     engine = ResponseEngine()

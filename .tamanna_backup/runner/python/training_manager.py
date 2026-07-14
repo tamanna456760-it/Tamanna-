@@ -71,8 +71,7 @@ class TrainingDataManager:
                             dataset_info["created_date"]
                         ),
                         source=dataset_info["source"],
-                        preprocessing_steps=dataset_info.get(
-                            "preprocessing_steps", []),
+                        preprocessing_steps=dataset_info.get("preprocessing_steps", []),
                         metadata=dataset_info.get("metadata", {}),
                     )
 
@@ -81,8 +80,7 @@ class TrainingDataManager:
         Register a new dataset
         """
         try:
-            dataset_id = dataset_config.get(
-                "dataset_id", f"DS_{uuid.uuid4().hex[:8]}")
+            dataset_id = dataset_config.get("dataset_id", f"DS_{uuid.uuid4().hex[:8]}")
 
             dataset_info = DatasetInfo(
                 dataset_id=dataset_id,
@@ -132,8 +130,7 @@ class TrainingDataManager:
                 if raw_file.exists():
                     df = pd.read_csv(raw_file)
                 else:
-                    raise FileNotFoundError(
-                        f"Dataset file not found: {dataset_id}")
+                    raise FileNotFoundError(f"Dataset file not found: {dataset_id}")
 
             # Split data if requested
             if split != "all" and dataset_info.target_column:
@@ -143,7 +140,7 @@ class TrainingDataManager:
                 if split == "train":
                     return X.iloc[: int(0.8 * len(X))], y.iloc[: int(0.8 * len(y))]
                 elif split == "test":
-                    return X.iloc[int(0.8 * len(X)):], y.iloc[int(0.8 * len(y)):]
+                    return X.iloc[int(0.8 * len(X)) :], y.iloc[int(0.8 * len(y)) :]
                 else:
                     return X, y
             else:

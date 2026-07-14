@@ -1,4 +1,3 @@
-cat > tamanna_runner.sh << 'EOF'
 #!/bin/sh
 # =========================
 # TAMANNA UNIVERSAL TERMINAL RUNNER
@@ -59,4 +58,3 @@ done
 
 echo "==== RUN COMPLETE ====" | tee -a "$LOG"
 echo "Check log: $LOG"
-EOF

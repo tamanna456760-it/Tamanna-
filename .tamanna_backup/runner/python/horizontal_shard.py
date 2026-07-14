@@ -89,9 +89,7 @@ class ShardedSession(Session):
         query_chooser = kwargs.pop("query_chooser", None)
         super(ShardedSession, self).__init__(query_cls=query_cls, **kwargs)
 
-        event.listen(
-            self, "do_orm_execute", execute_and_instances, retval=True
-        )
+        event.listen(self, "do_orm_execute", execute_and_instances, retval=True)
         self.shard_chooser = shard_chooser
         self.id_chooser = id_chooser
 
@@ -103,8 +101,7 @@ class ShardedSession(Session):
             )
             if execute_chooser:
                 raise exc.ArgumentError(
-                    "Can't pass query_chooser and execute_chooser "
-                    "at the same time."
+                    "Can't pass query_chooser and execute_chooser " "at the same time."
                 )
 
             def execute_chooser(orm_context):
@@ -138,10 +135,7 @@ class ShardedSession(Session):
 
         if identity_token is not None:
             return super(ShardedSession, self)._identity_lookup(
-                mapper,
-                primary_key_identity,
-                identity_token=identity_token,
-                **kw
+                mapper, primary_key_identity, identity_token=identity_token, **kw
             )
         else:
             q = self.query(mapper)
@@ -175,9 +169,7 @@ class ShardedSession(Session):
             state.identity_token = shard_id
         return shard_id
 
-    def connection_callable(
-        self, mapper=None, instance=None, shard_id=None, **kwargs
-    ):
+    def connection_callable(self, mapper=None, instance=None, shard_id=None, **kwargs):
         """Provide a :class:`_engine.Connection` to use in the unit of work
         flush process.
 
@@ -189,17 +181,13 @@ class ShardedSession(Session):
         if self.in_transaction():
             return self.get_transaction().connection(mapper, shard_id=shard_id)
         else:
-            return self.get_bind(
-                mapper, shard_id=shard_id, instance=instance
-            ).connect(**kwargs)
-
-    def get_bind(
-        self, mapper=None, shard_id=None, instance=None, clause=None, **kw
-    ):
-        if shard_id is None:
-            shard_id = self._choose_shard_and_assign(
-                mapper, instance, clause=clause
+            return self.get_bind(mapper, shard_id=shard_id, instance=instance).connect(
+                **kwargs
             )
+
+    def get_bind(self, mapper=None, shard_id=None, instance=None, clause=None, **kw):
+        if shard_id is None:
+            shard_id = self._choose_shard_and_assign(mapper, instance, clause=clause)
         return self.__binds[shard_id]
 
     def bind_shard(self, shard_id, bind):

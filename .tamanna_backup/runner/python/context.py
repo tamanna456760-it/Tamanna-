@@ -126,8 +126,7 @@ class QueryContext(object):
             # those just need to be present as they are
             uncached_o
             for uncached_o in statement._with_options
-            if uncached_o.propagate_to_loaders
-            and not uncached_o._is_compile_state
+            if uncached_o.propagate_to_loaders and not uncached_o._is_compile_state
         }
 
         self.attributes = dict(compile_state.attributes)
@@ -361,15 +360,12 @@ class ORMCompileState(CompileState):
         with_entities(), with_only_columns()
 
         """
-        return [
-            ent for ent in self._entities if isinstance(ent, _MapperEntity)
-        ]
+        return [ent for ent in self._entities if isinstance(ent, _MapperEntity)]
 
     def _create_with_polymorphic_adapter(self, ext_info, selectable):
         if (
             not ext_info.is_aliased_class
-            and ext_info.mapper.persist_selectable
-            not in self._polymorphic_adapters
+            and ext_info.mapper.persist_selectable not in self._polymorphic_adapters
         ):
             for mp in ext_info.mapper.iterate_to_root():
                 self._mapper_loads_polymorphically_with(
@@ -385,9 +381,7 @@ class ORMCompileState(CompileState):
 
     @classmethod
     def _create_entities_collection(cls, query, legacy):
-        raise NotImplementedError(
-            "this method only works for ORMSelectCompileState"
-        )
+        raise NotImplementedError("this method only works for ORMSelectCompileState")
 
 
 @sql.base.CompileState.plugin_for("orm", "orm_from_statement")
@@ -436,16 +430,16 @@ class ORMFromStatementCompileState(ORMCompileState):
             and not statement.is_dml
             and statement._label_style is LABEL_STYLE_NONE
         ):
-            self.statement = statement.set_label_style(
-                LABEL_STYLE_TABLENAME_PLUS_COL
-            )
+            self.statement = statement.set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL)
         else:
             self.statement = statement
 
         self._label_convention = self._column_naming_convention(
-            statement._label_style
-            if not statement._is_textual and not statement.is_dml
-            else LABEL_STYLE_NONE,
+            (
+                statement._label_style
+                if not statement._is_textual and not statement.is_dml
+                else LABEL_STYLE_NONE
+            ),
             self.use_legacy_query_style,
         )
 
@@ -482,9 +476,7 @@ class ORMFromStatementCompileState(ORMCompileState):
 
         self.order_by = None
 
-        if isinstance(
-            self.statement, (expression.TextClause, expression.UpdateBase)
-        ):
+        if isinstance(self.statement, (expression.TextClause, expression.UpdateBase)):
 
             self.extra_criteria_entities = {}
 
@@ -544,30 +536,23 @@ class _AdHocColumnsStatement(ClauseElement):
     def _gen_cache_key(self, anon_map, bindparams):
         raise NotImplementedError()
 
-    def _compiler_dispatch(
-        self, compiler, compound_index=None, asfrom=False, **kw
-    ):
+    def _compiler_dispatch(self, compiler, compound_index=None, asfrom=False, **kw):
         """provide a fixed _compiler_dispatch method."""
 
         toplevel = not compiler.stack
-        entry = (
-            compiler._default_stack_entry if toplevel else compiler.stack[-1]
-        )
+        entry = compiler._default_stack_entry if toplevel else compiler.stack[-1]
 
         populate_result_map = (
             toplevel
             # these two might not be needed
             or (
-                compound_index == 0
-                and entry.get("need_result_map_for_compound", False)
+                compound_index == 0 and entry.get("need_result_map_for_compound", False)
             )
             or entry.get("need_result_map_for_nested", False)
         )
 
         if populate_result_map:
-            compiler._ordered_columns = (
-                compiler._textual_ordered_columns
-            ) = False
+            compiler._ordered_columns = compiler._textual_ordered_columns = False
 
             # enable looser result column matching.  this is shown to be
             # needed by test_query.py::TextTest
@@ -688,9 +673,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                     [],
                     is_current_entities=False,
                 )
-                for memoized_entities in (
-                    select_statement._memoized_select_entities
-                )
+                for memoized_entities in (select_statement._memoized_select_entities)
             }
 
         _QueryEntity.to_compile_state(
@@ -705,23 +688,18 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         self.eager_order_by = ()
 
         if toplevel and (
-            select_statement._with_options
-            or select_statement._memoized_select_entities
+            select_statement._with_options or select_statement._memoized_select_entities
         ):
             self.attributes = {"_unbound_load_dedupes": set()}
 
-            for (
-                memoized_entities
-            ) in select_statement._memoized_select_entities:
+            for memoized_entities in select_statement._memoized_select_entities:
                 for opt in memoized_entities._with_options:
                     if opt._is_compile_state:
                         opt.process_compile_state_replaced_entities(
                             self,
                             [
                                 ent
-                                for ent in self._memoized_entities[
-                                    memoized_entities
-                                ]
+                                for ent in self._memoized_entities[memoized_entities]
                                 if isinstance(ent, _MapperEntity)
                             ],
                         )
@@ -797,8 +775,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
 
             if current_adapter:
                 self._where_criteria = tuple(
-                    current_adapter(crit, True)
-                    for crit in self._where_criteria
+                    current_adapter(crit, True) for crit in self._where_criteria
                 )
 
         # TODO: some complexity with order_by here was due to mapper.order_by.
@@ -829,9 +806,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             self.eager_order_by = adapter.copy_and_process(self.eager_order_by)
 
         if query._distinct_on:
-            self.distinct_on = self._adapt_col_list(
-                query._distinct_on, current_adapter
-            )
+            self.distinct_on = self._adapt_col_list(query._distinct_on, current_adapter)
         else:
             self.distinct_on = ()
 
@@ -902,9 +877,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             if ezero is not None:
                 # TODO: this goes away once we get rid of the deep entity
                 # thing
-                self.statement = self.statement._annotate(
-                    {"deepentity": ezero}
-                )
+                self.statement = self.statement._annotate({"deepentity": ezero})
 
     @classmethod
     def _create_entities_collection(cls, query, legacy):
@@ -922,9 +895,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         self._aliased_generations = {}
         self._polymorphic_adapters = {}
 
-        compile_options = cls.default_compile_options.safe_merge(
-            query._compile_options
-        )
+        compile_options = cls.default_compile_options.safe_merge(query._compile_options)
         # legacy: only for query.with_polymorphic()
         if compile_options._with_polymorphic_adapt_map:
             self._with_polymorphic_adapt_map = dict(
@@ -950,7 +921,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         if not setup_joins:
             return None
 
-        (target, onclause, from_, flags) = setup_joins[-1]
+        target, onclause, from_, flags = setup_joins[-1]
 
         if isinstance(target, interfaces.PropComparator):
             return target.entity
@@ -960,10 +931,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
     @classmethod
     def all_selected_columns(cls, statement):
         for element in statement._raw_columns:
-            if (
-                element.is_selectable
-                and "entity_namespace" in element._annotations
-            ):
+            if element.is_selectable and "entity_namespace" in element._annotations:
                 ens = element._annotations["entity_namespace"]
                 if not ens.is_mapper and not ens.is_aliased_class:
                     for elem in _select_iterables([element]):
@@ -979,11 +947,11 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
     def get_columns_clause_froms(cls, statement):
         return cls._normalize_froms(
             itertools.chain.from_iterable(
-                element._from_objects
-                if "parententity" not in element._annotations
-                else [
-                    element._annotations["parententity"].__clause_element__()
-                ]
+                (
+                    element._from_objects
+                    if "parententity" not in element._annotations
+                    else [element._annotations["parententity"].__clause_element__()]
+                )
                 for element in statement._raw_columns
             )
         )
@@ -1068,8 +1036,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
     def _only_full_mapper_zero(self, methname):
         if self._entities != [self._primary_entity]:
             raise sa_exc.InvalidRequestError(
-                "%s() can only be used against "
-                "a single mapped class." % methname
+                "%s() can only be used against " "a single mapped class." % methname
             )
         return self._primary_entity.entity_zero
 
@@ -1077,8 +1044,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         if len(self._entities) > 1:
             raise sa_exc.InvalidRequestError(
                 rationale
-                or "This operation requires a Query "
-                "against a single mapper."
+                or "This operation requires a Query " "against a single mapper."
             )
         return self._entity_zero()
 
@@ -1087,15 +1053,11 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
 
         for memoized_entities in self._memoized_entities.values():
             for ent in [
-                ent
-                for ent in memoized_entities
-                if isinstance(ent, _MapperEntity)
+                ent for ent in memoized_entities if isinstance(ent, _MapperEntity)
             ]:
                 equivs.update(ent.mapper._equivalent_columns)
 
-        for ent in [
-            ent for ent in self._entities if isinstance(ent, _MapperEntity)
-        ]:
+        for ent in [ent for ent in self._entities if isinstance(ent, _MapperEntity)]:
             equivs.update(ent.mapper._equivalent_columns)
         return equivs
 
@@ -1112,9 +1074,11 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             # the original expressions outside of the label references
             # in order to have them render.
             unwrapped_order_by = [
-                elem.element
-                if isinstance(elem, sql.elements._label_reference)
-                else elem
+                (
+                    elem.element
+                    if isinstance(elem, sql.elements._label_reference)
+                    else elem
+                )
                 for elem in self.order_by
             ]
 
@@ -1158,10 +1122,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         # and the Oracle dialect ignores it, plus for PostgreSQL, MySQL
         # we expect that all elements of the row are locked, so also put it
         # on the outside (except in the case of PG when OF is used)
-        if (
-            self._for_update_arg is not None
-            and self._for_update_arg.of is None
-        ):
+        if self._for_update_arg is not None and self._for_update_arg.of is None:
             statement._for_update_arg = self._for_update_arg
 
         from_clause = inner
@@ -1178,9 +1139,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         if unwrapped_order_by:
             statement.order_by.non_generative(
                 statement,
-                *self.compound_eager_adapter.copy_and_process(
-                    unwrapped_order_by
-                )
+                *self.compound_eager_adapter.copy_and_process(unwrapped_order_by)
             )
 
         statement.order_by.non_generative(statement, *self.eager_order_by)
@@ -1290,9 +1249,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             statement.correlate.non_generative(statement, *correlate)
 
         if correlate_except is not None:
-            statement.correlate_except.non_generative(
-                statement, *correlate_except
-            )
+            statement.correlate_except.non_generative(statement, *correlate_except)
 
         return statement
 
@@ -1349,9 +1306,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             # to all SQL constructs.
             adapters.append(
                 (
-                    False
-                    if self.compile_options._orm_only_from_obj_alias
-                    else True,
+                    False if self.compile_options._orm_only_from_obj_alias else True,
                     self._from_obj_alias.replace,
                 )
             )
@@ -1391,7 +1346,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         return _adapt_clause
 
     def _join(self, args, entities_collection):
-        for (right, onclause, from_, flags) in args:
+        for right, onclause, from_, flags in args:
             isouter = flags["isouter"]
             full = flags["full"]
             # maybe?
@@ -1401,9 +1356,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             if onclause is not None:
                 onclause = inspect(onclause)
 
-            if onclause is None and isinstance(
-                right, interfaces.PropComparator
-            ):
+            if onclause is None and isinstance(right, interfaces.PropComparator):
                 # determine onclause/right_entity.  still need to think
                 # about how to best organize this since we are getting:
                 #
@@ -1425,8 +1378,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             if onclause is None:
                 if not right.is_selectable and not hasattr(right, "mapper"):
                     raise sa_exc.ArgumentError(
-                        "Expected mapped entity or "
-                        "selectable/table as join target"
+                        "Expected mapped entity or " "selectable/table as join target"
                     )
 
             of_type = None
@@ -1473,8 +1425,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                 if from_ is not None:
                     if (
                         from_ is not left
-                        and from_._annotations.get("parententity", None)
-                        is not left
+                        and from_._annotations.get("parententity", None) is not left
                     ):
                         raise sa_exc.InvalidRequestError(
                             "explicit from clause %s does not match left side "
@@ -1511,7 +1462,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
         consistent format with which to form the actual JOIN constructs.
 
         """
-        for (right, onclause, left, flags) in args:
+        for right, onclause, left, flags in args:
 
             outerjoin = flags["isouter"]
             create_aliases = flags["aliased"]
@@ -1522,9 +1473,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             # do a quick inspect to accommodate for a lambda
             if right is not None and not isinstance(right, util.string_types):
                 right = inspect(right)
-            if onclause is not None and not isinstance(
-                onclause, util.string_types
-            ):
+            if onclause is not None and not isinstance(onclause, util.string_types):
                 onclause = inspect(onclause)
 
             # legacy vvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -1537,17 +1486,13 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                 if not aliased_generation:
                     aliased_generation = prev_aliased_generation
                 elif prev_aliased_generation:
-                    self._aliased_generations[
-                        aliased_generation
-                    ] = self._aliased_generations.get(
-                        prev_aliased_generation, ()
+                    self._aliased_generations[aliased_generation] = (
+                        self._aliased_generations.get(prev_aliased_generation, ())
                     )
             # legacy ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
             if (
-                isinstance(
-                    right, (interfaces.PropComparator, util.string_types)
-                )
+                isinstance(right, (interfaces.PropComparator, util.string_types))
                 and onclause is None
             ):
                 onclause = right
@@ -1558,8 +1503,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             if onclause is None:
                 if not right.is_selectable and not hasattr(right, "mapper"):
                     raise sa_exc.ArgumentError(
-                        "Expected mapped entity or "
-                        "selectable/table as join target"
+                        "Expected mapped entity or " "selectable/table as join target"
                     )
 
             if isinstance(onclause, interfaces.PropComparator):
@@ -1585,9 +1529,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             # to work with the aliased=True flag, which is also something
             # that probably shouldn't exist on join() due to its high
             # complexity/usefulness ratio
-            elif from_joinpoint and isinstance(
-                onclause, interfaces.PropComparator
-            ):
+            elif from_joinpoint and isinstance(onclause, interfaces.PropComparator):
                 jp0 = self._joinpoint_zero()
                 info = inspect(jp0)
 
@@ -1751,9 +1693,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                 # make use of _MapperEntity selectable, which is usually
                 # entity_zero.selectable, but if with_polymorphic() were used
                 # might be distinct
-                assert isinstance(
-                    entities_collection[use_entity_index], _MapperEntity
-                )
+                assert isinstance(entities_collection[use_entity_index], _MapperEntity)
                 left_clause = entities_collection[use_entity_index].selectable
             else:
                 left_clause = left
@@ -1966,18 +1906,13 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                 for from_obj in self.from_clauses or [l_info.selectable]:
                     if sql_util.selectables_overlap(
                         l_info.selectable, from_obj
-                    ) and sql_util.selectables_overlap(
-                        from_obj, r_info.selectable
-                    ):
+                    ) and sql_util.selectables_overlap(from_obj, r_info.selectable):
                         overlap = True
                         break
 
-        if (
-            overlap or not create_aliases
-        ) and l_info.selectable is r_info.selectable:
+        if (overlap or not create_aliases) and l_info.selectable is r_info.selectable:
             raise sa_exc.InvalidRequestError(
-                "Can't join table/selectable '%s' to itself"
-                % l_info.selectable
+                "Can't join table/selectable '%s' to itself" % l_info.selectable
             )
 
         right_mapper, right_selectable, right_is_aliased = (
@@ -1986,11 +1921,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
             getattr(r_info, "is_aliased_class", False),
         )
 
-        if (
-            right_mapper
-            and prop
-            and not right_mapper.common_parent(prop.mapper)
-        ):
+        if right_mapper and prop and not right_mapper.common_parent(prop.mapper):
             raise sa_exc.InvalidRequestError(
                 "Join target %s does not correspond to "
                 "the right side of join condition %s" % (right, onclause)
@@ -2051,8 +1982,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                     "joined entity %s for raw clauseelement, which is "
                     "deprecated and will be removed in a later release. "
                     "Use the aliased() "
-                    "construct explicitly, see the linked example."
-                    % right_mapper,
+                    "construct explicitly, see the linked example." % right_mapper,
                     "1.4",
                     code="xaj1",
                 )
@@ -2088,17 +2018,14 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                     "legacy pattern which may be "
                     "deprecated in a later release.  Use the "
                     "aliased(<entity>, flat=True) "
-                    "construct explicitly, see the linked example."
-                    % right_mapper,
+                    "construct explicitly, see the linked example." % right_mapper,
                     code="xaj2",
                 )
 
         if need_adapter:
             assert right_mapper
 
-            adapter = ORMAdapter(
-                right, equivalents=right_mapper._equivalent_columns
-            )
+            adapter = ORMAdapter(right, equivalents=right_mapper._equivalent_columns)
 
             # if an alias() on the right side was generated,
             # which is intended to wrap a the right side in a subquery,
@@ -2248,7 +2175,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
 
         search = set(self.extra_criteria_entities.values())
 
-        for (ext_info, adapter) in search:
+        for ext_info, adapter in search:
             if ext_info in self._join_entities:
                 continue
 
@@ -2273,9 +2200,7 @@ class ORMSelectCompileState(ORMCompileState, SelectState):
                 self._where_criteria += (crit,)
 
 
-def _column_descriptions(
-    query_or_select_stmt, compile_state=None, legacy=False
-):
+def _column_descriptions(query_or_select_stmt, compile_state=None, legacy=False):
     if compile_state is None:
         compile_state = ORMSelectCompileState._create_entities_collection(
             query_or_select_stmt, legacy=legacy
@@ -2287,18 +2212,16 @@ def _column_descriptions(
             "type": ent.type,
             "aliased": getattr(insp_ent, "is_aliased_class", False),
             "expr": ent.expr,
-            "entity": getattr(insp_ent, "entity", None)
-            if ent.entity_zero is not None and not insp_ent.is_clause_element
-            else None,
+            "entity": (
+                getattr(insp_ent, "entity", None)
+                if ent.entity_zero is not None and not insp_ent.is_clause_element
+                else None
+            ),
         }
         for ent, insp_ent in [
             (
                 _ent,
-                (
-                    inspect(_ent.entity_zero)
-                    if _ent.entity_zero is not None
-                    else None
-                ),
+                (inspect(_ent.entity_zero) if _ent.entity_zero is not None else None),
             )
             for _ent in ctx._entities
         ]
@@ -2358,13 +2281,11 @@ def _legacy_determine_last_joined_entity(setup_joins, entity_zero):
     # 7. therefore can pass in just the last setup_joins record,
     #    don't need entity_zero
 
-    (right, onclause, left_, flags) = setup_joins[-1]
+    right, onclause, left_, flags = setup_joins[-1]
 
     from_joinpoint = flags["from_joinpoint"]
 
-    if onclause is None and isinstance(
-        right, (str, interfaces.PropComparator)
-    ):
+    if onclause is None and isinstance(right, (str, interfaces.PropComparator)):
         onclause = right
         right = None
 
@@ -2384,9 +2305,7 @@ def _legacy_determine_last_joined_entity(setup_joins, entity_zero):
     # legacy vvvvvvvvvvvvvvvvvvvvvvvvvvv
     if isinstance(onclause, str):
         if from_joinpoint:
-            prev = _legacy_determine_last_joined_entity(
-                setup_joins[0:-1], entity_zero
-            )
+            prev = _legacy_determine_last_joined_entity(setup_joins[0:-1], entity_zero)
         else:
             prev = entity_zero
 
@@ -2447,9 +2366,7 @@ class _QueryEntity(object):
                         )
                 else:
                     if entity._annotations.get("bundle", False):
-                        _BundleEntity(
-                            compile_state, entity, entities_collection
-                        )
+                        _BundleEntity(compile_state, entity, entities_collection)
                     elif entity._is_clause_list:
                         # this is legacy only - test_composites.py
                         # test_query_cols_legacy
@@ -2485,9 +2402,7 @@ class _MapperEntity(_QueryEntity):
         "_polymorphic_discriminator",
     )
 
-    def __init__(
-        self, compile_state, entity, entities_collection, is_current_entities
-    ):
+    def __init__(self, compile_state, entity, entities_collection, is_current_entities):
         entities_collection.append(self)
         if is_current_entities:
             if compile_state._primary_entity is None:
@@ -2572,9 +2487,7 @@ class _MapperEntity(_QueryEntity):
 
         if not self.is_aliased_class:
             if compile_state._polymorphic_adapters:
-                adapter = compile_state._polymorphic_adapters.get(
-                    self.mapper, None
-                )
+                adapter = compile_state._polymorphic_adapters.get(self.mapper, None)
         else:
             adapter = self.entity_zero._adapter
 
@@ -2677,9 +2590,7 @@ class _BundleEntity(_QueryEntity):
         else:
             entities_collection.append(self)
 
-        if isinstance(
-            expr, (attributes.QueryableAttribute, interfaces.PropComparator)
-        ):
+        if isinstance(expr, (attributes.QueryableAttribute, interfaces.PropComparator)):
             bundle = expr.__clause_element__()
         else:
             bundle = expr
@@ -2882,9 +2793,7 @@ class _ColumnEntity(_QueryEntity):
 
         if self.translate_raw_column:
             extra_entities = self._extra_entities + (
-                result.context.invoked_statement._raw_columns[
-                    self.raw_column_index
-                ],
+                result.context.invoked_statement._raw_columns[self.raw_column_index],
             )
             return getter, self._label_name, extra_entities
         else:
@@ -3000,9 +2909,7 @@ class _ORMColumnEntity(_ColumnEntity):
             self.translate_raw_column = raw_column_index is not None
 
         self.raw_column_index = raw_column_index
-        self._label_name = compile_state._label_convention(
-            column, col_name=orm_key
-        )
+        self._label_name = compile_state._label_convention(column, col_name=orm_key)
 
         _entity._post_inspect
         self.entity_zero = self.entity_zero_or_selectable = ezero = _entity
@@ -3021,23 +2928,17 @@ class _ORMColumnEntity(_ColumnEntity):
 
         self._extra_entities = (self.expr, self.column)
 
-        if (
-            mapper.with_polymorphic
-            or mapper.inherits
-            or mapper._requires_row_aliasing
-        ):
-            compile_state._create_with_polymorphic_adapter(
-                ezero, ezero.selectable
-            )
+        if mapper.with_polymorphic or mapper.inherits or mapper._requires_row_aliasing:
+            compile_state._create_with_polymorphic_adapter(ezero, ezero.selectable)
 
     def corresponds_to(self, entity):
         if _is_aliased_class(entity):
             # TODO: polymorphic subclasses ?
             return entity is self.entity_zero
         else:
-            return not _is_aliased_class(
+            return not _is_aliased_class(self.entity_zero) and entity.common_parent(
                 self.entity_zero
-            ) and entity.common_parent(self.entity_zero)
+            )
 
     def setup_compile_state(self, compile_state):
         current_adapter = compile_state._get_current_adapter()
@@ -3070,9 +2971,7 @@ class _ORMColumnEntity(_ColumnEntity):
         # not the FROM of the column.  but also, don't use it if our column
         # doesn't actually have any FROMs that line up, such as when its
         # a scalar subquery.
-        if set(self.column._from_objects).intersection(
-            ezero.selectable._from_objects
-        ):
+        if set(self.column._from_objects).intersection(ezero.selectable._from_objects):
             compile_state._fallback_from_clauses.append(ezero.selectable)
 
         compile_state.dedupe_columns.add(column)

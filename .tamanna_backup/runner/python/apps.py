@@ -74,8 +74,7 @@ def analyze_data():
                 df = pd.read_excel(file)
             else:
                 return (
-                    jsonify({"error": "Unsupported format",
-                            "system": "BD-KING-R7"}),
+                    jsonify({"error": "Unsupported format", "system": "BD-KING-R7"}),
                     400,
                 )
 
@@ -131,8 +130,7 @@ def predict():
             result = predictor.predict_forecast(features)
         else:
             return (
-                jsonify({"error": "Invalid prediction type",
-                        "system": "BD-KING-R7"}),
+                jsonify({"error": "Invalid prediction type", "system": "BD-KING-R7"}),
                 400,
             )
 

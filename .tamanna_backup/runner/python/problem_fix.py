@@ -13,66 +13,64 @@ OUTPUT_LOG = "problem_fix_log.txt"
 # LOG SYSTEM
 # ==========================================
 
+
 def write_log(message):
 
     with open(OUTPUT_LOG, "a", encoding="utf-8") as log:
         log.write(f"{datetime.now()} : {message}\n")
+
 
 # ==========================================
 # PROBLEM DATABASE
 # ==========================================
 
 PROBLEMS = {
-
     "PROB_001": {
         "problem": "Webhook verification failing",
         "solution": [
             "Check FACEBOOK_VERIFY_TOKEN",
             "Check webhook GET endpoint",
-            "Verify SSL / HTTPS configuration"
-        ]
+            "Verify SSL / HTTPS configuration",
+        ],
     },
-
     "PROB_002": {
         "problem": "Message sending/receiving issues",
         "solution": [
             "Validate Page Access Token",
             "Check Graph API version",
-            "Handle timeout and API errors"
-        ]
+            "Handle timeout and API errors",
+        ],
     },
-
     "PROB_003": {
         "problem": "GitHub sync issues",
         "solution": [
             "Check git remote",
             "Run git fetch origin",
-            "Fix authentication token"
-        ]
+            "Fix authentication token",
+        ],
     },
-
     "PROB_004": {
         "problem": "Environment variables not loading",
         "solution": [
             "Check .env file",
             "Install dotenv",
-            "Validate process.env variables"
-        ]
+            "Validate process.env variables",
+        ],
     },
-
     "PROB_005": {
         "problem": "Deployment failures",
         "solution": [
             "Check package.json",
             "Verify PORT variable",
-            "Install missing dependencies"
-        ]
-    }
+            "Install missing dependencies",
+        ],
+    },
 }
 
 # ==========================================
 # DISPLAY PROBLEMS
 # ==========================================
+
 
 def show_problems():
 
@@ -85,9 +83,11 @@ def show_problems():
         print(f"\n[{pid}]")
         print("Problem :", pdata["problem"])
 
+
 # ==========================================
 # FIX ENGINE
 # ==========================================
+
 
 def fix_problem(problem_id):
 
@@ -108,26 +108,19 @@ def fix_problem(problem_id):
 
         write_log(f"{problem_id} : {solution}")
 
+
 # ==========================================
 # QUICK FIX COMMANDS
 # ==========================================
 
+
 def quick_fix_commands():
 
     commands = {
-
-        "Webhook Test":
-        'curl -X GET "https://your-app.com/webhook?hub.verify_token=YOUR_TOKEN&hub.challenge=CHALLENGE"',
-
-        "Token Validation":
-        'node -e "require(\'dotenv\').config(); console.log(!!process.env.FACEBOOK_PAGE_ACCESS_TOKEN)"',
-
-        "Git Sync Fix":
-        "git add . && git commit -m 'Fix Sync' && git push origin main",
-
-        "Dependency Fix":
-        "npm install && npm audit fix"
-
+        "Webhook Test": 'curl -X GET "https://your-app.com/webhook?hub.verify_token=YOUR_TOKEN&hub.challenge=CHALLENGE"',
+        "Token Validation": "node -e \"require('dotenv').config(); console.log(!!process.env.FACEBOOK_PAGE_ACCESS_TOKEN)\"",
+        "Git Sync Fix": "git add . && git commit -m 'Fix Sync' && git push origin main",
+        "Dependency Fix": "npm install && npm audit fix",
     }
 
     print("\n" + "=" * 60)
@@ -139,9 +132,11 @@ def quick_fix_commands():
         print(f"\n{name}:")
         print(cmd)
 
+
 # ==========================================
 # MAIN SYSTEM
 # ==========================================
+
 
 def main():
 
@@ -160,6 +155,7 @@ def main():
             break
 
         fix_problem(problem_id)
+
 
 # ==========================================
 # START

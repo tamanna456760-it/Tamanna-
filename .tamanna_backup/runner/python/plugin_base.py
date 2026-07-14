@@ -82,8 +82,7 @@ def setup_options(make_option):
         action="append",
         type=str,
         dest="db",
-        help="Use prefab database uri. Multiple OK, "
-        "first one is run by default.",
+        help="Use prefab database uri. Multiple OK, " "first one is run by default.",
     )
     make_option(
         "--dbs",
@@ -159,15 +158,13 @@ def setup_options(make_option):
         "--low-connections",
         action="store_true",
         dest="low_connections",
-        help="Use a low number of distinct connections - "
-        "i.e. for Oracle TNS",
+        help="Use a low number of distinct connections - " "i.e. for Oracle TNS",
     )
     make_option(
         "--write-idents",
         type=str,
         dest="write_idents",
-        help="write out generated follower idents to <file>, "
-        "when -n<num> is used",
+        help="write out generated follower idents to <file>, " "when -n<num> is used",
     )
     make_option(
         "--reversetop",
@@ -189,8 +186,7 @@ def setup_options(make_option):
         action="store_true",
         dest="cdecimal",
         default=False,
-        help="Monkeypatch the cdecimal library into Python 'decimal' "
-        "for all tests",
+        help="Monkeypatch the cdecimal library into Python 'decimal' " "for all tests",
     )
     make_option(
         "--include-tag",
@@ -535,19 +531,13 @@ def want_method(cls, fn):
     elif include_tags:
         return (
             hasattr(cls, "__tags__")
-            and exclusions.tags(cls.__tags__).include_test(
-                include_tags, exclude_tags
-            )
+            and exclusions.tags(cls.__tags__).include_test(include_tags, exclude_tags)
         ) or (
             hasattr(fn, "_sa_exclusion_extend")
-            and fn._sa_exclusion_extend.include_test(
-                include_tags, exclude_tags
-            )
+            and fn._sa_exclusion_extend.include_test(include_tags, exclude_tags)
         )
     elif exclude_tags and hasattr(cls, "__tags__"):
-        return exclusions.tags(cls.__tags__).include_test(
-            include_tags, exclude_tags
-        )
+        return exclusions.tags(cls.__tags__).include_test(include_tags, exclude_tags)
     elif exclude_tags and hasattr(fn, "_sa_exclusion_extend"):
         return fn._sa_exclusion_extend.include_test(include_tags, exclude_tags)
     else:
@@ -555,9 +545,7 @@ def want_method(cls, fn):
 
 
 def generate_sub_tests(cls, module):
-    if getattr(cls, "__backend__", False) or getattr(
-        cls, "__sparse_backend__", False
-    ):
+    if getattr(cls, "__backend__", False) or getattr(cls, "__sparse_backend__", False):
         sparse = getattr(cls, "__sparse_backend__", False)
         for cfg in _possible_configs_for_cls(cls, sparse=sparse):
             orig_name = cls.__name__
@@ -717,9 +705,7 @@ def _do_skips(cls):
     if getattr(cls, "__skip_if__", False):
         for c in getattr(cls, "__skip_if__"):
             if c():
-                config.skip_test(
-                    "'%s' skipped by %s" % (cls.__name__, c.__name__)
-                )
+                config.skip_test("'%s' skipped by %s" % (cls.__name__, c.__name__))
 
     if not all_configs:
         msg = "'%s' unsupported on any DB implementation %s%s" % (
@@ -729,8 +715,7 @@ def _do_skips(cls):
                 % (
                     config_obj.db.name,
                     ".".join(
-                        str(dig)
-                        for dig in exclusions._server_version(config_obj.db)
+                        str(dig) for dig in exclusions._server_version(config_obj.db)
                     ),
                     config_obj.db.driver,
                 )

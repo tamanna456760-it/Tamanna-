@@ -20,6 +20,7 @@ def load(file):
             return json.load(f)
     return {}
 
+
 def save(file, data):
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
@@ -57,14 +58,16 @@ def analyze_system():
 
     for file in all_files:
         file_issues = [i for i in issues if i.get("file") == file]
-        file_threats = [d for d in defense if d.get("file") == file and d.get("threats")]
+        file_threats = [
+            d for d in defense if d.get("file") == file and d.get("threats")
+        ]
 
         action = decide_action(file, file_issues, file_threats)
 
         final_report[file] = {
             "issues": file_issues,
             "threats": file_threats,
-            "action": action
+            "action": action,
         }
 
     return final_report
@@ -90,10 +93,7 @@ def update_memory(report):
     memory = load(BRAIN_MEMORY)
 
     for file, data in report.items():
-        memory[file] = {
-            "last_action": data["action"],
-            "timestamp": time.time()
-        }
+        memory[file] = {"last_action": data["action"], "timestamp": time.time()}
 
     save(BRAIN_MEMORY, memory)
 

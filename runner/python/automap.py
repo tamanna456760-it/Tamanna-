@@ -560,6 +560,7 @@ be applied as::
 
 
 """  # noqa
+
 from .. import util
 from ..orm import backref
 from ..orm import declarative_base as _declarative_base
@@ -630,9 +631,7 @@ def name_for_scalar_relationship(base, local_cls, referred_cls, constraint):
     return referred_cls.__name__.lower()
 
 
-def name_for_collection_relationship(
-    base, local_cls, referred_cls, constraint
-):
+def name_for_collection_relationship(base, local_cls, referred_cls, constraint):
     """Return the attribute name that should be used to refer from one
     class to another, for a collection reference.
 
@@ -843,13 +842,9 @@ class AutomapBase(object):
         if classname_for_table is None:
             classname_for_table = glbls["classname_for_table"]
         if name_for_scalar_relationship is None:
-            name_for_scalar_relationship = glbls[
-                "name_for_scalar_relationship"
-            ]
+            name_for_scalar_relationship = glbls["name_for_scalar_relationship"]
         if name_for_collection_relationship is None:
-            name_for_collection_relationship = glbls[
-                "name_for_collection_relationship"
-            ]
+            name_for_collection_relationship = glbls["name_for_collection_relationship"]
         if generate_relationship is None:
             generate_relationship = glbls["generate_relationship"]
         if collection_class is None:
@@ -874,9 +869,7 @@ class AutomapBase(object):
         with _CONFIGURE_MUTEX:
             table_to_map_config = dict(
                 (m.local_table, m)
-                for m in _DeferredMapperConfig.classes_for_base(
-                    cls, sort=False
-                )
+                for m in _DeferredMapperConfig.classes_for_base(cls, sort=False)
             )
 
             many_to_many = []
@@ -893,9 +886,7 @@ class AutomapBase(object):
                         (cls,),
                         {"__table__": table},
                     )
-                    map_config = _DeferredMapperConfig.config_for_cls(
-                        mapped_cls
-                    )
+                    map_config = _DeferredMapperConfig.config_for_cls(mapped_cls)
                     cls.classes[map_config.cls.__name__] = mapped_cls
                     table_to_map_config[table] = map_config
 
@@ -954,8 +945,7 @@ class AutomapBase(object):
             cls,
             msg="Class %s is a subclass of AutomapBase.  "
             "Mappings are not produced until the .prepare() "
-            "method is called on the class hierarchy."
-            % orm_exc._safe_cls_name(cls),
+            "method is called on the class hierarchy." % orm_exc._safe_cls_name(cls),
         )
 
 
@@ -993,9 +983,7 @@ def automap_base(declarative_base=None, **kw):
 
 def _is_many_to_many(automap_base, table):
     fk_constraints = [
-        const
-        for const in table.constraints
-        if isinstance(const, ForeignKeyConstraint)
+        const for const in table.constraints if isinstance(const, ForeignKeyConstraint)
     ]
     if len(fk_constraints) != 2:
         return None, None, None
@@ -1041,9 +1029,7 @@ def _relationships_for_fks(
                 continue
             referred_cls = referred_cfg.cls
 
-            if local_cls is not referred_cls and issubclass(
-                local_cls, referred_cls
-            ):
+            if local_cls is not referred_cls and issubclass(local_cls, referred_cls):
                 continue
 
             relationship_name = name_for_scalar_relationship(
@@ -1058,16 +1044,10 @@ def _relationships_for_fks(
             if not nullable:
                 o2m_kws["cascade"] = "all, delete-orphan"
 
-                if (
-                    constraint.ondelete
-                    and constraint.ondelete.lower() == "cascade"
-                ):
+                if constraint.ondelete and constraint.ondelete.lower() == "cascade":
                     o2m_kws["passive_deletes"] = True
             else:
-                if (
-                    constraint.ondelete
-                    and constraint.ondelete.lower() == "set null"
-                ):
+                if constraint.ondelete and constraint.ondelete.lower() == "set null":
                     o2m_kws["passive_deletes"] = True
 
             create_backref = backref_name not in referred_cfg.properties
@@ -1100,9 +1080,9 @@ def _relationships_for_fks(
                 if rel is not None:
                     map_config.properties[relationship_name] = rel
                     if not create_backref:
-                        referred_cfg.properties[
-                            backref_name
-                        ].back_populates = relationship_name
+                        referred_cfg.properties[backref_name].back_populates = (
+                            relationship_name
+                        )
             elif create_backref:
                 rel = generate_relationship(
                     automap_base,
@@ -1118,9 +1098,9 @@ def _relationships_for_fks(
                 )
                 if rel is not None:
                     referred_cfg.properties[backref_name] = rel
-                    map_config.properties[
-                        relationship_name
-                    ].back_populates = backref_name
+                    map_config.properties[relationship_name].back_populates = (
+                        backref_name
+                    )
 
 
 def _m2m_relationship(
@@ -1182,12 +1162,8 @@ def _m2m_relationship(
             referred_cls,
             overlaps=overlaps,
             secondary=table,
-            primaryjoin=and_(
-                fk.column == fk.parent for fk in m2m_const[0].elements
-            ),
-            secondaryjoin=and_(
-                fk.column == fk.parent for fk in m2m_const[1].elements
-            ),
+            primaryjoin=and_(fk.column == fk.parent for fk in m2m_const[0].elements),
+            secondaryjoin=and_(fk.column == fk.parent for fk in m2m_const[1].elements),
             backref=backref_obj,
             collection_class=collection_class,
         )
@@ -1195,9 +1171,7 @@ def _m2m_relationship(
             map_config.properties[relationship_name] = rel
 
             if not create_backref:
-                referred_cfg.properties[
-                    backref_name
-                ].back_populates = relationship_name
+                referred_cfg.properties[backref_name].back_populates = relationship_name
     elif create_backref:
         rel = generate_relationship(
             automap_base,
@@ -1208,17 +1182,11 @@ def _m2m_relationship(
             local_cls,
             overlaps=overlaps,
             secondary=table,
-            primaryjoin=and_(
-                fk.column == fk.parent for fk in m2m_const[1].elements
-            ),
-            secondaryjoin=and_(
-                fk.column == fk.parent for fk in m2m_const[0].elements
-            ),
+            primaryjoin=and_(fk.column == fk.parent for fk in m2m_const[1].elements),
+            secondaryjoin=and_(fk.column == fk.parent for fk in m2m_const[0].elements),
             back_populates=relationship_name,
             collection_class=collection_class,
         )
         if rel is not None:
             referred_cfg.properties[backref_name] = rel
-            map_config.properties[
-                relationship_name
-            ].back_populates = backref_name
+            map_config.properties[relationship_name].back_populates = backref_name

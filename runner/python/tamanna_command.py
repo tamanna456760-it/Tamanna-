@@ -35,6 +35,7 @@ Examples:
 
 # ---------- LANGUAGE SENSE ----------
 
+
 def detect_language_simple(text: str) -> str:
     """
     Very simple heuristic:
@@ -56,6 +57,7 @@ def detect_language_simple(text: str) -> str:
 
 # ---------- SYSTEM SENSE ----------
 
+
 def sense_system():
     print("\n[System Sense]")
     print(f"  Time       : {datetime.now().isoformat(sep=' ', timespec='seconds')}")
@@ -67,6 +69,7 @@ def sense_system():
 
 
 # ---------- PROJECT BUILD ----------
+
 
 def build_project(name: str):
     root = os.path.abspath(name)
@@ -104,6 +107,7 @@ def build_project(name: str):
 
 # ---------- COMMAND LOOP ----------
 
+
 def handle_command(cmd: str):
     parts = cmd.strip().split()
     if not parts:
@@ -136,7 +140,9 @@ def handle_command(cmd: str):
             print(f"  Lang : {lang}\n")
         else:
             sense_system()
-            sample = input("Enter sample text to sense language (or leave empty): ").strip()
+            sample = input(
+                "Enter sample text to sense language (or leave empty): "
+            ).strip()
             if sample:
                 lang = detect_language_simple(sample)
                 print(f"\n[Language Sense]")

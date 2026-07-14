@@ -6,7 +6,6 @@
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 """Provides the Session class and related utilities."""
 
-
 import itertools
 import sys
 import weakref
@@ -148,9 +147,7 @@ class ORMExecuteState(util.MemoizedSlots):
         self.statement = statement
         self.parameters = parameters
         self.local_execution_options = execution_options
-        self.execution_options = statement._execution_options.union(
-            execution_options
-        )
+        self.execution_options = statement._execution_options.union(execution_options)
         self.bind_arguments = bind_arguments
         self._compile_state_cls = compile_state_cls
         self._events_todo = list(events_todo)
@@ -603,8 +600,7 @@ class SessionTransaction(TransactionalContext):
                         "due to a previous exception during flush."
                         " To begin a new transaction with this Session, "
                         "first issue Session.rollback()."
-                        " Original exception was: %s"
-                        % self._rollback_exception,
+                        " Original exception was: %s" % self._rollback_exception,
                         code="7s2a",
                     )
                 elif not deactive_ok:
@@ -639,8 +635,7 @@ class SessionTransaction(TransactionalContext):
                 break
             elif current._parent is None:
                 raise sa_exc.InvalidRequestError(
-                    "Transaction %s is not on the active transaction list"
-                    % (upto)
+                    "Transaction %s is not on the active transaction list" % (upto)
                 )
             else:
                 current = current._parent
@@ -707,9 +702,7 @@ class SessionTransaction(TransactionalContext):
             for s in self.session.identity_map.all_states():
                 s._expire(s.dict, self.session.identity_map._modified)
 
-            statelib.InstanceState._detach_states(
-                list(self._deleted), self.session
-            )
+            statelib.InstanceState._detach_states(list(self._deleted), self.session)
             self._deleted.clear()
         elif self.nested:
             self._parent._new.update(self._new)
@@ -870,9 +863,7 @@ class SessionTransaction(TransactionalContext):
                         rollback_err = sys.exc_info()
                     finally:
                         transaction._state = DEACTIVE
-                        transaction._restore_snapshot(
-                            dirty_only=transaction.nested
-                        )
+                        transaction._restore_snapshot(dirty_only=transaction.nested)
                     boundary = transaction
                     break
                 else:
@@ -907,9 +898,7 @@ class SessionTransaction(TransactionalContext):
 
     def close(self, invalidate=False):
         if self.nested:
-            self.session._nested_transaction = (
-                self._previous_nested_transaction
-            )
+            self.session._nested_transaction = self._previous_nested_transaction
 
         self.session._transaction = self._parent
 
@@ -1313,8 +1302,7 @@ class Session(_SessionClassMethods):
 
         if subtransactions and self.future:
             raise NotImplementedError(
-                "subtransactions are not implemented in future "
-                "Session objects."
+                "subtransactions are not implemented in future " "Session objects."
             )
 
         if self._autobegin():
@@ -1452,11 +1440,7 @@ class Session(_SessionClassMethods):
         self._transaction.prepare()
 
     def connection(
-        self,
-        bind_arguments=None,
-        close_with_result=False,
-        execution_options=None,
-        **kw
+        self, bind_arguments=None, close_with_result=False, execution_options=None, **kw
     ):
         r"""Return a :class:`_engine.Connection` object corresponding to this
         :class:`.Session` object's transactional state.
@@ -1533,9 +1517,7 @@ class Session(_SessionClassMethods):
         TransactionalContext._trans_ctx_check(self)
 
         if self._transaction is not None or self._autobegin():
-            return self._transaction._connection_for_bind(
-                engine, execution_options
-            )
+            return self._transaction._connection_for_bind(engine, execution_options)
 
         assert self._transaction is None
         assert self.autocommit
@@ -1624,10 +1606,7 @@ class Session(_SessionClassMethods):
         elif not bind_arguments:
             bind_arguments = {}
 
-        if (
-            statement._propagate_attrs.get("compile_state_plugin", None)
-            == "orm"
-        ):
+        if statement._propagate_attrs.get("compile_state_plugin", None) == "orm":
             # note that even without "future" mode, we need
             compile_state_cls = CompileState._get_plugin_class_for_plugin(
                 statement, "orm"
@@ -1651,9 +1630,7 @@ class Session(_SessionClassMethods):
             )
         else:
             bind_arguments.setdefault("clause", statement)
-            execution_options = execution_options.union(
-                {"future_result": True}
-            )
+            execution_options = execution_options.union({"future_result": True})
 
         if _parent_execute_state:
             events_todo = _parent_execute_state._remaining_events()
@@ -1688,9 +1665,7 @@ class Session(_SessionClassMethods):
             # we rely upon close_with_result, also legacy.  it's all
             # interrelated
             conn = self._connection_for_bind(bind, close_with_result=True)
-            execution_options = execution_options.union(
-                dict(future_result=False)
-            )
+            execution_options = execution_options.union(dict(future_result=False))
         else:
             conn = self._connection_for_bind(bind)
         result = conn._execute_20(statement, params or {}, execution_options)
@@ -1856,9 +1831,7 @@ class Session(_SessionClassMethods):
         except sa_exc.NoInspectionAvailable as err:
             if not isinstance(key, type):
                 util.raise_(
-                    sa_exc.ArgumentError(
-                        "Not an acceptable bind target: %s" % key
-                    ),
+                    sa_exc.ArgumentError("Not an acceptable bind target: %s" % key),
                     replace_context=err,
                 )
             else:
@@ -1871,9 +1844,7 @@ class Session(_SessionClassMethods):
                 for _selectable in insp._all_tables:
                     self.__binds[_selectable] = bind
             else:
-                raise sa_exc.ArgumentError(
-                    "Not an acceptable bind target: %s" % key
-                )
+                raise sa_exc.ArgumentError("Not an acceptable bind target: %s" % key)
 
     def bind_mapper(self, mapper, bind):
         """Associate a :class:`_orm.Mapper` or arbitrary Python class with a
@@ -2061,9 +2032,7 @@ class Session(_SessionClassMethods):
                     clause = mapper.persist_selectable
 
             if clause is not None:
-                plugin_subject = clause._propagate_attrs.get(
-                    "plugin_subject", None
-                )
+                plugin_subject = clause._propagate_attrs.get("plugin_subject", None)
 
                 if plugin_subject is not None:
                     for cls in plugin_subject.mapper.class_.__mro__:
@@ -2456,9 +2425,7 @@ class Session(_SessionClassMethods):
                 "Instance %s is not present in this Session" % state_str(state)
             )
 
-        cascaded = list(
-            state.manager.mapper.cascade_iterator("expunge", state)
-        )
+        cascaded = list(state.manager.mapper.cascade_iterator("expunge", state))
         self._expunge_states([state] + [st_ for o, m, st_, dct_ in cascaded])
 
     def _expunge_states(self, states, to_transient=False):
@@ -2472,9 +2439,7 @@ class Session(_SessionClassMethods):
                 # state is "detached" from being deleted, but still present
                 # in the transaction snapshot
                 self._transaction._deleted.pop(state, None)
-        statelib.InstanceState._detach_states(
-            states, self, to_transient=to_transient
-        )
+        statelib.InstanceState._detach_states(states, self, to_transient=to_transient)
 
     def _register_persistent(self, states):
         """Register all persistent objects from a flush.
@@ -2506,8 +2471,7 @@ class Session(_SessionClassMethods):
                         "that the mapped Column object is configured to "
                         "expect these generated values.  Ensure also that "
                         "this flush() is not occurring at an inappropriate "
-                        "time, such as within a load() event."
-                        % state_str(state)
+                        "time, such as within a load() event." % state_str(state)
                     )
 
                 if state.key is None:
@@ -2822,9 +2786,7 @@ class Session(_SessionClassMethods):
 
         is_dict = isinstance(primary_key_identity, dict)
         if not is_dict:
-            primary_key_identity = util.to_list(
-                primary_key_identity, default=(None,)
-            )
+            primary_key_identity = util.to_list(primary_key_identity, default=(None,))
 
         if len(primary_key_identity) != len(mapper.primary_key):
             raise sa_exc.InvalidRequestError(
@@ -2847,8 +2809,7 @@ class Session(_SessionClassMethods):
                         "primary key for session.get(); primary key attribute "
                         "names are %s"
                         % ",".join(
-                            "'%s'" % prop.key
-                            for prop in mapper._identity_key_props
+                            "'%s'" % prop.key for prop in mapper._identity_key_props
                         )
                     ),
                     replace_context=err,
@@ -2881,9 +2842,7 @@ class Session(_SessionClassMethods):
 
         if populate_existing:
             load_options += {"_populate_existing": populate_existing}
-        statement = sql.select(mapper).set_label_style(
-            LABEL_STYLE_TABLENAME_PLUS_COL
-        )
+        statement = sql.select(mapper).set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL)
         if with_for_update is not None:
             statement._for_update_arg = query.ForUpdateArg._from_argument(
                 with_for_update
@@ -3019,10 +2978,7 @@ class Session(_SessionClassMethods):
             key = mapper._identity_key_from_state(state)
             key_is_persistent = attributes.NEVER_SET not in key[1] and (
                 not _none_set.intersection(key[1])
-                or (
-                    mapper.allow_partial_pks
-                    and not _none_set.issuperset(key[1])
-                )
+                or (mapper.allow_partial_pks and not _none_set.issuperset(key[1]))
             )
         else:
             key_is_persistent = True
@@ -3143,8 +3099,7 @@ class Session(_SessionClassMethods):
     def _validate_persistent(self, state):
         if not self.identity_map.contains_state(state):
             raise sa_exc.InvalidRequestError(
-                "Instance '%s' is not persistent within this Session"
-                % state_str(state)
+                "Instance '%s' is not persistent within this Session" % state_str(state)
             )
 
     def _save_impl(self, state):
@@ -3283,8 +3238,7 @@ class Session(_SessionClassMethods):
         if state.session_id and state.session_id in _sessions:
             raise sa_exc.InvalidRequestError(
                 "Object '%s' is already attached to session '%s' "
-                "(this is '%s')"
-                % (state_str(state), state.session_id, self.hash_key)
+                "(this is '%s')" % (state_str(state), state.session_id, self.hash_key)
             )
 
         self.dispatch.before_attach(self, state)
@@ -3323,9 +3277,7 @@ class Session(_SessionClassMethods):
         Session.
 
         """
-        return iter(
-            list(self._new.values()) + list(self.identity_map.values())
-        )
+        return iter(list(self._new.values()) + list(self.identity_map.values()))
 
     def _contains_state(self, state):
         return state in self._new or self.identity_map.contains_state(state)
@@ -3476,10 +3428,7 @@ class Session(_SessionClassMethods):
                 len_ = len(self.identity_map._modified)
 
                 statelib.InstanceState._commit_all_states(
-                    [
-                        (state, state.dict)
-                        for state in self.identity_map._modified
-                    ],
+                    [(state, state.dict) for state in self.identity_map._modified],
                     instance_dict=self.identity_map,
                 )
                 util.warn(
@@ -3621,9 +3570,7 @@ class Session(_SessionClassMethods):
         def grouping_key(state):
             return (state.mapper, state.key is not None)
 
-        for (mapper, isupdate), states in itertools.groupby(
-            obj_states, grouping_key
-        ):
+        for (mapper, isupdate), states in itertools.groupby(obj_states, grouping_key):
             self._bulk_save_mappings(
                 mapper,
                 states,
@@ -3800,9 +3747,7 @@ class Session(_SessionClassMethods):
             :meth:`.Session.bulk_save_objects`
 
         """
-        self._bulk_save_mappings(
-            mapper, mappings, True, False, False, False, False
-        )
+        self._bulk_save_mappings(mapper, mappings, True, False, False, False, False)
 
     def _bulk_save_mappings(
         self,
@@ -3904,12 +3849,11 @@ class Session(_SessionClassMethods):
 
         for attr in state.manager.attributes:
             if (
-                not include_collections
-                and hasattr(attr.impl, "get_collection")
+                not include_collections and hasattr(attr.impl, "get_collection")
             ) or not hasattr(attr.impl, "get_history"):
                 continue
 
-            (added, unchanged, deleted) = attr.impl.get_history(
+            added, unchanged, deleted = attr.impl.get_history(
                 state, dict_, passive=attributes.NO_CHANGE
             )
 
@@ -3947,9 +3891,7 @@ class Session(_SessionClassMethods):
 
         """
         if self.autocommit:
-            return (
-                self._transaction is not None and self._transaction.is_active
-            )
+            return self._transaction is not None and self._transaction.is_active
         else:
             return self._transaction is None or self._transaction.is_active
 
@@ -4002,11 +3944,7 @@ class Session(_SessionClassMethods):
 
         """
         return util.IdentitySet(
-            [
-                state.obj()
-                for state in self._dirty_states
-                if state not in self._deleted
-            ]
+            [state.obj() for state in self._dirty_states if state not in self._deleted]
         )
 
     @property

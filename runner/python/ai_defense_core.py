@@ -1,24 +1,31 @@
-import requests
 import base64
 import hashlib
-import time
 import json
+import time
+
+import requests
 
 # 🔐 CONFIG
-GITHUB_TOKEN = 'tamanna'
-REPO_OWNER = 'tamanna456760-it'
-REPO_NAME = 'tamanna-'
+GITHUB_TOKEN = "tamanna"
+REPO_OWNER = "tamanna456760-it"
+REPO_NAME = "tamanna-"
 
 HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
+    "Authorization": f"token {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github.v3+json",
 }
 
 # 🚨 Dangerous patterns
 DANGEROUS_PATTERNS = [
-    "os.system", "rm -rf", "subprocess",
-    "eval(", "exec(", "chmod 777",
-    "requests.post(", "socket", "pickle.loads"
+    "os.system",
+    "rm -rf",
+    "subprocess",
+    "eval(",
+    "exec(",
+    "chmod 777",
+    "requests.post(",
+    "socket",
+    "pickle.loads",
 ]
 
 # 📦 Backup DB
@@ -37,6 +44,7 @@ def load_memory():
             return json.load(f)
     except:
         return {}
+
 
 def save_memory(data):
     with open(AI_MEMORY_FILE, "w") as f:
@@ -82,13 +90,17 @@ def update_file(path, content, message):
     if res.status_code != 200:
         return
 
-    sha = res.json()['sha']
+    sha = res.json()["sha"]
 
-    requests.put(url, headers=HEADERS, json={
-        "message": message,
-        "content": base64.b64encode(content.encode()).decode(),
-        "sha": sha
-    })
+    requests.put(
+        url,
+        headers=HEADERS,
+        json={
+            "message": message,
+            "content": base64.b64encode(content.encode()).decode(),
+            "sha": sha,
+        },
+    )
 
 
 # ==============================
@@ -125,23 +137,23 @@ def defense_engine():
     report = []
 
     for file in files:
-        if file['type'] != 'file':
+        if file["type"] != "file":
             continue
 
-        file_url = file['url']
+        file_url = file["url"]
         res = requests.get(file_url, headers=HEADERS)
 
         if res.status_code != 200:
             continue
 
         data = res.json()
-        content = base64.b64decode(data['content']).decode('utf-8')
+        content = base64.b64decode(data["content"]).decode("utf-8")
 
         file_hash = get_hash(content)
 
         # 📦 Backup first
-        if file['path'] not in backup_db:
-            backup_file(file['path'], content)
+        if file["path"] not in backup_db:
+            backup_file(file["path"], content)
 
         # 🔍 Detect threats
         threats = detect_threat(content)
@@ -149,10 +161,10 @@ def defense_engine():
         if threats:
             print(f"🚨 Threat in {file['path']} → {threats}")
 
-            safe_content = restore_backup(file['path'])
+            safe_content = restore_backup(file["path"])
 
             if safe_content:
-                update_file(file['path'], safe_content, "🛡️ Auto Restore Safe Version")
+                update_file(file["path"], safe_content, "🛡️ Auto Restore Safe Version")
 
                 status = "restored"
             else:
@@ -162,17 +174,9 @@ def defense_engine():
             status = "safe"
 
         # 🧠 Memory update
-        memory[file['path']] = {
-            "hash": file_hash,
-            "status": status,
-            "threats": threats
-        }
+        memory[file["path"]] = {"hash": file_hash, "status": status, "threats": threats}
 
-        report.append({
-            "file": file['path'],
-            "status": status,
-            "threats": threats
-        })
+        report.append({"file": file["path"], "status": status, "threats": threats})
 
     save_memory(memory)
     send_to_ai_system(report)

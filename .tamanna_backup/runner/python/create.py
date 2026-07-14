@@ -573,7 +573,7 @@ def create_engine(url, **kwargs):
     dialect = dialect_cls(**dialect_args)
 
     # assemble connection arguments
-    (cargs, cparams) = dialect.create_connect_args(u)
+    cargs, cparams = dialect.create_connect_args(u)
     cparams.update(pop_kwarg("connect_args", {}))
     cargs = list(cargs)  # allow mutability
 
@@ -698,9 +698,7 @@ def create_engine(url, **kwargs):
         # since "on_connect" is virtually always present, just use
         # "connect" event with once_unless_exception in all cases so that
         # the connection event flow is consistent in all cases.
-        event.listen(
-            pool, "connect", first_connect, _once_unless_exception=True
-        )
+        event.listen(pool, "connect", first_connect, _once_unless_exception=True)
 
     dialect_cls.engine_created(engine)
     if entrypoint is not dialect_cls:

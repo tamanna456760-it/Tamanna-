@@ -3,6 +3,7 @@
 Entry point for Earth BD-KING-R7 PowerHub Master.
 Run the API + Sync server and expose web UI.
 """
+
 import os
 from threading import Thread
 
@@ -20,8 +21,7 @@ def main():
     controller = PowerHubController()
 
     # Start Flask sync server in a thread
-    api_thread = Thread(target=run_sync_server,
-                        args=(controller,), daemon=True)
+    api_thread = Thread(target=run_sync_server, args=(controller,), daemon=True)
     api_thread.start()
     print("[MANAGE] Sync server started in background")
 

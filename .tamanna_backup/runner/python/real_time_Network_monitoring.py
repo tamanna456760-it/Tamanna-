@@ -13,12 +13,10 @@ class RealTimeWiresharkTest:
 
     def start_realtime_capture(self, interface="lo", duration=30):
         """Start real-time packet capture and analysis"""
-        print(
-            f"🔍 Starting real-time capture on {interface} for {duration} seconds...")
+        print(f"🔍 Starting real-time capture on {interface} for {duration} seconds...")
 
         # Start capture
-        capture_cmd = ["tshark", "-i", interface,
-                       "-w", "realtime_capture.pcap"]
+        capture_cmd = ["tshark", "-i", interface, "-w", "realtime_capture.pcap"]
         self.capture_process = subprocess.Popen(capture_cmd)
 
         # Start real-time analysis in separate thread
@@ -36,8 +34,7 @@ class RealTimeWiresharkTest:
 
     def realtime_analysis(self):
         """Perform real-time analysis on captured packets"""
-        analysis_cmd = ["tshark", "-r",
-                        "realtime_capture.pcap", "-z", "io,stat,1"]
+        analysis_cmd = ["tshark", "-r", "realtime_capture.pcap", "-z", "io,stat,1"]
 
         while self.capture_process and self.capture_process.poll() is None:
             try:

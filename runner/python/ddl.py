@@ -65,9 +65,7 @@ class DDLElement(roles.DDLRole, Executable, _DDLCompiles):
 
     """
 
-    _execution_options = Executable._execution_options.union(
-        {"autocommit": True}
-    )
+    _execution_options = Executable._execution_options.union({"autocommit": True})
 
     target = None
     on = None
@@ -77,9 +75,7 @@ class DDLElement(roles.DDLRole, Executable, _DDLCompiles):
     def _execute_on_connection(
         self, connection, multiparams, params, execution_options
     ):
-        return connection._execute_ddl(
-            self, multiparams, params, execution_options
-        )
+        return connection._execute_ddl(self, multiparams, params, execution_options)
 
     @util.deprecated_20(
         ":meth:`.DDLElement.execute`",
@@ -340,8 +336,7 @@ class DDL(DDLElement):
 
         if not isinstance(statement, util.string_types):
             raise exc.ArgumentError(
-                "Expected a string or unicode SQL statement, got '%r'"
-                % statement
+                "Expected a string or unicode SQL statement, got '%r'" % statement
             )
 
         self.statement = statement
@@ -637,9 +632,7 @@ class DropTable(_CreateDropBase):
          .. versionadded:: 1.4.0b2
 
         """
-        super(DropTable, self).__init__(
-            element, _legacy_bind=bind, if_exists=if_exists
-        )
+        super(DropTable, self).__init__(element, _legacy_bind=bind, if_exists=if_exists)
 
 
 class CreateSequence(_CreateDropBase):
@@ -711,9 +704,7 @@ class DropIndex(_CreateDropBase):
          .. versionadded:: 1.4.0b2
 
         """
-        super(DropIndex, self).__init__(
-            element, _legacy_bind=bind, if_exists=if_exists
-        )
+        super(DropIndex, self).__init__(element, _legacy_bind=bind, if_exists=if_exists)
 
 
 class AddConstraint(_CreateDropBase):
@@ -723,9 +714,7 @@ class AddConstraint(_CreateDropBase):
 
     def __init__(self, element, *args, **kw):
         super(AddConstraint, self).__init__(element, *args, **kw)
-        element._create_rule = util.portable_instancemethod(
-            self._create_rule_disable
-        )
+        element._create_rule = util.portable_instancemethod(self._create_rule_disable)
 
 
 class DropConstraint(_CreateDropBase):
@@ -736,9 +725,7 @@ class DropConstraint(_CreateDropBase):
     def __init__(self, element, cascade=False, **kw):
         self.cascade = cascade
         super(DropConstraint, self).__init__(element, **kw)
-        element._create_rule = util.portable_instancemethod(
-            self._create_rule_disable
-        )
+        element._create_rule = util.portable_instancemethod(self._create_rule_disable)
 
 
 class SetTableComment(_CreateDropBase):
@@ -775,9 +762,7 @@ class DDLBase(SchemaVisitor):
 
 
 class SchemaGenerator(DDLBase):
-    def __init__(
-        self, dialect, connection, checkfirst=False, tables=None, **kwargs
-    ):
+    def __init__(self, dialect, connection, checkfirst=False, tables=None, **kwargs):
         super(SchemaGenerator, self).__init__(connection, **kwargs)
         self.checkfirst = checkfirst
         self.tables = tables
@@ -939,9 +924,7 @@ class SchemaGenerator(DDLBase):
 
 
 class SchemaDropper(DDLBase):
-    def __init__(
-        self, dialect, connection, checkfirst=False, tables=None, **kwargs
-    ):
+    def __init__(self, dialect, connection, checkfirst=False, tables=None, **kwargs):
         super(SchemaDropper, self).__init__(connection, **kwargs)
         self.checkfirst = checkfirst
         self.tables = tables
@@ -961,10 +944,12 @@ class SchemaDropper(DDLBase):
                 reversed(
                     sort_tables_and_constraints(
                         unsorted_tables,
-                        filter_fn=lambda constraint: False
-                        if not self.dialect.supports_alter
-                        or constraint.name is None
-                        else None,
+                        filter_fn=lambda constraint: (
+                            False
+                            if not self.dialect.supports_alter
+                            or constraint.name is None
+                            else None
+                        ),
                     )
                 )
             )
@@ -995,19 +980,13 @@ class SchemaDropper(DDLBase):
                         "involved in the cycle have "
                         "names so that they can be dropped using "
                         "DROP CONSTRAINT."
-                        % (
-                            ", ".join(
-                                sorted([t.fullname for t in err2.cycles])
-                            )
-                        ),
+                        % (", ".join(sorted([t.fullname for t in err2.cycles]))),
                     ),
                     from_=err2,
                 )
 
         seq_coll = [
-            s
-            for s in metadata._sequences.values()
-            if self._can_drop_sequence(s)
+            s for s in metadata._sequences.values() if self._can_drop_sequence(s)
         ]
 
         event_collection = [t for (t, fks) in collection if t is not None]
@@ -1107,10 +1086,7 @@ class SchemaDropper(DDLBase):
         # latest/core/defaults.html#associating-a-sequence-as-the-server-side-
         # default), so have to be dropped after the table is dropped.
         for column in table.columns:
-            if (
-                column.default is not None
-                and column.default not in _ignore_sequences
-            ):
+            if column.default is not None and column.default not in _ignore_sequences:
                 self.traverse_single(column.default)
 
         table.dispatch.after_drop(

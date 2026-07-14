@@ -7,7 +7,6 @@
 
 """Define row constructs including :class:`.Row`."""
 
-
 import operator
 
 from .. import util
@@ -29,7 +28,6 @@ try:
     # the extension is present.
     def rowproxy_reconstructor(cls, state):
         return safe_rowproxy_reconstructor(cls, state)
-
 
 except ImportError:
 
@@ -161,10 +159,7 @@ except ImportError:
             mdindex = rec[MD_INDEX]
             if mdindex is None:
                 self._parent._raise_for_ambiguous_column_name(rec)
-            elif (
-                self._key_style == KEY_OBJECTS_ONLY
-                and int in key.__class__.__mro__
-            ):
+            elif self._key_style == KEY_OBJECTS_ONLY and int in key.__class__.__mro__:
                 raise KeyError(key)
 
             return self._data[mdindex]
@@ -257,9 +252,7 @@ class Row(BaseRow, collections_abc.Sequence):
             else:
 
                 def meth(*arg, **kw):
-                    return getattr(collections_abc.Sequence, name)(
-                        self, *arg, **kw
-                    )
+                    return getattr(collections_abc.Sequence, name)(self, *arg, **kw)
 
                 return meth
 

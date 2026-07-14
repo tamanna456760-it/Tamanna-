@@ -77,8 +77,7 @@ class CNNPatternDetector(BaseNeuralNetwork):
                 )
 
                 if self.config["architecture"].get("batch_normalization", False):
-                    model.add(layers.BatchNormalization(
-                        name=f"batch_norm_{i}"))
+                    model.add(layers.BatchNormalization(name=f"batch_norm_{i}"))
 
                 model.add(layers.MaxPooling2D(2, name=f"pool_{i}"))
 
@@ -86,8 +85,7 @@ class CNNPatternDetector(BaseNeuralNetwork):
             model.add(layers.Flatten(name="flatten"))
 
             for i, units in enumerate(self.config["architecture"]["dense_layers"]):
-                model.add(layers.Dense(
-                    units, activation="relu", name=f"dense_{i}"))
+                model.add(layers.Dense(units, activation="relu", name=f"dense_{i}"))
 
                 if self.config["architecture"].get("dropout_rate", 0) > 0:
                     model.add(
@@ -99,8 +97,7 @@ class CNNPatternDetector(BaseNeuralNetwork):
 
             # Output layer
             model.add(
-                layers.Dense(self.num_classes,
-                             activation="softmax", name="output")
+                layers.Dense(self.num_classes, activation="softmax", name="output")
             )
 
             self.logger.info("✅ CNN model built successfully")
@@ -169,8 +166,7 @@ class CNNPatternDetector(BaseNeuralNetwork):
             # Learning rate scheduler
             if config.get("lr_scheduler", False):
                 callbacks.append(
-                    tf.keras.callbacks.ReduceLROnPlateau(
-                        factor=0.5, patience=5)
+                    tf.keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=5)
                 )
 
             # Train the model
@@ -275,8 +271,7 @@ class CNNPatternDetector(BaseNeuralNetwork):
 
             # Create feature map model
             feature_map_model = tf.keras.models.Model(
-                inputs=self.model.input, outputs=self.model.get_layer(
-                    layer_name).output
+                inputs=self.model.input, outputs=self.model.get_layer(layer_name).output
             )
 
             # Generate feature maps

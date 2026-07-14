@@ -11,13 +11,12 @@ try:
     import tornado
 except ImportError:
     raise RuntimeError("You need tornado installed to use this worker.")
-import tornado.web
 import tornado.httpserver
+import tornado.web
+from gunicorn import __version__ as gversion
+from gunicorn.workers.base import Worker
 from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.wsgi import WSGIContainer
-from gunicorn.workers.base import Worker
-from gunicorn import __version__ as gversion
-
 
 # Tornado 5.0 updated its IOLoop, and the `io_loop` arguments to many
 # Tornado functions have been removed in Tornado 5.0. Also, they no
@@ -39,6 +38,7 @@ class TornadoWorker(Worker):
             old_clear(self)
             if "Gunicorn" not in self._headers["Server"]:
                 self._headers["Server"] += " (Gunicorn/%s)" % gversion
+
         web.RequestHandler.clear = clear
         sys.modules["tornado.web"] = web
 
@@ -63,7 +63,7 @@ class TornadoWorker(Worker):
     def heartbeat(self):
         if not self.alive:
             if self.server_alive:
-                if hasattr(self, 'server'):
+                if hasattr(self, "server"):
                     try:
                         self.server.stop()
                     except Exception:
@@ -107,8 +107,9 @@ class TornadoWorker(Worker):
         app = self.wsgi
 
         if tornado.version_info[0] < 6:
-            if not isinstance(app, tornado.web.Application) or \
-            isinstance(app, tornado.wsgi.WSGIApplication):
+            if not isinstance(app, tornado.web.Application) or isinstance(
+                app, tornado.wsgi.WSGIApplication
+            ):
                 app = WSGIContainer(app)
         elif not isinstance(app, WSGIContainer):
             app = WSGIContainer(app)
@@ -118,12 +119,13 @@ class TornadoWorker(Worker):
         # will help gunicorn shutdown the worker if max_requests
         # is exceeded.
         httpserver = sys.modules["tornado.httpserver"]
-        if hasattr(httpserver, 'HTTPConnection'):
+        if hasattr(httpserver, "HTTPConnection"):
             old_connection_finish = httpserver.HTTPConnection.finish
 
             def finish(other):
                 self.handle_request()
                 old_connection_finish(other)
+
             httpserver.HTTPConnection.finish = finish
             sys.modules["tornado.httpserver"] = httpserver
 
@@ -147,8 +149,7 @@ class TornadoWorker(Worker):
             if TORNADO5:
                 server = server_class(app, ssl_options=_ssl_opt)
             else:
-                server = server_class(app, io_loop=self.ioloop,
-                                      ssl_options=_ssl_opt)
+                server = server_class(app, io_loop=self.ioloop, ssl_options=_ssl_opt)
         else:
             if TORNADO5:
                 server = server_class(app)

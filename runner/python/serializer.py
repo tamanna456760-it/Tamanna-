@@ -55,19 +55,13 @@ needed for:
 
 import re
 
-from .. import Column
-from .. import Table
+from .. import Column, Table
 from ..engine import Engine
 from ..orm import class_mapper
 from ..orm.interfaces import MapperProperty
 from ..orm.mapper import Mapper
 from ..orm.session import Session
-from ..util import b64decode
-from ..util import b64encode
-from ..util import byte_buffer
-from ..util import pickle
-from ..util import text_type
-
+from ..util import b64decode, b64encode, byte_buffer, pickle, text_type
 
 __all__ = ["Serializer", "Deserializer", "dumps", "loads"]
 
@@ -94,9 +88,7 @@ def Serializer(*args, **kw):
             else:
                 id_ = "table:" + text_type(obj.key)
         elif isinstance(obj, Column) and isinstance(obj.table, Table):
-            id_ = (
-                "column:" + text_type(obj.table.key) + ":" + text_type(obj.key)
-            )
+            id_ = "column:" + text_type(obj.table.key) + ":" + text_type(obj.key)
         elif isinstance(obj, Session):
             id_ = "session:"
         elif isinstance(obj, Engine):

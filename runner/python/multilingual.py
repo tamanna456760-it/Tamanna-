@@ -197,11 +197,10 @@ class TamannaMultilingualLexer:
             self.position += 1
             self.column += 1
 
-        number_str = self.source_code[start_pos: self.position]
+        number_str = self.source_code[start_pos : self.position]
         value = float(number_str) if "." in number_str else int(number_str)
 
-        self.tokens.append(
-            Token(TokenType.NUMBER, value, self.line, start_col))
+        self.tokens.append(Token(TokenType.NUMBER, value, self.line, start_col))
 
     def _handle_identifier(self):
         start_pos = self.position
@@ -217,7 +216,7 @@ class TamannaMultilingualLexer:
             self.position += 1
             self.column += 1
 
-        identifier = self.source_code[start_pos: self.position]
+        identifier = self.source_code[start_pos : self.position]
         token_type = self.KEYWORDS.get(identifier, TokenType.IDENTIFIER)
 
         self.tokens.append(Token(token_type, identifier, self.line, start_col))
@@ -243,9 +242,8 @@ class TamannaMultilingualLexer:
         if self.position >= len(self.source_code):
             raise SyntaxError(f"Unterminated string at line {self.line}")
 
-        string_value = self.source_code[start_pos: self.position]
-        self.tokens.append(
-            Token(TokenType.STRING, string_value, self.line, start_col))
+        string_value = self.source_code[start_pos : self.position]
+        self.tokens.append(Token(TokenType.STRING, string_value, self.line, start_col))
 
         self.position += 1
         self.column += 1
@@ -277,14 +275,12 @@ class TamannaMultilingualLexer:
 
         # Two-character operators
         if char == "=" and next_char == "=":
-            self.tokens.append(
-                Token(TokenType.SOMAN, "==", self.line, self.column))
+            self.tokens.append(Token(TokenType.SOMAN, "==", self.line, self.column))
             self.position += 2
             self.column += 2
             return
         elif char == "!" and next_char == "=":
-            self.tokens.append(
-                Token(TokenType.ASOMAN, "!=", self.line, self.column))
+            self.tokens.append(Token(TokenType.ASOMAN, "!=", self.line, self.column))
             self.position += 2
             self.column += 2
             return
@@ -303,22 +299,19 @@ class TamannaMultilingualLexer:
             self.column += 2
             return
         elif char == ">" and next_char != "=":
-            self.tokens.append(
-                Token(TokenType.BORO, ">", self.line, self.column))
+            self.tokens.append(Token(TokenType.BORO, ">", self.line, self.column))
             self.position += 1
             self.column += 1
             return
         elif char == "<" and next_char != "=":
-            self.tokens.append(
-                Token(TokenType.CHOTO, "<", self.line, self.column))
+            self.tokens.append(Token(TokenType.CHOTO, "<", self.line, self.column))
             self.position += 1
             self.column += 1
             return
 
         # Single-character operators
         if char in operators:
-            self.tokens.append(
-                Token(operators[char], char, self.line, self.column))
+            self.tokens.append(Token(operators[char], char, self.line, self.column))
             self.position += 1
             self.column += 1
         else:
@@ -571,8 +564,7 @@ class TamannaMultilingualParser:
             self.eat(TokenType.RPAREN)
             return node
         else:
-            raise SyntaxError(
-                f"Unexpected token {token.type} at line {token.line}")
+            raise SyntaxError(f"Unexpected token {token.type} at line {token.line}")
 
 
 class TamannaMultilingualInterpreter:

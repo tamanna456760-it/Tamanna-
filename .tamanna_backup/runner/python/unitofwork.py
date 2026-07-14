@@ -58,8 +58,7 @@ def track_cascade_events(descriptor, prop):
             if (
                 prop._cascade.save_update
                 and (
-                    (prop.cascade_backrefs and not sess.future)
-                    or key == initiator.key
+                    (prop.cascade_backrefs and not sess.future) or key == initiator.key
                 )
                 and not sess._contains_state(item_state)
             ):
@@ -78,9 +77,7 @@ def track_cascade_events(descriptor, prop):
 
         if sess and sess._warn_on_events:
             sess._flush_warning(
-                "collection remove"
-                if prop.uselist
-                else "related attribute delete"
+                "collection remove" if prop.uselist else "related attribute delete"
             )
 
         if (
@@ -249,10 +246,7 @@ class UOWTransaction(object):
             # if the cached lookup was "passive" and now
             # we want non-passive, do a non-passive lookup and re-cache
 
-            if (
-                not cached_passive & attributes.SQL_OK
-                and passive & attributes.SQL_OK
-            ):
+            if not cached_passive & attributes.SQL_OK and passive & attributes.SQL_OK:
                 impl = state.manager[key].impl
                 history = impl.get_history(
                     state,
@@ -273,9 +267,7 @@ class UOWTransaction(object):
             history = impl.get_history(
                 state,
                 state.dict,
-                passive
-                | attributes.LOAD_AGAINST_COMMITTED
-                | attributes.NO_RAISE,
+                passive | attributes.LOAD_AGAINST_COMMITTED | attributes.NO_RAISE,
             )
             if history and impl.uses_objects:
                 state_history = history.as_state()
@@ -467,9 +459,7 @@ class UOWTransaction(object):
             return
 
         states = set(self.states)
-        isdel = set(
-            s for (s, (isdelete, listonly)) in self.states.items() if isdelete
-        )
+        isdel = set(s for (s, (isdelete, listonly)) in self.states.items() if isdelete)
         other = states.difference(isdel)
         if isdel:
             self.session._remove_newly_deleted(isdel)
@@ -509,7 +499,7 @@ class Preprocess(IterateMappersMixin):
 
         for mapper in self._mappers(uow):
             for state in uow.mappers[mapper].difference(self.processed):
-                (isdelete, listonly) = uow.states[state]
+                isdelete, listonly = uow.states[state]
                 if not listonly:
                     if isdelete:
                         delete_states.add(state)
@@ -525,12 +515,8 @@ class Preprocess(IterateMappersMixin):
 
         if delete_states or save_states:
             if not self.setup_flush_actions and (
-                self.dependency_processor.prop_has_changes(
-                    uow, delete_states, True
-                )
-                or self.dependency_processor.prop_has_changes(
-                    uow, save_states, False
-                )
+                self.dependency_processor.prop_has_changes(uow, delete_states, True)
+                or self.dependency_processor.prop_has_changes(uow, save_states, False)
             ):
                 self.dependency_processor.per_property_flush_actions(uow)
                 self.setup_flush_actions = True
@@ -567,9 +553,7 @@ class ProcessAll(IterateMappersMixin, PostSortRec):
         )
         self.isdelete = isdelete
         self.fromparent = fromparent
-        uow.deps[dependency_processor.parent.base_mapper].add(
-            dependency_processor
-        )
+        uow.deps[dependency_processor.parent.base_mapper].add(dependency_processor)
 
     def execute(self, uow):
         states = self._elements(uow)
@@ -595,7 +579,7 @@ class ProcessAll(IterateMappersMixin, PostSortRec):
     def _elements(self, uow):
         for mapper in self._mappers(uow):
             for state in uow.mappers[mapper]:
-                (isdelete, listonly) = uow.states[state]
+                isdelete, listonly = uow.states[state]
                 if isdelete == self.isdelete and not listonly:
                     yield state
 
@@ -634,9 +618,7 @@ class SaveUpdateAll(PostSortRec):
         )
 
     def per_state_flush_actions(self, uow):
-        states = list(
-            uow.states_for_mapper_hierarchy(self.mapper, False, False)
-        )
+        states = list(uow.states_for_mapper_hierarchy(self.mapper, False, False))
         base_mapper = self.mapper.base_mapper
         delete_all = DeleteAll(uow, base_mapper)
         for state in states:
@@ -671,9 +653,7 @@ class DeleteAll(PostSortRec):
         )
 
     def per_state_flush_actions(self, uow):
-        states = list(
-            uow.states_for_mapper_hierarchy(self.mapper, True, False)
-        )
+        states = list(uow.states_for_mapper_hierarchy(self.mapper, True, False))
         base_mapper = self.mapper.base_mapper
         save_all = SaveUpdateAll(uow, base_mapper)
         for state in states:
@@ -740,13 +720,9 @@ class SaveUpdateState(PostSortRec):
         persistence = util.preloaded.orm_persistence
         cls_ = self.__class__
         mapper = self.mapper
-        our_recs = [
-            r for r in recs if r.__class__ is cls_ and r.mapper is mapper
-        ]
+        our_recs = [r for r in recs if r.__class__ is cls_ and r.mapper is mapper]
         recs.difference_update(our_recs)
-        persistence.save_obj(
-            mapper, [self.state] + [r.state for r in our_recs], uow
-        )
+        persistence.save_obj(mapper, [self.state] + [r.state for r in our_recs], uow)
 
     def __repr__(self):
         return "%s(%s)" % (
@@ -768,14 +744,10 @@ class DeleteState(PostSortRec):
         persistence = util.preloaded.orm_persistence
         cls_ = self.__class__
         mapper = self.mapper
-        our_recs = [
-            r for r in recs if r.__class__ is cls_ and r.mapper is mapper
-        ]
+        our_recs = [r for r in recs if r.__class__ is cls_ and r.mapper is mapper]
         recs.difference_update(our_recs)
         states = [self.state] + [r.state for r in our_recs]
-        persistence.delete_obj(
-            mapper, [s for s in states if uow.states[s][0]], uow
-        )
+        persistence.delete_obj(mapper, [s for s in states if uow.states[s][0]], uow)
 
     def __repr__(self):
         return "%s(%s)" % (

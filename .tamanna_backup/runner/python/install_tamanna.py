@@ -38,8 +38,7 @@ class TamannaInstaller:
 
     def copy_files(self):
         """Copy system files to installation directory"""
-        files_to_copy = ["tamanna_system.py",
-                         "tamanna_config.hm", "requirements.txt"]
+        files_to_copy = ["tamanna_system.py", "tamanna_config.hm", "requirements.txt"]
 
         for file in files_to_copy:
             if Path(file).exists():

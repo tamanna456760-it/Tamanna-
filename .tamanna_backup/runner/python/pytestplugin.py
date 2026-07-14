@@ -18,7 +18,6 @@ import uuid
 
 import pytest
 
-
 py2k = sys.version_info < (3, 0)
 if py2k:
     try:
@@ -35,9 +34,7 @@ def pytest_addoption(parser):
         if callback_:
 
             class CallableAction(argparse.Action):
-                def __call__(
-                    self, parser, namespace, values, option_string=None
-                ):
+                def __call__(self, parser, namespace, values, option_string=None):
                     callback_(option_string, values, parser)
 
             kw["action"] = CallableAction
@@ -64,9 +61,7 @@ def pytest_addoption(parser):
                         help=help,
                     )
 
-                def __call__(
-                    self, parser, namespace, values, option_string=None
-                ):
+                def __call__(self, parser, namespace, values, option_string=None):
                     zeroarg_callback(option_string, values, parser)
 
             kw["action"] = CallableAction
@@ -85,16 +80,12 @@ def pytest_configure(config):
         plugin_base.restore_important_follower_config(config.workerinput)
         plugin_base.configure_follower(config.workerinput["follower_ident"])
     else:
-        if config.option.write_idents and os.path.exists(
-            config.option.write_idents
-        ):
+        if config.option.write_idents and os.path.exists(config.option.write_idents):
             os.remove(config.option.write_idents)
 
     plugin_base.pre_begin(config.option)
 
-    plugin_base.set_coverage_flag(
-        bool(getattr(config.option, "cov_source", False))
-    )
+    plugin_base.set_coverage_flag(bool(getattr(config.option, "cov_source", False)))
 
     plugin_base.set_fixture_functions(PytestFixtureFunctions)
 
@@ -142,9 +133,7 @@ def pytest_collection_finish(session):
 
         def _filter(filename):
             filename = os.path.normpath(os.path.abspath(filename))
-            if "lib/sqlalchemy" not in os.path.commonpath(
-                [filename, lib_sqlalchemy]
-            ):
+            if "lib/sqlalchemy" not in os.path.commonpath([filename, lib_sqlalchemy]):
                 return None
             if "testing" in filename:
                 return None
@@ -193,9 +182,7 @@ def pytest_collection_modifyitems(session, config, items):
 
     from sqlalchemy.testing import asyncio
 
-    rebuilt_items = collections.defaultdict(
-        lambda: collections.defaultdict(list)
-    )
+    rebuilt_items = collections.defaultdict(lambda: collections.defaultdict(list))
 
     items[:] = [
         item
@@ -226,9 +213,7 @@ def pytest_collection_modifyitems(session, config, items):
                     # support pytest 5.4.0 and above pytest.Class.from_parent
                     ctor = getattr(pytest.Class, "from_parent", pytest.Class)
                     module = test_class.getparent(pytest.Module)
-                    for fn in collect(
-                        ctor(name=sub_cls.__name__, parent=module)
-                    ):
+                    for fn in collect(ctor(name=sub_cls.__name__, parent=module)):
                         per_cls_dict[fn.name].append(fn)
 
     # class requirements will sometimes need to access the DB to check
@@ -414,14 +399,12 @@ def pytest_runtest_teardown(item, nextitem):
             if _current_report.failed:
                 if not e.args:
                     e.args = (
-                        "__Original test failure__:\n"
-                        + _current_report.longreprtext,
+                        "__Original test failure__:\n" + _current_report.longreprtext,
                     )
                 elif e.args[-1] and isinstance(e.args[-1], string_types):
                     args = list(e.args)
                     args[-1] += (
-                        "\n__Original test failure__:\n"
-                        + _current_report.longreprtext
+                        "\n__Original test failure__:\n" + _current_report.longreprtext
                     )
                     e.args = tuple(args)
                 else:
@@ -575,13 +558,10 @@ def _pytest_fn_decorator(target):
             __target_fn="__target_fn", __orig_fn="__orig_fn", name=fn.__name__
         )
         metadata.update(format_argspec_plus(spec, grouped=False))
-        code = (
-            """\
+        code = """\
 def %(name)s(%(args)s):
     return %(__target_fn)s(%(__orig_fn)s, %(apply_kw)s)
-"""
-            % metadata
-        )
+""" % metadata
         decorated = _exec_code_in_env(
             code, {"__target_fn": target, "__orig_fn": fn}, fn.__name__
         )
@@ -607,17 +587,15 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
         return pytest.skip.Exception(*arg, **kw)
 
     def mark_base_test_class(self):
-        return pytest.mark.usefixtures(
-            "setup_class_methods", "setup_test_methods"
-        )
+        return pytest.mark.usefixtures("setup_class_methods", "setup_test_methods")
 
     _combination_id_fns = {
         "i": lambda obj: obj,
         "r": repr,
         "s": str,
-        "n": lambda obj: obj.__name__
-        if hasattr(obj, "__name__")
-        else type(obj).__name__,
+        "n": lambda obj: (
+            obj.__name__ if hasattr(obj, "__name__") else type(obj).__name__
+        ),
     }
 
     def combinations(self, *arg_sets, **kw):
@@ -663,11 +641,7 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
             # to omit the first argument
             _arg_getter = operator.itemgetter(
                 0,
-                *[
-                    idx
-                    for idx, char in enumerate(id_)
-                    if char in ("n", "r", "s", "a")
-                ]
+                *[idx for idx, char in enumerate(id_) if char in ("n", "r", "s", "a")]
             )
             fns = [
                 (operator.itemgetter(idx), _combination_id_fns[char])
@@ -690,9 +664,7 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
                     (
                         parameters,
                         param_exclusions,
-                        "-".join(
-                            comb_fn(getter(arg)) for getter, comb_fn in fns
-                        ),
+                        "-".join(comb_fn(getter(arg)) for getter, comb_fn in fns),
                     )
                 )
 
@@ -707,9 +679,7 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
                 if param_exclusions:
                     has_exclusions = True
 
-                tobuild_pytest_params.append(
-                    (fn_params, param_exclusions, None)
-                )
+                tobuild_pytest_params.append((fn_params, param_exclusions, None))
 
         pytest_params = []
         for parameters, param_exclusions, id_ in tobuild_pytest_params:

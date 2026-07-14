@@ -5,14 +5,12 @@ class TestWiresharkPerformance(unittest.TestCase):
         try:
             # Generate high traffic
             traffic_cmd = ["ping", "-f", "127.0.0.1"]
-            traffic_proc = subprocess.Popen(
-                traffic_cmd, stdout=subprocess.PIPE)
+            traffic_proc = subprocess.Popen(traffic_cmd, stdout=subprocess.PIPE)
 
             # Capture with high buffer
             capture_cmd = ["tshark", "-i", "lo", "-c", "1000", "-B", "1024"]
             start_time = time.time()
-            result = subprocess.run(
-                capture_cmd, capture_output=True, timeout=30)
+            result = subprocess.run(capture_cmd, capture_output=True, timeout=30)
             capture_time = time.time() - start_time
 
             # Stop traffic generation
@@ -20,8 +18,7 @@ class TestWiresharkPerformance(unittest.TestCase):
 
             if result.returncode == 0:
                 packets_captured = len(
-                    [line for line in result.stdout.split(
-                        "\n") if line.strip()]
+                    [line for line in result.stdout.split("\n") if line.strip()]
                 )
                 print(
                     f"✓ High volume capture: {packets_captured} packets in {capture_time:.2f}s"

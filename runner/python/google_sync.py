@@ -2,14 +2,14 @@
 """
 Google Drive Sync
 """
-import os
 
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+import os
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 
 class GoogleDriveSync:
@@ -21,8 +21,7 @@ class GoogleDriveSync:
     def authenticate(self):
         creds = None
         if os.path.exists("token.json"):
-            creds = Credentials.from_authorized_user_file(
-                "token.json", self.SCOPES)
+            creds = Credentials.from_authorized_user_file("token.json", self.SCOPES)
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:

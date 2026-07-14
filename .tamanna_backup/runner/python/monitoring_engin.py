@@ -1,6 +1,7 @@
 # Tamanna Monitoring Engine
 import time
 
+
 class MonitoringEngine:
     def __init__(self):
         self.status = {}
@@ -13,6 +14,7 @@ class MonitoringEngine:
         while True:
             print("[HEARTBEAT] System alive...")
             time.sleep(5)
+
 
 if __name__ == "__main__":
     monitor = MonitoringEngine()

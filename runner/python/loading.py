@@ -12,6 +12,7 @@ the functions here are called primarily by Query, Mapper,
 as well as some of the attribute loading strategies.
 
 """
+
 from __future__ import absolute_import
 
 from . import attributes
@@ -64,7 +65,7 @@ def instances(cursor, context):
     )
 
     try:
-        (process, labels, extra) = list(
+        process, labels, extra = list(
             zip(
                 *[
                     query_entity.row_processor(context, cursor)
@@ -74,8 +75,7 @@ def instances(cursor, context):
         )
 
         if context.yield_per and (
-            context.loaders_require_buffering
-            or context.loaders_require_uniquing
+            context.loaders_require_buffering or context.loaders_require_uniquing
         ):
             raise sa_exc.InvalidRequestError(
                 "Can't use yield_per with eager loaders that require uniquing "
@@ -97,40 +97,43 @@ def instances(cursor, context):
         def go(obj):
             raise sa_exc.InvalidRequestError(
                 "Can't apply uniqueness to row tuple containing value of "
-                "type %r; this datatype produces non-hashable values"
-                % datatype
+                "type %r; this datatype produces non-hashable values" % datatype
             )
 
         return go
 
     if context.load_options._legacy_uniquing:
         unique_filters = [
-            _no_unique
-            if context.yield_per
-            else id
-            if (
-                ent.use_id_for_hash
-                or ent._non_hashable_value
-                or ent._null_column_type
+            (
+                _no_unique
+                if context.yield_per
+                else (
+                    id
+                    if (
+                        ent.use_id_for_hash
+                        or ent._non_hashable_value
+                        or ent._null_column_type
+                    )
+                    else None
+                )
             )
-            else None
             for ent in context.compile_state._entities
         ]
     else:
         unique_filters = [
-            _no_unique
-            if context.yield_per
-            else _not_hashable(ent.column.type)
-            if (not ent.use_id_for_hash and ent._non_hashable_value)
-            else id
-            if ent.use_id_for_hash
-            else None
+            (
+                _no_unique
+                if context.yield_per
+                else (
+                    _not_hashable(ent.column.type)
+                    if (not ent.use_id_for_hash and ent._non_hashable_value)
+                    else id if ent.use_id_for_hash else None
+                )
+            )
             for ent in context.compile_state._entities
         ]
 
-    row_metadata = SimpleResultMetaData(
-        labels, extra, _unique_filters=unique_filters
-    )
+    row_metadata = SimpleResultMetaData(labels, extra, _unique_filters=unique_filters)
 
     def chunks(size):
         while True:
@@ -150,9 +153,7 @@ def instances(cursor, context):
                 proc = process[0]
                 rows = [proc(row) for row in fetch]
             else:
-                rows = [
-                    tuple([proc(row) for proc in process]) for row in fetch
-                ]
+                rows = [tuple([proc(row) for proc in process]) for row in fetch]
 
             for path, post_load in context.post_load_paths.items():
                 post_load.invoke(context, path)
@@ -241,9 +242,7 @@ def merge_frozen_result(session, statement, frozen_result, load=True):
         ]
         keys = [ent._label_name for ent in ctx._entities]
 
-        keyed_tuple = result_tuple(
-            keys, [ent._extra_entities for ent in ctx._entities]
-        )
+        keyed_tuple = result_tuple(keys, [ent._extra_entities for ent in ctx._entities])
 
         result = []
         for newrow in frozen_result.rewrite_rows():
@@ -432,7 +431,6 @@ def load_on_pk_identity(
     bind_arguments=util.EMPTY_DICT,
     execution_options=util.EMPTY_DICT,
 ):
-
     """Load the given primary key identity from the database."""
 
     query = statement
@@ -446,10 +444,7 @@ def load_on_pk_identity(
     if load_options is None:
         load_options = QueryContext.default_load_options
 
-    if (
-        statement._compile_options
-        is SelectState.default_select_compile_options
-    ):
+    if statement._compile_options is SelectState.default_select_compile_options:
         compile_options = ORMCompileState.default_compile_options
     else:
         compile_options = statement._compile_options
@@ -457,7 +452,7 @@ def load_on_pk_identity(
     if primary_key_identity is not None:
         mapper = query._propagate_attrs["plugin_subject"]
 
-        (_get_clause, _get_params) = mapper._get_clause
+        _get_clause, _get_params = mapper._get_clause
 
         # None present in ident - turn those comparisons
         # into "IS NULL"
@@ -465,9 +460,7 @@ def load_on_pk_identity(
             nones = set(
                 [
                     _get_params[col].key
-                    for col, value in zip(
-                        mapper.primary_key, primary_key_identity
-                    )
+                    for col, value in zip(mapper.primary_key, primary_key_identity)
                     if value is None
                 ]
             )
@@ -488,9 +481,7 @@ def load_on_pk_identity(
         params = dict(
             [
                 (_get_params[primary_key].key, id_val)
-                for id_val, primary_key in zip(
-                    primary_key_identity, mapper.primary_key
-                )
+                for id_val, primary_key in zip(primary_key_identity, mapper.primary_key)
             ]
         )
     else:
@@ -589,9 +580,7 @@ def _setup_entity_query(
 ):
 
     if with_polymorphic:
-        poly_properties = mapper._iterate_polymorphic_properties(
-            with_polymorphic
-        )
+        poly_properties = mapper._iterate_polymorphic_properties(with_polymorphic)
     else:
         poly_properties = mapper._polymorphic_properties
 
@@ -687,13 +676,9 @@ def _instance_processor(
         # per attribute.
         props = mapper._prop_set
         if only_load_props is not None:
-            props = props.intersection(
-                mapper._props[k] for k in only_load_props
-            )
+            props = props.intersection(mapper._props[k] for k in only_load_props)
 
-        quick_populators = path.get(
-            context.attributes, "memoized_setups", _none_set
-        )
+        quick_populators = path.get(context.attributes, "memoized_setups", _none_set)
 
         todo = []
         cached_populators = {
@@ -838,9 +823,7 @@ def _instance_processor(
                 _polymorphic_from,
             )
         else:
-            selectin_load_via = mapper._should_selectin_load(
-                None, _polymorphic_from
-            )
+            selectin_load_via = mapper._should_selectin_load(None, _polymorphic_from)
 
         if selectin_load_via and selectin_load_via is not _polymorphic_from:
             # only_load_props goes w/ refresh_state only, and in a refresh
@@ -867,9 +850,7 @@ def _instance_processor(
             # super-rare condition; a refresh is being called
             # on a non-instance-key instance; this is meant to only
             # occur within a flush()
-            refresh_identity_key = mapper._identity_key_from_state(
-                refresh_state
-            )
+            refresh_identity_key = mapper._identity_key_from_state(refresh_state)
     else:
         refresh_identity_key = None
 
@@ -912,9 +893,7 @@ def _instance_processor(
                 loaded_instance = False
 
                 if version_check and version_id_getter and not currentload:
-                    _validate_version_id(
-                        mapper, state, dict_, row, version_id_getter
-                    )
+                    _validate_version_id(mapper, state, dict_, row, version_id_getter)
 
             else:
                 # create a new instance
@@ -953,9 +932,7 @@ def _instance_processor(
             # be conservative about setting load_path when populate_existing
             # is in effect; want to maintain options from the original
             # load.  see test_expire->test_refresh_maintains_deferred_options
-            if isnew and (
-                propagated_loader_options or not effective_populate_existing
-            ):
+            if isnew and (propagated_loader_options or not effective_populate_existing):
                 state.load_options = propagated_loader_options
                 state.load_path = load_path
 
@@ -989,9 +966,7 @@ def _instance_processor(
                         if state.runid != existing_runid:
                             _warn_for_runid_changed(state)
                 elif refresh_evt:
-                    state.manager.dispatch.refresh(
-                        state, context, only_load_props
-                    )
+                    state.manager.dispatch.refresh(state, context, only_load_props)
                     if state.runid != runid:
                         _warn_for_runid_changed(state)
 
@@ -1199,17 +1174,15 @@ def _populate_partial(
 
 def _validate_version_id(mapper, state, dict_, row, getter):
 
-    if mapper._get_state_attr_by_column(
-        state, dict_, mapper.version_id_col
-    ) != getter(row):
+    if mapper._get_state_attr_by_column(state, dict_, mapper.version_id_col) != getter(
+        row
+    ):
         raise orm_exc.StaleDataError(
             "Instance '%s' has version id '%s' which "
             "does not match database-loaded version id '%s'."
             % (
                 state_str(state),
-                mapper._get_state_attr_by_column(
-                    state, dict_, mapper.version_id_col
-                ),
+                mapper._get_state_attr_by_column(state, dict_, mapper.version_id_col),
                 getter(row),
             )
         )
@@ -1375,9 +1348,7 @@ def load_scalar_attributes(mapper, state, attribute_names, passive):
 
     result = False
 
-    no_autoflush = (
-        bool(passive & attributes.NO_AUTOFLUSH) or state.session.autocommit
-    )
+    no_autoflush = bool(passive & attributes.NO_AUTOFLUSH) or state.session.autocommit
 
     # in the case of inheritance, particularly concrete and abstract
     # concrete inheritance, the class manager might have some keys
@@ -1426,9 +1397,7 @@ def load_scalar_attributes(mapper, state, attribute_names, passive):
             # object is becoming persistent but hasn't yet been assigned
             # an identity_key.
             # check here to ensure we have the attrs we need.
-            pk_attrs = [
-                mapper._columntoproperty[col].key for col in mapper.primary_key
-            ]
+            pk_attrs = [mapper._columntoproperty[col].key for col in mapper.primary_key]
             if state.expired_attributes.intersection(pk_attrs):
                 raise sa_exc.InvalidRequestError(
                     "Instance %s cannot be refreshed - it's not "
@@ -1450,9 +1419,7 @@ def load_scalar_attributes(mapper, state, attribute_names, passive):
 
         result = load_on_ident(
             session,
-            future.select(mapper).set_label_style(
-                LABEL_STYLE_TABLENAME_PLUS_COL
-            ),
+            future.select(mapper).set_label_style(LABEL_STYLE_TABLENAME_PLUS_COL),
             identity_key,
             refresh_state=state,
             only_load_props=attribute_names,

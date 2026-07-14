@@ -19,7 +19,6 @@ from .langhelpers import inject_docstring_text
 from .langhelpers import inject_param_text
 from .. import exc
 
-
 SQLALCHEMY_WARN_20 = False
 
 if os.getenv("SQLALCHEMY_WARN_20", "false").lower() in ("true", "yes", "1"):
@@ -27,10 +26,7 @@ if os.getenv("SQLALCHEMY_WARN_20", "false").lower() in ("true", "yes", "1"):
 
 
 def _warn_with_version(msg, version, type_, stacklevel, code=None):
-    if (
-        issubclass(type_, exc.Base20DeprecationWarning)
-        and not SQLALCHEMY_WARN_20
-    ):
+    if issubclass(type_, exc.Base20DeprecationWarning) and not SQLALCHEMY_WARN_20:
         return
 
     warn = type_(msg, code=code)
@@ -40,9 +36,7 @@ def _warn_with_version(msg, version, type_, stacklevel, code=None):
 
 
 def warn_deprecated(msg, version, stacklevel=3, code=None):
-    _warn_with_version(
-        msg, version, exc.SADeprecationWarning, stacklevel, code=code
-    )
+    _warn_with_version(msg, version, exc.SADeprecationWarning, stacklevel, code=code)
 
 
 def warn_deprecated_limited(msg, args, version, stacklevel=3, code=None):
@@ -52,9 +46,7 @@ def warn_deprecated_limited(msg, args, version, stacklevel=3, code=None):
     """
     if args:
         msg = _hash_limit_string(msg, 10, args)
-    _warn_with_version(
-        msg, version, exc.SADeprecationWarning, stacklevel, code=code
-    )
+    _warn_with_version(msg, version, exc.SADeprecationWarning, stacklevel, code=code)
 
 
 def warn_deprecated_20(msg, stacklevel=3, code=None):
@@ -92,9 +84,7 @@ def deprecated_20_cls(
         "1.x series of SQLAlchemy and %s in 2.0."
         % (
             clsname,
-            "will be removed"
-            if not becomes_legacy
-            else "becomes a legacy construct",
+            "will be removed" if not becomes_legacy else "becomes a legacy construct",
         )
     )
 
@@ -181,9 +171,7 @@ def deprecated(
 
 
 def moved_20(message, **kw):
-    return deprecated(
-        "2.0", message=message, warning=exc.MovedIn20Warning, **kw
-    )
+    return deprecated("2.0", message=message, warning=exc.MovedIn20Warning, **kw)
 
 
 def deprecated_20(api_name, alternative=None, becomes_legacy=False, **kw):
@@ -200,9 +188,7 @@ def deprecated_20(api_name, alternative=None, becomes_legacy=False, **kw):
         % (
             api_name,
             type_,
-            "will be removed"
-            if not becomes_legacy
-            else "becomes a legacy construct",
+            "will be removed" if not becomes_legacy else "becomes a legacy construct",
         )
     )
 
@@ -251,9 +237,7 @@ def deprecated_params(**specs):
         versions[param] = version
         messages[param] = _sanitize_restructured_text(message)
         version_warnings[param] = (
-            exc.RemovedIn20Warning
-            if version == "2.0"
-            else exc.SADeprecationWarning
+            exc.RemovedIn20Warning if version == "2.0" else exc.SADeprecationWarning
         )
 
     def decorate(fn):
@@ -287,9 +271,7 @@ def deprecated_params(**specs):
                         stacklevel=3,
                     )
 
-            if check_any_kw in messages and set(kwargs).difference(
-                check_defaults
-            ):
+            if check_any_kw in messages and set(kwargs).difference(check_defaults):
 
                 _warn_with_version(
                     messages[check_any_kw],
@@ -347,8 +329,7 @@ def _decorate_cls_with_warning(
 
         if issubclass(wtype, exc.Base20DeprecationWarning):
             docstring_header += (
-                " (Background on SQLAlchemy 2.0 at: "
-                ":ref:`migration_20_toplevel`)"
+                " (Background on SQLAlchemy 2.0 at: " ":ref:`migration_20_toplevel`)"
             )
         doc = inject_docstring_text(doc, docstring_header, 1)
 
@@ -369,9 +350,7 @@ def _decorate_cls_with_warning(
             setattr(
                 cls,
                 constructor,
-                _decorate_with_warning(
-                    constructor_fn, wtype, message, version, None
-                ),
+                _decorate_with_warning(constructor_fn, wtype, message, version, None),
             )
     return cls
 
@@ -384,18 +363,13 @@ def _decorate_with_warning(
     message = _sanitize_restructured_text(message)
 
     if issubclass(wtype, exc.Base20DeprecationWarning):
-        doc_only = (
-            " (Background on SQLAlchemy 2.0 at: "
-            ":ref:`migration_20_toplevel`)"
-        )
+        doc_only = " (Background on SQLAlchemy 2.0 at: " ":ref:`migration_20_toplevel`)"
     else:
         doc_only = ""
 
     @decorator
     def warned(fn, *args, **kwargs):
-        skip_warning = not enable_warnings or kwargs.pop(
-            "_sa_skip_warning", False
-        )
+        skip_warning = not enable_warnings or kwargs.pop("_sa_skip_warning", False)
         if not skip_warning:
             _warn_with_version(message, version, wtype, stacklevel=3)
         return fn(*args, **kwargs)

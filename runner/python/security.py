@@ -92,8 +92,7 @@ class SecurityModule:
 
     async def handle_threats(self, scan_results: Dict):
         """Handle detected threats"""
-        self.logger.warning(
-            "Security threats detected - implementing countermeasures")
+        self.logger.warning("Security threats detected - implementing countermeasures")
 
         # Implement security measures
         countermeasures = [

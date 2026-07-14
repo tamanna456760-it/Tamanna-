@@ -10,6 +10,7 @@ This system allows specification of classes and expressions used in
 :func:`_orm.relationship` using strings.
 
 """
+
 import weakref
 
 from . import attributes
@@ -47,9 +48,9 @@ def add_class(classname, cls, decl_class_registry):
     try:
         root_module = decl_class_registry["_sa_module_registry"]
     except KeyError:
-        decl_class_registry[
-            "_sa_module_registry"
-        ] = root_module = _ModuleMarker("_sa_module_registry", None)
+        decl_class_registry["_sa_module_registry"] = root_module = _ModuleMarker(
+            "_sa_module_registry", None
+        )
 
     tokens = cls.__module__.split(".")
 
@@ -128,9 +129,7 @@ class _MultipleClassMarker(object):
 
     def __init__(self, classes, on_remove=None):
         self.on_remove = on_remove
-        self.contents = set(
-            [weakref.ref(item, self._remove_item) for item in classes]
-        )
+        self.contents = set([weakref.ref(item, self._remove_item) for item in classes])
         _registries.add(self)
 
     def remove_item(self, cls):
@@ -274,8 +273,7 @@ class _GetColumns(object):
         if mp:
             if key not in mp.all_orm_descriptors:
                 raise AttributeError(
-                    "Class %r does not have a mapped column named %r"
-                    % (self.cls, key)
+                    "Class %r does not have a mapped column named %r" % (self.cls, key)
                 )
 
             desc = mp.all_orm_descriptors[key]
@@ -292,9 +290,7 @@ class _GetColumns(object):
         return getattr(self.cls, key)
 
 
-inspection._inspects(_GetColumns)(
-    lambda target: inspection.inspect(target.cls)
-)
+inspection._inspects(_GetColumns)(lambda target: inspection.inspect(target.cls))
 
 
 class _GetTable(object):

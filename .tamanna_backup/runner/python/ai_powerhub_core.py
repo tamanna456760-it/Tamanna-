@@ -17,6 +17,7 @@ POWERHUB = "bd-king-r7"  # central power source
 NODES_FILE = "nodes_status.json"
 AI_UNITS_FILE = "ai_units.json"
 
+
 # =========================
 # LOAD / SAVE
 # =========================
@@ -27,9 +28,11 @@ def load(file):
     except:
         return {}
 
+
 def save(file, data):
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
+
 
 # =========================
 # NODE MANAGEMENT
@@ -42,10 +45,12 @@ def connect_nodes():
         save(NODES_FILE, nodes)
     return nodes
 
+
 def broadcast_power(nodes, unit_power):
     for node in nodes:
         nodes[node]["power"] += unit_power
     save(NODES_FILE, nodes)
+
 
 # =========================
 # AI UNIT CREATION
@@ -57,16 +62,12 @@ def create_ai_unit(unit_id, emergency=False):
     power = 10
     if emergency:
         power *= EMERGENCY_MULTIPLIER
-    unit = {
-        "id": unit_id,
-        "power": power,
-        "status": "active",
-        "timestamp": time.time()
-    }
+    unit = {"id": unit_id, "power": power, "status": "active", "timestamp": time.time()}
     units[unit_id] = unit
     save(AI_UNITS_FILE, units)
     print(f"✅ AI UNIT CREATED: {unit_id} | Power: {power}")
     return True
+
 
 # =========================
 # MAIN LOOP
@@ -107,6 +108,7 @@ def self_decision_monitor():
             broadcast_power(nodes, 50)
         # additional decision logic can go here
         time.sleep(3)
+
 
 # =========================
 # START SYSTEM

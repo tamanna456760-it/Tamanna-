@@ -9,6 +9,7 @@
 within INSERT and UPDATE statements.
 
 """
+
 import functools
 import operator
 
@@ -166,8 +167,7 @@ def _get_crud_params(compiler, stmt, compile_state, **kw):
         )
         if check:
             raise exc.CompileError(
-                "Unconsumed column names: %s"
-                % (", ".join("%s" % (c,) for c in check))
+                "Unconsumed column names: %s" % (", ".join("%s" % (c,) for c in check))
             )
 
     if compile_state._has_multi_parameters:
@@ -204,9 +204,7 @@ def _create_bind_param(
 ):
     if name is None:
         name = col.key
-    bindparam = elements.BindParameter(
-        name, value, type_=col.type, required=required
-    )
+    bindparam = elements.BindParameter(name, value, type_=col.type, required=required)
     bindparam._is_crud = True
     if process:
         bindparam = bindparam._compiler_dispatch(compiler, **kw)
@@ -235,11 +233,7 @@ def _handle_values_anonymous_param(compiler, col, value, name, **kw):
     # multiple insert/update are combined together using CTEs
     is_cte = "visiting_cte" in kw
 
-    if (
-        not is_cte
-        and value.unique
-        and isinstance(value.key, elements._truncated_label)
-    ):
+    if not is_cte and value.unique and isinstance(value.key, elements._truncated_label):
         compiler.truncated_names[("bindparam", value.key)] = name
 
     if value.type._isnull:
@@ -261,9 +255,7 @@ def _key_getters_for_crud_column(compiler, stmt, compile_state):
         # statement.
         _et = set(compile_state._extra_froms)
 
-        c_key_role = functools.partial(
-            coercions.expect_as_key, roles.DMLColumnRole
-        )
+        c_key_role = functools.partial(coercions.expect_as_key, roles.DMLColumnRole)
 
         def _column_as_key(key):
             str_key = c_key_role(key)
@@ -285,9 +277,7 @@ def _key_getters_for_crud_column(compiler, stmt, compile_state):
                 return col.key
 
     else:
-        _column_as_key = functools.partial(
-            coercions.expect_as_key, roles.DMLColumnRole
-        )
+        _column_as_key = functools.partial(coercions.expect_as_key, roles.DMLColumnRole)
         _getattr_col_key = _col_bind_name = operator.attrgetter("key")
 
     return _column_as_key, _getattr_col_key, _col_bind_name
@@ -340,9 +330,9 @@ def _scan_insert_from_select_cols(
         values.extend(add_select_cols)
         ins_from_select = compiler.stack[-1]["insert_from_select"]
         ins_from_select = ins_from_select._generate()
-        ins_from_select._raw_columns = tuple(
-            ins_from_select._raw_columns
-        ) + tuple(expr for col, col_expr, expr in add_select_cols)
+        ins_from_select._raw_columns = tuple(ins_from_select._raw_columns) + tuple(
+            expr for col, col_expr, expr in add_select_cols
+        )
         compiler.stack[-1]["insert_from_select"] = ins_from_select
 
 
@@ -414,9 +404,7 @@ def _scan_cols(
                     # column and get the value where RETURNING is an option.
                     # we can inline server-side functions in this case.
 
-                    _append_param_insert_pk_returning(
-                        compiler, stmt, c, values, kw
-                    )
+                    _append_param_insert_pk_returning(compiler, stmt, c, values, kw)
                 else:
                     # otherwise, find out how to invoke this column
                     # and get its value where RETURNING is not an option.
@@ -425,9 +413,7 @@ def _scan_cols(
                     # autoincrement column and the dialect supports it
                     # we can use cursor.lastrowid.
 
-                    _append_param_insert_pk_no_returning(
-                        compiler, stmt, c, values, kw
-                    )
+                    _append_param_insert_pk_no_returning(compiler, stmt, c, values, kw)
 
             elif c.default is not None:
                 # column has a default, but it's not a pk column, or it is but
@@ -491,9 +477,11 @@ def _append_param_parameter(
             c,
             value,
             required=value is REQUIRED,
-            name=_col_bind_name(c)
-            if not compile_state._has_multi_parameters
-            else "%s_m0" % _col_bind_name(c),
+            name=(
+                _col_bind_name(c)
+                if not compile_state._has_multi_parameters
+                else "%s_m0" % _col_bind_name(c)
+            ),
             **kw
         )
     elif value._is_bind_parameter:
@@ -501,9 +489,11 @@ def _append_param_parameter(
             compiler,
             c,
             value,
-            name=_col_bind_name(c)
-            if not compile_state._has_multi_parameters
-            else "%s_m0" % _col_bind_name(c),
+            name=(
+                _col_bind_name(c)
+                if not compile_state._has_multi_parameters
+                else "%s_m0" % _col_bind_name(c)
+            ),
             **kw
         )
     else:
@@ -548,8 +538,7 @@ def _append_param_insert_pk_returning(compiler, stmt, c, values, kw):
     if c.default is not None:
         if c.default.is_sequence:
             if compiler.dialect.supports_sequences and (
-                not c.default.optional
-                or not compiler.dialect.sequences_optional
+                not c.default.optional or not compiler.dialect.sequences_optional
             ):
                 values.append(
                     (
@@ -608,10 +597,7 @@ def _append_param_insert_pk_no_returning(compiler, stmt, c, values, kw):
             not c.default.is_sequence
             or (
                 compiler.dialect.supports_sequences
-                and (
-                    not c.default.optional
-                    or not compiler.dialect.sequences_optional
-                )
+                and (not c.default.optional or not compiler.dialect.sequences_optional)
             )
         )
     ) or (
@@ -723,9 +709,7 @@ def _append_param_insert_select_hasdefault(compiler, stmt, c, values, kw):
             (
                 c,
                 compiler.preparer.format_column(c),
-                _create_insert_prefetch_bind_param(
-                    compiler, c, process=False, **kw
-                ),
+                _create_insert_prefetch_bind_param(compiler, c, process=False, **kw),
             )
         )
 
@@ -775,23 +759,15 @@ def _append_param_update(
         compiler.returning.append(c)
 
 
-def _create_insert_prefetch_bind_param(
-    compiler, c, process=True, name=None, **kw
-):
+def _create_insert_prefetch_bind_param(compiler, c, process=True, name=None, **kw):
 
-    param = _create_bind_param(
-        compiler, c, None, process=process, name=name, **kw
-    )
+    param = _create_bind_param(compiler, c, None, process=process, name=name, **kw)
     compiler.insert_prefetch.append(c)
     return param
 
 
-def _create_update_prefetch_bind_param(
-    compiler, c, process=True, name=None, **kw
-):
-    param = _create_bind_param(
-        compiler, c, None, process=process, name=name, **kw
-    )
+def _create_update_prefetch_bind_param(compiler, c, process=True, name=None, **kw):
+    param = _create_bind_param(compiler, c, None, process=process, name=name, **kw)
     compiler.update_prefetch.append(c)
     return param
 
@@ -903,9 +879,7 @@ def _get_update_multitable_params(
                         (
                             c,
                             compiler.process(c, include_table=include_table),
-                            compiler.process(
-                                c.onupdate.arg.self_group(), **kw
-                            ),
+                            compiler.process(c.onupdate.arg.self_group(), **kw),
                         )
                     )
                     compiler.postfetch.append(c)
@@ -939,24 +913,18 @@ def _extend_values_for_multiparams(
 
         row = {_column_as_key(key): v for key, v in row.items()}
 
-        for (col, col_expr, param) in values_0:
+        for col, col_expr, param in values_0:
             if col.key in row:
                 key = col.key
 
                 if coercions._is_literal(row[key]):
                     new_param = _create_bind_param(
-                        compiler,
-                        col,
-                        row[key],
-                        name="%s_m%d" % (col.key, i + 1),
-                        **kw
+                        compiler, col, row[key], name="%s_m%d" % (col.key, i + 1), **kw
                     )
                 else:
                     new_param = compiler.process(row[key].self_group(), **kw)
             else:
-                new_param = _process_multiparam_default_bind(
-                    compiler, stmt, col, i, kw
-                )
+                new_param = _process_multiparam_default_bind(compiler, stmt, col, i, kw)
 
             extension.append((col, col_expr, new_param))
 
@@ -1014,10 +982,7 @@ def _get_returning_modifiers(compiler, stmt, compile_state):
         and not stmt._inline
         and (
             not compiler.for_executemany
-            or (
-                compiler.dialect.insert_executemany_returning
-                and stmt._return_defaults
-            )
+            or (compiler.dialect.insert_executemany_returning and stmt._return_defaults)
         )
         and not stmt._returning
         and not compile_state._has_multi_parameters

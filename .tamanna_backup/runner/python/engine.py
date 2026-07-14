@@ -277,9 +277,7 @@ class Connection(_LegacyConnection):
         :return: a :class:`_engine.Result` object.
 
         """
-        return self._execute_20(
-            statement, parameters, execution_options or NO_OPTIONS
-        )
+        return self._execute_20(statement, parameters, execution_options or NO_OPTIONS)
 
     def scalar(self, statement, parameters=None, execution_options=None):
         r"""Executes a SQL statement construct and returns a scalar object.
@@ -317,19 +315,11 @@ class Engine(_LegacyEngine):
     _is_future = True
 
     def _not_implemented(self, *arg, **kw):
-        raise NotImplementedError(
-            "This method is not implemented for SQLAlchemy 2.0."
-        )
+        raise NotImplementedError("This method is not implemented for SQLAlchemy 2.0.")
 
-    transaction = (
-        run_callable
-    ) = (
-        execute
-    ) = (
-        scalar
-    ) = (
-        _execute_clauseelement
-    ) = _execute_compiled = table_names = has_table = _not_implemented
+    transaction = run_callable = execute = scalar = _execute_clauseelement = (
+        _execute_compiled
+    ) = table_names = has_table = _not_implemented
 
     def _run_ddl_visitor(self, visitorcallable, element, **kwargs):
         # TODO: this is for create_all support etc.   not clear if we

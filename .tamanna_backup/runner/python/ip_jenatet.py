@@ -9,9 +9,11 @@ CODE_EXT = {".py", ".js", ".php", ".java", ".c", ".cpp", ".html"}
 # Output file
 OUTPUT_FILE = "TAMANNA_SYSTEM_ALL_CODE.txt"
 
+
 def is_code_file(filename):
     _, ext = os.path.splitext(filename)
     return ext.lower() in CODE_EXT
+
 
 def collect_all_code(repo_path):
     combined = []
@@ -37,11 +39,13 @@ def collect_all_code(repo_path):
 
     return combined
 
+
 def save_output(data):
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(data))
 
     print(f"\n✔ All code merged successfully into: {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     all_code = collect_all_code(REPO_PATH)

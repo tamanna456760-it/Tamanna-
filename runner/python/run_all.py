@@ -6,7 +6,7 @@ scripts = [
     "device_monitor.py",
     "system_resources.py",
     "network_monitor.py",
-    "backup_logs.py"
+    "backup_logs.py",
 ]
 
 for script in scripts:

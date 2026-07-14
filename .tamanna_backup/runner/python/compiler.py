@@ -348,18 +348,14 @@ class FromLinter(collections.namedtuple("FromLinter", ["froms", "edges"])):
                     "between each element to resolve."
                 )
                 froms_str = ", ".join(
-                    '"{elem}"'.format(elem=self.froms[from_])
-                    for from_ in froms
+                    '"{elem}"'.format(elem=self.froms[from_]) for from_ in froms
                 )
-                message = template.format(
-                    froms=froms_str, start=self.froms[start_with]
-                )
+                message = template.format(froms=froms_str, start=self.froms[start_with])
 
                 util.warn(message)
 
 
 class Compiled(object):
-
     """Represent a compiled SQL or DDL expression.
 
     The ``__str__`` method of the ``Compiled`` object should produce
@@ -438,9 +434,7 @@ class Compiled(object):
         self.preparer = self.dialect.identifier_preparer
         if schema_translate_map:
             self.schema_translate_map = schema_translate_map
-            self.preparer = self.preparer._with_schema_translate(
-                schema_translate_map
-            )
+            self.preparer = self.preparer._with_schema_translate(schema_translate_map)
 
         if statement is not None:
             self.statement = statement
@@ -527,7 +521,6 @@ class TypeCompiler(util.with_metaclass(util.EnsureKWArgType, object)):
 # this was a Visitable, but to allow accurate detection of
 # column elements this is actually a column element
 class _CompileLabel(elements.ColumnElement):
-
     """lightweight label object which acts as an expression.Label."""
 
     __visit_name__ = "label"
@@ -723,9 +716,7 @@ class SQLCompiler(Compiled):
         self.cache_key = cache_key
 
         if cache_key:
-            self._cache_key_bind_match = ckbm = {
-                b.key: b for b in cache_key[1]
-            }
+            self._cache_key_bind_match = ckbm = {b.key: b for b in cache_key[1]}
             ckbm.update({b: [b] for b in cache_key[1]})
 
         # compile INSERT/UPDATE defaults/sequences to expect executemany
@@ -761,9 +752,7 @@ class SQLCompiler(Compiled):
 
         self.ctes = None
 
-        self.label_length = (
-            dialect.label_length or dialect.max_identifier_length
-        )
+        self.label_length = dialect.label_length or dialect.max_identifier_length
 
         # a map which tracks "anonymous" identifiers that are created on
         # the fly here
@@ -903,11 +892,13 @@ class SQLCompiler(Compiled):
             for key, value in (
                 (
                     self.bind_names[bindparam],
-                    bindparam.type._cached_bind_processor(self.dialect)
-                    if not bindparam.type._is_tuple_type
-                    else tuple(
-                        elem_type._cached_bind_processor(self.dialect)
-                        for elem_type in bindparam.type.types
+                    (
+                        bindparam.type._cached_bind_processor(self.dialect)
+                        if not bindparam.type._is_tuple_type
+                        else tuple(
+                            elem_type._cached_bind_processor(self.dialect)
+                            for elem_type in bindparam.type.types
+                        )
                     ),
                 )
                 for bindparam in self.bind_names
@@ -978,21 +969,17 @@ class SQLCompiler(Compiled):
                     if _group_number:
                         raise exc.InvalidRequestError(
                             "A value is required for bind parameter %r, "
-                            "in parameter group %d"
-                            % (bindparam.key, _group_number),
+                            "in parameter group %d" % (bindparam.key, _group_number),
                             code="cd3x",
                         )
                     else:
                         raise exc.InvalidRequestError(
-                            "A value is required for bind parameter %r"
-                            % bindparam.key,
+                            "A value is required for bind parameter %r" % bindparam.key,
                             code="cd3x",
                         )
                 else:
                     if resolved_extracted:
-                        value_param = resolved_extracted.get(
-                            bindparam, bindparam
-                        )
+                        value_param = resolved_extracted.get(bindparam, bindparam)
                     else:
                         value_param = bindparam
 
@@ -1014,14 +1001,12 @@ class SQLCompiler(Compiled):
                     if _group_number:
                         raise exc.InvalidRequestError(
                             "A value is required for bind parameter %r, "
-                            "in parameter group %d"
-                            % (bindparam.key, _group_number),
+                            "in parameter group %d" % (bindparam.key, _group_number),
                             code="cd3x",
                         )
                     else:
                         raise exc.InvalidRequestError(
-                            "A value is required for bind parameter %r"
-                            % bindparam.key,
+                            "A value is required for bind parameter %r" % bindparam.key,
                             code="cd3x",
                         )
 
@@ -1037,9 +1022,7 @@ class SQLCompiler(Compiled):
             return pd
 
     @util.memoized_instancemethod
-    def _get_set_input_sizes_lookup(
-        self, include_types=None, exclude_types=None
-    ):
+    def _get_set_input_sizes_lookup(self, include_types=None, exclude_types=None):
         if not hasattr(self, "bind_names"):
             return None
 
@@ -1165,9 +1148,7 @@ class SQLCompiler(Compiled):
         # *escaped* parameter names in:
         # construct_params(), replacement_expressions
 
-        for name in (
-            self.positiontup if self.positional else self.bind_names.values()
-        ):
+        for name in (self.positiontup if self.positional else self.bind_names.values()):
             escaped_name = (
                 self.escaped_bind_names.get(name, name)
                 if self.escaped_bind_names
@@ -1178,9 +1159,7 @@ class SQLCompiler(Compiled):
                 if escaped_name not in replacement_expressions:
                     value = parameters.pop(escaped_name)
 
-                replacement_expressions[
-                    escaped_name
-                ] = self.render_literal_bindparam(
+                replacement_expressions[escaped_name] = self.render_literal_bindparam(
                     parameter, render_literal_value=value
                 )
                 continue
@@ -1198,9 +1177,7 @@ class SQLCompiler(Compiled):
                     values = parameters.pop(escaped_name)
 
                     leep = self._literal_execute_expanding_parameter
-                    to_update, replacement_expr = leep(
-                        escaped_name, parameter, values
-                    )
+                    to_update, replacement_expr = leep(escaped_name, parameter, values)
 
                     to_update_sets[escaped_name] = to_update
                     replacement_expressions[escaped_name] = replacement_expr
@@ -1242,8 +1219,7 @@ class SQLCompiler(Compiled):
                 tok = m.group(2).split("~~")
                 be_left, be_right = tok[1], tok[3]
                 expr = ", ".join(
-                    "%s%s%s" % (be_left, exp, be_right)
-                    for exp in expr.split(", ")
+                    "%s%s%s" % (be_left, exp, be_right) for exp in expr.split(", ")
                 )
             return expr
 
@@ -1275,9 +1251,7 @@ class SQLCompiler(Compiled):
                 for value, expanded_key in zip(
                     bind.value, expanded_state.parameter_expansion[key]
                 ):
-                    self.binds[expanded_key] = new_param = bind._with_value(
-                        value
-                    )
+                    self.binds[expanded_key] = new_param = bind._with_value(value)
                     self.bind_names[new_param] = expanded_key
 
         return expanded_state
@@ -1319,9 +1293,7 @@ class SQLCompiler(Compiled):
         autoinc_col = table._autoincrement_column
         if autoinc_col is not None:
             # apply type post processors to the lastrowid
-            proc = autoinc_col.type._cached_result_processor(
-                self.dialect, None
-            )
+            proc = autoinc_col.type._cached_result_processor(self.dialect, None)
         else:
             proc = None
 
@@ -1358,11 +1330,13 @@ class SQLCompiler(Compiled):
         ret = {col: idx for idx, col in enumerate(self.returning)}
 
         getters = [
-            (operator.itemgetter(ret[col]), True)
-            if col in ret
-            else (
-                operator.methodcaller("get", param_key_getter(col), None),
-                False,
+            (
+                (operator.itemgetter(ret[col]), True)
+                if col in ret
+                else (
+                    operator.methodcaller("get", param_key_getter(col), None),
+                    False,
+                )
             )
             for col in table.primary_key
         ]
@@ -1392,9 +1366,7 @@ class SQLCompiler(Compiled):
     def visit_select_statement_grouping(self, grouping, **kwargs):
         return "(" + grouping.element._compiler_dispatch(self, **kwargs) + ")"
 
-    def visit_label_reference(
-        self, element, within_columns_clause=False, **kwargs
-    ):
+    def visit_label_reference(self, element, within_columns_clause=False, **kwargs):
         if self.stack and self.dialect.supports_simple_order_by_label:
             compile_state = self.stack[-1]["compile_state"]
 
@@ -1417,17 +1389,13 @@ class SQLCompiler(Compiled):
             if (
                 order_by_elem is not None
                 and order_by_elem.name in resolve_dict
-                and order_by_elem.shares_lineage(
-                    resolve_dict[order_by_elem.name]
-                )
+                and order_by_elem.shares_lineage(resolve_dict[order_by_elem.name])
             ):
-                kwargs[
-                    "render_label_as_label"
-                ] = element.element._order_by_label_element
+                kwargs["render_label_as_label"] = (
+                    element.element._order_by_label_element
+                )
         return self.process(
-            element.element,
-            within_columns_clause=within_columns_clause,
-            **kwargs
+            element.element, within_columns_clause=within_columns_clause, **kwargs
         )
 
     def visit_textual_label_reference(
@@ -1473,9 +1441,7 @@ class SQLCompiler(Compiled):
         # only render labels within the columns clause
         # or ORDER BY clause of a select.  dialect-specific compilers
         # can modify this behavior.
-        render_label_with_as = (
-            within_columns_clause and not within_label_clause
-        )
+        render_label_with_as = within_columns_clause and not within_label_clause
         render_label_only = render_label_as_label is label
 
         if render_label_only or render_label_with_as:
@@ -1494,10 +1460,7 @@ class SQLCompiler(Compiled):
                 )
             return (
                 label.element._compiler_dispatch(
-                    self,
-                    within_columns_clause=True,
-                    within_label_clause=True,
-                    **kw
+                    self, within_columns_clause=True, within_label_clause=True, **kw
                 )
                 + OPERATORS[operators.as_]
                 + self.preparer.format_label(label, labelname)
@@ -1554,9 +1517,7 @@ class SQLCompiler(Compiled):
             effective_schema = self.preparer.schema_for_object(table)
 
             if effective_schema:
-                schema_prefix = (
-                    self.preparer.quote_schema(effective_schema) + "."
-                )
+                schema_prefix = self.preparer.quote_schema(effective_schema) + "."
             else:
                 schema_prefix = ""
             tablename = table.name
@@ -1609,14 +1570,10 @@ class SQLCompiler(Compiled):
         # un-escape any \:params
         return BIND_PARAMS_ESC.sub(
             lambda m: m.group(1),
-            BIND_PARAMS.sub(
-                do_bindparam, self.post_process_text(textclause.text)
-            ),
+            BIND_PARAMS.sub(do_bindparam, self.post_process_text(textclause.text)),
         )
 
-    def visit_textual_select(
-        self, taf, compound_index=None, asfrom=False, **kw
-    ):
+    def visit_textual_select(self, taf, compound_index=None, asfrom=False, **kw):
 
         toplevel = not self.stack
         entry = self._default_stack_entry if toplevel else self.stack[-1]
@@ -1635,16 +1592,13 @@ class SQLCompiler(Compiled):
         populate_result_map = (
             toplevel
             or (
-                compound_index == 0
-                and entry.get("need_result_map_for_compound", False)
+                compound_index == 0 and entry.get("need_result_map_for_compound", False)
             )
             or entry.get("need_result_map_for_nested", False)
         )
 
         if populate_result_map:
-            self._ordered_columns = (
-                self._textual_ordered_columns
-            ) = taf.positional
+            self._ordered_columns = self._textual_ordered_columns = taf.positional
 
             # enable looser result column matching when the SQL text links to
             # Column objects by name only
@@ -1685,9 +1639,7 @@ class SQLCompiler(Compiled):
 
     def _generate_delimited_list(self, elements, separator, **kw):
         return separator.join(
-            s
-            for s in (c._compiler_dispatch(self, **kw) for c in elements)
-            if s
+            s for s in (c._compiler_dispatch(self, **kw) for c in elements) if s
         )
 
     def _generate_delimited_and_list(self, clauses, **kw):
@@ -1703,9 +1655,7 @@ class SQLCompiler(Compiled):
         else:
             separator = OPERATORS[operators.and_]
             return separator.join(
-                s
-                for s in (c._compiler_dispatch(self, **kw) for c in clauses)
-                if s
+                s for s in (c._compiler_dispatch(self, **kw) for c in clauses) if s
             )
 
     def visit_tuple(self, clauselist, **kw):
@@ -1733,9 +1683,7 @@ class SQLCompiler(Compiled):
                 + " "
             )
         if clause.else_ is not None:
-            x += (
-                "ELSE " + clause.else_._compiler_dispatch(self, **kwargs) + " "
-            )
+            x += "ELSE " + clause.else_._compiler_dispatch(self, **kwargs) + " "
         x += "END"
         return x
 
@@ -1751,24 +1699,36 @@ class SQLCompiler(Compiled):
     def _format_frame_clause(self, range_, **kw):
 
         return "%s AND %s" % (
-            "UNBOUNDED PRECEDING"
-            if range_[0] is elements.RANGE_UNBOUNDED
-            else "CURRENT ROW"
-            if range_[0] is elements.RANGE_CURRENT
-            else "%s PRECEDING"
-            % (self.process(elements.literal(abs(range_[0])), **kw),)
-            if range_[0] < 0
-            else "%s FOLLOWING"
-            % (self.process(elements.literal(range_[0]), **kw),),
-            "UNBOUNDED FOLLOWING"
-            if range_[1] is elements.RANGE_UNBOUNDED
-            else "CURRENT ROW"
-            if range_[1] is elements.RANGE_CURRENT
-            else "%s PRECEDING"
-            % (self.process(elements.literal(abs(range_[1])), **kw),)
-            if range_[1] < 0
-            else "%s FOLLOWING"
-            % (self.process(elements.literal(range_[1]), **kw),),
+            (
+                "UNBOUNDED PRECEDING"
+                if range_[0] is elements.RANGE_UNBOUNDED
+                else (
+                    "CURRENT ROW"
+                    if range_[0] is elements.RANGE_CURRENT
+                    else (
+                        "%s PRECEDING"
+                        % (self.process(elements.literal(abs(range_[0])), **kw),)
+                        if range_[0] < 0
+                        else "%s FOLLOWING"
+                        % (self.process(elements.literal(range_[0]), **kw),)
+                    )
+                )
+            ),
+            (
+                "UNBOUNDED FOLLOWING"
+                if range_[1] is elements.RANGE_UNBOUNDED
+                else (
+                    "CURRENT ROW"
+                    if range_[1] is elements.RANGE_CURRENT
+                    else (
+                        "%s PRECEDING"
+                        % (self.process(elements.literal(abs(range_[1])), **kw),)
+                        if range_[1] < 0
+                        else "%s FOLLOWING"
+                        % (self.process(elements.literal(range_[1]), **kw),)
+                    )
+                )
+            ),
         )
 
     def visit_over(self, over, **kwargs):
@@ -1777,9 +1737,7 @@ class SQLCompiler(Compiled):
                 over.range_, **kwargs
             )
         elif over.rows:
-            range_ = "ROWS BETWEEN %s" % self._format_frame_clause(
-                over.rows, **kwargs
-            )
+            range_ = "ROWS BETWEEN %s" % self._format_frame_clause(over.rows, **kwargs)
         else:
             range_ = None
 
@@ -1787,8 +1745,7 @@ class SQLCompiler(Compiled):
             over.element._compiler_dispatch(self, **kwargs),
             " ".join(
                 [
-                    "%s BY %s"
-                    % (word, clause._compiler_dispatch(self, **kwargs))
+                    "%s BY %s" % (word, clause._compiler_dispatch(self, **kwargs))
                     for word, clause in (
                         ("PARTITION", over.partition_by),
                         ("ORDER", over.order_by),
@@ -1866,16 +1823,13 @@ class SQLCompiler(Compiled):
 
     def visit_sequence(self, sequence, **kw):
         raise NotImplementedError(
-            "Dialect '%s' does not support sequence increments."
-            % self.dialect.name
+            "Dialect '%s' does not support sequence increments." % self.dialect.name
         )
 
     def function_argspec(self, func, **kwargs):
         return func.clause_expr._compiler_dispatch(self, **kwargs)
 
-    def visit_compound_select(
-        self, cs, asfrom=False, compound_index=None, **kwargs
-    ):
+    def visit_compound_select(self, cs, asfrom=False, compound_index=None, **kwargs):
         toplevel = not self.stack
 
         compile_state = cs._compile_state_factory(cs, self, **kwargs)
@@ -1887,8 +1841,7 @@ class SQLCompiler(Compiled):
 
         entry = self._default_stack_entry if toplevel else self.stack[-1]
         need_result_map = toplevel or (
-            not compound_index
-            and entry.get("need_result_map_for_compound", False)
+            not compound_index and entry.get("need_result_map_for_compound", False)
         )
 
         # indicates there is already a CompoundSelect in play
@@ -1913,9 +1866,7 @@ class SQLCompiler(Compiled):
 
         text = (" " + keyword + " ").join(
             (
-                c._compiler_dispatch(
-                    self, asfrom=asfrom, compound_index=i, **kwargs
-                )
+                c._compiler_dispatch(self, asfrom=asfrom, compound_index=i, **kwargs)
                 for i, c in enumerate(cs.selects)
             )
         )
@@ -1952,9 +1903,7 @@ class SQLCompiler(Compiled):
         )
         return getattr(self, attrname, None)
 
-    def visit_unary(
-        self, unary, add_to_result_map=None, result_map_targets=(), **kw
-    ):
+    def visit_unary(self, unary, add_to_result_map=None, result_map_targets=(), **kw):
 
         if add_to_result_map is not None:
             result_map_targets += (unary,)
@@ -1967,9 +1916,7 @@ class SQLCompiler(Compiled):
                     "Unary expression does not support operator "
                     "and modifier simultaneously"
                 )
-            disp = self._get_operator_dispatch(
-                unary.operator, "unary", "operator"
-            )
+            disp = self._get_operator_dispatch(unary.operator, "unary", "operator")
             if disp:
                 return disp(unary, unary.operator, **kw)
             else:
@@ -1977,9 +1924,7 @@ class SQLCompiler(Compiled):
                     unary, OPERATORS[unary.operator], **kw
                 )
         elif unary.modifier:
-            disp = self._get_operator_dispatch(
-                unary.modifier, "unary", "modifier"
-            )
+            disp = self._get_operator_dispatch(unary.modifier, "unary", "modifier")
             if disp:
                 return disp(unary, unary.modifier, **kw)
             else:
@@ -1987,24 +1932,16 @@ class SQLCompiler(Compiled):
                     unary, OPERATORS[unary.modifier], **kw
                 )
         else:
-            raise exc.CompileError(
-                "Unary expression has no operator or modifier"
-            )
+            raise exc.CompileError("Unary expression has no operator or modifier")
 
     def visit_is_true_unary_operator(self, element, operator, **kw):
-        if (
-            element._is_implicitly_boolean
-            or self.dialect.supports_native_boolean
-        ):
+        if element._is_implicitly_boolean or self.dialect.supports_native_boolean:
             return self.process(element.element, **kw)
         else:
             return "%s = 1" % self.process(element.element, **kw)
 
     def visit_is_false_unary_operator(self, element, operator, **kw):
-        if (
-            element._is_implicitly_boolean
-            or self.dialect.supports_native_boolean
-        ):
+        if element._is_implicitly_boolean or self.dialect.supports_native_boolean:
             return "NOT %s" % self.process(element.element, **kw)
         else:
             return "%s = 0" % self.process(element.element, **kw)
@@ -2018,23 +1955,17 @@ class SQLCompiler(Compiled):
         # The brackets are required in the NOT IN operation because the empty
         # case is handled using the form "(col NOT IN (null) OR 1 = 1)".
         # The presence of the OR makes the brackets required.
-        return "(%s)" % self._generate_generic_binary(
-            binary, OPERATORS[operator], **kw
-        )
+        return "(%s)" % self._generate_generic_binary(binary, OPERATORS[operator], **kw)
 
     def visit_empty_set_op_expr(self, type_, expand_op):
         if expand_op is operators.not_in_op:
             if len(type_) > 1:
-                return "(%s)) OR (1 = 1" % (
-                    ", ".join("NULL" for element in type_)
-                )
+                return "(%s)) OR (1 = 1" % (", ".join("NULL" for element in type_))
             else:
                 return "NULL) OR (1 = 1"
         elif expand_op is operators.in_op:
             if len(type_) > 1:
-                return "(%s)) AND (1 != 1" % (
-                    ", ".join("NULL" for element in type_)
-                )
+                return "(%s)) AND (1 != 1" % (", ".join("NULL" for element in type_))
             else:
                 return "NULL) AND (1 != 1"
         else:
@@ -2042,13 +1973,10 @@ class SQLCompiler(Compiled):
 
     def visit_empty_set_expr(self, element_types):
         raise NotImplementedError(
-            "Dialect '%s' does not support empty set expression."
-            % self.dialect.name
+            "Dialect '%s' does not support empty set expression." % self.dialect.name
         )
 
-    def _literal_execute_expanding_parameter_literal_binds(
-        self, parameter, values
-    ):
+    def _literal_execute_expanding_parameter_literal_binds(self, parameter, values):
 
         typ_dialect_impl = parameter.type._unwrapped_dialect_impl(self.dialect)
 
@@ -2068,9 +1996,7 @@ class SQLCompiler(Compiled):
         elif typ_dialect_impl._is_tuple_type or (
             typ_dialect_impl._isnull
             and isinstance(values[0], util.collections_abc.Sequence)
-            and not isinstance(
-                values[0], util.string_types + util.binary_types
-            )
+            and not isinstance(values[0], util.string_types + util.binary_types)
         ):
 
             replacement_expression = (
@@ -2089,8 +2015,7 @@ class SQLCompiler(Compiled):
             )
         else:
             replacement_expression = ", ".join(
-                self.render_literal_value(value, parameter.type)
-                for value in values
+                self.render_literal_value(value, parameter.type) for value in values
             )
 
         return (), replacement_expression
@@ -2119,9 +2044,7 @@ class SQLCompiler(Compiled):
         elif typ_dialect_impl._is_tuple_type or (
             typ_dialect_impl._isnull
             and isinstance(values[0], util.collections_abc.Sequence)
-            and not isinstance(
-                values[0], util.string_types + util.binary_types
-            )
+            and not isinstance(values[0], util.string_types + util.binary_types)
         ):
             assert not typ_dialect_impl._is_array
             to_update = [
@@ -2144,8 +2067,7 @@ class SQLCompiler(Compiled):
             )
         else:
             to_update = [
-                ("%s_%s" % (name, i), value)
-                for i, value in enumerate(values, 1)
+                ("%s_%s" % (name, i), value) for i, value in enumerate(values, 1)
             ]
             replacement_expression = ", ".join(
                 self.bindtemplate % {"name": key} for key, value in to_update
@@ -2227,9 +2149,7 @@ class SQLCompiler(Compiled):
     def visit_custom_op_binary(self, element, operator, **kw):
         kw["eager_grouping"] = operator.eager_grouping
         return self._generate_generic_binary(
-            element,
-            " " + self.escape_literal_column(operator.opstring) + " ",
-            **kw
+            element, " " + self.escape_literal_column(operator.opstring) + " ", **kw
         )
 
     def visit_custom_op_unary_operator(self, element, operator, **kw):
@@ -2242,22 +2162,16 @@ class SQLCompiler(Compiled):
             element, " " + self.escape_literal_column(operator.opstring), **kw
         )
 
-    def _generate_generic_binary(
-        self, binary, opstring, eager_grouping=False, **kw
-    ):
+    def _generate_generic_binary(self, binary, opstring, eager_grouping=False, **kw):
 
         _in_binary = kw.get("_in_binary", False)
 
         kw["_in_binary"] = True
         kw["_binary_op"] = binary.operator
         text = (
-            binary.left._compiler_dispatch(
-                self, eager_grouping=eager_grouping, **kw
-            )
+            binary.left._compiler_dispatch(self, eager_grouping=eager_grouping, **kw)
             + opstring
-            + binary.right._compiler_dispatch(
-                self, eager_grouping=eager_grouping, **kw
-            )
+            + binary.right._compiler_dispatch(self, eager_grouping=eager_grouping, **kw)
         )
 
         if _in_binary and eager_grouping:
@@ -2365,21 +2279,17 @@ class SQLCompiler(Compiled):
     def visit_not_between_op_binary(self, binary, operator, **kw):
         symmetric = binary.modifiers.get("symmetric", False)
         return self._generate_generic_binary(
-            binary,
-            " NOT BETWEEN SYMMETRIC " if symmetric else " NOT BETWEEN ",
-            **kw
+            binary, " NOT BETWEEN SYMMETRIC " if symmetric else " NOT BETWEEN ", **kw
         )
 
     def visit_regexp_match_op_binary(self, binary, operator, **kw):
         raise exc.CompileError(
-            "%s dialect does not support regular expressions"
-            % self.dialect.name
+            "%s dialect does not support regular expressions" % self.dialect.name
         )
 
     def visit_not_regexp_match_op_binary(self, binary, operator, **kw):
         raise exc.CompileError(
-            "%s dialect does not support regular expressions"
-            % self.dialect.name
+            "%s dialect does not support regular expressions" % self.dialect.name
         )
 
     def visit_regexp_replace_op_binary(self, binary, operator, **kw):
@@ -2414,9 +2324,7 @@ class SQLCompiler(Compiled):
                 if bindparam.expanding:
                     # for postcompile w/ expanding, move the "wrapped" part
                     # of this into the inside
-                    m = re.match(
-                        r"^(.*)\(__\[POSTCOMPILE_(\S+?)\]\)(.*)$", wrapped
-                    )
+                    m = re.match(r"^(.*)\(__\[POSTCOMPILE_(\S+?)\]\)(.*)$", wrapped)
                     wrapped = "(__[POSTCOMPILE_%s~~%s~~REPL~~%s~~])" % (
                         m.group(2),
                         m.group(1),
@@ -2449,12 +2357,8 @@ class SQLCompiler(Compiled):
             if existing is not bindparam:
                 if (
                     (existing.unique or bindparam.unique)
-                    and not existing.proxy_set.intersection(
-                        bindparam.proxy_set
-                    )
-                    and not existing._cloned_set.intersection(
-                        bindparam._cloned_set
-                    )
+                    and not existing.proxy_set.intersection(bindparam.proxy_set)
+                    and not existing._cloned_set.intersection(bindparam._cloned_set)
                 ):
                     raise exc.CompileError(
                         "Bind parameter '%s' conflicts with "
@@ -2501,19 +2405,14 @@ class SQLCompiler(Compiled):
                 self.post_compile_params |= {bindparam}
 
         ret = self.bindparam_string(
-            name,
-            post_compile=post_compile,
-            expanding=bindparam.expanding,
-            **kwargs
+            name, post_compile=post_compile, expanding=bindparam.expanding, **kwargs
         )
 
         if bindparam.expanding:
             ret = "(%s)" % ret
         return ret
 
-    def render_literal_bindparam(
-        self, bindparam, render_literal_value=NO_ARG, **kw
-    ):
+    def render_literal_bindparam(self, bindparam, render_literal_value=NO_ARG, **kw):
         if render_literal_value is not NO_ARG:
             value = render_literal_value
         else:
@@ -2577,9 +2476,7 @@ class SQLCompiler(Compiled):
         if len(anonname) > self.label_length - 6:
             counter = self.truncated_names.get(ident_class, 1)
             truncname = (
-                anonname[0 : max(self.label_length - 6, 0)]
-                + "_"
-                + hex(counter)[2:]
+                anonname[0 : max(self.label_length - 6, 0)] + "_" + hex(counter)[2:]
             )
             self.truncated_names[ident_class] = counter + 1
         else:
@@ -2709,11 +2606,7 @@ class SQLCompiler(Compiled):
                 and "autocommit" not in self.execution_options
             ):
                 self.execution_options = self.execution_options.union(
-                    {
-                        "autocommit": cte.element._execution_options[
-                            "autocommit"
-                        ]
-                    }
+                    {"autocommit": cte.element._execution_options["autocommit"]}
                 )
 
             if pre_alias_cte not in self.ctes:
@@ -2768,23 +2661,15 @@ class SQLCompiler(Compiled):
                     # toplevel, this is a stringify of the
                     # cte directly.  just compile the inner
                     # the way alias() does.
-                    return cte.element._compiler_dispatch(
-                        self, asfrom=asfrom, **kwargs
-                    )
+                    return cte.element._compiler_dispatch(self, asfrom=asfrom, **kwargs)
                 else:
-                    prefixes = self._generate_prefixes(
-                        cte, cte._prefixes, **kwargs
-                    )
-                    inner = cte.element._compiler_dispatch(
-                        self, asfrom=True, **kwargs
-                    )
+                    prefixes = self._generate_prefixes(cte, cte._prefixes, **kwargs)
+                    inner = cte.element._compiler_dispatch(self, asfrom=True, **kwargs)
 
                     text += " AS %s\n(%s)" % (prefixes, inner)
 
                 if cte._suffixes:
-                    text += " " + self._generate_prefixes(
-                        cte, cte._suffixes, **kwargs
-                    )
+                    text += " " + self._generate_prefixes(cte, cte._suffixes, **kwargs)
 
                 self.ctes[cte] = text
 
@@ -2891,28 +2776,24 @@ class SQLCompiler(Compiled):
                         "%s%s"
                         % (
                             self.preparer.quote(col.name),
-                            " %s"
-                            % self.dialect.type_compiler.process(
-                                col.type, **kwargs
-                            )
-                            if alias._render_derived_w_types
-                            else "",
+                            (
+                                " %s"
+                                % self.dialect.type_compiler.process(col.type, **kwargs)
+                                if alias._render_derived_w_types
+                                else ""
+                            ),
                         )
                         for col in alias.c
                     )
                 )
 
             if fromhints and alias in fromhints:
-                ret = self.format_from_hint_text(
-                    ret, alias, fromhints[alias], iscrud
-                )
+                ret = self.format_from_hint_text(ret, alias, fromhints[alias], iscrud)
 
             return ret
         else:
             # note we cancel the "subquery" flag here as well
-            return alias.element._compiler_dispatch(
-                self, lateral=lateral, **kwargs
-            )
+            return alias.element._compiler_dispatch(self, lateral=lateral, **kwargs)
 
     def visit_subquery(self, subquery, **kw):
         kw["subquery"] = True
@@ -2939,10 +2820,7 @@ class SQLCompiler(Compiled):
         kw.setdefault("literal_binds", element.literal_binds)
         v = "VALUES %s" % ", ".join(
             self.process(
-                elements.Tuple(
-                    types=element._column_types, *elem
-                ).self_group(),
-                **kw
+                elements.Tuple(types=element._column_types, *elem).self_group(), **kw
             )
             for chunk in element._data
             for elem in chunk
@@ -2971,9 +2849,7 @@ class SQLCompiler(Compiled):
                     self.get_render_as_alias_suffix(self.preparer.quote(name)),
                     (
                         ", ".join(
-                            c._compiler_dispatch(
-                                self, include_table=False, **kw
-                            )
+                            c._compiler_dispatch(self, include_table=False, **kw)
                             for c in element.columns
                         )
                     ),
@@ -3061,9 +2937,7 @@ class SQLCompiler(Compiled):
                 _add_to_result_map = add_to_result_map
 
                 def add_to_result_map(keyname, name, objects, type_):
-                    _add_to_result_map(
-                        keyname, name, (column,) + objects, type_
-                    )
+                    _add_to_result_map(keyname, name, (column,) + objects, type_)
 
         else:
             add_to_result_map = None
@@ -3092,9 +2966,7 @@ class SQLCompiler(Compiled):
             # tablenames_plus_columnnames as well as when columns are being
             # deduplicated on name
 
-            assert (
-                proxy_name is not None
-            ), "proxy_name is required if 'name' is passed"
+            assert proxy_name is not None, "proxy_name is required if 'name' is passed"
 
             result_expr = _CompileLabel(
                 col_expr,
@@ -3123,9 +2995,7 @@ class SQLCompiler(Compiled):
                 # table-bound column, we render its name as a label if we are
                 # inside of a subquery only
                 render_with_label = (
-                    asfrom
-                    and not column.is_literal
-                    and column.table is not None
+                    asfrom and not column.is_literal and column.table is not None
                 )
             elif isinstance(column, elements.TextClause):
                 render_with_label = False
@@ -3160,9 +3030,7 @@ class SQLCompiler(Compiled):
 
                 fallback_label_name = (
                     elements._truncated_label(fallback_label_name)
-                    if not isinstance(
-                        fallback_label_name, elements._truncated_label
-                    )
+                    if not isinstance(fallback_label_name, elements._truncated_label)
                     else fallback_label_name
                 )
 
@@ -3200,9 +3068,7 @@ class SQLCompiler(Compiled):
         [("correlate_froms", frozenset()), ("asfrom_froms", frozenset())]
     )
 
-    def _display_froms_for_select(
-        self, select_stmt, asfrom, lateral=False, **kw
-    ):
+    def _display_froms_for_select(self, select_stmt, asfrom, lateral=False, **kw):
         # utility method to help external dialects
         # get the correct from list for a select.
         # specifically the oracle dialect needs this feature
@@ -3217,9 +3083,7 @@ class SQLCompiler(Compiled):
 
         if asfrom and not lateral:
             froms = compile_state._get_display_froms(
-                explicit_correlate_froms=correlate_froms.difference(
-                    asfrom_froms
-                ),
+                explicit_correlate_froms=correlate_froms.difference(asfrom_froms),
                 implicit_correlate_froms=(),
             )
         else:
@@ -3262,9 +3126,7 @@ class SQLCompiler(Compiled):
 
         kwargs["within_columns_clause"] = False
 
-        compile_state = select_stmt._compile_state_factory(
-            select_stmt, self, **kwargs
-        )
+        compile_state = select_stmt._compile_state_factory(select_stmt, self, **kwargs)
         select_stmt = compile_state.statement
 
         toplevel = not self.stack
@@ -3426,9 +3288,7 @@ class SQLCompiler(Compiled):
             # In compound query, CTEs are shared at the compound level
             if not is_embedded_select:
                 nesting_level = len(self.stack) if not toplevel else None
-                text = (
-                    self._render_cte_clause(nesting_level=nesting_level) + text
-                )
+                text = self._render_cte_clause(nesting_level=nesting_level) + text
 
         if select_stmt._suffixes:
             text += " " + self._generate_prefixes(
@@ -3444,8 +3304,7 @@ class SQLCompiler(Compiled):
             [
                 (
                     from_,
-                    hinttext
-                    % {"name": from_._compiler_dispatch(self, ashint=True)},
+                    hinttext % {"name": from_._compiler_dispatch(self, ashint=True)},
                 )
                 for (from_, dialect), hinttext in select._hints.items()
                 if dialect in ("*", self.dialect.name)
@@ -3482,9 +3341,7 @@ class SQLCompiler(Compiled):
 
         if asfrom and not lateral:
             froms = compile_state._get_display_froms(
-                explicit_correlate_froms=correlate_froms.difference(
-                    asfrom_froms
-                ),
+                explicit_correlate_froms=correlate_froms.difference(asfrom_froms),
                 implicit_correlate_froms=(),
             )
         else:
@@ -3548,10 +3405,7 @@ class SQLCompiler(Compiled):
                 text += ", ".join(
                     [
                         f._compiler_dispatch(
-                            self,
-                            asfrom=True,
-                            from_linter=from_linter,
-                            **kwargs
+                            self, asfrom=True, from_linter=from_linter, **kwargs
                         )
                         for f in froms
                     ]
@@ -3573,9 +3427,7 @@ class SQLCompiler(Compiled):
             text += self.group_by_clause(select, **kwargs)
 
         if select._having_criteria:
-            t = self._generate_delimited_and_list(
-                select._having_criteria, **kwargs
-            )
+            t = self._generate_delimited_and_list(select._having_criteria, **kwargs)
             if t:
                 text += " \nHAVING " + t
 
@@ -3617,9 +3469,7 @@ class SQLCompiler(Compiled):
         if nesting_level and nesting_level > 1:
             ctes = util.OrderedDict()
             for cte in list(self.ctes.keys()):
-                cte_level, cte_name = self.level_name_by_cte[
-                    cte._get_reference_cte()
-                ]
+                cte_level, cte_name = self.level_name_by_cte[cte._get_reference_cte()]
                 is_rendered_level = cte_level == nesting_level or (
                     include_following_stack and cte_level == nesting_level + 1
                 )
@@ -3638,8 +3488,7 @@ class SQLCompiler(Compiled):
 
         if self.positional:
             self.positiontup = (
-                sum([self.cte_positional[cte] for cte in ctes], [])
-                + self.positiontup
+                sum([self.cte_positional[cte] for cte in ctes], []) + self.positiontup
             )
         cte_text = self.get_cte_preamble(ctes_recursive) + " "
         cte_text += ", \n".join([txt for txt in ctes.values()])
@@ -3647,9 +3496,7 @@ class SQLCompiler(Compiled):
 
         if nesting_level and nesting_level > 1:
             for cte in list(ctes.keys()):
-                cte_level, cte_name = self.level_name_by_cte[
-                    cte._get_reference_cte()
-                ]
+                cte_level, cte_name = self.level_name_by_cte[cte._get_reference_cte()]
                 del self.ctes[cte]
                 del self.ctes_by_level_name[(cte_level, cte_name)]
                 del self.level_name_by_cte[cte._get_reference_cte()]
@@ -3706,8 +3553,7 @@ class SQLCompiler(Compiled):
 
     def returning_clause(self, stmt, returning_cols):
         raise exc.CompileError(
-            "RETURNING is not supported by this "
-            "dialect's statement compiler."
+            "RETURNING is not supported by this " "dialect's statement compiler."
         )
 
     def limit_clause(self, select, **kw):
@@ -3723,16 +3569,12 @@ class SQLCompiler(Compiled):
     def fetch_clause(self, select, **kw):
         text = ""
         if select._offset_clause is not None:
-            text += "\n OFFSET %s ROWS" % self.process(
-                select._offset_clause, **kw
-            )
+            text += "\n OFFSET %s ROWS" % self.process(select._offset_clause, **kw)
         if select._fetch_clause is not None:
             text += "\n FETCH FIRST %s%s ROWS %s" % (
                 self.process(select._fetch_clause, **kw),
                 " PERCENT" if select._fetch_clause_options["percent"] else "",
-                "WITH TIES"
-                if select._fetch_clause_options["with_ties"]
-                else "ONLY",
+                "WITH TIES" if select._fetch_clause_options["with_ties"] else "ONLY",
             )
         return text
 
@@ -3762,9 +3604,7 @@ class SQLCompiler(Compiled):
             else:
                 ret = self.preparer.quote(table.name)
             if fromhints and table in fromhints:
-                ret = self.format_from_hint_text(
-                    ret, table, fromhints[table], iscrud
-                )
+                ret = self.format_from_hint_text(ret, table, fromhints[table], iscrud)
             return ret
         else:
             return ""
@@ -3772,9 +3612,7 @@ class SQLCompiler(Compiled):
     def visit_join(self, join, asfrom=False, from_linter=None, **kwargs):
         if from_linter:
             from_linter.edges.update(
-                itertools.product(
-                    join.left._from_objects, join.right._from_objects
-                )
+                itertools.product(join.left._from_objects, join.right._from_objects)
             )
 
         if join.full:
@@ -3793,9 +3631,7 @@ class SQLCompiler(Compiled):
             )
             + " ON "
             # TODO: likely need asfrom=True here?
-            + join.onclause._compiler_dispatch(
-                self, from_linter=from_linter, **kwargs
-            )
+            + join.onclause._compiler_dispatch(self, from_linter=from_linter, **kwargs)
         )
 
     def _setup_crud_hints(self, stmt, table_text):
@@ -3814,9 +3650,7 @@ class SQLCompiler(Compiled):
 
     def visit_insert(self, insert_stmt, **kw):
 
-        compile_state = insert_stmt._compile_state_factory(
-            insert_stmt, self, **kw
-        )
+        compile_state = insert_stmt._compile_state_factory(insert_stmt, self, **kw)
         insert_stmt = compile_state.statement
 
         toplevel = not self.stack
@@ -3834,9 +3668,7 @@ class SQLCompiler(Compiled):
             }
         )
 
-        crud_params = crud._get_crud_params(
-            self, insert_stmt, compile_state, **kw
-        )
+        crud_params = crud._get_crud_params(self, insert_stmt, compile_state, **kw)
 
         if (
             not crud_params
@@ -3867,9 +3699,7 @@ class SQLCompiler(Compiled):
         text = "INSERT "
 
         if insert_stmt._prefixes:
-            text += self._generate_prefixes(
-                insert_stmt, insert_stmt._prefixes, **kw
-            )
+            text += self._generate_prefixes(insert_stmt, insert_stmt._prefixes, **kw)
 
         text += "INTO "
         table_text = preparer.format_table(insert_stmt.table)
@@ -3884,9 +3714,7 @@ class SQLCompiler(Compiled):
         text += table_text
 
         if crud_params_single or not supports_default_values:
-            text += " (%s)" % ", ".join(
-                [expr for c, expr, value in crud_params_single]
-            )
+            text += " (%s)" % ", ".join([expr for c, expr, value in crud_params_single])
 
         if self.returning or insert_stmt._returning:
             returning_clause = self.returning_clause(
@@ -3920,8 +3748,7 @@ class SQLCompiler(Compiled):
         elif compile_state._has_multi_parameters:
             text += " VALUES %s" % (
                 ", ".join(
-                    "(%s)"
-                    % (", ".join(value for c, expr, value in crud_param_set))
+                    "(%s)" % (", ".join(value for c, expr, value in crud_param_set))
                     for crud_param_set in crud_params
                 )
             )
@@ -3934,9 +3761,7 @@ class SQLCompiler(Compiled):
                 self.insert_single_values_expr = insert_single_values_expr
 
         if insert_stmt._post_values_clause is not None:
-            post_values_clause = self.process(
-                insert_stmt._post_values_clause, **kw
-            )
+            post_values_clause = self.process(insert_stmt._post_values_clause, **kw)
             if post_values_clause:
                 text += " " + post_values_clause
 
@@ -3980,14 +3805,11 @@ class SQLCompiler(Compiled):
 
         """
         raise NotImplementedError(
-            "This backend does not support multiple-table "
-            "criteria within UPDATE"
+            "This backend does not support multiple-table " "criteria within UPDATE"
         )
 
     def visit_update(self, update_stmt, **kw):
-        compile_state = update_stmt._compile_state_factory(
-            update_stmt, self, **kw
-        )
+        compile_state = update_stmt._compile_state_factory(update_stmt, self, **kw)
         update_stmt = compile_state.statement
 
         toplevel = not self.stack
@@ -4002,9 +3824,7 @@ class SQLCompiler(Compiled):
         if is_multitable:
             # main table might be a JOIN
             main_froms = set(selectable._from_objects(update_stmt.table))
-            render_extra_froms = [
-                f for f in extra_froms if f not in main_froms
-            ]
+            render_extra_froms = [f for f in extra_froms if f not in main_froms]
             correlate_froms = main_froms.union(extra_froms)
         else:
             render_extra_froms = []
@@ -4021,21 +3841,15 @@ class SQLCompiler(Compiled):
         text = "UPDATE "
 
         if update_stmt._prefixes:
-            text += self._generate_prefixes(
-                update_stmt, update_stmt._prefixes, **kw
-            )
+            text += self._generate_prefixes(update_stmt, update_stmt._prefixes, **kw)
 
         table_text = self.update_tables_clause(
             update_stmt, update_stmt.table, render_extra_froms, **kw
         )
-        crud_params = crud._get_crud_params(
-            self, update_stmt, compile_state, **kw
-        )
+        crud_params = crud._get_crud_params(self, update_stmt, compile_state, **kw)
 
         if update_stmt._hints:
-            dialect_hints, table_text = self._setup_crud_hints(
-                update_stmt, table_text
-            )
+            dialect_hints, table_text = self._setup_crud_hints(update_stmt, table_text)
         else:
             dialect_hints = None
 
@@ -4056,19 +3870,13 @@ class SQLCompiler(Compiled):
 
         if extra_froms:
             extra_from_text = self.update_from_clause(
-                update_stmt,
-                update_stmt.table,
-                render_extra_froms,
-                dialect_hints,
-                **kw
+                update_stmt, update_stmt.table, render_extra_froms, dialect_hints, **kw
             )
             if extra_from_text:
                 text += " " + extra_from_text
 
         if update_stmt._where_criteria:
-            t = self._generate_delimited_and_list(
-                update_stmt._where_criteria, **kw
-            )
+            t = self._generate_delimited_and_list(update_stmt._where_criteria, **kw)
             if t:
                 text += " WHERE " + t
 
@@ -4103,17 +3911,14 @@ class SQLCompiler(Compiled):
 
         """
         raise NotImplementedError(
-            "This backend does not support multiple-table "
-            "criteria within DELETE"
+            "This backend does not support multiple-table " "criteria within DELETE"
         )
 
     def delete_table_clause(self, delete_stmt, from_table, extra_froms):
         return from_table._compiler_dispatch(self, asfrom=True, iscrud=True)
 
     def visit_delete(self, delete_stmt, **kw):
-        compile_state = delete_stmt._compile_state_factory(
-            delete_stmt, self, **kw
-        )
+        compile_state = delete_stmt._compile_state_factory(delete_stmt, self, **kw)
         delete_stmt = compile_state.statement
 
         toplevel = not self.stack
@@ -4136,9 +3941,7 @@ class SQLCompiler(Compiled):
         text = "DELETE "
 
         if delete_stmt._prefixes:
-            text += self._generate_prefixes(
-                delete_stmt, delete_stmt._prefixes, **kw
-            )
+            text += self._generate_prefixes(delete_stmt, delete_stmt._prefixes, **kw)
 
         text += "FROM "
         table_text = self.delete_table_clause(
@@ -4146,9 +3949,7 @@ class SQLCompiler(Compiled):
         )
 
         if delete_stmt._hints:
-            dialect_hints, table_text = self._setup_crud_hints(
-                delete_stmt, table_text
-            )
+            dialect_hints, table_text = self._setup_crud_hints(delete_stmt, table_text)
         else:
             dialect_hints = None
 
@@ -4160,32 +3961,22 @@ class SQLCompiler(Compiled):
 
         if delete_stmt._returning:
             if self.returning_precedes_values:
-                text += " " + self.returning_clause(
-                    delete_stmt, delete_stmt._returning
-                )
+                text += " " + self.returning_clause(delete_stmt, delete_stmt._returning)
 
         if extra_froms:
             extra_from_text = self.delete_extra_from_clause(
-                delete_stmt,
-                delete_stmt.table,
-                extra_froms,
-                dialect_hints,
-                **kw
+                delete_stmt, delete_stmt.table, extra_froms, dialect_hints, **kw
             )
             if extra_from_text:
                 text += " " + extra_from_text
 
         if delete_stmt._where_criteria:
-            t = self._generate_delimited_and_list(
-                delete_stmt._where_criteria, **kw
-            )
+            t = self._generate_delimited_and_list(delete_stmt._where_criteria, **kw)
             if t:
                 text += " WHERE " + t
 
         if delete_stmt._returning and not self.returning_precedes_values:
-            text += " " + self.returning_clause(
-                delete_stmt, delete_stmt._returning
-            )
+            text += " " + self.returning_clause(delete_stmt, delete_stmt._returning)
 
         if self.ctes:
             nesting_level = len(self.stack) if not toplevel else None
@@ -4204,9 +3995,7 @@ class SQLCompiler(Compiled):
         )
 
     def visit_release_savepoint(self, savepoint_stmt):
-        return "RELEASE SAVEPOINT %s" % self.preparer.format_savepoint(
-            savepoint_stmt
-        )
+        return "RELEASE SAVEPOINT %s" % self.preparer.format_savepoint(savepoint_stmt)
 
 
 class StrSQLCompiler(SQLCompiler):
@@ -4242,9 +4031,7 @@ class StrSQLCompiler(SQLCompiler):
             if not isinstance(compiler, StrSQLCompiler):
                 return compiler.process(element)
 
-        return super(StrSQLCompiler, self).visit_unsupported_compilation(
-            element, err
-        )
+        return super(StrSQLCompiler, self).visit_unsupported_compilation(element, err)
 
     def visit_getitem_binary(self, binary, operator, **kw):
         return "%s[%s]" % (
@@ -4274,8 +4061,7 @@ class StrSQLCompiler(SQLCompiler):
     ):
         kw["asfrom"] = True
         return "FROM " + ", ".join(
-            t._compiler_dispatch(self, fromhints=from_hints, **kw)
-            for t in extra_froms
+            t._compiler_dispatch(self, fromhints=from_hints, **kw) for t in extra_froms
         )
 
     def delete_extra_from_clause(
@@ -4283,8 +4069,7 @@ class StrSQLCompiler(SQLCompiler):
     ):
         kw["asfrom"] = True
         return ", " + ", ".join(
-            t._compiler_dispatch(self, fromhints=from_hints, **kw)
-            for t in extra_froms
+            t._compiler_dispatch(self, fromhints=from_hints, **kw) for t in extra_froms
         )
 
     def visit_empty_set_expr(self, type_):
@@ -4414,9 +4199,7 @@ class DDLCompiler(Compiled):
             return None
 
         text = self.get_column_specification(column, first_pk=first_pk)
-        const = " ".join(
-            self.process(constraint) for constraint in column.constraints
-        )
+        const = " ".join(self.process(constraint) for constraint in column.constraints)
         if const:
             text += " " + const
 
@@ -4451,10 +4234,7 @@ class DDLCompiler(Compiled):
             for p in (
                 self.process(constraint)
                 for constraint in constraints
-                if (
-                    constraint._create_rule is None
-                    or constraint._create_rule(self)
-                )
+                if (constraint._create_rule is None or constraint._create_rule(self))
                 and (
                     not self.dialect.supports_alter
                     or not getattr(constraint, "use_alter", False)
@@ -4488,9 +4268,7 @@ class DDLCompiler(Compiled):
         if index.unique:
             text += "UNIQUE "
         if index.name is None:
-            raise exc.CompileError(
-                "CREATE INDEX requires that the index have a name"
-            )
+            raise exc.CompileError("CREATE INDEX requires that the index have a name")
 
         text += "INDEX "
         if create.if_not_exists:
@@ -4498,13 +4276,9 @@ class DDLCompiler(Compiled):
 
         text += "%s ON %s (%s)" % (
             self._prepared_index_name(index, include_schema=include_schema),
-            preparer.format_table(
-                index.table, use_schema=include_table_schema
-            ),
+            preparer.format_table(index.table, use_schema=include_table_schema),
             ", ".join(
-                self.sql_compiler.process(
-                    expr, include_table=False, literal_binds=True
-                )
+                self.sql_compiler.process(expr, include_table=False, literal_binds=True)
                 for expr in index.expressions
             ),
         )
@@ -4514,9 +4288,7 @@ class DDLCompiler(Compiled):
         index = drop.element
 
         if index.name is None:
-            raise exc.CompileError(
-                "DROP INDEX requires that the index have a name"
-            )
+            raise exc.CompileError("DROP INDEX requires that the index have a name")
         text = "\nDROP INDEX "
         if drop.if_exists:
             text += "IF EXISTS "
@@ -4554,9 +4326,7 @@ class DDLCompiler(Compiled):
         )
 
     def visit_drop_table_comment(self, drop, **kw):
-        return "COMMENT ON TABLE %s IS NULL" % self.preparer.format_table(
-            drop.element
-        )
+        return "COMMENT ON TABLE %s IS NULL" % self.preparer.format_table(drop.element)
 
     def visit_set_column_comment(self, create, **kw):
         return "COMMENT ON COLUMN %s IS %s" % (
@@ -4596,9 +4366,7 @@ class DDLCompiler(Compiled):
         return " ".join(text)
 
     def visit_create_sequence(self, create, prefix=None, **kw):
-        text = "CREATE SEQUENCE %s" % self.preparer.format_sequence(
-            create.element
-        )
+        text = "CREATE SEQUENCE %s" % self.preparer.format_sequence(create.element)
         if prefix:
             text += prefix
         if create.element.start is None:
@@ -4633,9 +4401,7 @@ class DDLCompiler(Compiled):
         colspec = (
             self.preparer.format_column(column)
             + " "
-            + self.dialect.type_compiler.process(
-                column.type, type_expression=column
-            )
+            + self.dialect.type_compiler.process(column.type, type_expression=column)
         )
         default = self.get_column_default_string(column)
         if default is not None:
@@ -4644,10 +4410,7 @@ class DDLCompiler(Compiled):
         if column.computed is not None:
             colspec += " " + self.process(column.computed)
 
-        if (
-            column.identity is not None
-            and self.dialect.supports_identity_columns
-        ):
+        if column.identity is not None and self.dialect.supports_identity_columns:
             colspec += " " + self.process(column.identity)
 
         if not column.nullable and (
@@ -4734,15 +4497,9 @@ class DDLCompiler(Compiled):
                 text += "CONSTRAINT %s " % formatted_name
         remote_table = list(constraint.elements)[0].column.table
         text += "FOREIGN KEY(%s) REFERENCES %s (%s)" % (
-            ", ".join(
-                preparer.quote(f.parent.name) for f in constraint.elements
-            ),
-            self.define_constraint_remote_table(
-                constraint, remote_table, preparer
-            ),
-            ", ".join(
-                preparer.quote(f.column.name) for f in constraint.elements
-            ),
+            ", ".join(preparer.quote(f.parent.name) for f in constraint.elements),
+            self.define_constraint_remote_table(constraint, remote_table, preparer),
+            ", ".join(preparer.quote(f.column.name) for f in constraint.elements),
         )
         text += self.define_constraint_match(constraint)
         text += self.define_constraint_cascades(constraint)
@@ -5007,7 +4764,6 @@ class StrSQLTypeCompiler(GenericTypeCompiler):
 
 
 class IdentifierPreparer(object):
-
     """Handle quoting and case-folding of identifiers based on options."""
 
     reserved_words = RESERVED_WORDS
@@ -5075,9 +4831,7 @@ class IdentifierPreparer(object):
                         "Square bracket characters ([]) not supported "
                         "in schema translate name '%s'" % name
                     )
-                return quoted_name(
-                    "__[SCHEMA_%s]" % (name or "_none"), quote=False
-                )
+                return quoted_name("__[SCHEMA_%s]" % (name or "_none"), quote=False)
             else:
                 return obj.schema
 
@@ -5150,11 +4904,7 @@ class IdentifierPreparer(object):
         quoting behavior.
         """
 
-        return (
-            self.initial_quote
-            + self._escape_identifier(value)
-            + self.final_quote
-        )
+        return self.initial_quote + self._escape_identifier(value) + self.final_quote
 
     def _requires_quotes(self, value):
         """Return True if the given identifier requires quoting."""
@@ -5273,11 +5023,7 @@ class IdentifierPreparer(object):
 
         effective_schema = self.schema_for_object(sequence)
 
-        if (
-            not self.omit_schema
-            and use_schema
-            and effective_schema is not None
-        ):
+        if not self.omit_schema and use_schema and effective_schema is not None:
             name = self.quote_schema(effective_schema) + "." + name
         return name
 
@@ -5301,9 +5047,7 @@ class IdentifierPreparer(object):
         naming = util.preloaded.sql_naming
 
         if constraint.name is elements._NONE_NAME:
-            name = naming._constraint_name_for_table(
-                constraint, constraint.table
-            )
+            name = naming._constraint_name_for_table(constraint, constraint.table)
 
             if name is None:
                 return None
@@ -5323,13 +5067,8 @@ class IdentifierPreparer(object):
         # calculate these at format time so that ad-hoc changes
         # to dialect.max_identifier_length etc. can be reflected
         # as IdentifierPreparer is long lived
-        max_ = (
-            self.dialect.max_index_name_length
-            or self.dialect.max_identifier_length
-        )
-        return self._truncate_and_render_maxlen_name(
-            name, max_, _alembic_quote
-        )
+        max_ = self.dialect.max_index_name_length or self.dialect.max_identifier_length
+        return self._truncate_and_render_maxlen_name(name, max_, _alembic_quote)
 
     def truncate_and_render_constraint_name(self, name, _alembic_quote=True):
         # calculate these at format time so that ad-hoc changes
@@ -5339,9 +5078,7 @@ class IdentifierPreparer(object):
             self.dialect.max_constraint_name_length
             or self.dialect.max_identifier_length
         )
-        return self._truncate_and_render_maxlen_name(
-            name, max_, _alembic_quote
-        )
+        return self._truncate_and_render_maxlen_name(name, max_, _alembic_quote)
 
     def _truncate_and_render_maxlen_name(self, name, max_, _alembic_quote):
         if isinstance(name, elements._truncated_label):
@@ -5384,9 +5121,7 @@ class IdentifierPreparer(object):
     ):
         """Prepare a quoted column name."""
 
-        if anon_map is not None and isinstance(
-            name, elements._truncated_label
-        ):
+        if anon_map is not None and isinstance(name, elements._truncated_label):
             name = name.apply_map(anon_map)
 
         return self.quote(name)
@@ -5405,9 +5140,7 @@ class IdentifierPreparer(object):
         if name is None:
             name = column.name
 
-        if anon_map is not None and isinstance(
-            name, elements._truncated_label
-        ):
+        if anon_map is not None and isinstance(name, elements._truncated_label):
             name = name.apply_map(anon_map)
 
         if not getattr(column, "is_literal", False):

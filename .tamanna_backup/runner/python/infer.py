@@ -188,8 +188,7 @@ def _infer_type_from_relationship(
         else:
             util.fail(
                 api,
-                "Expected Python collection type for "
-                "collection_class parameter",
+                "Expected Python collection type for " "collection_class parameter",
                 stmt.rvalue,
             )
             python_type_for_type = None
@@ -202,9 +201,7 @@ def _infer_type_from_relationship(
                 stmt.rvalue,
             )
         if python_type_for_type is not None:
-            python_type_for_type = UnionType(
-                [python_type_for_type, NoneType()]
-            )
+            python_type_for_type = UnionType([python_type_for_type, NoneType()])
 
     else:
         if left_hand_explicit_type is None:
@@ -218,9 +215,7 @@ def _infer_type_from_relationship(
             util.fail(api, msg.format(node.name), node)
 
     if python_type_for_type is None:
-        return infer_type_from_left_hand_type_only(
-            api, node, left_hand_explicit_type
-        )
+        return infer_type_from_left_hand_type_only(api, node, left_hand_explicit_type)
     elif left_hand_explicit_type is not None:
         if type_is_a_collection:
             assert isinstance(left_hand_explicit_type, Instance)
@@ -260,9 +255,7 @@ def _infer_type_from_decl_composite_property(
         python_type_for_type = None
 
     if python_type_for_type is None:
-        return infer_type_from_left_hand_type_only(
-            api, node, left_hand_explicit_type
-        )
+        return infer_type_from_left_hand_type_only(api, node, left_hand_explicit_type)
     elif left_hand_explicit_type is not None:
         return _infer_type_from_left_and_inferred_right(
             api, node, left_hand_explicit_type, python_type_for_type
@@ -315,9 +308,7 @@ def _infer_type_from_decl_column_property(
                 left_hand_explicit_type,
             )
 
-    return infer_type_from_left_hand_type_only(
-        api, node, left_hand_explicit_type
-    )
+    return infer_type_from_left_hand_type_only(api, node, left_hand_explicit_type)
 
 
 def _infer_type_from_decl_column(
@@ -411,9 +402,7 @@ def _infer_type_from_decl_column(
     else:
         # it's not TypeEngine, it's typically implicitly typed
         # like ForeignKey.  we can't infer from the right side.
-        return infer_type_from_left_hand_type_only(
-            api, node, left_hand_explicit_type
-        )
+        return infer_type_from_left_hand_type_only(api, node, left_hand_explicit_type)
 
 
 def _infer_type_from_left_and_inferred_right(
@@ -523,9 +512,7 @@ def extract_python_type_from_typeengine(
 ) -> ProperType:
     if node.fullname == "sqlalchemy.sql.sqltypes.Enum" and type_args:
         first_arg = type_args[0]
-        if isinstance(first_arg, RefExpr) and isinstance(
-            first_arg.node, TypeInfo
-        ):
+        if isinstance(first_arg, RefExpr) and isinstance(first_arg.node, TypeInfo):
             for base_ in first_arg.node.mro:
                 if base_.fullname == "enum.Enum":
                     return Instance(first_arg.node, [])
@@ -541,9 +528,7 @@ def extract_python_type_from_typeengine(
         "sqlalchemy.sql.type_api.TypeEngine"
     )
 
-    assert type_engine_sym is not None and isinstance(
-        type_engine_sym.node, TypeInfo
-    )
+    assert type_engine_sym is not None and isinstance(type_engine_sym.node, TypeInfo)
     type_engine = map_instance_to_supertype(
         Instance(node, []),
         type_engine_sym.node,

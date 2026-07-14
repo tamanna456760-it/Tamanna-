@@ -37,13 +37,11 @@ connection arguments are the same as they are for that of :ref:`pysqlite`.
 
 """  # noqa
 
+from ... import pool, util
+from ...engine import AdaptedConnection
+from ...util.concurrency import await_fallback, await_only
 from .base import SQLiteExecutionContext
 from .pysqlite import SQLiteDialect_pysqlite
-from ... import pool
-from ... import util
-from ...engine import AdaptedConnection
-from ...util.concurrency import await_fallback
-from ...util.concurrency import await_only
 
 
 class AsyncAdapt_aiosqlite_cursor:
@@ -217,10 +215,7 @@ class AsyncAdapt_aiosqlite_connection(AdaptedConnection):
             self._handle_exception(error)
 
     def _handle_exception(self, error):
-        if (
-            isinstance(error, ValueError)
-            and error.args[0] == "no active connection"
-        ):
+        if isinstance(error, ValueError) and error.args[0] == "no active connection":
             util.raise_(
                 self.dbapi.sqlite.OperationalError("no active connection"),
                 from_=error,
@@ -322,9 +317,9 @@ class SQLiteDialect_aiosqlite(SQLiteDialect_pysqlite):
             return pool.StaticPool
 
     def is_disconnect(self, e, connection, cursor):
-        if isinstance(
-            e, self.dbapi.OperationalError
-        ) and "no active connection" in str(e):
+        if isinstance(e, self.dbapi.OperationalError) and "no active connection" in str(
+            e
+        ):
             return True
 
         return super().is_disconnect(e, connection, cursor)

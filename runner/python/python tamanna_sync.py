@@ -15,10 +15,10 @@ Auto-sync all files and code from SOURCE to TARGET.
 Edit the CONFIG section only.
 """
 
+import hashlib
 import os
 import shutil
 import time
-import hashlib
 from datetime import datetime
 
 # ====================== CONFIG: EDIT THESE ONLY ======================

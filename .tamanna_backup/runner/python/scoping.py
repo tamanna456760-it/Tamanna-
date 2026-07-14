@@ -5,15 +5,12 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
+from .. import exc as sa_exc
+from ..util import (ScopedRegistry, ThreadLocalRegistry, create_proxy_methods,
+                    warn, warn_deprecated)
 from . import class_mapper
 from . import exc as orm_exc
 from .session import Session
-from .. import exc as sa_exc
-from ..util import create_proxy_methods
-from ..util import ScopedRegistry
-from ..util import ThreadLocalRegistry
-from ..util import warn
-from ..util import warn_deprecated
 
 __all__ = ["scoped_session", "ScopedSessionMixin"]
 

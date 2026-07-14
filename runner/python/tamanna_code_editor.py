@@ -41,14 +41,20 @@ class TamannaEditor(tk.Tk):
 
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="New", accelerator="Ctrl+N", command=self.new_file)
-        file_menu.add_command(label="Open...", accelerator="Ctrl+O", command=self.open_file)
-        file_menu.add_command(label="Save", accelerator="Ctrl+S", command=self.save_file)
+        file_menu.add_command(
+            label="Open...", accelerator="Ctrl+O", command=self.open_file
+        )
+        file_menu.add_command(
+            label="Save", accelerator="Ctrl+S", command=self.save_file
+        )
         file_menu.add_command(label="Save As...", command=self.save_file_as)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.quit)
 
         run_menu = tk.Menu(menubar, tearoff=0)
-        run_menu.add_command(label="Run Python File", accelerator="F5", command=self.run_code)
+        run_menu.add_command(
+            label="Run Python File", accelerator="F5", command=self.run_code
+        )
 
         menubar.add_cascade(label="File", menu=file_menu)
         menubar.add_cascade(label="Run", menu=run_menu)
@@ -70,7 +76,7 @@ class TamannaEditor(tk.Tk):
             background=LINE_NUM_BG,
             foreground=LINE_NUM_FG,
             state="disabled",
-            font=DEFAULT_FONT
+            font=DEFAULT_FONT,
         )
         self.line_numbers.pack(side=tk.LEFT, fill=tk.Y)
 
@@ -83,17 +89,13 @@ class TamannaEditor(tk.Tk):
             foreground=FG_COLOR,
             insertbackground=CURSOR_COLOR,
             selectbackground=HIGHLIGHT_BG,
-            border=0
+            border=0,
         )
         self.text.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         # Status bar
         self.status = tk.Label(
-            self,
-            text="Tamanna ready",
-            anchor="w",
-            bg=STATUS_BG,
-            fg=STATUS_FG
+            self, text="Tamanna ready", anchor="w", bg=STATUS_BG, fg=STATUS_FG
         )
         self.status.pack(fill=tk.X, side=tk.BOTTOM)
 
@@ -155,7 +157,7 @@ class TamannaEditor(tk.Tk):
     def save_file_as(self):
         path = filedialog.asksaveasfilename(
             defaultextension=".py",
-            filetypes=[("Python Files", "*.py"), ("All Files", "*.*")]
+            filetypes=[("Python Files", "*.py"), ("All Files", "*.*")],
         )
         if not path:
             return
@@ -177,8 +179,7 @@ class TamannaEditor(tk.Tk):
         # Ensure file is saved first
         if self.file_path is None:
             save_first = messagebox.askyesno(
-                "Save file",
-                "You must save the file before running.\nSave now?"
+                "Save file", "You must save the file before running.\nSave now?"
             )
             if not save_first:
                 return
@@ -191,18 +192,16 @@ class TamannaEditor(tk.Tk):
         cmd = [sys.executable, self.file_path]
 
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True)
             output = result.stdout
             error = result.stderr
 
             if error:
                 self._show_run_output("Error", error)
             else:
-                self._show_run_output("Output", output if output.strip() else "(No output)")
+                self._show_run_output(
+                    "Output", output if output.strip() else "(No output)"
+                )
         except Exception as e:
             self._show_run_output("Error", str(e))
 
@@ -218,7 +217,7 @@ class TamannaEditor(tk.Tk):
             background=BG_COLOR,
             foreground=FG_COLOR,
             insertbackground=CURSOR_COLOR,
-            border=0
+            border=0,
         )
         text.pack(fill=tk.BOTH, expand=True)
         text.insert("1.0", content)
@@ -229,8 +228,7 @@ class TamannaEditor(tk.Tk):
     def _confirm_discard_changes(self):
         if self.text.edit_modified():
             resp = messagebox.askyesnocancel(
-                "Unsaved changes",
-                "You have unsaved changes. Save before continuing?"
+                "Unsaved changes", "You have unsaved changes. Save before continuing?"
             )
             if resp is None:
                 return False

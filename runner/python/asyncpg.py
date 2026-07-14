@@ -146,7 +146,6 @@ from ...util.concurrency import asyncio
 from ...util.concurrency import await_fallback
 from ...util.concurrency import await_only
 
-
 try:
     from uuid import UUID as _python_UUID  # noqa
 except ImportError:
@@ -287,9 +286,7 @@ class AsyncpgNumeric(sqltypes.Numeric):
                 # pg8000 returns Decimal natively for 1700
                 return None
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
         else:
             if coltype in _FLOAT_TYPES:
                 # pg8000 returns float natively for 701
@@ -297,9 +294,7 @@ class AsyncpgNumeric(sqltypes.Numeric):
             elif coltype in _DECIMAL_TYPES or coltype in _INT_TYPES:
                 return processors.to_float
             else:
-                raise exc.InvalidRequestError(
-                    "Unknown PG numeric type: %d" % coltype
-                )
+                raise exc.InvalidRequestError("Unknown PG numeric type: %d" % coltype)
 
 
 class AsyncpgFloat(AsyncpgNumeric):
@@ -408,9 +403,7 @@ class AsyncAdapt_asyncpg_cursor:
                 await adapt_connection._start_transaction()
 
             if parameters is not None:
-                operation = operation % self._parameter_placeholders(
-                    parameters
-                )
+                operation = operation % self._parameter_placeholders(parameters)
             else:
                 parameters = ()
 
@@ -442,9 +435,7 @@ class AsyncAdapt_asyncpg_cursor:
                     self._rows = await prepared_stmt.fetch(*parameters)
                     status = prepared_stmt.get_statusmsg()
 
-                    reg = re.match(
-                        r"(?:UPDATE|DELETE|INSERT \d+) (\d+)", status
-                    )
+                    reg = re.match(r"(?:UPDATE|DELETE|INSERT \d+) (\d+)", status)
                     if reg:
                         self.rowcount = int(reg.group(1))
                     else:
@@ -464,21 +455,15 @@ class AsyncAdapt_asyncpg_cursor:
             if not adapt_connection._started:
                 await adapt_connection._start_transaction()
 
-            operation = operation % self._parameter_placeholders(
-                seq_of_parameters[0]
-            )
+            operation = operation % self._parameter_placeholders(seq_of_parameters[0])
 
             try:
-                return await self._connection.executemany(
-                    operation, seq_of_parameters
-                )
+                return await self._connection.executemany(operation, seq_of_parameters)
             except Exception as error:
                 self._handle_exception(error)
 
     def execute(self, operation, parameters=None):
-        self._adapt_connection.await_(
-            self._prepare_and_execute(operation, parameters)
-        )
+        self._adapt_connection.await_(self._prepare_and_execute(operation, parameters))
 
     def executemany(self, operation, seq_of_parameters):
         return self._adapt_connection.await_(
@@ -561,18 +546,14 @@ class AsyncAdapt_asyncpg_ss_cursor(AsyncAdapt_asyncpg_cursor):
         buf = list(self._rowbuffer)
         lb = len(buf)
         if size > lb:
-            buf.extend(
-                self._adapt_connection.await_(self._cursor.fetch(size - lb))
-            )
+            buf.extend(self._adapt_connection.await_(self._cursor.fetch(size - lb)))
 
         result = buf[0:size]
         self._rowbuffer = collections.deque(buf[size:])
         return result
 
     def fetchall(self):
-        ret = list(self._rowbuffer) + list(
-            self._adapt_connection.await_(self._all())
-        )
+        ret = list(self._rowbuffer) + list(self._adapt_connection.await_(self._all()))
         self._rowbuffer.clear()
         return ret
 
@@ -591,9 +572,7 @@ class AsyncAdapt_asyncpg_ss_cursor(AsyncAdapt_asyncpg_cursor):
         return rows
 
     def executemany(self, operation, seq_of_parameters):
-        raise NotImplementedError(
-            "server side cursor doesn't support executemany yet"
-        )
+        raise NotImplementedError("server side cursor doesn't support executemany yet")
 
 
 class AsyncAdapt_asyncpg_connection(AdaptedConnection):
@@ -676,9 +655,9 @@ class AsyncAdapt_asyncpg_connection(AdaptedConnection):
                     translated_error = exception_mapping[super_](
                         "%s: %s" % (type(error), error)
                     )
-                    translated_error.pgcode = (
-                        translated_error.sqlstate
-                    ) = getattr(error, "sqlstate", None)
+                    translated_error.pgcode = translated_error.sqlstate = getattr(
+                        error, "sqlstate", None
+                    )
                     raise translated_error from error
             else:
                 raise error
@@ -762,9 +741,7 @@ class AsyncAdapt_asyncpg_dbapi:
 
     def connect(self, *arg, **kw):
         async_fallback = kw.pop("async_fallback", False)
-        prepared_statement_cache_size = kw.pop(
-            "prepared_statement_cache_size", 100
-        )
+        prepared_statement_cache_size = kw.pop("prepared_statement_cache_size", 100)
         if util.asbool(async_fallback):
             return AsyncAdaptFallback_asyncpg_connection(
                 self,
@@ -813,9 +790,7 @@ class AsyncAdapt_asyncpg_dbapi:
 
     class InvalidCachedStatementError(NotSupportedError):
         def __init__(self, message):
-            super(
-                AsyncAdapt_asyncpg_dbapi.InvalidCachedStatementError, self
-            ).__init__(
+            super(AsyncAdapt_asyncpg_dbapi.InvalidCachedStatementError, self).__init__(
                 message + " (SQLAlchemy asyncpg dialect will now invalidate "
                 "all prepared caches in response to this exception)",
             )
@@ -939,9 +914,7 @@ class PGDialect_asyncpg(PGDialect):
             return tuple(
                 [
                     int(x)
-                    for x in re.findall(
-                        r"(\d+)(?:[-\.]?|$)", self.dbapi.__version__
-                    )
+                    for x in re.findall(r"(\d+)(?:[-\.]?|$)", self.dbapi.__version__)
                 ]
             )
         else:
@@ -1015,16 +988,10 @@ class PGDialect_asyncpg(PGDialect):
 
     def do_set_input_sizes(self, cursor, list_of_tuples, context):
         if self.positional:
-            cursor.setinputsizes(
-                *[dbtype for key, dbtype, sqltype in list_of_tuples]
-            )
+            cursor.setinputsizes(*[dbtype for key, dbtype, sqltype in list_of_tuples])
         else:
             cursor.setinputsizes(
-                **{
-                    key: dbtype
-                    for key, dbtype, sqltype in list_of_tuples
-                    if dbtype
-                }
+                **{key: dbtype for key, dbtype, sqltype in list_of_tuples if dbtype}
             )
 
     async def setup_asyncpg_json_codec(self, conn):

@@ -120,8 +120,7 @@ class SelfDefensePower:
                 code_analysis = self.analyze_system_code()
 
                 # Generate AI-powered improvements
-                improvements = self.ai_coder.generate_code_improvements(
-                    code_analysis)
+                improvements = self.ai_coder.generate_code_improvements(code_analysis)
 
                 # Apply modifications
                 for improvement in improvements:
@@ -150,8 +149,7 @@ class SelfDefensePower:
                 power_analysis = self.analyze_power_systems()
 
                 # Evolve power capabilities
-                evolution = self.power_evolver.evolve_power_systems(
-                    power_analysis)
+                evolution = self.power_evolver.evolve_power_systems(power_analysis)
 
                 # Apply power upgrades
                 for upgrade in evolution["upgrades"]:
@@ -277,8 +275,7 @@ class SelfDefensePower:
 
     def execute_auto_attack(self, threat):
         """Execute automatic counter-attack"""
-        attack_power = {"LOW": 5000, "MEDIUM": 10000,
-                        "HIGH": 15000, "CRITICAL": 25000}
+        attack_power = {"LOW": 5000, "MEDIUM": 10000, "HIGH": 15000, "CRITICAL": 25000}
 
         return {
             "power": attack_power[threat["severity"]],

@@ -23,6 +23,7 @@ service = build("drive", "v3", credentials=creds)
 
 print("☁️ Tamanna Google Cloud Sync Started")
 
+
 # ----------------------------
 # UPLOAD FUNCTION
 # ----------------------------
@@ -30,13 +31,10 @@ def upload_file(file_path):
     file_metadata = {"name": os.path.basename(file_path)}
     media = MediaFileUpload(file_path, resumable=True)
 
-    service.files().create(
-        body=file_metadata,
-        media_body=media,
-        fields="id"
-    ).execute()
+    service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
     print("✅ Uploaded:", file_path)
+
 
 # ----------------------------
 # AUTO SYNC LOOP
@@ -53,6 +51,7 @@ while True:
     print("🔄 Sync complete. Sleeping...")
     time.sleep(SYNC_INTERVAL)
 import datetime
+
 
 def log(message):
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

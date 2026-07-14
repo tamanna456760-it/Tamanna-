@@ -51,8 +51,7 @@ class CodeAnalyzer:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.FileHandler(
-                "code_fixer.log"), logging.StreamHandler()],
+            handlers=[logging.FileHandler("code_fixer.log"), logging.StreamHandler()],
         )
 
     def analyze_file(self, file_path: str) -> Dict[str, Any]:
@@ -83,8 +82,7 @@ class CodeAnalyzer:
 
         except Exception as e:
             logging.error(f"Error analyzing {file_path}: {e}")
-            issues.append(
-                {"type": "error", "message": f"Analysis failed: {e}"})
+            issues.append({"type": "error", "message": f"Analysis failed: {e}"})
 
         return {
             "file_path": file_path,
@@ -220,12 +218,10 @@ class CodeAnalyzer:
     def generate_suggestions(self, issues: List[Dict], file_path: str) -> List[str]:
         """Generate improvement suggestions"""
         suggestions = []
-        fixable_issues = [
-            issue for issue in issues if issue.get("fixable", False)]
+        fixable_issues = [issue for issue in issues if issue.get("fixable", False)]
 
         if fixable_issues:
-            suggestions.append(
-                f"Found {len(fixable_issues)} auto-fixable issues")
+            suggestions.append(f"Found {len(fixable_issues)} auto-fixable issues")
 
         if any(issue["type"] == "error" for issue in issues):
             suggestions.append("Critical errors need immediate attention")
@@ -396,8 +392,7 @@ class FileSyncManager:
 
         for directory in directories:
             if os.path.exists(directory):
-                self.observer.schedule(
-                    event_handler, directory, recursive=True)
+                self.observer.schedule(event_handler, directory, recursive=True)
                 logging.info(f"Started monitoring: {directory}")
 
         self.observer.start()
@@ -431,8 +426,7 @@ class FileSyncManager:
                         shutil.copy2(source_path, target_path)
                         logging.info(f"Synced: {relative_path}")
 
-            logging.info(
-                f"Directory sync completed: {source_dir} -> {target_dir}")
+            logging.info(f"Directory sync completed: {source_dir} -> {target_dir}")
 
         except Exception as e:
             logging.error(f"Sync error: {e}")
@@ -576,15 +570,11 @@ def main():
     """Command line interface"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="BD-King-R7 Auto Code Manager")
-    parser.add_argument("--config", default="builder.json",
-                        help="Config file path")
-    parser.add_argument("--scan", action="store_true",
-                        help="Scan and fix all files")
+    parser = argparse.ArgumentParser(description="BD-King-R7 Auto Code Manager")
+    parser.add_argument("--config", default="builder.json", help="Config file path")
+    parser.add_argument("--scan", action="store_true", help="Scan and fix all files")
     parser.add_argument("--auto", action="store_true", help="Start auto mode")
-    parser.add_argument("--report", action="store_true",
-                        help="Generate report")
+    parser.add_argument("--report", action="store_true", help="Generate report")
 
     args = parser.parse_args()
 

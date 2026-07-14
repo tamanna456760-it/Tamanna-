@@ -21,8 +21,7 @@ class NeuralNetworkUtils:
             [tf.keras.backend.count_params(w) for w in model.trainable_weights]
         )
         non_trainable_params = np.sum(
-            [tf.keras.backend.count_params(w)
-             for w in model.non_trainable_weights]
+            [tf.keras.backend.count_params(w) for w in model.non_trainable_weights]
         )
         total_params = trainable_params + non_trainable_params
 
@@ -45,8 +44,7 @@ class NeuralNetworkUtils:
         if "accuracy" in history:
             axes[0, 0].plot(history["accuracy"], label="Training Accuracy")
             if "val_accuracy" in history:
-                axes[0, 0].plot(history["val_accuracy"],
-                                label="Validation Accuracy")
+                axes[0, 0].plot(history["val_accuracy"], label="Validation Accuracy")
             axes[0, 0].set_title("Model Accuracy")
             axes[0, 0].set_ylabel("Accuracy")
             axes[0, 0].set_xlabel("Epoch")
@@ -66,8 +64,7 @@ class NeuralNetworkUtils:
         if "precision" in history:
             axes[1, 0].plot(history["precision"], label="Training Precision")
             if "val_precision" in history:
-                axes[1, 0].plot(history["val_precision"],
-                                label="Validation Precision")
+                axes[1, 0].plot(history["val_precision"], label="Validation Precision")
             axes[1, 0].set_title("Model Precision")
             axes[1, 0].set_ylabel("Precision")
             axes[1, 0].set_xlabel("Epoch")
@@ -77,8 +74,7 @@ class NeuralNetworkUtils:
         if "recall" in history:
             axes[1, 1].plot(history["recall"], label="Training Recall")
             if "val_recall" in history:
-                axes[1, 1].plot(history["val_recall"],
-                                label="Validation Recall")
+                axes[1, 1].plot(history["val_recall"], label="Validation Recall")
             axes[1, 1].set_title("Model Recall")
             axes[1, 1].set_ylabel("Recall")
             axes[1, 1].set_xlabel("Epoch")
@@ -136,10 +132,8 @@ class PatternRecognitionAnalyzer:
         max_confidences = np.max(predictions, axis=1)
         predicted_classes = np.argmax(predictions, axis=1)
 
-        high_confidence_indices = np.where(
-            max_confidences >= confidence_threshold)[0]
-        low_confidence_indices = np.where(
-            max_confidences < confidence_threshold)[0]
+        high_confidence_indices = np.where(max_confidences >= confidence_threshold)[0]
+        low_confidence_indices = np.where(max_confidences < confidence_threshold)[0]
 
         return {
             "total_predictions": len(predictions),

@@ -137,9 +137,7 @@ class LambdaElement(elements.ClauseElement):
 
     _is_lambda_element = True
 
-    _traverse_internals = [
-        ("_resolved", visitors.InternalTraversal.dp_clauseelement)
-    ]
+    _traverse_internals = [("_resolved", visitors.InternalTraversal.dp_clauseelement)]
 
     _transforms = ()
 
@@ -148,9 +146,7 @@ class LambdaElement(elements.ClauseElement):
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.fn.__code__)
 
-    def __init__(
-        self, fn, role, opts=LambdaOptions, apply_propagate_attrs=None
-    ):
+    def __init__(self, fn, role, opts=LambdaOptions, apply_propagate_attrs=None):
         self.fn = fn
         self.role = role
         self.tracker_key = (fn.__code__,)
@@ -218,9 +214,7 @@ class LambdaElement(elements.ClauseElement):
 
         if rec is None:
             if cache_key is not traversals.NO_CACHE:
-                rec = AnalyzedFunction(
-                    tracker, self, apply_propagate_attrs, fn
-                )
+                rec = AnalyzedFunction(tracker, self, apply_propagate_attrs, fn)
                 rec.closure_bindparams = bindparams
                 lambda_cache[tracker_key + cache_key] = rec
             else:
@@ -229,9 +223,7 @@ class LambdaElement(elements.ClauseElement):
         else:
             bindparams[:] = [
                 orig_bind._with_value(new_bind.value, maintain_key=True)
-                for orig_bind, new_bind in zip(
-                    rec.closure_bindparams, bindparams
-                )
+                for orig_bind, new_bind in zip(rec.closure_bindparams, bindparams)
             ]
 
         self._rec = rec
@@ -309,14 +301,10 @@ class LambdaElement(elements.ClauseElement):
 
         return expr
 
-    def _copy_internals(
-        self, clone=_clone, deferred_copy_internals=None, **kw
-    ):
+    def _copy_internals(self, clone=_clone, deferred_copy_internals=None, **kw):
         # TODO: this needs A LOT of tests
         self._resolved = clone(
-            self._resolved,
-            deferred_copy_internals=deferred_copy_internals,
-            **kw
+            self._resolved, deferred_copy_internals=deferred_copy_internals, **kw
         )
 
     @util.memoized_property
@@ -340,9 +328,7 @@ class LambdaElement(elements.ClauseElement):
 
         parent = self.parent_lambda
         while parent is not None:
-            cache_key = (
-                (parent.fn.__code__,) + parent.closure_cache_key + cache_key
-            )
+            cache_key = (parent.fn.__code__,) + parent.closure_cache_key + cache_key
 
             parent = parent.parent_lambda
 
@@ -406,9 +392,7 @@ class DeferredLambdaElement(LambdaElement):
 
         return expr
 
-    def _copy_internals(
-        self, clone=_clone, deferred_copy_internals=None, **kw
-    ):
+    def _copy_internals(self, clone=_clone, deferred_copy_internals=None, **kw):
         super(DeferredLambdaElement, self)._copy_internals(
             clone=clone,
             deferred_copy_internals=deferred_copy_internals,  # **kw
@@ -547,9 +531,7 @@ class NullLambdaStatement(roles.AllowsLambdaRole, elements.ClauseElement):
 
     _is_lambda_element = True
 
-    _traverse_internals = [
-        ("_resolved", visitors.InternalTraversal.dp_clauseelement)
-    ]
+    _traverse_internals = [("_resolved", visitors.InternalTraversal.dp_clauseelement)]
 
     def __init__(self, statement):
         self._resolved = statement
@@ -700,9 +682,7 @@ class AnalyzedCode(object):
                 build_py_wrappers.append((fv, closure_index))
                 if track_bound_values:
                     bindparam_trackers.append(
-                        self._bound_parameter_getter_func_closure(
-                            fv, closure_index
-                        )
+                        self._bound_parameter_getter_func_closure(fv, closure_index)
                     )
             else:
                 # for normal cell contents, add them to a list that
@@ -772,9 +752,7 @@ class AnalyzedCode(object):
 
         """
 
-        def extract_parameter_value(
-            current_fn, tracker_instrumented_fn, result
-        ):
+        def extract_parameter_value(current_fn, tracker_instrumented_fn, result):
             wrapper = tracker_instrumented_fn.__globals__[name]
             object.__getattribute__(wrapper, "_extract_bound_parameters")(
                 current_fn.__globals__[name], result
@@ -789,12 +767,8 @@ class AnalyzedCode(object):
 
         """
 
-        def extract_parameter_value(
-            current_fn, tracker_instrumented_fn, result
-        ):
-            wrapper = tracker_instrumented_fn.__closure__[
-                closure_index
-            ].cell_contents
+        def extract_parameter_value(current_fn, tracker_instrumented_fn, result):
+            wrapper = tracker_instrumented_fn.__closure__[closure_index].cell_contents
             object.__getattribute__(wrapper, "_extract_bound_parameters")(
                 current_fn.__closure__[closure_index].cell_contents, result
             )
@@ -867,8 +841,7 @@ class AnalyzedCode(object):
 
                 try:
                     return tuple(
-                        elem._gen_cache_key(anon_map, bindparams)
-                        for elem in contents
+                        elem._gen_cache_key(anon_map, bindparams) for elem in contents
                     )
                 except AttributeError as ae:
                     self._raise_for_uncacheable_closure_variable(
@@ -904,9 +877,7 @@ class AnalyzedCode(object):
 
         return get
 
-    def _raise_for_uncacheable_closure_variable(
-        self, variable_name, fn, from_=None
-    ):
+    def _raise_for_uncacheable_closure_variable(self, variable_name, fn, from_=None):
         util.raise_(
             exc.InvalidRequestError(
                 "Closure variable named '%s' inside of lambda callable %s "
@@ -1025,9 +996,7 @@ class AnalyzedFunction(object):
                         name,
                         value,
                         closure_index=closure_index,
-                        track_bound_values=(
-                            self.analyzed_code.track_bound_values
-                        ),
+                        track_bound_values=(self.analyzed_code.track_bound_values),
                     )
                     if track_closure_variables:
                         closure_pywrappers.append(bind)
@@ -1037,12 +1006,12 @@ class AnalyzedFunction(object):
 
             # rewrite the original fn.   things that look like they will
             # become bound parameters are wrapped in a PyWrapper.
-            self.tracker_instrumented_fn = (
-                tracker_instrumented_fn
-            ) = self._rewrite_code_obj(
-                fn,
-                [new_closure[name] for name in fn.__code__.co_freevars],
-                new_globals,
+            self.tracker_instrumented_fn = tracker_instrumented_fn = (
+                self._rewrite_code_obj(
+                    fn,
+                    [new_closure[name] for name in fn.__code__.co_freevars],
+                    new_globals,
+                )
             )
 
             # now invoke the function.  This will give us a new SQL
@@ -1119,9 +1088,7 @@ class AnalyzedFunction(object):
         compat.exec_(code, vars_, vars_)
         closure = vars_["make_cells"]()
 
-        func = type(f)(
-            f.__code__, globals_, f.__name__, f.__defaults__, closure
-        )
+        func = type(f)(f.__code__, globals_, f.__name__, f.__defaults__, closure)
         if sys.version_info >= (3,):
             func.__annotations__ = f.__annotations__
             func.__kwdefaults__ = f.__kwdefaults__

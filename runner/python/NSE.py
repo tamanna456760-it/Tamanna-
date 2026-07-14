@@ -25,8 +25,7 @@ class TestCustomNSEScripts(unittest.TestCase):
 
         try:
             cmd = ["nmap", "--script", temp_script, "-p", "80", "127.0.0.1"]
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=30)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0)
             print("✓ Custom NSE script loading working")
         except subprocess.TimeoutExpired:

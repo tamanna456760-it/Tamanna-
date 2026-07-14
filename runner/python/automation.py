@@ -250,8 +250,7 @@ class AdvancedAutomationEngine:
         Register a new workflow in the automation engine
         """
         try:
-            workflow_id = workflow_definition.get(
-                "id", f"WF_{uuid.uuid4().hex[:8]}")
+            workflow_id = workflow_definition.get("id", f"WF_{uuid.uuid4().hex[:8]}")
 
             # Validate workflow definition
             validation_result = await self._validate_workflow(workflow_definition)
@@ -379,14 +378,12 @@ class AdvancedAutomationEngine:
             for task in workflow.tasks:
                 # Check dependencies
                 if not await self._check_dependencies(task, results):
-                    self.logger.warning(
-                        f"⏸️ Task {task.name} waiting for dependencies")
+                    self.logger.warning(f"⏸️ Task {task.name} waiting for dependencies")
                     continue
 
                 # Check conditions
                 if not await self._evaluate_conditions(task, variables):
-                    self.logger.info(
-                        f"⏭️ Task {task.name} skipped due to conditions")
+                    self.logger.info(f"⏭️ Task {task.name} skipped due to conditions")
                     continue
 
                 # Execute task
@@ -430,8 +427,7 @@ class AdvancedAutomationEngine:
                 status=overall_status,
                 tasks_executed=tasks_executed,
                 tasks_failed=tasks_failed,
-                total_duration=(datetime.now() -
-                                context.start_time).total_seconds(),
+                total_duration=(datetime.now() - context.start_time).total_seconds(),
                 results=results,
                 error_details=error_details if error_details else None,
             )
@@ -449,8 +445,7 @@ class AdvancedAutomationEngine:
         task_start = datetime.now()
 
         try:
-            self.logger.info(
-                f"⚡ Executing Task: {task.name} (ID: {task.task_id})")
+            self.logger.info(f"⚡ Executing Task: {task.name} (ID: {task.task_id})")
 
             # Resolve variables in parameters
             resolved_params = await self._resolve_variables(task.parameters, variables)
@@ -556,8 +551,7 @@ class AdvancedAutomationEngine:
                         ):
                             # Execute workflow
                             execution_result = await self.execute_workflow(
-                                workflow_id, {
-                                    "event_data": event_data, **event_data}
+                                workflow_id, {"event_data": event_data, **event_data}
                             )
 
                             triggered_workflows.append(
@@ -923,10 +917,8 @@ class AdvancedAutomationEngine:
                 f"⚠️ Continuing workflow despite task failure: {task.name}"
             )
         else:
-            self.logger.error(
-                f"🚨 Stopping workflow due to task failure: {task.name}")
-            raise Exception(
-                f"Workflow stopped due to task failure: {task.name}")
+            self.logger.error(f"🚨 Stopping workflow due to task failure: {task.name}")
+            raise Exception(f"Workflow stopped due to task failure: {task.name}")
 
     # Built-in Task Implementations
     async def _execute_system_command(self, command: str, **kwargs) -> Dict:

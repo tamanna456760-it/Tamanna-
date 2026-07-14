@@ -12,6 +12,7 @@ def fix_suggestion(error):
     else:
         return "Fix: manual check দরকার"
 
+
 report = []
 
 try:

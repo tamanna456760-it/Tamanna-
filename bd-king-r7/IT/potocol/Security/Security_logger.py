@@ -1,16 +1,17 @@
-import json
 import datetime
+import json
 import os
 
 os.makedirs("logs", exist_ok=True)
 os.makedirs("security", exist_ok=True)
+
 
 def log_event(ip="0.0.0.0", event="unknown", path="/"):
     data = {
         "time": str(datetime.datetime.now()),
         "ip": ip,
         "event": event,
-        "path": path
+        "path": path,
     }
 
     with open("logs/security.log", "a") as f:

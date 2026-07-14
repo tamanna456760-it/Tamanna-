@@ -5,10 +5,7 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-"""Base types API.
-
-"""
-
+"""Base types API."""
 
 from . import operators
 from .base import SchemaEventTarget
@@ -621,10 +618,7 @@ class TypeEngine(Traversible):
             intended use.
 
         """
-        if (
-            not allow_nulltype
-            and self._generic_type_affinity == NULLTYPE.__class__
-        ):
+        if not allow_nulltype and self._generic_type_affinity == NULLTYPE.__class__:
             raise NotImplementedError(
                 "Default TypeEngine.as_generic() "
                 "heuristic method was unsuccessful for {}. A custom "
@@ -739,9 +733,11 @@ class TypeEngine(Traversible):
         return (self.__class__,) + tuple(
             (
                 k,
-                self.__dict__[k]._static_cache_key
-                if isinstance(self.__dict__[k], TypeEngine)
-                else self.__dict__[k],
+                (
+                    self.__dict__[k]._static_cache_key
+                    if isinstance(self.__dict__[k], TypeEngine)
+                    else self.__dict__[k]
+                ),
             )
             for k in names
             if k in self.__dict__ and not k.startswith("_")
@@ -1339,9 +1335,7 @@ class TypeDecorator(ExternalType, SchemaEventTarget, TypeEngine):
 
         def operate(self, op, *other, **kwargs):
             kwargs["_python_is_types"] = self.expr.type.coerce_to_is_types
-            return super(TypeDecorator.Comparator, self).operate(
-                op, *other, **kwargs
-            )
+            return super(TypeDecorator.Comparator, self).operate(op, *other, **kwargs)
 
         def reverse_operate(self, op, other, **kwargs):
             kwargs["_python_is_types"] = self.expr.type.coerce_to_is_types
@@ -1400,9 +1394,7 @@ class TypeDecorator(ExternalType, SchemaEventTarget, TypeEngine):
     def _set_parent_with_dispatch(self, parent):
         """Support SchemaEventTarget"""
 
-        super(TypeDecorator, self)._set_parent_with_dispatch(
-            parent, outer=True
-        )
+        super(TypeDecorator, self)._set_parent_with_dispatch(parent, outer=True)
 
         if isinstance(self.impl, SchemaEventTarget):
             self.impl._set_parent_with_dispatch(parent)
@@ -1549,17 +1541,13 @@ class TypeDecorator(ExternalType, SchemaEventTarget, TypeEngine):
 
         """
 
-        return util.method_is_overridden(
-            self, TypeDecorator.process_bind_param
-        )
+        return util.method_is_overridden(self, TypeDecorator.process_bind_param)
 
     @util.memoized_property
     def _has_literal_processor(self):
         """memoized boolean, check if process_literal_param is implemented."""
 
-        return util.method_is_overridden(
-            self, TypeDecorator.process_literal_param
-        )
+        return util.method_is_overridden(self, TypeDecorator.process_literal_param)
 
     def literal_processor(self, dialect):
         """Provide a literal processing function for the given
@@ -1649,9 +1637,7 @@ class TypeDecorator(ExternalType, SchemaEventTarget, TypeEngine):
 
         """
 
-        return util.method_is_overridden(
-            self, TypeDecorator.process_result_value
-        )
+        return util.method_is_overridden(self, TypeDecorator.process_result_value)
 
     def result_processor(self, dialect, coltype):
         """Provide a result value processing function for the given

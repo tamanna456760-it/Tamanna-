@@ -195,8 +195,7 @@ class PowerHubCodeSystem:
                 built_components = self.build_code_components(new_structures)
 
                 # Optimize builds
-                optimization_results = self.optimize_built_components(
-                    built_components)
+                optimization_results = self.optimize_built_components(built_components)
 
                 self.code_engines["builder_power"].update(
                     {
@@ -263,12 +262,10 @@ class PowerHubCodeSystem:
                 decoded_structures = self.analyze_and_decode_code()
 
                 # Pattern recognition
-                patterns_found = self.recognize_code_patterns(
-                    decoded_structures)
+                patterns_found = self.recognize_code_patterns(decoded_structures)
 
                 # Comprehension scoring
-                comprehension_level = self.measure_comprehension(
-                    patterns_found)
+                comprehension_level = self.measure_comprehension(patterns_found)
 
                 self.code_engines["decode_power"].update(
                     {
@@ -300,12 +297,10 @@ class PowerHubCodeSystem:
                 problems_detected = self.detect_code_problems()
 
                 # Solution generation
-                solutions_generated = self.generate_solutions(
-                    problems_detected)
+                solutions_generated = self.generate_solutions(problems_detected)
 
                 # Resolution application
-                resolutions_applied = self.apply_resolutions(
-                    solutions_generated)
+                resolutions_applied = self.apply_resolutions(solutions_generated)
 
                 self.code_engines["resolve_power"].update(
                     {
@@ -313,8 +308,7 @@ class PowerHubCodeSystem:
                         "solutions_generated": len(solutions_generated),
                         "resolutions_applied": len(resolutions_applied),
                         "resolution_rate": (
-                            len(resolutions_applied) /
-                            max(1, len(problems_detected))
+                            len(resolutions_applied) / max(1, len(problems_detected))
                         )
                         * 100,
                         "last_resolution": datetime.now(),
@@ -613,8 +607,7 @@ class PowerHubCodeSystem:
             annotations.append(
                 {
                     "type": np.random.choice(
-                        ["EXPLANATION", "WARNING",
-                            "OPTIMIZATION_TIP", "SECURITY_NOTE"]
+                        ["EXPLANATION", "WARNING", "OPTIMIZATION_TIP", "SECURITY_NOTE"]
                     ),
                     "context": "RELEVANT",
                     "clarity": np.random.uniform(90, 100),
@@ -736,8 +729,7 @@ def main():
             print(f"⚡ TOTAL CODE POWER: {total_power:,}W")
             print(f"🏥 SYSTEM HEALTH: {system_health:.1f}%")
             print(f"🔧 ACTIVE ENGINES: {len(powerhub.code_engines)}")
-            print(
-                f"📁 WORKSPACE FILES: {len(powerhub.live_workspace['active_files'])}")
+            print(f"📁 WORKSPACE FILES: {len(powerhub.live_workspace['active_files'])}")
 
     except KeyboardInterrupt:
         print("\n\n🛑 POWERHUB CODE SYSTEM SHUTTING DOWN...")

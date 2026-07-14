@@ -5,26 +5,12 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
-from mypy.nodes import ClassDef
-from mypy.nodes import Expression
-from mypy.nodes import FuncDef
-from mypy.nodes import MemberExpr
-from mypy.nodes import NameExpr
-from mypy.nodes import SymbolNode
-from mypy.nodes import TypeAlias
-from mypy.nodes import TypeInfo
+from mypy.nodes import (ClassDef, Expression, FuncDef, MemberExpr, NameExpr,
+                        SymbolNode, TypeAlias, TypeInfo)
 from mypy.plugin import SemanticAnalyzerPluginInterface
-from mypy.types import CallableType
-from mypy.types import get_proper_type
-from mypy.types import Instance
-from mypy.types import UnboundType
+from mypy.types import CallableType, Instance, UnboundType, get_proper_type
 
 from ... import util
 
@@ -227,7 +213,7 @@ def type_id_for_callee(callee: Expression) -> Optional[int]:
 
 
 def type_id_for_named_node(
-    node: Union[NameExpr, MemberExpr, SymbolNode]
+    node: Union[NameExpr, MemberExpr, SymbolNode],
 ) -> Optional[int]:
     type_id, fullnames = _lookup.get(node.name, (None, None))
 

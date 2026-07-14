@@ -19,9 +19,9 @@ from typing import Dict, List, Optional, Tuple
 # ----------------------------------------------------------------------
 try:
     from rich.console import Console
+    from rich.panel import Panel
     from rich.progress import Progress, SpinnerColumn, TextColumn
     from rich.table import Table
-    from rich.panel import Panel
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False

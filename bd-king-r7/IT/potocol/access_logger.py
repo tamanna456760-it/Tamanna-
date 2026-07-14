@@ -1,7 +1,9 @@
-from flask import Flask, request
 import datetime
 
+from flask import Flask, request
+
 app = Flask(__name__)
+
 
 @app.before_request
 def log_request():
@@ -14,8 +16,10 @@ def log_request():
             f"UA={request.headers.get('User-Agent')}\n"
         )
 
+
 @app.route("/")
 def home():
     return "OK"
+
 
 app.run(host="0.0.0.0", port=5000)

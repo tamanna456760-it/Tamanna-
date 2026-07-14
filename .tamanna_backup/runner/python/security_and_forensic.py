@@ -27,10 +27,8 @@ class TestWiresharkSecurity(unittest.TestCase):
         """Test TLS/SSL traffic analysis"""
         try:
             # Test SSL/TLS statistics
-            cmd = ["tshark", "-z", "ssl,stat,0",
-                   "-i", "lo", "-a", "duration:5"]
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=15)
+            cmd = ["tshark", "-z", "ssl,stat,0", "-i", "lo", "-a", "duration:5"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
             self.assertEqual(result.returncode, 0)
             print("✓ Encrypted traffic analysis working")
         except subprocess.TimeoutExpired:

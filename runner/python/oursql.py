@@ -32,7 +32,6 @@ handling.
 
 """
 
-
 from .base import BIT
 from .base import MySQLDialect
 from .base import MySQLExecutionContext
@@ -98,9 +97,9 @@ class MySQLDialect_oursql(MySQLDialect):
             arg = connection.connection._escape_string(xid)
         else:
             charset = self._connection_charset
-            arg = connection.connection._escape_string(
-                xid.encode(charset)
-            ).decode(charset)
+            arg = connection.connection._escape_string(xid.encode(charset)).decode(
+                charset
+            )
         arg = "'%s'" % arg
         connection.execution_options(_oursql_plain_query=True).exec_driver_sql(
             query % arg
@@ -118,16 +117,12 @@ class MySQLDialect_oursql(MySQLDialect):
         self._xa_query(connection, "XA END %s", xid)
         self._xa_query(connection, "XA PREPARE %s", xid)
 
-    def do_rollback_twophase(
-        self, connection, xid, is_prepared=True, recover=False
-    ):
+    def do_rollback_twophase(self, connection, xid, is_prepared=True, recover=False):
         if not is_prepared:
             self._xa_query(connection, "XA END %s", xid)
         self._xa_query(connection, "XA ROLLBACK %s", xid)
 
-    def do_commit_twophase(
-        self, connection, xid, is_prepared=True, recover=False
-    ):
+    def do_commit_twophase(self, connection, xid, is_prepared=True, recover=False):
         if not is_prepared:
             self.do_prepare_twophase(connection, xid)
         self._xa_query(connection, "XA COMMIT %s", xid)
@@ -177,9 +172,7 @@ class MySQLDialect_oursql(MySQLDialect):
 
     def get_schema_names(self, connection, **kw):
         return MySQLDialect.get_schema_names(
-            self,
-            connection.connect().execution_options(_oursql_plain_query=True),
-            **kw
+            self, connection.connect().execution_options(_oursql_plain_query=True), **kw
         )
 
     def initialize(self, connection):
@@ -187,9 +180,7 @@ class MySQLDialect_oursql(MySQLDialect):
             self, connection.execution_options(_oursql_plain_query=True)
         )
 
-    def _show_create_table(
-        self, connection, table, charset=None, full_name=None
-    ):
+    def _show_create_table(self, connection, table, charset=None, full_name=None):
         return MySQLDialect._show_create_table(
             self,
             connection.connect(close_with_result=True).execution_options(

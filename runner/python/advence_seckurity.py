@@ -215,8 +215,7 @@ class AdvancedSecuritySystem:
             with open(config_path, "r") as f:
                 user_config = json.load(f)
                 # Deep merge with security validation
-                default_config = self._deep_merge_configs(
-                    default_config, user_config)
+                default_config = self._deep_merge_configs(default_config, user_config)
         except FileNotFoundError:
             self._save_config(default_config, config_path)
 
@@ -475,8 +474,7 @@ class AdvancedSecuritySystem:
         """
         try:
             # Verify integrity first
-            encrypted_data = base64.b64decode(
-                encrypted_package["encrypted_data"])
+            encrypted_data = base64.b64decode(encrypted_package["encrypted_data"])
             expected_hash = encrypted_package["integrity_hash"]
 
             if not await self._verify_integrity(encrypted_data, expected_hash):
@@ -515,8 +513,7 @@ class AdvancedSecuritySystem:
 
             # Combine detection results
             threat_score = (
-                sum(result.get("threat_score", 0)
-                    for result in detection_results) / 4
+                sum(result.get("threat_score", 0) for result in detection_results) / 4
             )
 
             if threat_score > 0.7:  # High confidence threshold
@@ -727,8 +724,7 @@ class AdvancedSecuritySystem:
         if threat_level in [ThreatLevel.HIGH, ThreatLevel.CRITICAL]:
             self.active_threats[event.event_id] = event
 
-        self.logger.warning(
-            f"🚨 Security Event: {event_type.value} - {description}")
+        self.logger.warning(f"🚨 Security Event: {event_type.value} - {description}")
 
         return event
 
@@ -993,8 +989,7 @@ async def demo_security_system():
 
         # Test authentication
         auth_result = await security_system.authenticate(
-            "admin", {"password": "secure_password",
-                      "ip_address": "192.168.1.100"}
+            "admin", {"password": "secure_password", "ip_address": "192.168.1.100"}
         )
         print(f"Authentication: {auth_result}")
 

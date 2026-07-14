@@ -90,9 +90,7 @@ class SybaseDialect_pysybase(SybaseDialect):
         return (vers / 1000, vers % 1000 / 100, vers % 100 / 10, vers % 10)
 
     def is_disconnect(self, e, connection, cursor):
-        if isinstance(
-            e, (self.dbapi.OperationalError, self.dbapi.ProgrammingError)
-        ):
+        if isinstance(e, (self.dbapi.OperationalError, self.dbapi.ProgrammingError)):
             msg = str(e)
             return (
                 "Unable to complete network request to host" in msg

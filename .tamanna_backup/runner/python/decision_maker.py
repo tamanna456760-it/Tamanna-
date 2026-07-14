@@ -306,8 +306,7 @@ class LiveDecisionEngine:
         try:
             # Check resource availability
             if not await self._check_resources(decision.required_resources):
-                raise Exception(
-                    "Insufficient resources for decision execution")
+                raise Exception("Insufficient resources for decision execution")
 
             # Execute using appropriate engine
             engine = self.engines[decision.decision_engine]
@@ -636,8 +635,7 @@ class LiveDecisionEngine:
 
     async def emergency_override(self, decision_id: str, override_action: Dict):
         """Emergency override for critical situations"""
-        self.logger.warning(
-            f"🚨 EMERGENCY OVERRIDE for Decision: {decision_id}")
+        self.logger.warning(f"🚨 EMERGENCY OVERRIDE for Decision: {decision_id}")
 
         # Immediately execute override action
         result = await self._execute_emergency_action(override_action)
@@ -675,8 +673,7 @@ class LiveDecisionEngine:
 
         # Reconfigure process pool
         self.process_pool.shutdown(wait=True)
-        self.process_pool = ProcessPoolExecutor(
-            max_workers=config["processes"])
+        self.process_pool = ProcessPoolExecutor(max_workers=config["processes"])
 
         # Adjust system priorities
         await self.power_manager.set_system_priority(config["priority"])
@@ -694,13 +691,11 @@ class LiveDecisionEngine:
         # Multiple factors affecting confidence
         data_quality = decision_input.get("data_quality", 0.8)
         model_accuracy = decision_input.get("model_accuracy", 0.9)
-        historical_success = decision_input.get(
-            "historical_success_rate", 0.85)
+        historical_success = decision_input.get("historical_success_rate", 0.85)
         expert_validation = decision_input.get("expert_validation", 0.7)
 
         weights = [0.3, 0.3, 0.25, 0.15]  # Weighted combination
-        factors = [data_quality, model_accuracy,
-                   historical_success, expert_validation]
+        factors = [data_quality, model_accuracy, historical_success, expert_validation]
 
         confidence = sum(w * f for w, f in zip(weights, factors))
         return min(1.0, confidence)
@@ -775,14 +770,12 @@ class LiveDecisionEngine:
 
         # Update running averages
         self.metrics.average_confidence = (
-            self.metrics.average_confidence *
-            (self.metrics.total_decisions - 1)
+            self.metrics.average_confidence * (self.metrics.total_decisions - 1)
             + decision.confidence
         ) / self.metrics.total_decisions
 
         self.metrics.average_execution_time = (
-            self.metrics.average_execution_time *
-            (self.metrics.total_decisions - 1)
+            self.metrics.average_execution_time * (self.metrics.total_decisions - 1)
             + execution_time
         ) / self.metrics.total_decisions
 

@@ -29,8 +29,7 @@ class TestNmapAdvancedScans(unittest.TestCase):
         """Test service and version detection"""
         try:
             cmd = ["nmap", "-sV", "-p", "22,80", "127.0.0.1"]
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=45)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
             self.assertEqual(result.returncode, 0)
             self.assertIn("Service detection performed", result.stdout)
             print("✓ Service version detection working")
@@ -41,8 +40,7 @@ class TestNmapAdvancedScans(unittest.TestCase):
         """Test OS detection"""
         try:
             cmd = ["nmap", "-O", "127.0.0.1"]
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             self.assertEqual(result.returncode, 0)
             print("✓ OS detection working")
         except subprocess.TimeoutExpired:
@@ -55,8 +53,7 @@ class TestNmapAdvancedScans(unittest.TestCase):
         for script in scripts_to_test:
             with self.subTest(script=script):
                 try:
-                    cmd = ["nmap", "--script", script,
-                           "-p", "80,443", "127.0.0.1"]
+                    cmd = ["nmap", "--script", script, "-p", "80,443", "127.0.0.1"]
                     result = subprocess.run(
                         cmd, capture_output=True, text=True, timeout=45
                     )

@@ -96,8 +96,7 @@ class BDKingR7AIDoctor:
 
         # Store consultation
         self.consultations.append(analysis_result)
-        self.patients[patient_id]["consultation_history"].append(
-            consultation_id)
+        self.patients[patient_id]["consultation_history"].append(consultation_id)
 
         return analysis_result
 
@@ -139,10 +138,8 @@ class BDKingR7AIDoctor:
         recommendations = []
 
         if emergency == "CRITICAL":
-            recommendations.append(
-                "🚨 SEEK IMMEDIATE EMERGENCY MEDICAL ATTENTION!")
-            recommendations.append(
-                "Call emergency services or go to nearest hospital")
+            recommendations.append("🚨 SEEK IMMEDIATE EMERGENCY MEDICAL ATTENTION!")
+            recommendations.append("Call emergency services or go to nearest hospital")
             return recommendations
 
         # General recommendations
@@ -156,12 +153,10 @@ class BDKingR7AIDoctor:
             recommendations.append("🔄 Use fever-reducing medication if needed")
 
         if "cough" in symptoms:
-            recommendations.append(
-                "🍯 Consider cough drops or honey for throat")
+            recommendations.append("🍯 Consider cough drops or honey for throat")
 
         if duration > 72:  # More than 3 days
-            recommendations.append(
-                "📞 Schedule appointment with healthcare provider")
+            recommendations.append("📞 Schedule appointment with healthcare provider")
 
         return recommendations
 
@@ -196,8 +191,7 @@ class BDKingR7AIDoctor:
     def generate_medical_report(self, consultation_id: str) -> Dict:
         """Generate comprehensive medical report"""
         consultation = next(
-            (c for c in self.consultations if c["consultation_id"]
-             == consultation_id),
+            (c for c in self.consultations if c["consultation_id"] == consultation_id),
             None,
         )
 

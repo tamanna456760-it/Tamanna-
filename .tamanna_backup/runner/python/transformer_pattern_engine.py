@@ -59,8 +59,7 @@ class TransformerPatternEngine(BaseNeuralNetwork):
         """Build Transformer architecture"""
         try:
             # Input layer
-            inputs = layers.Input(
-                shape=(self.sequence_length, self.num_features))
+            inputs = layers.Input(shape=(self.sequence_length, self.num_features))
 
             # Positional encoding
             if self.config["architecture"].get("positional_encoding", True):
@@ -294,8 +293,7 @@ class TransformerPatternEngine(BaseNeuralNetwork):
             )
 
             # Get attention weights
-            attention_weights = attention_model.predict(
-                X_sample[np.newaxis, ...])
+            attention_weights = attention_model.predict(X_sample[np.newaxis, ...])
 
             attention_analysis = {
                 "num_attention_layers": len(attention_weights),

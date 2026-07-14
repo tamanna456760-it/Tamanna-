@@ -1,7 +1,6 @@
 import unittest
 
-from your_bd_king_r7_module import \
-    BDKingR7Fullmap  # Replace with your actual import
+from your_bd_king_r7_module import BDKingR7Fullmap  # Replace with your actual import
 
 
 class TestBDKingR7Fullmap(unittest.TestCase):

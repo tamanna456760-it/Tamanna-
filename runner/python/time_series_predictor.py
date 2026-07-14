@@ -113,8 +113,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
 
         x = inputs
         for i, units in enumerate(self.config["architecture"]["lstm_layers"]):
-            return_sequences = i < len(
-                self.config["architecture"]["lstm_layers"]) - 1
+            return_sequences = i < len(self.config["architecture"]["lstm_layers"]) - 1
 
             lstm_layer = layers.LSTM(
                 units=units,
@@ -141,8 +140,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
         # Dense layers
         for i, units in enumerate(self.config["architecture"]["dense_layers"]):
             x = layers.Dense(units, activation="relu", name=f"dense_{i}")(x)
-            x = layers.Dropout(
-                self.config["architecture"].get("dropout_rate", 0))(x)
+            x = layers.Dropout(self.config["architecture"].get("dropout_rate", 0))(x)
 
         # Output layer
         outputs = layers.Dense(self.prediction_horizon, name="output")(x)
@@ -163,16 +161,14 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
                 name=f"conv1d_{i}",
             )(x)
             x = layers.MaxPooling1D(pool_size=2, name=f"pool_{i}")(x)
-            x = layers.Dropout(
-                self.config["architecture"].get("dropout_rate", 0))(x)
+            x = layers.Dropout(self.config["architecture"].get("dropout_rate", 0))(x)
 
         x = layers.Flatten()(x)
 
         # Dense layers
         for i, units in enumerate(self.config["architecture"]["dense_layers"]):
             x = layers.Dense(units, activation="relu", name=f"dense_{i}")(x)
-            x = layers.Dropout(
-                self.config["architecture"].get("dropout_rate", 0))(x)
+            x = layers.Dropout(self.config["architecture"].get("dropout_rate", 0))(x)
 
         # Output layer
         outputs = layers.Dense(self.prediction_horizon, name="output")(x)
@@ -193,8 +189,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
 
             # Feed Forward Part
             x = layers.LayerNormalization(epsilon=1e-6)(res)
-            x = layers.Conv1D(filters=ff_dim, kernel_size=1,
-                              activation="relu")(x)
+            x = layers.Conv1D(filters=ff_dim, kernel_size=1, activation="relu")(x)
             x = layers.Dropout(dropout)(x)
             x = layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
             return x + res
@@ -225,8 +220,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
         # Dense layers
         for i, units in enumerate(self.config["architecture"]["dense_layers"]):
             x = layers.Dense(units, activation="relu", name=f"dense_{i}")(x)
-            x = layers.Dropout(
-                self.config["architecture"].get("dropout_rate", 0))(x)
+            x = layers.Dropout(self.config["architecture"].get("dropout_rate", 0))(x)
 
         # Output layer
         outputs = layers.Dense(self.prediction_horizon, name="output")(x)
@@ -247,14 +241,12 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
                 padding="same",
                 name=f"conv1d_{i}",
             )(cnn_branch)
-            cnn_branch = layers.MaxPooling1D(
-                pool_size=2, name=f"pool_{i}")(cnn_branch)
+            cnn_branch = layers.MaxPooling1D(pool_size=2, name=f"pool_{i}")(cnn_branch)
 
         # LSTM branch for temporal patterns
         lstm_branch = inputs
         for i, units in enumerate(self.config["architecture"]["lstm_layers"]):
-            return_sequences = i < len(
-                self.config["architecture"]["lstm_layers"]) - 1
+            return_sequences = i < len(self.config["architecture"]["lstm_layers"]) - 1
 
             lstm_layer = layers.LSTM(
                 units=units,
@@ -279,8 +271,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
         x = combined
         for i, units in enumerate(self.config["architecture"]["dense_layers"]):
             x = layers.Dense(units, activation="relu", name=f"dense_{i}")(x)
-            x = layers.Dropout(
-                self.config["architecture"].get("dropout_rate", 0))(x)
+            x = layers.Dropout(self.config["architecture"].get("dropout_rate", 0))(x)
 
         # Output layer
         outputs = layers.Dense(self.prediction_horizon, name="output")(x)
@@ -404,8 +395,11 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
             # Additional time series specific metrics
             predictions = await self._execute_prediction(X_test)
 
-            from sklearn.metrics import (mean_absolute_error,
-                                         mean_squared_error, r2_score)
+            from sklearn.metrics import (
+                mean_absolute_error,
+                mean_squared_error,
+                r2_score,
+            )
 
             metrics_dict.update(
                 {
@@ -467,11 +461,9 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
                     new_row[0, 0] = next_value[
                         0
                     ]  # Update first feature, assume others are external
-                    current_sequence = np.vstack(
-                        [current_sequence[1:], new_row])
+                    current_sequence = np.vstack([current_sequence[1:], new_row])
                 else:  # Single feature
-                    current_sequence = np.append(
-                        current_sequence[1:], next_value)
+                    current_sequence = np.append(current_sequence[1:], next_value)
 
             forecast_result = {
                 "forecasts": np.array(forecasts).tolist(),
@@ -495,8 +487,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
         """Calculate confidence interval using Monte Carlo dropout"""
         try:
             if num_samples is None:
-                num_samples = self.config["prediction"].get(
-                    "num_mc_samples", 100)
+                num_samples = self.config["prediction"].get("num_mc_samples", 100)
 
             predictions = []
             for _ in range(num_samples):
@@ -608,8 +599,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
                 seasonal_analysis[f"sequence_{i}"] = {
                     "dominant_frequency": float(dominant_freq),
                     "period": (
-                        float(1 / abs(dominant_freq)
-                              ) if dominant_freq != 0 else 0
+                        float(1 / abs(dominant_freq)) if dominant_freq != 0 else 0
                     ),
                     "seasonal_strength": float(
                         power[dominant_freq_idx] / np.sum(power)
@@ -625,8 +615,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
     async def _calculate_volatility(self, predictions: np.ndarray) -> float:
         """Calculate volatility of predictions"""
         try:
-            returns = np.diff(predictions.flatten()) / \
-                predictions.flatten()[:-1]
+            returns = np.diff(predictions.flatten()) / predictions.flatten()[:-1]
             # Annualized volatility
             volatility = np.std(returns) * np.sqrt(252)
             return float(volatility)
@@ -642,11 +631,9 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
             for i in range(1, len(pred_flat) - 1):
                 # Check for local maxima/minima
                 if (
-                    pred_flat[i] > pred_flat[i -
-                                             1] and pred_flat[i] > pred_flat[i + 1]
+                    pred_flat[i] > pred_flat[i - 1] and pred_flat[i] > pred_flat[i + 1]
                 ) or (
-                    pred_flat[i] < pred_flat[i -
-                                             1] and pred_flat[i] < pred_flat[i + 1]
+                    pred_flat[i] < pred_flat[i - 1] and pred_flat[i] < pred_flat[i + 1]
                 ):
                     turning_points.append(i)
 
@@ -661,8 +648,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
         try:
             pattern_analysis = {
                 "prediction_accuracy": float(
-                    np.mean(
-                        np.abs(sequences[:, -1, 0] - predictions.flatten()))
+                    np.mean(np.abs(sequences[:, -1, 0] - predictions.flatten()))
                 ),
                 "pattern_consistency": await self._calculate_pattern_consistency(
                     sequences
@@ -684,8 +670,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
                 correlations = []
                 for i in range(sequences.shape[0]):
                     for j in range(i + 1, sequences.shape[0]):
-                        corr = np.corrcoef(
-                            sequences[i, :, 0], sequences[j, :, 0])[0, 1]
+                        corr = np.corrcoef(sequences[i, :, 0], sequences[j, :, 0])[0, 1]
                         correlations.append(corr)
                 return float(np.mean(correlations)) if correlations else 0.0
             return 0.0
@@ -742,8 +727,7 @@ class TimeSeriesPredictor(BaseNeuralNetwork):
     async def _load_model_weights(self, load_path: Path):
         """Load time series model weights"""
         try:
-            self.model = tf.keras.models.load_model(
-                load_path / "time_series_model.h5")
+            self.model = tf.keras.models.load_model(load_path / "time_series_model.h5")
 
             # Load additional data
             data_path = load_path / "time_series_data.json"
