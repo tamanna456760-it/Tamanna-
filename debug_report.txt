@@ -1,0 +1,466 @@
+=========================================
+Tamanna System Debug Report
+=========================================
+Generated: Tue Jul 14 20:46:55 +04 2026
+
+== System ==
+Linux localhost 5.15.178-android13-8-00006-g0c6055fd2d8b-ab13363910 #1 SMP PREEMPT Tue Apr 15 22:34:18 UTC 2025 aarch64 Android
+
+== Current Directory ==
+/data/data/com.termux/files/home/tamanna-
+
+== Python ==
+Python 3.13.13
+
+== Node.js ==
+v26.3.1
+
+== npm ==
+12.0.1
+
+== Git ==
+git version 2.54.0
+
+== Project Files ==
+./.env/api_call.py
+./.env/config.json
+./.env/github_token
+./.git/COMMIT_EDITMSG
+./.git/FETCH_HEAD
+./.git/HEAD
+./.git/MERGE_RR
+./.git/ORIG_HEAD
+./.git/REBASE_HEAD
+./.git/config
+./.git/description
+./.git/index
+./.git/packed-refs
+./.github/PULL_REQUEST_TEMPLATE.md
+./.github/README.md
+./.github/Tamannabot.yml
+./.github/master_sync.yml
+./.github/tamannabot.yml
+./.gitignore/.gitignore
+./.gitignore/ai_key
+./.prettierrc
+./.snapshots/readme.md
+./.snapshots/snapshot-2025-12-03T15_58_46_675Z.md
+./.snapshots/sponsors.md
+./.tamanna/readme.md
+./.tamanna/tamanna.md
+./.tamanna/wearing.js
+./.tamanna/worjer.js
+./.tamanna_backup/.prettierrc
+./.tamanna_backup/CNAME
+./.tamanna_backup/CODE_OF_CONDUCT.md
+./.tamanna_backup/CORE.boot
+./.tamanna_backup/LICENSE
+./.tamanna_backup/Makefile
+./.tamanna_backup/README .md
+./.tamanna_backup/README.md
+./.tamanna_backup/SECURITY.md
+./.tamanna_backup/TAMANNA_ULTIMATE_CODE_RUNNER.py
+./.tamanna_backup/Tamanna-.sln
+./.tamanna_backup/Tamanna.prompt.yml
+./.tamanna_backup/advanced_feature_request_template.md
+./.tamanna_backup/ai-sync.log
+./.tamanna_backup/ai_backup_network.py
+./.tamanna_backup/ai_brain_core.py
+./.tamanna_backup/ai_upgrade_feature_template.md
+./.tamanna_backup/auto_code_manager.py
+./.tamanna_backup/config. json
+./.tamanna_backup/config.json
+./.tamanna_backup/deep_packet_inspection.py
+./.tamanna_backup/feature_upgrade_poem_matrix.md
+./.tamanna_backup/fix-mesh.sh
+./.tamanna_backup/idtamanna.sys
+./.tamanna_backup/ldtamanna.inf
+./.tamanna_backup/lint_monitor.py
+./.tamanna_backup/monitor.py
+./.tamanna_backup/monitor_log.txt
+./.tamanna_backup/python promote.py
+./.tamanna_backup/requirements-optional.txt
+./.tamanna_backup/requirements.txt
+./.tamanna_backup/settings.md
+./.tamanna_backup/smart_monitor.log
+./.tamanna_backup/system.txt
+./.tamanna_backup/system_auto_run.bat
+./.tamanna_backup/system_launcher.bat
+./.tamanna_backup/tamanna.txt
+./.tamanna_backup/tamanna_code_editor_runner.sh
+./.tamanna_backup/tamanna_head_index.jsonl
+./.tamanna_backup/tamanna_runner.sh
+./.tamanna_backup/tamannaping.c
+./.tamanna_backup/ultra_advanced_issue_form.md
+./.tamanna_backup/wrangler.tomal
+./.venv/.gitignore
+./.venv/pyvenv.cfg
+./CNAME
+./CODE_OF_CONDUCT.md
+./CORE.boot
+./EXECUTION_REPORT.json
+./LICENSE
+./Makefile
+./README .md
+./README.md
+./SECURITY.md
+./TAMANNA_ULTIMATE_CODE_RUNNER.py
+./Tamanna-.sln
+./Tamanna.prompt.yml
+./__pycache__/TAMANNA_ULTIMATE_CODE_RUNNER.cpython-313.pyc
+./__pycache__/ai_brain_core.cpython-313.pyc
+./__pycache__/ai_system_monitor.cpython-313.pyc
+./__pycache__/auto_code_manager.cpython-313.pyc
+./__pycache__/deep_packet_inspection.cpython-313.pyc
+./__pycache__/lint_monitor.cpython-313.pyc
+./__pycache__/monitor.cpython-313.pyc
+./__pycache__/tamanna_auto_counter.cpython-313.pyc
+./__pycache__/tamanna_master_attack.cpython-313.pyc
+./__pycache__/test_commands.cpython-312-pytest-8.4.2.pyc
+./advanced_feature_request_template.md
+./ai system/README.md
+./ai-sync.log
+./ai/ai_file2.js
+./ai/ai_file3.js
+./ai/file_daygram_1.js
+./ai/init.py
+./ai_brain_core.py
+./ai_system_monitor.py
+./ai_upgrade_feature_template.md
+./api/config.sh
+./api/system api
+./api/tamanna ai key
+./api/token
+./api/token.txt
+./api/zon id
+./auto_code_manager.py
+./auto_fix_issues.py
+./auto_sync_all.sh
+./autogen/.gitattributes
+./autogen/.gitignore
+./autogen/CODE_OF_CONDUCT.md
+./autogen/CONTRIBUTING.md
+./autogen/FAQ.md
+./autogen/LICENSE
+./autogen/LICENSE-CODE
+./autogen/README.md
+./autogen/SECURITY.md
+./autogen/SUPPORT.md
+./autogen/TRANSPARENCY_FAQS.md
+./autogen/autogen-landing.jpg
+./autogen/codecov.yml
+./bd-king-r7/.env
+./bd-king-r7/README.md
+./bd-king-r7/Tamanna_AI_OS.hm
+./bd-king-r7/Tamanna_AI_OS_v100.hm
+./bd-king-r7/Tamanna_AI_OS_v20.hm
+./bd-king-r7/Tamanna_AI_OS_v50.hm
+./bd-king-r7/Tamanna_AI_OS_v500.hm
+./bd-king-r7/Tamanna_auto_pro.hm
+./bd-king-r7/auto_synce.hm
+./bd-king-r7/calculator.akon
+./bd-king-r7/config.hm
+./bd-king-r7/core_pipline.text
+./bd-king-r7/data.hm
+./bd-king-r7/hello.hm
+./bd-king-r7/install.hm
+./bd-king-r7/license
+./bd-king-r7/math_operations.akon
+./bd-king-r7/tamanna.hm
+./bd-king-r7/tamanna_config.hm
+./bot.js
+./check_token.sh
+./cli/.codecov.yml
+./cli/.dockerignore
+./cli/.gitattributes
+./cli/.gitignore
+./cli/.golangci.yml
+./cli/.mailmap
+./cli/AUTHORS
+./cli/CONTRIBUTING.md
+./cli/Dockerfile
+./cli/LICENSE
+./cli/MAINTAINERS
+./cli/Makefile
+./cli/NOTICE
+./cli/README.md
+./cli/SECURITY.md
+./cli/TESTING.md
+./cli/VERSION
+./cli/docker-bake.hcl
+./cli/docker.Makefile
+./cli/vendor.mod
+./cli/vendor.sum
+./config. json
+./config.json
+./counter_report.json
+./crewAI/.editorconfig
+./crewAI/.env.test
+./crewAI/.gitignore
+./crewAI/.pre-commit-config.yaml
+./crewAI/.python-version
+./crewAI/AGENTS.md
+./crewAI/LICENSE
+./crewAI/README.md
+./crewAI/conftest.py
+./crewAI/pyproject.toml
+./crewAI/uv.lock
+./data/brain_memory.json
+./debug_report.txt
+./deep_packet_inspection.py
+./device/MainActivity.java
+./device/MainActivity.kt
+./device/build.gradle
+./dify/.coveragerc
+./dify/.dockerignore
+./dify/.editorconfig
+./dify/.gitattributes
+./dify/.gitignore
+./dify/.nvmrc
+./dify/AGENTS.md
+./dify/AUTHORS
+./dify/CONTRIBUTING.md
+./dify/LICENSE
+./dify/Makefile
+./dify/README.md
+./dify/SECURITY.md
+./dify/codecov.yml
+./dify/depot.json
+./dify/eslint.config.mjs
+./dify/lint.config.ts
+./dify/oxlint-suppressions.json
+./dify/package.json
+./dify/pnpm-lock.yaml
+./dify/pnpm-workspace.yaml
+./dify/vite.config.ts
+./distributed_ai_report.json
+./dns/README.md
+./dns/wrangler.toml
+./docs/AUTO_FIX.md
+./docs/INSTALL.md
+./docs/README.md
+./docs/system_architecture.mmd
+./docs/system_log.jsonl
+./face-detector/.gitignore
+./face-detector/Dockerfile
+./face-detector/README.md
+./face-detector/app.py
+./face-detector/docker-compose.yml
+./face-detector/requirements.txt
+./feature_upgrade_poem_matrix.md
+./fix-mesh.sh
+./github/bot.js
+./github/package.json
+./idtamanna.sys
+./index.js
+./install.sh
+./int_and_detect_issues.py
+./langchain/.dockerignore
+./langchain/.editorconfig
+./langchain/.gitattributes
+./langchain/.gitignore
+./langchain/.markdownlint.json
+./langchain/.mcp.json
+./langchain/.pre-commit-config.yaml
+./langchain/AGENTS.md
+./langchain/CITATION.cff
+./langchain/CLAUDE.md
+./langchain/LICENSE
+./langchain/README.md
+./ldtamanna.inf
+./lint_monitor.py
+./lint_report.json
+./logs/global_defense.log
+./logs/run.log
+./monitor.py
+./monitor_log.txt
+./n8n/.actrc
+./n8n/.code-health-baseline.json
+./n8n/.dockerignore
+./n8n/.editorconfig
+./n8n/.env.local.example
+./n8n/.git-blame-ignore-revs
+./n8n/.gitattributes
+./n8n/.gitignore
+./n8n/.npmignore
+./n8n/.npmrc
+./n8n/.poutine.yml
+./n8n/.prettierignore
+./n8n/.prettierrc.js
+./n8n/AGENTS.md
+./n8n/CHANGELOG.md
+./n8n/CLAUDE.md
+./n8n/CODE_OF_CONDUCT.md
+./n8n/CONTRIBUTING.md
+./n8n/CONTRIBUTOR_LICENSE_AGREEMENT.md
+./n8n/LICENSE.md
+./n8n/LICENSE_EE.md
+./n8n/README.md
+./n8n/SECURITY.md
+./n8n/biome.jsonc
+./n8n/codecov.yml
+./n8n/cubic.yaml
+./n8n/jest.config.js
+./n8n/lefthook.yml
+./n8n/package.json
+./n8n/pnpm-lock.yaml
+./n8n/pnpm-workspace.yaml
+./n8n/renovate.json
+./n8n/tsconfig.json
+./n8n/turbo.json
+./n8n/vitest.workspace.ts
+./open-webui/.dockerignore
+./open-webui/.env.example
+./open-webui/.eslintignore
+./open-webui/.eslintrc.cjs
+./open-webui/.gitattributes
+./open-webui/.gitignore
+./open-webui/.npmrc
+./open-webui/.pre-commit-config.yaml
+./open-webui/.prettierignore
+./open-webui/.prettierrc
+./open-webui/CHANGELOG.md
+./open-webui/CODE_OF_CONDUCT.md
+./open-webui/CONTRIBUTOR_LICENSE_AGREEMENT
+./open-webui/Dockerfile
+./open-webui/LICENSE
+./open-webui/LICENSE_HISTORY
+./open-webui/LICENSE_NOTICE
+./open-webui/Makefile
+./open-webui/README.md
+./open-webui/TROUBLESHOOTING.md
+./open-webui/banner.png
+./open-webui/contribution_stats.py
+./open-webui/demo.png
+./open-webui/docker-cleanup.sh
+./open-webui/docker-compose-launcher.sh
+./open-webui/docker-compose.a1111-test.yaml
+./open-webui/docker-compose.amdgpu.yaml
+./open-webui/docker-compose.api.yaml
+./open-webui/docker-compose.data.yaml
+./open-webui/docker-compose.gpu.yaml
+./open-webui/docker-compose.otel.yaml
+./open-webui/docker-compose.playwright.yaml
+./open-webui/docker-compose.yaml
+./open-webui/docker-ollama.sh
+./open-webui/docker-run.sh
+./open-webui/docker-update-models.sh
+./open-webui/hatch_build.py
+./open-webui/i18next-parser.config.ts
+./open-webui/package-lock.json
+./open-webui/package.json
+./open-webui/postcss.config.js
+./open-webui/pyproject.toml
+./open-webui/svelte.config.js
+./open-webui/tailwind.config.js
+./open-webui/tsconfig.json
+./open-webui/uv.lock
+./open-webui/vite.config.ts
+./orcid-system/README.md
+./orcid-system/config.github
+./orcid-system/config.name
+./orcid-system/config.orcid
+./orcid-system/config.projects
+./python promote.py
+./requirements-optional.txt
+./requirements.txt
+./run.py
+./settings.md
+./smart_monitor.log
+./system.txt
+./system_auto_run.bat
+./system_launcher.bat
+./tamanna-ai-app/README.md
+./tamanna-ai-app/settings.gradle
+./tamanna-server/.gitignore
+./tamanna-server/README.md
+./tamanna-server/dockerfile
+./tamanna-speed-optimizatio/.htaccess
+./tamanna-speed-optimizatio/README.md
+./tamanna-speed-optimizatio/speed_config.php
+./tamanna.txt
+./tamanna_auto_counter.py
+./tamanna_cli.py
+./tamanna_code_editor_runner.sh
+./tamanna_debug.sh
+./tamanna_distributed_ai.py
+./tamanna_head.py
+./tamanna_head_index.jsonl
+./tamanna_master_ai.py
+./tamanna_runner.sh
+./tamanna_security_ai.py
+./tamannaping.c
+./ultra_advanced_issue_form.md
+./watcher.js
+./wrangler.tomal
+./~tamanna_code_editor_runner.sh
+
+== Disk Usage ==
+Filesystem              Size Used Avail Use% Mounted on
+/dev/block/dm-14        1.2G 1.2G     0 100% /
+tmpfs                   1.8G 1.9M  1.8G   1% /dev
+tmpfs                   1.8G    0  1.8G   0% /mnt
+/dev/block/mmcblk0p80    96M 2.9M   89M   4% /mnt/rescue
+/dev/block/dm-15        181M 181M     0 100% /system_ext
+/dev/block/dm-16        963M 963M     0 100% /vendor
+/dev/block/dm-17        393M 393M     0 100% /odm
+/dev/block/dm-18        1.1G 1.1G     0 100% /product
+/dev/block/dm-19         11M  11M     0 100% /vendor_dlkm
+tmpfs                   1.8G  32K  1.8G   1% /apex
+/dev/block/loop4         21M  21M     0 100% /apex/com.android.btservices@352090000
+/dev/block/loop5         10M  10M     0 100% /apex/com.android.adbd@360527560
+/dev/block/loop7         10M  10M     0 100% /apex/com.android.wifi@360735060
+/dev/block/dm-54         39M  39M     0 100% /apex/com.android.media.swcodec@370549000
+/dev/block/loop8        6.2M 6.2M     0 100% /apex/com.android.nfcservices@352090000
+/dev/block/loop9         80M  80M     0 100% /apex/com.android.virt@2
+/dev/block/loop10        31M  31M     0 100% /apex/com.android.mediaprovider@360738280
+/dev/block/loop14       4.2M 4.1M     0 100% /apex/com.android.appsearch@360743400
+/dev/block/loop13        37M  37M     0 100% /apex/com.android.i18n@1
+/dev/block/dm-48        804K 772K   16K  98% /apex/com.android.tzdata@370547060
+/dev/block/dm-49        7.9M 7.8M     0 100% /apex/com.android.conscrypt@370549380
+/dev/block/loop15       232K 112K  116K  50% /apex/com.android.apex.cts.shim@1
+/dev/block/loop16       596K 568K   16K  98% /apex/com.android.profiling@352090000
+/dev/block/loop17       2.1M 2.1M     0 100% /apex/com.google.mainline.go.primary.libs@351131000
+/dev/block/loop18       1.2M 1.1M  8.0K 100% /apex/com.android.rkpd@352090000
+/dev/block/loop21        45M  45M     0 100% /apex/com.android.vndk.v33@1
+/dev/block/dm-41        3.3M 3.2M     0 100% /apex/com.android.os.statsd@370547060
+/dev/block/loop22        11M  11M     0 100% /apex/com.android.runtime@1
+/dev/block/dm-42        7.2M 7.2M     0 100% /apex/com.android.media@370549000
+/dev/block/loop23       7.4M 7.4M     0 100% /apex/com.android.devicelock@343201000
+/dev/block/loop25        19M  19M     0 100% /apex/com.android.cellbroadcast@360735060
+/dev/block/loop26       7.6M 7.5M     0 100% /apex/com.android.neuralnetworks@360527560
+/dev/block/dm-37        5.2M 5.2M     0 100% /apex/com.android.adservices@370547060
+/dev/block/loop27       6.2M 6.2M     0 100% /apex/com.android.extservices@360737103
+/dev/block/loop28       4.3M 4.2M     0 100% /apex/com.android.uwb@352090000
+/dev/block/loop30       3.1M 3.1M     0 100% /apex/com.android.compos@2
+/dev/block/loop32       4.4M 4.4M     0 100% /apex/com.android.resolv@360735100
+/dev/block/dm-33         43M  43M     0 100% /apex/com.android.art@370549100
+/dev/block/loop33       232K 104K  124K  46% /apex/com.android.scheduling@360527560
+/dev/block/dm-26         28M  28M     0 100% /apex/com.android.permission@370549180
+/dev/block/loop35       836K 808K   12K  99% /apex/com.android.ipsec@360527560
+/dev/block/dm-22        1.1M 1.0M   12K  99% /apex/com.android.sdkext@370547060
+/dev/block/loop37        26M  26M     0 100% /apex/com.android.tethering@360743340
+/dev/block/dm-27         14M  14M     0 100% /apex/com.android.ondevicepersonalization@370547060
+/dev/block/dm-30         11M  11M     0 100% /apex/com.android.configinfrastructure@360527560
+/dev/block/dm-29         15M  15M     0 100% /apex/com.android.healthfitness@360745040
+tmpfs                   1.8G 4.0K  1.8G   1% /bootstrap-apex
+/dev/block/loop0         11M  11M     0 100% /bootstrap-apex/com.android.runtime@1
+/dev/block/loop1         45M  45M     0 100% /bootstrap-apex/com.android.vndk.v33@1
+/dev/block/loop2         37M  37M     0 100% /bootstrap-apex/com.android.i18n@1
+/dev/block/loop3        788K 756K   16K  98% /bootstrap-apex/com.android.tzdata@360527920
+tmpfs                   1.8G    0  1.8G   0% /tmp
+/dev/block/by-name/cust 1.1G 1.1G     0 100% /cust
+/dev/block/mmcblk0p49    62M  47M   15M  77% /cache
+/dev/block/dm-57        108G 107G  812M 100% /data
+/dev/fuse               108G 107G  812M 100% /storage/emulated
+tmpfs                   1.8G    0  1.8G   0% /data/data
+tmpfs                   1.8G    0  1.8G   0% /data/user
+tmpfs                   1.8G    0  1.8G   0% /data/user_de
+tmpfs                   1.8G    0  1.8G   0% /data/misc/profiles/cur
+tmpfs                   1.8G    0  1.8G   0% /data/misc/profiles/ref
+
+== Memory ==
+               total        used        free      shared  buff/cache   available
+Mem:           3.7Gi       1.5Gi       376Mi        18Mi       1.8Gi       2.1Gi
+Swap:          3.0Gi       1.2Gi       1.8Gi
+

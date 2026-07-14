@@ -93,4 +93,4 @@ if __name__ == "__main__":
     print("=" * 50)
     print("Tamanna Head")
     print("=" * 50)
-    print(json.dumps
+    print(json.dumps(report, indent=4))
