@@ -7,8 +7,8 @@ layers and modulation schemes.
 """
 
 import logging
-from typing import Optional, Any, Dict, List
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 # Configure module-level logger
 logger = logging.getLogger(__name__)

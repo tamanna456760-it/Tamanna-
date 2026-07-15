@@ -15,10 +15,7 @@ the source distribution.
 
 """
 
-from .. import event
-from .. import exc
-from .. import inspect
-from .. import util
+from .. import event, exc, inspect, util
 from ..orm.query import Query
 from ..orm.session import Session
 

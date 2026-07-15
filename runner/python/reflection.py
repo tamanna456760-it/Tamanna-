@@ -27,17 +27,12 @@ methods such as get_table_names, get_columns, etc.
 
 import contextlib
 
-from .base import Connectable
-from .base import Connection
-from .base import Engine
-from .. import exc
-from .. import inspection
-from .. import sql
-from .. import util
+from .. import exc, inspection, sql, util
 from ..sql import operators
 from ..sql import schema as sa_schema
 from ..sql.type_api import TypeEngine
 from ..util import topological
+from .base import Connectable, Connection, Engine
 
 
 @util.decorator

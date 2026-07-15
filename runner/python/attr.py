@@ -29,19 +29,16 @@ as well as support for subclass propagation (e.g. events assigned to
 
 """
 
-from __future__ import absolute_import
-from __future__ import with_statement
+from __future__ import absolute_import, with_statement
 
 import collections
-from itertools import chain
 import weakref
+from itertools import chain
 
-from . import legacy
-from . import registry
-from .. import exc
-from .. import util
+from .. import exc, util
 from ..util import threading
 from ..util.concurrency import AsyncAdaptedLock
+from . import legacy, registry
 
 
 class RefCollection(util.MemoizedSlots):

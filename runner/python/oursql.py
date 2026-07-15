@@ -33,11 +33,9 @@ handling.
 """
 
 
-from .base import BIT
-from .base import MySQLDialect
-from .base import MySQLExecutionContext
 from ... import types as sqltypes
 from ... import util
+from .base import BIT, MySQLDialect, MySQLExecutionContext
 
 
 class _oursqlBIT(BIT):

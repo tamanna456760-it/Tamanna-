@@ -1,11 +1,7 @@
+from ... import Integer, select, testing, union
 from .. import fixtures
 from ..assertions import eq_
-from ..schema import Column
-from ..schema import Table
-from ... import Integer
-from ... import select
-from ... import testing
-from ... import union
+from ..schema import Column, Table
 
 
 class DeprecatedCompoundSelectTest(fixtures.TablesTest):

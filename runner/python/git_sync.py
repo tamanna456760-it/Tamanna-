@@ -1,5 +1,7 @@
 import os
+
 from logger import log
+
 
 def git_commit_push():
     os.system("git add .")

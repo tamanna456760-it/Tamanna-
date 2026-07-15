@@ -6,39 +6,21 @@
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 import itertools
 
-from . import attributes
-from . import interfaces
-from . import loading
+from .. import exc as sa_exc
+from .. import future, inspect, sql, util
+from ..sql import ClauseElement, coercions, expression, roles
+from ..sql import util as sql_util
+from ..sql import visitors
+from ..sql.base import (CacheableOptions, CompileState, Options,
+                        _entity_namespace_key, _select_iterables)
+from ..sql.selectable import (LABEL_STYLE_DISAMBIGUATE_ONLY, LABEL_STYLE_NONE,
+                              LABEL_STYLE_TABLENAME_PLUS_COL, SelectState)
+from ..sql.visitors import ExtendedInternalTraversal, InternalTraversal
+from . import attributes, interfaces, loading
 from .base import _is_aliased_class
 from .interfaces import ORMColumnsClauseRole
 from .path_registry import PathRegistry
-from .util import _entity_corresponds_to
-from .util import _ORMJoin
-from .util import aliased
-from .util import Bundle
-from .util import ORMAdapter
-from .. import exc as sa_exc
-from .. import future
-from .. import inspect
-from .. import sql
-from .. import util
-from ..sql import ClauseElement
-from ..sql import coercions
-from ..sql import expression
-from ..sql import roles
-from ..sql import util as sql_util
-from ..sql import visitors
-from ..sql.base import _entity_namespace_key
-from ..sql.base import _select_iterables
-from ..sql.base import CacheableOptions
-from ..sql.base import CompileState
-from ..sql.base import Options
-from ..sql.selectable import LABEL_STYLE_DISAMBIGUATE_ONLY
-from ..sql.selectable import LABEL_STYLE_NONE
-from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
-from ..sql.selectable import SelectState
-from ..sql.visitors import ExtendedInternalTraversal
-from ..sql.visitors import InternalTraversal
+from .util import Bundle, ORMAdapter, _entity_corresponds_to, _ORMJoin, aliased
 
 _path_registry = PathRegistry.root
 

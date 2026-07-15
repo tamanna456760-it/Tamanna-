@@ -11,11 +11,11 @@ associations.
 
 """
 
+from .. import util
 from . import operators
 from .base import HasCacheKey
 from .traversals import anon_map
 from .visitors import InternalTraversal
-from .. import util
 
 EMPTY_ANNOTATIONS = util.immutabledict()
 

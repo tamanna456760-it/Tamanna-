@@ -96,9 +96,8 @@ time, at the expense of slower startup time for new connections.
 
 from __future__ import absolute_import
 
+from ... import pool, util
 from .pysqlite import SQLiteDialect_pysqlite
-from ... import pool
-from ... import util
 
 
 class SQLiteDialect_pysqlcipher(SQLiteDialect_pysqlite):

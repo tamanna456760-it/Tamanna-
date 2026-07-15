@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # tamanna_code_editor.py
 
+import os
+import subprocess
+import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
-import subprocess
-import os
-import sys
 
 APP_TITLE = "Tamanna Code Editor"
 DEFAULT_FONT = ("Consolas", 12)

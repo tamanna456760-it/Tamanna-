@@ -21,11 +21,9 @@ from ..orm import exc as orm_exc
 from ..orm import strategy_options
 from ..orm.query import Query
 from ..orm.session import Session
-from ..sql import func
-from ..sql import literal_column
+from ..sql import func, literal_column
 from ..sql import util as sql_util
 from ..util import collections_abc
-
 
 log = logging.getLogger(__name__)
 

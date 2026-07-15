@@ -40,10 +40,9 @@ In addition, it also accepts the following:
 import decimal
 from re import match
 
-from .base import FBDialect
-from .base import FBExecutionContext
 from ... import types as sqltypes
 from ... import util
+from .base import FBDialect, FBExecutionContext
 
 
 class _kinterbasdb_numeric(object):

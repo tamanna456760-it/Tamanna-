@@ -24,10 +24,9 @@ from datetime import datetime
 from functools import partial
 from threading import RLock
 
-from . import base
-from .. import http
-from .. import util
+from .. import http, util
 from ..http import wsgi
+from . import base
 
 
 class TConn(object):

@@ -5,15 +5,10 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from .array import ARRAY
 from ... import util
-from ...sql import coercions
-from ...sql import elements
-from ...sql import expression
-from ...sql import functions
-from ...sql import roles
-from ...sql import schema
+from ...sql import coercions, elements, expression, functions, roles, schema
 from ...sql.schema import ColumnCollectionConstraint
+from .array import ARRAY
 
 
 class aggregate_order_by(expression.ColumnElement):

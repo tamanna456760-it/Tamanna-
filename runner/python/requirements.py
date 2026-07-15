@@ -18,10 +18,9 @@ to provide specific inclusion/exclusions.
 import platform
 import sys
 
-from . import exclusions
-from . import only_on
 from .. import util
 from ..pool import QueuePool
+from . import exclusions, only_on
 
 
 class Requirements(object):

@@ -8,18 +8,12 @@
 import numbers
 import re
 
-from . import operators
-from . import roles
-from . import visitors
-from .base import ExecutableOption
-from .base import Options
+from .. import exc, inspection, util
+from ..util import collections_abc
+from . import operators, roles, visitors
+from .base import ExecutableOption, Options
 from .traversals import HasCacheKey
 from .visitors import Visitable
-from .. import exc
-from .. import inspection
-from .. import util
-from ..util import collections_abc
-
 
 elements = None
 lambdas = None

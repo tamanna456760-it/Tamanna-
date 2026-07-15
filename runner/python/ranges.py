@@ -6,7 +6,6 @@
 
 from ... import types as sqltypes
 
-
 __all__ = ("INT4RANGE", "INT8RANGE", "NUMRANGE")
 
 

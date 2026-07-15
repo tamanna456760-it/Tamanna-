@@ -7,12 +7,11 @@
 
 import re
 
-from .array import ARRAY
 from ... import types as sqltypes
 from ... import util
 from ...sql import functions as sqlfunc
 from ...sql import operators
-
+from .array import ARRAY
 
 __all__ = ("HSTORE", "hstore")
 

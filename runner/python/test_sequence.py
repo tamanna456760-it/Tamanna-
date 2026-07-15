@@ -1,16 +1,8 @@
-from .. import config
-from .. import fixtures
-from ..assertions import eq_
-from ..assertions import is_true
+from ... import Integer, MetaData, Sequence, String, inspect, testing
+from .. import config, fixtures
+from ..assertions import eq_, is_true
 from ..config import requirements
-from ..schema import Column
-from ..schema import Table
-from ... import inspect
-from ... import Integer
-from ... import MetaData
-from ... import Sequence
-from ... import String
-from ... import testing
+from ..schema import Column, Table
 
 
 class SequenceTest(fixtures.TablesTest):

@@ -5,9 +5,9 @@ This module centralizes configuration parameters for both the sender and receive
 including hardware settings, modulation parameters, frequency bands, and data framing.
 """
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
 import logging
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 # Default logging configuration
 LOG_LEVEL = logging.INFO

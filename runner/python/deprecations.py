@@ -11,14 +11,10 @@ functionality."""
 import os
 import re
 
-from . import compat
-from .langhelpers import _hash_limit_string
-from .langhelpers import _warnings_warn
-from .langhelpers import decorator
-from .langhelpers import inject_docstring_text
-from .langhelpers import inject_param_text
 from .. import exc
-
+from . import compat
+from .langhelpers import (_hash_limit_string, _warnings_warn, decorator,
+                          inject_docstring_text, inject_param_text)
 
 SQLALCHEMY_WARN_20 = False
 

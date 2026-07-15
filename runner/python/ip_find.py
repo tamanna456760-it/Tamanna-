@@ -1,9 +1,10 @@
-from scapy.all import sniff, ARP
-import subprocess
 import json
-import time
 import logging
+import subprocess
 import threading
+import time
+
+from scapy.all import ARP, sniff
 
 CONFIG_FILE = "config.json"
 BLOCK_CACHE = {}

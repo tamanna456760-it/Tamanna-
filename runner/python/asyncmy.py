@@ -28,14 +28,11 @@ This dialect should normally be used only with the
 
 """  # noqa
 
-from .pymysql import MySQLDialect_pymysql
-from ... import pool
-from ... import util
+from ... import pool, util
 from ...engine import AdaptedConnection
-from ...util.concurrency import asynccontextmanager
-from ...util.concurrency import asyncio
-from ...util.concurrency import await_fallback
-from ...util.concurrency import await_only
+from ...util.concurrency import (asynccontextmanager, asyncio, await_fallback,
+                                 await_only)
+from .pymysql import MySQLDialect_pymysql
 
 
 class AsyncAdapt_asyncmy_cursor:

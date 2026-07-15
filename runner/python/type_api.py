@@ -10,13 +10,11 @@
 """
 
 
+from .. import exc, util
 from . import operators
 from .base import SchemaEventTarget
 from .traversals import NO_CACHE
-from .visitors import Traversible
-from .visitors import TraversibleType
-from .. import exc
-from .. import util
+from .visitors import Traversible, TraversibleType
 
 # these are back-assigned by sqltypes.
 BOOLEANTYPE = None

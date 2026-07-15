@@ -17,12 +17,12 @@
 # would run in the real world.
 
 
-from functools import wraps
 import inspect
+from functools import wraps
 
+from ..util.concurrency import (_util_async_run,
+                                _util_async_run_coroutine_function)
 from . import config
-from ..util.concurrency import _util_async_run
-from ..util.concurrency import _util_async_run_coroutine_function
 
 # may be set to False if the
 # --disable-asyncio flag is passed to the test runner.

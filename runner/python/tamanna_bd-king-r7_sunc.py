@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import os
-import time
 import hashlib
 import json
+import os
 import shutil
+import time
 from datetime import datetime
 
 # ================= CONFIG: EDIT FOR YOUR SYSTEM =================

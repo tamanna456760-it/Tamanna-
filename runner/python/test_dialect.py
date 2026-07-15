@@ -1,25 +1,13 @@
 #! coding: utf-8
 
-from . import testing
-from .. import assert_raises
-from .. import config
-from .. import engines
-from .. import eq_
-from .. import fixtures
-from .. import ne_
-from .. import provide_metadata
+from ... import Integer, String, bindparam, event, exc, literal_column, select
+from ...util import compat
+from .. import (assert_raises, config, engines, eq_, fixtures, ne_,
+                provide_metadata)
 from ..config import requirements
 from ..provision import set_default_schema_on_connection
-from ..schema import Column
-from ..schema import Table
-from ... import bindparam
-from ... import event
-from ... import exc
-from ... import Integer
-from ... import literal_column
-from ... import select
-from ... import String
-from ...util import compat
+from ..schema import Column, Table
+from . import testing
 
 
 class ExceptionTest(fixtures.TablesTest):

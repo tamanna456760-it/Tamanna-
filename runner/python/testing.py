@@ -1,6 +1,5 @@
 import typing as t
-from contextlib import contextmanager
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from copy import copy
 from types import TracebackType
 from urllib.parse import urlsplit

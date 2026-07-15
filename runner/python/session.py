@@ -11,34 +11,19 @@ import itertools
 import sys
 import weakref
 
-from . import attributes
-from . import context
-from . import exc
-from . import identity
-from . import loading
-from . import persistence
-from . import query
-from . import state as statelib
-from .base import _class_to_mapper
-from .base import _none_set
-from .base import _state_mapper
-from .base import instance_str
-from .base import object_mapper
-from .base import object_state
-from .base import state_str
-from .unitofwork import UOWTransaction
 from .. import engine
 from .. import exc as sa_exc
-from .. import sql
-from .. import util
+from .. import sql, util
 from ..engine.util import TransactionalContext
 from ..inspection import inspect
-from ..sql import coercions
-from ..sql import dml
-from ..sql import roles
-from ..sql import visitors
+from ..sql import coercions, dml, roles, visitors
 from ..sql.base import CompileState
 from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
+from . import attributes, context, exc, identity, loading, persistence, query
+from . import state as statelib
+from .base import (_class_to_mapper, _none_set, _state_mapper, instance_str,
+                   object_mapper, object_state, state_str)
+from .unitofwork import UOWTransaction
 
 __all__ = [
     "Session",

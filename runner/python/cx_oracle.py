@@ -459,16 +459,13 @@ import decimal
 import random
 import re
 
-from . import base as oracle
-from .base import OracleCompiler
-from .base import OracleDialect
-from .base import OracleExecutionContext
-from ... import exc
-from ... import processors
+from ... import exc, processors
 from ... import types as sqltypes
 from ... import util
 from ...engine import cursor as _cursor
 from ...util import compat
+from . import base as oracle
+from .base import OracleCompiler, OracleDialect, OracleExecutionContext
 
 
 class _OracleInteger(sqltypes.Integer):

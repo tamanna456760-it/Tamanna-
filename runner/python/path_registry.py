@@ -8,15 +8,13 @@
 
 """
 
-from itertools import chain
 import logging
+from itertools import chain
 
-from . import base as orm_base
-from .. import exc
-from .. import inspection
-from .. import util
+from .. import exc, inspection, util
 from ..sql import visitors
 from ..sql.traversals import HasCacheKey
+from . import base as orm_base
 
 log = logging.getLogger(__name__)
 

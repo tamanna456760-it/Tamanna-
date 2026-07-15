@@ -20,27 +20,17 @@ from __future__ import absolute_import
 
 import collections
 
-from . import exc as orm_exc
-from . import path_registry
-from .base import _MappedAttribute  # noqa
-from .base import EXT_CONTINUE
-from .base import EXT_SKIP
-from .base import EXT_STOP
-from .base import InspectionAttr  # noqa
-from .base import InspectionAttrInfo  # noqa
-from .base import MANYTOMANY
-from .base import MANYTOONE
-from .base import NOT_EXTENSION
-from .base import ONETOMANY
-from .. import inspect
-from .. import inspection
-from .. import util
-from ..sql import operators
-from ..sql import roles
-from ..sql import visitors
+from .. import inspect, inspection, util
+from ..sql import operators, roles, visitors
 from ..sql.base import ExecutableOption
 from ..sql.traversals import HasCacheKey
-
+from . import exc as orm_exc
+from . import path_registry
+from .base import InspectionAttr  # noqa
+from .base import InspectionAttrInfo  # noqa
+from .base import _MappedAttribute  # noqa
+from .base import (EXT_CONTINUE, EXT_SKIP, EXT_STOP, MANYTOMANY, MANYTOONE,
+                   NOT_EXTENSION, ONETOMANY)
 
 __all__ = (
     "EXT_CONTINUE",

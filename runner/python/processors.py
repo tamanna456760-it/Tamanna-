@@ -143,13 +143,13 @@ def py_fallback():
 
 try:
     from sqlalchemy.cprocessors import DecimalResultProcessor  # noqa
+    from sqlalchemy.cprocessors import UnicodeResultProcessor  # noqa
     from sqlalchemy.cprocessors import int_to_boolean  # noqa
     from sqlalchemy.cprocessors import str_to_date  # noqa
     from sqlalchemy.cprocessors import str_to_datetime  # noqa
     from sqlalchemy.cprocessors import str_to_time  # noqa
     from sqlalchemy.cprocessors import to_float  # noqa
     from sqlalchemy.cprocessors import to_str  # noqa
-    from sqlalchemy.cprocessors import UnicodeResultProcessor  # noqa
 
     def to_unicode_processor_factory(encoding, errors=None):
         if errors is not None:

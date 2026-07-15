@@ -61,8 +61,8 @@ accept every argument that Kinterbasdb does.
 
 """  # noqa
 
-from .kinterbasdb import FBDialect_kinterbasdb
 from ... import util
+from .kinterbasdb import FBDialect_kinterbasdb
 
 
 class FBDialect_fdb(FBDialect_kinterbasdb):

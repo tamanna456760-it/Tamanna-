@@ -356,11 +356,8 @@ pickling process of the parent's object-relational state so that the
 """
 import weakref
 
-from .. import event
-from .. import inspect
-from .. import types
-from ..orm import Mapper
-from ..orm import mapper
+from .. import event, inspect, types
+from ..orm import Mapper, mapper
 from ..orm.attributes import flag_modified
 from ..sql.base import SchemaEventTarget
 from ..util import memoized_property

@@ -23,12 +23,8 @@ r"""
 
 import re
 
-from .base import BIT
-from .base import MySQLCompiler
-from .base import MySQLDialect
-from .base import MySQLIdentifierPreparer
-from ... import processors
-from ... import util
+from ... import processors, util
+from .base import BIT, MySQLCompiler, MySQLDialect, MySQLIdentifierPreparer
 
 
 class MySQLCompiler_mysqlconnector(MySQLCompiler):

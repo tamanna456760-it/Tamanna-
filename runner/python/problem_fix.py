@@ -3,8 +3,8 @@
 # Messenger AI GitHub Integration Fix Tool
 # ==========================================
 
-import os
 import json
+import os
 from datetime import datetime
 
 OUTPUT_LOG = "problem_fix_log.txt"

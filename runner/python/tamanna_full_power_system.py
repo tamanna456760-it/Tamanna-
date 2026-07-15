@@ -2,7 +2,12 @@
 # IT TAMANNA FULL AI POWER SYSTEM
 # User: tamanna456760-it
 
-import os, shutil, json, platform, subprocess, sys
+import json
+import os
+import platform
+import shutil
+import subprocess
+import sys
 from datetime import datetime
 
 # -------------------- CONFIG --------------------

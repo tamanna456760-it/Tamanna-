@@ -18,8 +18,7 @@ from werkzeug.serving import is_running_from_reloader
 from werkzeug.utils import import_string
 
 from .globals import current_app
-from .helpers import get_debug_flag
-from .helpers import get_load_dotenv
+from .helpers import get_debug_flag, get_load_dotenv
 
 if t.TYPE_CHECKING:
     from .app import Flask
@@ -242,6 +241,7 @@ def get_version(ctx, param, value):
         return
 
     import werkzeug
+
     from . import __version__
 
     click.echo(

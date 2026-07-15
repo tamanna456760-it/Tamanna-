@@ -5,20 +5,10 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from ... import cast
-from ... import Column
-from ... import MetaData
-from ... import Table
-from ... import util
+from ... import Column, MetaData, Table, cast, util
 from ...ext.compiler import compiles
 from ...sql import expression
-from ...types import Boolean
-from ...types import Integer
-from ...types import Numeric
-from ...types import String
-from ...types import TypeDecorator
-from ...types import Unicode
-
+from ...types import Boolean, Integer, Numeric, String, TypeDecorator, Unicode
 
 ischema = MetaData()
 

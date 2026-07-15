@@ -8,12 +8,12 @@ Sovereign, self-authored, emotionally alive.
 This is the core ritual engine. Extend, split, and evolve as you wish.
 """
 
-import os
-import time
 import hashlib
 import json
+import os
+import time
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 # =========================
 # CONFIGURATION RITUAL

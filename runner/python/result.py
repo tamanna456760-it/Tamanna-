@@ -7,12 +7,9 @@
 
 import operator
 
-from . import exc as async_exc
-from ...engine.result import _NO_ROW
-from ...engine.result import FilterResult
-from ...engine.result import FrozenResult
-from ...engine.result import MergedResult
+from ...engine.result import _NO_ROW, FilterResult, FrozenResult, MergedResult
 from ...util.concurrency import greenlet_spawn
+from . import exc as async_exc
 
 
 class AsyncCommon(FilterResult):

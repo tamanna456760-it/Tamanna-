@@ -473,27 +473,17 @@ import logging
 import re
 from uuid import UUID as _python_UUID
 
-from .array import ARRAY as PGARRAY
-from .base import _ColonCast
-from .base import _DECIMAL_TYPES
-from .base import _FLOAT_TYPES
-from .base import _INT_TYPES
-from .base import ENUM
-from .base import PGCompiler
-from .base import PGDialect
-from .base import PGExecutionContext
-from .base import PGIdentifierPreparer
-from .base import UUID
-from .hstore import HSTORE
-from .json import JSON
-from .json import JSONB
-from ... import exc
-from ... import processors
+from ... import exc, processors
 from ... import types as sqltypes
 from ... import util
 from ...engine import cursor as _cursor
 from ...util import collections_abc
-
+from .array import ARRAY as PGARRAY
+from .base import (_DECIMAL_TYPES, _FLOAT_TYPES, _INT_TYPES, ENUM, UUID,
+                   PGCompiler, PGDialect, PGExecutionContext,
+                   PGIdentifierPreparer, _ColonCast)
+from .hstore import HSTORE
+from .json import JSON, JSONB
 
 logger = logging.getLogger("sqlalchemy.dialects.postgresql")
 

@@ -16,45 +16,29 @@ available in :class:`~sqlalchemy.orm.`.
 """
 from __future__ import absolute_import
 
-from collections import deque
-from itertools import chain
 import sys
 import weakref
+from collections import deque
+from itertools import chain
 
-from . import attributes
-from . import exc as orm_exc
-from . import instrumentation
-from . import loading
-from . import properties
-from . import util as orm_util
-from .base import _class_to_mapper
-from .base import _state_mapper
-from .base import class_mapper
-from .base import state_str
-from .interfaces import _MappedAttribute
-from .interfaces import EXT_SKIP
-from .interfaces import InspectionAttr
-from .interfaces import MapperProperty
-from .interfaces import ORMEntityColumnsClauseRole
-from .interfaces import ORMFromClauseRole
-from .interfaces import StrategizedProperty
-from .path_registry import PathRegistry
 from .. import event
 from .. import exc as sa_exc
-from .. import inspection
-from .. import log
-from .. import schema
-from .. import sql
-from .. import util
+from .. import inspection, log, schema, sql, util
 from ..sql import base as sql_base
-from ..sql import coercions
-from ..sql import expression
-from ..sql import operators
-from ..sql import roles
+from ..sql import coercions, expression, operators, roles
 from ..sql import util as sql_util
 from ..sql import visitors
 from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
 from ..util import HasMemoized
+from . import attributes
+from . import exc as orm_exc
+from . import instrumentation, loading, properties
+from . import util as orm_util
+from .base import _class_to_mapper, _state_mapper, class_mapper, state_str
+from .interfaces import (EXT_SKIP, InspectionAttr, MapperProperty,
+                         ORMEntityColumnsClauseRole, ORMFromClauseRole,
+                         StrategizedProperty, _MappedAttribute)
+from .path_registry import PathRegistry
 
 _mapper_registries = weakref.WeakKeyDictionary()
 

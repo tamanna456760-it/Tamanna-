@@ -1,6 +1,7 @@
 import os
 import stat
 
+
 def unlock_all(folder):
 
     for root, dirs, files in os.walk(folder):

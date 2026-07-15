@@ -12,15 +12,12 @@ This system allows specification of classes and expressions used in
 """
 import weakref
 
-from . import attributes
-from . import interfaces
+from .. import exc, inspection, util
+from ..sql.schema import _get_table_key
+from . import attributes, interfaces
 from .descriptor_props import SynonymProperty
 from .properties import ColumnProperty
 from .util import class_mapper
-from .. import exc
-from .. import inspection
-from .. import util
-from ..sql.schema import _get_table_key
 
 # strong references to registries which we place in
 # the _decl_class_registry, which is usually weak referencing.

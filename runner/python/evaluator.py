@@ -7,10 +7,8 @@
 
 import operator
 
-from .. import inspect
-from .. import util
-from ..sql import and_
-from ..sql import operators
+from .. import inspect, util
+from ..sql import and_, operators
 
 
 class UnevaluatableError(Exception):

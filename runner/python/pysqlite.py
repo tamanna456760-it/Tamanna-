@@ -405,13 +405,10 @@ by adding the desired locking mode to our ``"BEGIN"``::
 import os
 import re
 
-from .base import DATE
-from .base import DATETIME
-from .base import SQLiteDialect
-from ... import exc
-from ... import pool
+from ... import exc, pool
 from ... import types as sqltypes
 from ... import util
+from .base import DATE, DATETIME, SQLiteDialect
 
 
 class _SQLite_pysqliteTimeStamp(DATETIME):

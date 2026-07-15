@@ -1,6 +1,7 @@
 # scan_ping.py
-import subprocess
 import datetime
+import subprocess
+
 
 def log(message):
     with open("../logs/system_log.txt", "a") as f:

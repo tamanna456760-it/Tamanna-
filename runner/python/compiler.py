@@ -29,20 +29,11 @@ import itertools
 import operator
 import re
 
-from . import base
-from . import coercions
-from . import crud
-from . import elements
-from . import functions
-from . import operators
-from . import schema
-from . import selectable
-from . import sqltypes
-from .base import NO_ARG
-from .base import prefix_anon_map
+from .. import exc, util
+from . import (base, coercions, crud, elements, functions, operators, schema,
+               selectable, sqltypes)
+from .base import NO_ARG, prefix_anon_map
 from .elements import quoted_name
-from .. import exc
-from .. import util
 
 RESERVED_WORDS = set(
     [

@@ -3,6 +3,7 @@
 
 from datetime import datetime
 
+
 class TamannaIntelligence:
     def __init__(self, name="Tamanna"):
         self.name = name

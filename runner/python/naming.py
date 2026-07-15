@@ -12,19 +12,11 @@
 
 import re
 
+from .. import event, exc
 from . import events  # noqa
-from .elements import _NONE_NAME
-from .elements import conv
-from .schema import CheckConstraint
-from .schema import Column
-from .schema import Constraint
-from .schema import ForeignKeyConstraint
-from .schema import Index
-from .schema import PrimaryKeyConstraint
-from .schema import Table
-from .schema import UniqueConstraint
-from .. import event
-from .. import exc
+from .elements import _NONE_NAME, conv
+from .schema import (CheckConstraint, Column, Constraint, ForeignKeyConstraint,
+                     Index, PrimaryKeyConstraint, Table, UniqueConstraint)
 
 
 class ConventionDict(object):

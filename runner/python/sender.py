@@ -9,8 +9,8 @@ modulation schemes, and forward error correction.
 import logging
 import math
 import random
-from typing import Optional, List, Any
 from dataclasses import dataclass
+from typing import Any, List, Optional
 
 # Configure module-level logger
 logger = logging.getLogger(__name__)

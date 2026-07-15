@@ -1,16 +1,12 @@
-from collections import deque
-from collections import namedtuple
 import itertools
 import operator
+from collections import deque, namedtuple
 
-from . import operators
-from .visitors import ExtendedInternalTraversal
-from .visitors import InternalTraversal
 from .. import util
 from ..inspection import inspect
-from ..util import collections_abc
-from ..util import HasMemoized
-from ..util import py37
+from ..util import HasMemoized, collections_abc, py37
+from . import operators
+from .visitors import ExtendedInternalTraversal, InternalTraversal
 
 SKIP_TRAVERSE = util.symbol("skip_traverse")
 COMPARE_FAILED = False

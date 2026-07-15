@@ -15,12 +15,8 @@ See the example ``examples/association/proxied_association.py``.
 """
 import operator
 
-from .. import exc
-from .. import inspect
-from .. import orm
-from .. import util
-from ..orm import collections
-from ..orm import interfaces
+from .. import exc, inspect, orm, util
+from ..orm import collections, interfaces
 from ..sql import or_
 from ..sql.operators import ColumnOperators
 

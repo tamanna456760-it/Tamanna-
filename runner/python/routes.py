@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify
-from users import register_user, login_user
+from flask import Blueprint, jsonify, request
+from users import login_user, register_user
 
 api = Blueprint("api", __name__)
 

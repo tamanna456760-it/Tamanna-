@@ -13,19 +13,14 @@ mapped attributes.
 """
 from __future__ import absolute_import
 
+from .. import log, util
+from ..sql import coercions, roles
 from . import attributes
-from .descriptor_props import CompositeProperty
-from .descriptor_props import ConcreteInheritedProperty
-from .descriptor_props import SynonymProperty
-from .interfaces import PropComparator
-from .interfaces import StrategizedProperty
+from .descriptor_props import (CompositeProperty, ConcreteInheritedProperty,
+                               SynonymProperty)
+from .interfaces import PropComparator, StrategizedProperty
 from .relationships import RelationshipProperty
 from .util import _orm_full_deannotate
-from .. import log
-from .. import util
-from ..sql import coercions
-from ..sql import roles
-
 
 __all__ = [
     "ColumnProperty",

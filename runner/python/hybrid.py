@@ -803,8 +803,7 @@ things it can be used for.
 
 """  # noqa
 from .. import util
-from ..orm import attributes
-from ..orm import interfaces
+from ..orm import attributes, interfaces
 
 HYBRID_METHOD = util.symbol("HYBRID_METHOD")
 """Symbol indicating an :class:`InspectionAttr` that's

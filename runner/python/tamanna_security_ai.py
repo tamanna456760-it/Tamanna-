@@ -1,8 +1,10 @@
-import time
-import threading
-import random
 import json
-from tamanna_master_attack import NODES, create_unit, broadcast_power, save_state
+import random
+import threading
+import time
+
+from tamanna_master_attack import (NODES, broadcast_power, create_unit,
+                                   save_state)
 
 # =========================
 # SECURITY LOG FILE

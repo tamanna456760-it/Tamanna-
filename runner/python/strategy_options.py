@@ -8,30 +8,18 @@
 
 """
 
+from .. import exc as sa_exc
+from .. import inspect, util
+from ..sql import and_, coercions, roles, traversals, visitors
+from ..sql.base import Generative, _generative
 from . import util as orm_util
 from .attributes import QueryableAttribute
-from .base import _class_to_mapper
-from .base import _is_aliased_class
-from .base import _is_mapped_class
-from .base import InspectionAttr
-from .interfaces import LoaderOption
-from .interfaces import MapperProperty
-from .interfaces import PropComparator
-from .path_registry import _DEFAULT_TOKEN
-from .path_registry import _WILDCARD_TOKEN
-from .path_registry import PathRegistry
-from .path_registry import TokenRegistry
+from .base import (InspectionAttr, _class_to_mapper, _is_aliased_class,
+                   _is_mapped_class)
+from .interfaces import LoaderOption, MapperProperty, PropComparator
+from .path_registry import (_DEFAULT_TOKEN, _WILDCARD_TOKEN, PathRegistry,
+                            TokenRegistry)
 from .util import _orm_full_deannotate
-from .. import exc as sa_exc
-from .. import inspect
-from .. import util
-from ..sql import and_
-from ..sql import coercions
-from ..sql import roles
-from ..sql import traversals
-from ..sql import visitors
-from ..sql.base import _generative
-from ..sql.base import Generative
 
 
 class Load(Generative, LoaderOption):

@@ -14,19 +14,14 @@ import itertools
 import operator
 import re
 
-from . import roles
-from . import visitors
+from .. import exc, util
+from ..util import HasMemoized, hybridmethod
+from . import roles, visitors
 from .traversals import HasCacheKey  # noqa
 from .traversals import HasCopyInternals  # noqa
 from .traversals import MemoizedHasCacheKey  # noqa
-from .visitors import ClauseVisitor
-from .visitors import ExtendedInternalTraversal
-from .visitors import InternalTraversal
-from .. import exc
-from .. import util
-from ..util import HasMemoized
-from ..util import hybridmethod
-
+from .visitors import (ClauseVisitor, ExtendedInternalTraversal,
+                       InternalTraversal)
 
 coercions = None
 elements = None

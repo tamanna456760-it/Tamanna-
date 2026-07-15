@@ -29,11 +29,8 @@ be ``mysqldb``. ``mariadb+mariadbconnector://`` is required to use this driver.
 """  # noqa
 import re
 
-from .base import MySQLCompiler
-from .base import MySQLDialect
-from .base import MySQLExecutionContext
-from ... import sql
-from ... import util
+from ... import sql, util
+from .base import MySQLCompiler, MySQLDialect, MySQLExecutionContext
 
 mariadb_cpy_minimum_version = (1, 0, 1)
 

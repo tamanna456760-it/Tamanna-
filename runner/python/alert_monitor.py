@@ -2,6 +2,7 @@
 import smtplib
 from email.message import EmailMessage
 
+
 def send_alert(message):
     email = EmailMessage()
     email.set_content(message)

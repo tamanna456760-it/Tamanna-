@@ -3,11 +3,11 @@
 # This file is part of gunicorn released under the MIT license.
 # See the NOTICE for more information.
 
-from datetime import datetime
 import errno
 import socket
 import ssl
 import sys
+from datetime import datetime
 
 import gunicorn.http as http
 import gunicorn.http.wsgi as wsgi

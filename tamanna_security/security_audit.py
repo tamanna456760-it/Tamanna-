@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import socket
 import hashlib
 import os
+import socket
 from datetime import datetime
 
 print("=== Tamanna AI Security Audit ===")

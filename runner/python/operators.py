@@ -10,28 +10,10 @@
 
 """Defines operators used in SQL expressions."""
 
-from operator import add
-from operator import and_
-from operator import contains
-from operator import eq
-from operator import ge
-from operator import getitem
-from operator import gt
-from operator import inv
-from operator import le
-from operator import lshift
-from operator import lt
-from operator import mod
-from operator import mul
-from operator import ne
-from operator import neg
-from operator import or_
-from operator import rshift
-from operator import sub
-from operator import truediv
+from operator import (add, and_, contains, eq, ge, getitem, gt, inv, le,
+                      lshift, lt, mod, mul, ne, neg, or_, rshift, sub, truediv)
 
 from .. import util
-
 
 if util.py2k:
     from operator import div

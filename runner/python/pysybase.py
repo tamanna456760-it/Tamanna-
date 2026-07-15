@@ -22,9 +22,9 @@ kind at this time.
 
 from sqlalchemy import processors
 from sqlalchemy import types as sqltypes
-from sqlalchemy.dialects.sybase.base import SybaseDialect
-from sqlalchemy.dialects.sybase.base import SybaseExecutionContext
-from sqlalchemy.dialects.sybase.base import SybaseSQLCompiler
+from sqlalchemy.dialects.sybase.base import (SybaseDialect,
+                                             SybaseExecutionContext,
+                                             SybaseSQLCompiler)
 
 
 class _SybNumeric(sqltypes.Numeric):

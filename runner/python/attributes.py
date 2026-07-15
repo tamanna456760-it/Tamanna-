@@ -16,44 +16,26 @@ defines a large part of the ORM's interactivity.
 
 import operator
 
+from .. import event, exc, inspection, util
+from ..sql import base as sql_base
+from ..sql import roles, traversals, visitors
 from . import collections
 from . import exc as orm_exc
 from . import interfaces
-from .base import ATTR_EMPTY
-from .base import ATTR_WAS_SET
-from .base import CALLABLES_OK
-from .base import DEFERRED_HISTORY_LOAD
-from .base import INIT_OK
-from .base import instance_dict
-from .base import instance_state
-from .base import instance_str
-from .base import LOAD_AGAINST_COMMITTED
-from .base import manager_of_class
 from .base import NEVER_SET  # noqa
-from .base import NO_AUTOFLUSH
 from .base import NO_CHANGE  # noqa
-from .base import NO_RAISE
-from .base import NO_VALUE
 from .base import NON_PERSISTENT_OK  # noqa
 from .base import PASSIVE_CLASS_MISMATCH  # noqa
-from .base import PASSIVE_NO_FETCH
 from .base import PASSIVE_NO_FETCH_RELATED  # noqa
-from .base import PASSIVE_NO_INITIALIZE
-from .base import PASSIVE_NO_RESULT
-from .base import PASSIVE_OFF
-from .base import PASSIVE_ONLY_PERSISTENT
-from .base import PASSIVE_RETURN_NO_VALUE
 from .base import RELATED_OBJECT_OK  # noqa
 from .base import SQL_OK  # noqa
-from .base import state_str
-from .. import event
-from .. import exc
-from .. import inspection
-from .. import util
-from ..sql import base as sql_base
-from ..sql import roles
-from ..sql import traversals
-from ..sql import visitors
+from .base import (ATTR_EMPTY, ATTR_WAS_SET, CALLABLES_OK,
+                   DEFERRED_HISTORY_LOAD, INIT_OK, LOAD_AGAINST_COMMITTED,
+                   NO_AUTOFLUSH, NO_RAISE, NO_VALUE, PASSIVE_NO_FETCH,
+                   PASSIVE_NO_INITIALIZE, PASSIVE_NO_RESULT, PASSIVE_OFF,
+                   PASSIVE_ONLY_PERSISTENT, PASSIVE_RETURN_NO_VALUE,
+                   instance_dict, instance_state, instance_str,
+                   manager_of_class, state_str)
 
 
 class NoKey(str):
@@ -367,7 +349,7 @@ def _queryable_attribute_unreduce(key, mapped_class, parententity, entity):
 
 
 if util.py3k:
-    from typing import TypeVar, Generic
+    from typing import Generic, TypeVar
 
     _T = TypeVar("_T")
     _Generic_T = Generic[_T]

@@ -92,94 +92,33 @@ __all__ = [
 ]
 
 
-from .base import _from_objects
-from .base import _select_iterables
-from .base import ColumnCollection
-from .base import Executable
-from .base import PARSE_AUTOCOMMIT
-from .dml import Delete
-from .dml import Insert
-from .dml import Update
-from .dml import UpdateBase
-from .dml import ValuesBase
-from .elements import _truncated_label
-from .elements import between
-from .elements import BinaryExpression
-from .elements import BindParameter
-from .elements import BooleanClauseList
-from .elements import Case
-from .elements import Cast
-from .elements import ClauseElement
-from .elements import ClauseList
-from .elements import collate
-from .elements import CollectionAggregate
-from .elements import ColumnClause
-from .elements import ColumnElement
-from .elements import Extract
-from .elements import False_
-from .elements import FunctionFilter
-from .elements import Grouping
-from .elements import Label
-from .elements import literal
-from .elements import literal_column
-from .elements import not_
-from .elements import Null
-from .elements import outparam
-from .elements import Over
-from .elements import quoted_name
-from .elements import ReleaseSavepointClause
-from .elements import RollbackToSavepointClause
-from .elements import SavepointClause
-from .elements import TextClause
-from .elements import True_
-from .elements import Tuple
-from .elements import TypeClause
-from .elements import TypeCoerce
-from .elements import UnaryExpression
-from .elements import WithinGroup
-from .functions import func
-from .functions import Function
-from .functions import FunctionElement
-from .functions import modifier
-from .lambdas import lambda_stmt
-from .lambdas import LambdaElement
-from .lambdas import StatementLambdaElement
-from .operators import ColumnOperators
-from .operators import custom_op
-from .operators import Operators
-from .selectable import Alias
-from .selectable import AliasedReturnsRows
-from .selectable import CompoundSelect
-from .selectable import CTE
-from .selectable import Exists
-from .selectable import FromClause
-from .selectable import FromGrouping
-from .selectable import GenerativeSelect
-from .selectable import HasCTE
-from .selectable import HasPrefixes
-from .selectable import HasSuffixes
-from .selectable import Join
-from .selectable import LABEL_STYLE_DEFAULT
-from .selectable import LABEL_STYLE_DISAMBIGUATE_ONLY
-from .selectable import LABEL_STYLE_NONE
-from .selectable import LABEL_STYLE_TABLENAME_PLUS_COL
-from .selectable import Lateral
-from .selectable import ReturnsRows
-from .selectable import ScalarSelect
-from .selectable import Select
-from .selectable import Selectable
-from .selectable import SelectBase
-from .selectable import Subquery
-from .selectable import subquery
-from .selectable import TableClause
-from .selectable import TableSample
-from .selectable import TableValuedAlias
-from .selectable import TextAsFrom
-from .selectable import TextualSelect
-from .selectable import Values
+from ..util.langhelpers import public_factory
+from .base import (PARSE_AUTOCOMMIT, ColumnCollection, Executable,
+                   _from_objects, _select_iterables)
+from .dml import Delete, Insert, Update, UpdateBase, ValuesBase
+from .elements import (BinaryExpression, BindParameter, BooleanClauseList,
+                       Case, Cast, ClauseElement, ClauseList,
+                       CollectionAggregate, ColumnClause, ColumnElement,
+                       Extract, False_, FunctionFilter, Grouping, Label, Null,
+                       Over, ReleaseSavepointClause, RollbackToSavepointClause,
+                       SavepointClause, TextClause, True_, Tuple, TypeClause,
+                       TypeCoerce, UnaryExpression, WithinGroup,
+                       _truncated_label, between, collate, literal,
+                       literal_column, not_, outparam, quoted_name)
+from .functions import Function, FunctionElement, func, modifier
+from .lambdas import LambdaElement, StatementLambdaElement, lambda_stmt
+from .operators import ColumnOperators, Operators, custom_op
+from .selectable import (CTE, LABEL_STYLE_DEFAULT,
+                         LABEL_STYLE_DISAMBIGUATE_ONLY, LABEL_STYLE_NONE,
+                         LABEL_STYLE_TABLENAME_PLUS_COL, Alias,
+                         AliasedReturnsRows, CompoundSelect, Exists,
+                         FromClause, FromGrouping, GenerativeSelect, HasCTE,
+                         HasPrefixes, HasSuffixes, Join, Lateral, ReturnsRows,
+                         ScalarSelect, Select, Selectable, SelectBase,
+                         Subquery, TableClause, TableSample, TableValuedAlias,
+                         TextAsFrom, TextualSelect, Values, subquery)
 from .traversals import CacheKey
 from .visitors import Visitable
-from ..util.langhelpers import public_factory
 
 # factory functions - these pull class-bound constructors and classmethods
 # from SQL elements and selectables into public functions.  This allows

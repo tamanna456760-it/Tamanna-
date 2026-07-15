@@ -9,8 +9,7 @@ import collections
 import contextlib
 import re
 
-from .. import event
-from .. import util
+from .. import event, util
 from ..engine import url
 from ..engine.default import DefaultDialect
 from ..engine.util import _distill_cursor_params

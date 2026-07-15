@@ -14,35 +14,16 @@ import datetime as dt
 import decimal
 import json
 
-from . import coercions
-from . import elements
-from . import operators
-from . import roles
-from . import type_api
-from .base import _bind_or_error
-from .base import NO_ARG
-from .base import SchemaEventTarget
-from .elements import _NONE_NAME
-from .elements import quoted_name
-from .elements import Slice
+from .. import event, exc, inspection, processors, util
+from ..util import OrderedDict, compat, langhelpers, pickle
+from . import coercions, elements, operators, roles, type_api
+from .base import NO_ARG, SchemaEventTarget, _bind_or_error
+from .elements import _NONE_NAME, Slice
 from .elements import TypeCoerce as type_coerce  # noqa
-from .traversals import HasCacheKey
-from .traversals import InternalTraversal
-from .type_api import Emulated
+from .elements import quoted_name
+from .traversals import HasCacheKey, InternalTraversal
 from .type_api import NativeForEmulated  # noqa
-from .type_api import to_instance
-from .type_api import TypeDecorator
-from .type_api import TypeEngine
-from .type_api import Variant
-from .. import event
-from .. import exc
-from .. import inspection
-from .. import processors
-from .. import util
-from ..util import compat
-from ..util import langhelpers
-from ..util import OrderedDict
-from ..util import pickle
+from .type_api import Emulated, TypeDecorator, TypeEngine, Variant, to_instance
 
 
 class _LookupExpressionAdapter(object):

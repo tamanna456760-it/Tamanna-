@@ -223,11 +223,9 @@ The above query will render::
 """  # noqa
 from __future__ import absolute_import
 
-from .. import inspect
-from .. import util
+from .. import inspect, util
 from ..ext.hybrid import hybrid_property
 from ..orm.attributes import flag_modified
-
 
 __all__ = ["index_property"]
 

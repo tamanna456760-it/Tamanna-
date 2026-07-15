@@ -93,26 +93,15 @@ import decimal
 import re
 from uuid import UUID as _python_UUID
 
-from .array import ARRAY as PGARRAY
-from .base import _ColonCast
-from .base import _DECIMAL_TYPES
-from .base import _FLOAT_TYPES
-from .base import _INT_TYPES
-from .base import ENUM
-from .base import INTERVAL
-from .base import PGCompiler
-from .base import PGDialect
-from .base import PGExecutionContext
-from .base import PGIdentifierPreparer
-from .base import UUID
-from .json import JSON
-from .json import JSONB
-from .json import JSONPathType
-from ... import exc
-from ... import processors
+from ... import exc, processors
 from ... import types as sqltypes
 from ... import util
 from ...sql.elements import quoted_name
+from .array import ARRAY as PGARRAY
+from .base import (_DECIMAL_TYPES, _FLOAT_TYPES, _INT_TYPES, ENUM, INTERVAL,
+                   UUID, PGCompiler, PGDialect, PGExecutionContext,
+                   PGIdentifierPreparer, _ColonCast)
+from .json import JSON, JSONB, JSONPathType
 
 
 class _PGNumeric(sqltypes.Numeric):

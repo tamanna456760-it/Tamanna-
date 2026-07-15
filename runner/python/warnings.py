@@ -9,9 +9,9 @@ from __future__ import absolute_import
 
 import warnings
 
-from . import assertions
 from .. import exc as sa_exc
 from ..util.langhelpers import _warnings_warn
+from . import assertions
 
 
 class SATestSuiteWarning(Warning):

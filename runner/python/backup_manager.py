@@ -1,6 +1,9 @@
-import shutil, os
-from config import GIT_REPO_PATH, BACKUP_PATH
+import os
+import shutil
+
+from config import BACKUP_PATH, GIT_REPO_PATH
 from logger import log
+
 
 def backup_files():
     if not os.path.exists(BACKUP_PATH):

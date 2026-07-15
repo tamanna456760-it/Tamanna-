@@ -7,12 +7,10 @@
 
 import re
 
-from .types import _StringType
-from ... import exc
-from ... import sql
-from ... import util
+from ... import exc, sql, util
 from ...sql import sqltypes
 from ...sql.base import NO_ARG
+from .types import _StringType
 
 
 class ENUM(sqltypes.NativeForEmulated, sqltypes.Enum, _StringType):

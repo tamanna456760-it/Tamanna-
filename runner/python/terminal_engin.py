@@ -1,6 +1,7 @@
 # Tamanna Terminal Connection Engine
 import subprocess
 
+
 def run_terminal_command(command):
     try:
         output = subprocess.check_output(command, shell=True)

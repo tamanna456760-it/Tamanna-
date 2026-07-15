@@ -23,11 +23,8 @@ from time import time as _time
 
 from . import compat
 from .compat import threading
-from .concurrency import asyncio
-from .concurrency import await_fallback
-from .concurrency import await_only
+from .concurrency import asyncio, await_fallback, await_only
 from .langhelpers import memoized_property
-
 
 __all__ = ["Empty", "Full", "Queue"]
 

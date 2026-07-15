@@ -1,8 +1,9 @@
+import json
+import random
 import threading
 import time
-import random
-import json
-from flask import Flask, render_template, jsonify
+
+from flask import Flask, jsonify, render_template
 
 # =========================
 # SYSTEM CONFIG

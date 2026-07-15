@@ -1,7 +1,8 @@
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
+
 
 def run_pip_cache_command(*args):
     """Run a pip cache subcommand and return output."""

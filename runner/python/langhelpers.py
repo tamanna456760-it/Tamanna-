@@ -11,7 +11,6 @@ modules, classes, hierarchies, attributes, functions, and methods.
 """
 
 import collections
-from functools import update_wrapper
 import hashlib
 import inspect
 import itertools
@@ -21,10 +20,10 @@ import sys
 import textwrap
 import types
 import warnings
+from functools import update_wrapper
 
-from . import _collections
-from . import compat
 from .. import exc
+from . import _collections, compat
 
 
 def md5_hex(x):

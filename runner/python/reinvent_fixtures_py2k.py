@@ -28,7 +28,6 @@ can all be removed.
 """
 import collections
 
-
 _py2k_fixture_fn_names = collections.defaultdict(set)
 _py2k_class_fixtures = collections.defaultdict(
     lambda: collections.defaultdict(set)

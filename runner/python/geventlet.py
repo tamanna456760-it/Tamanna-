@@ -3,8 +3,8 @@
 # This file is part of gunicorn released under the MIT license.
 # See the NOTICE for more information.
 
-from functools import partial
 import sys
+from functools import partial
 
 try:
     import eventlet
@@ -15,11 +15,10 @@ else:
     if parse_version(eventlet.__version__) < parse_version('0.24.1'):
         raise RuntimeError("eventlet worker requires eventlet 0.24.1 or higher")
 
-from eventlet import hubs, greenthread
+import greenlet
+from eventlet import greenthread, hubs
 from eventlet.greenio import GreenSocket
 from eventlet.wsgi import ALREADY_HANDLED as EVENTLET_ALREADY_HANDLED
-import greenlet
-
 from gunicorn.workers.base_async import AsyncWorker
 
 

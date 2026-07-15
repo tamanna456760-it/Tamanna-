@@ -18,8 +18,8 @@
 
 """
 from sqlalchemy.connectors.mxodbc import MxODBCConnector
-from sqlalchemy.dialects.sybase.base import SybaseDialect
-from sqlalchemy.dialects.sybase.base import SybaseExecutionContext
+from sqlalchemy.dialects.sybase.base import (SybaseDialect,
+                                             SybaseExecutionContext)
 
 
 class SybaseExecutionContext_mxodbc(SybaseExecutionContext):

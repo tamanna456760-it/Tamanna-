@@ -8,38 +8,17 @@
 """SQL function API, factories, and built-in functions.
 
 """
-from . import annotation
-from . import coercions
-from . import operators
-from . import roles
-from . import schema
-from . import sqltypes
-from . import util as sqlutil
-from .base import _entity_namespace
-from .base import ColumnCollection
-from .base import Executable
-from .base import Generative
-from .base import HasMemoized
-from .elements import _type_from_args
-from .elements import BinaryExpression
-from .elements import BindParameter
-from .elements import Cast
-from .elements import ClauseList
-from .elements import ColumnElement
-from .elements import Extract
-from .elements import FunctionFilter
-from .elements import Grouping
-from .elements import literal_column
-from .elements import NamedColumn
-from .elements import Over
-from .elements import WithinGroup
-from .selectable import FromClause
-from .selectable import Select
-from .selectable import TableValuedAlias
-from .visitors import InternalTraversal
-from .visitors import TraversibleType
 from .. import util
-
+from . import annotation, coercions, operators, roles, schema, sqltypes
+from . import util as sqlutil
+from .base import (ColumnCollection, Executable, Generative, HasMemoized,
+                   _entity_namespace)
+from .elements import (BinaryExpression, BindParameter, Cast, ClauseList,
+                       ColumnElement, Extract, FunctionFilter, Grouping,
+                       NamedColumn, Over, WithinGroup, _type_from_args,
+                       literal_column)
+from .selectable import FromClause, Select, TableValuedAlias
+from .visitors import InternalTraversal, TraversibleType
 
 _registry = util.defaultdict(dict)
 

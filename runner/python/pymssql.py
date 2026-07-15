@@ -41,11 +41,10 @@ ODBC Driver for SQL Server (msodbcsql), which is now available for Windows,
 """  # noqa
 import re
 
-from .base import MSDialect
-from .base import MSIdentifierPreparer
 from ... import processors
 from ... import types as sqltypes
 from ... import util
+from .base import MSDialect, MSIdentifierPreparer
 
 
 class _MSNumeric_pymssql(sqltypes.Numeric):

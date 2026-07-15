@@ -129,19 +129,13 @@ if py3k:
     import configparser
     import itertools
     import pickle
-
     from functools import reduce
     from io import BytesIO as byte_buffer
     from io import StringIO
     from itertools import zip_longest
     from time import perf_counter
-    from urllib.parse import (
-        quote_plus,
-        unquote_plus,
-        parse_qsl,
-        quote,
-        unquote,
-    )
+    from urllib.parse import (parse_qsl, quote, quote_plus, unquote,
+                              unquote_plus)
 
     string_types = (str,)
     binary_types = (bytes,)
@@ -230,20 +224,19 @@ if py3k:
 
 else:
     import base64
-    import ConfigParser as configparser  # noqa
     import itertools
-
-    from StringIO import StringIO  # noqa
-    from cStringIO import StringIO as byte_buffer  # noqa
+    from abc import ABCMeta
     from itertools import izip_longest as zip_longest  # noqa
     from time import clock as perf_counter  # noqa
     from urllib import quote  # noqa
     from urllib import quote_plus  # noqa
     from urllib import unquote  # noqa
     from urllib import unquote_plus  # noqa
-    from urlparse import parse_qsl  # noqa
 
-    from abc import ABCMeta
+    import ConfigParser as configparser  # noqa
+    from cStringIO import StringIO as byte_buffer  # noqa
+    from StringIO import StringIO  # noqa
+    from urlparse import parse_qsl  # noqa
 
     class ABC(object):
         __metaclass__ = ABCMeta
@@ -531,9 +524,7 @@ def with_metaclass(meta, *bases, **kw):
 if py3k:
     from datetime import timezone
 else:
-    from datetime import datetime
-    from datetime import timedelta
-    from datetime import tzinfo
+    from datetime import datetime, timedelta, tzinfo
 
     class timezone(tzinfo):
         """Minimal port of python 3 timezone object"""

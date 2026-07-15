@@ -1,7 +1,7 @@
 from .. import util
 from ..engine import Connection as _LegacyConnection
-from ..engine import create_engine as _create_engine
 from ..engine import Engine as _LegacyEngine
+from ..engine import create_engine as _create_engine
 from ..engine.base import OptionEngineMixin
 
 NO_OPTIONS = util.immutabledict()

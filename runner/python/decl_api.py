@@ -11,26 +11,18 @@ import itertools
 import re
 import weakref
 
-from . import attributes
-from . import clsregistry
+from .. import exc, inspection, util
+from ..sql.schema import MetaData
+from ..util import hybridmethod, hybridproperty
+from . import attributes, clsregistry
 from . import exc as orm_exc
-from . import instrumentation
-from . import interfaces
+from . import instrumentation, interfaces
 from . import mapper as mapperlib
 from .base import _inspect_mapped_class
-from .decl_base import _add_attribute
-from .decl_base import _as_declarative
-from .decl_base import _declarative_constructor
-from .decl_base import _DeferredMapperConfig
-from .decl_base import _del_attribute
-from .decl_base import _mapper
+from .decl_base import (_add_attribute, _as_declarative,
+                        _declarative_constructor, _DeferredMapperConfig,
+                        _del_attribute, _mapper)
 from .descriptor_props import SynonymProperty as _orm_synonym
-from .. import exc
-from .. import inspection
-from .. import util
-from ..sql.schema import MetaData
-from ..util import hybridmethod
-from ..util import hybridproperty
 
 
 def has_inherited_table(cls):

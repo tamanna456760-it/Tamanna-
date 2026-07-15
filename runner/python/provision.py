@@ -1,16 +1,11 @@
 import collections
 import logging
 
-from . import config
-from . import engines
-from . import util
-from .. import exc
-from .. import inspect
+from .. import exc, inspect
 from ..engine import url as sa_url
-from ..sql import ddl
-from ..sql import schema
+from ..sql import ddl, schema
 from ..util import compat
-
+from . import config, engines, util
 
 log = logging.getLogger(__name__)
 

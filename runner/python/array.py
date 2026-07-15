@@ -9,10 +9,7 @@ import re
 
 from ... import types as sqltypes
 from ... import util
-from ...sql import coercions
-from ...sql import expression
-from ...sql import operators
-from ...sql import roles
+from ...sql import coercions, expression, operators, roles
 
 
 def Any(other, arrexpr, operator=operators.eq):

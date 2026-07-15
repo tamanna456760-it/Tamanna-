@@ -12,12 +12,8 @@ within INSERT and UPDATE statements.
 import functools
 import operator
 
-from . import coercions
-from . import dml
-from . import elements
-from . import roles
-from .. import exc
-from .. import util
+from .. import exc, util
+from . import coercions, dml, elements, roles
 
 REQUIRED = util.symbol(
     "REQUIRED",

@@ -1,7 +1,7 @@
 import os
-import time
 import shutil
 import subprocess
+import time
 from datetime import datetime
 
 WATCH_PATH = "."

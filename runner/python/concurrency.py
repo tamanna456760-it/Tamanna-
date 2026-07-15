@@ -17,16 +17,12 @@ if compat.py3k:
         greenlet_error = str(e)
     else:
         have_greenlet = True
-        from ._concurrency_py3k import await_only
-        from ._concurrency_py3k import await_fallback
-        from ._concurrency_py3k import greenlet_spawn
-        from ._concurrency_py3k import is_exit_exception
-        from ._concurrency_py3k import AsyncAdaptedLock
         from ._concurrency_py3k import _util_async_run  # noqa: F401
-        from ._concurrency_py3k import (
-            _util_async_run_coroutine_function,
-        )  # noqa: F401, E501
         from ._concurrency_py3k import asyncio  # noqa: F401
+        from ._concurrency_py3k import (AsyncAdaptedLock,  # noqa: F401, E501
+                                        _util_async_run_coroutine_function,
+                                        await_fallback, await_only,
+                                        greenlet_spawn, is_exit_exception)
 
     # does not need greennlet, just Python 3
     from ._compat_py3k import asynccontextmanager  # noqa: F401

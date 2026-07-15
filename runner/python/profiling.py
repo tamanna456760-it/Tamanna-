@@ -20,10 +20,9 @@ import pstats
 import re
 import sys
 
+from ..util import has_compiled_ext
 from . import config
 from .util import gc_collect
-from ..util import has_compiled_ext
-
 
 try:
     import cProfile
@@ -241,10 +240,9 @@ def function_call_count(variance=0.05, times=1, warmup=0):
     # still work on py27.  In Py3, update_wrapper() alone is good enough,
     # likely due to the introduction of __signature__.
 
-    from sqlalchemy.util import decorator
-    from sqlalchemy.util import deprecations
     from sqlalchemy.engine import row
     from sqlalchemy.testing import mock
+    from sqlalchemy.util import decorator, deprecations
 
     @decorator
     def wrap(fn, *args, **kw):

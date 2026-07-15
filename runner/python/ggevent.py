@@ -5,9 +5,9 @@
 
 import os
 import sys
+import time
 from datetime import datetime
 from functools import partial
-import time
 
 try:
     import gevent
@@ -18,11 +18,10 @@ else:
     if parse_version(gevent.__version__) < parse_version('1.4'):
         raise RuntimeError("gevent worker requires gevent 1.4 or higher")
 
+import gunicorn
+from gevent import hub, monkey, pywsgi, socket
 from gevent.pool import Pool
 from gevent.server import StreamServer
-from gevent import hub, monkey, socket, pywsgi
-
-import gunicorn
 from gunicorn.http.wsgi import base_environ
 from gunicorn.workers.base_async import AsyncWorker
 

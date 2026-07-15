@@ -13,12 +13,11 @@ organizes them in order of dependency, and executes.
 
 """
 
+from .. import event, util
+from ..util import topological
 from . import attributes
 from . import exc as orm_exc
 from . import util as orm_util
-from .. import event
-from .. import util
-from ..util import topological
 
 
 def _warn_for_cascade_backrefs(state, prop):

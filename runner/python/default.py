@@ -19,19 +19,15 @@ import random
 import re
 import weakref
 
+from .. import event, exc, pool, processors
+from .. import types as sqltypes
+from .. import util
+from ..sql import compiler, expression
+from ..sql.elements import quoted_name
 from . import characteristics
 from . import cursor as _cursor
 from . import interfaces
 from .base import Connection
-from .. import event
-from .. import exc
-from .. import pool
-from .. import processors
-from .. import types as sqltypes
-from .. import util
-from ..sql import compiler
-from ..sql import expression
-from ..sql.elements import quoted_name
 
 AUTOCOMMIT_REGEXP = re.compile(
     r"\s*(?:UPDATE|INSERT|CREATE|DELETE|DROP|ALTER)", re.I | re.UNICODE

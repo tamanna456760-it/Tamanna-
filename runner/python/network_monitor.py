@@ -1,6 +1,7 @@
 # network_monitor.py
-import psutil
 import datetime
+
+import psutil
 
 net_io = psutil.net_io_counters()
 with open("../logs/network_log.txt", "a") as f:

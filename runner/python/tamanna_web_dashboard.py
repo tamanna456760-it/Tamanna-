@@ -1,8 +1,9 @@
-from flask import Flask, render_template_string, jsonify
-import threading
-import random
-import time
 import json
+import random
+import threading
+import time
+
+from flask import Flask, jsonify, render_template_string
 
 app = Flask(__name__)
 

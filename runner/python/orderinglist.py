@@ -119,9 +119,7 @@ start numbering at 1 or some other integer, provide ``count_from=1``.
 
 
 """
-from ..orm.collections import collection
-from ..orm.collections import collection_adapter
-
+from ..orm.collections import collection, collection_adapter
 
 __all__ = ["ordering_list"]
 

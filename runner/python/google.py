@@ -8,14 +8,13 @@ from bs4 import BeautifulSoup
 
 try:
     import gspread
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    from googleapiclient.discovery import build
-    from googlesearch import search as google_search
-
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from google.oauth2.service_account import \
         Credentials as ServiceAccountCredentials
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from googleapiclient.discovery import build
+    from googlesearch import search as google_search
 except ImportError:
     print(
         "Some dependencies missing. Install with: pip install googlesearch-python google-api-python-client gspread google-auth-httplib2 google-auth-oauthlib beautifulsoup4 requests"

@@ -11,18 +11,14 @@ as actively in the load/persist ORM loop.
 
 """
 
-from . import attributes
-from . import util as orm_util
-from .interfaces import MapperProperty
-from .interfaces import PropComparator
-from .util import _none_set
 from .. import event
 from .. import exc as sa_exc
-from .. import schema
-from .. import sql
-from .. import util
-from ..sql import expression
-from ..sql import operators
+from .. import schema, sql, util
+from ..sql import expression, operators
+from . import attributes
+from . import util as orm_util
+from .interfaces import MapperProperty, PropComparator
+from .util import _none_set
 
 
 class DescriptorProperty(MapperProperty):

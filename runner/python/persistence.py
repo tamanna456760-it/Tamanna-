@@ -14,36 +14,21 @@ in unitofwork.py.
 
 """
 
-from itertools import chain
-from itertools import groupby
 import operator
+from itertools import chain, groupby
 
-from . import attributes
-from . import evaluator
-from . import exc as orm_exc
-from . import loading
-from . import sync
-from .base import NO_VALUE
-from .base import state_str
 from .. import exc as sa_exc
-from .. import future
-from .. import sql
-from .. import util
+from .. import future, sql, util
 from ..engine import result as _result
-from ..sql import coercions
-from ..sql import expression
-from ..sql import operators
-from ..sql import roles
-from ..sql import select
-from ..sql import sqltypes
-from ..sql.base import _entity_namespace_key
-from ..sql.base import CompileState
-from ..sql.base import Options
-from ..sql.dml import DeleteDMLState
-from ..sql.dml import InsertDMLState
-from ..sql.dml import UpdateDMLState
+from ..sql import coercions, expression, operators, roles, select, sqltypes
+from ..sql.base import CompileState, Options, _entity_namespace_key
+from ..sql.dml import DeleteDMLState, InsertDMLState, UpdateDMLState
 from ..sql.elements import BooleanClauseList
 from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
+from . import attributes, evaluator
+from . import exc as orm_exc
+from . import loading, sync
+from .base import NO_VALUE, state_str
 
 
 def _bulk_insert(

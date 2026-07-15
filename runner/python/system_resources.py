@@ -1,6 +1,8 @@
 # system_resources.py
-import psutil
 import datetime
+
+import psutil
+
 
 def log_system_status():
     cpu = psutil.cpu_percent(interval=1)

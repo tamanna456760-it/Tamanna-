@@ -11,13 +11,12 @@ try:
     import tornado
 except ImportError:
     raise RuntimeError("You need tornado installed to use this worker.")
-import tornado.web
 import tornado.httpserver
+import tornado.web
+from gunicorn import __version__ as gversion
+from gunicorn.workers.base import Worker
 from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.wsgi import WSGIContainer
-from gunicorn.workers.base import Worker
-from gunicorn import __version__ as gversion
-
 
 # Tornado 5.0 updated its IOLoop, and the `io_loop` arguments to many
 # Tornado functions have been removed in Tornado 5.0. Also, they no

@@ -3,7 +3,6 @@
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent
 # repo root (bd-king-r7)
 REPO_ROOT = ROOT.parents[1]

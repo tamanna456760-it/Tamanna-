@@ -12,12 +12,10 @@ import re
 import warnings
 import weakref
 
-from . import config
-from .util import decorator
-from .util import gc_collect
-from .. import event
-from .. import pool
+from .. import event, pool
 from ..util import await_only
+from . import config
+from .util import decorator, gc_collect
 
 
 class ConnectionKiller(object):
@@ -282,9 +280,7 @@ def testing_engine(
 
     if asyncio:
         assert not _sqlite_savepoint
-        from sqlalchemy.ext.asyncio import (
-            create_async_engine as create_engine,
-        )
+        from sqlalchemy.ext.asyncio import create_async_engine as create_engine
     elif future or (
         config.db and config.db._is_future and future is not False
     ):

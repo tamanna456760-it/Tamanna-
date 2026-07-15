@@ -11,7 +11,6 @@ from .. import util
 from ..exc import MultipleResultsFound  # noqa
 from ..exc import NoResultFound  # noqa
 
-
 NO_STATE = (AttributeError, KeyError)
 """Exception types that may be raised by instrumentation implementations."""
 

@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with autocommand.  If not, see <http://www.gnu.org/licenses/>.
 
-from .autoparse import autoparse
 from .automain import automain
+from .autoparse import autoparse
+
 try:
     from .autoasync import autoasync
 except ImportError:  # pragma: no cover

@@ -5,10 +5,10 @@ Provides helper functions for signal processing, data encoding/decoding,
 CRC computation, and other common tasks used by both sender and receiver.
 """
 
+import logging
 import math
 import struct
-import logging
-from typing import List, Tuple, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 # CRC16-CCITT (used in AX.25 and many satellite protocols)
 # Polynomial: x^16 + x^12 + x^5 + 1 (0x1021)

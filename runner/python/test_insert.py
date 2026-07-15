@@ -1,15 +1,8 @@
-from .. import config
-from .. import engines
-from .. import fixtures
+from ... import Integer, String, literal, literal_column, select
+from .. import config, engines, fixtures
 from ..assertions import eq_
 from ..config import requirements
-from ..schema import Column
-from ..schema import Table
-from ... import Integer
-from ... import literal
-from ... import literal_column
-from ... import select
-from ... import String
+from ..schema import Column, Table
 
 
 class LastrowidTest(fixtures.TablesTest):

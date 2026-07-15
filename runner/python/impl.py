@@ -13,15 +13,11 @@
 import traceback
 import weakref
 
-from .base import _AsyncConnDialect
-from .base import _ConnectionFairy
-from .base import _ConnectionRecord
-from .base import Pool
-from .. import exc
-from .. import util
+from .. import exc, util
 from ..util import chop_traceback
 from ..util import queue as sqla_queue
 from ..util import threading
+from .base import Pool, _AsyncConnDialect, _ConnectionFairy, _ConnectionRecord
 
 
 class QueuePool(Pool):

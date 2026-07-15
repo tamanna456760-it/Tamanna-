@@ -107,12 +107,11 @@ import operator
 import weakref
 
 from sqlalchemy.util.compat import inspect_getfullargspec
-from . import base
+
 from .. import exc as sa_exc
 from .. import util
-from ..sql import coercions
-from ..sql import expression
-from ..sql import roles
+from ..sql import coercions, expression, roles
+from . import base
 
 __all__ = [
     "collection",

@@ -2,14 +2,14 @@
 
 import os
 import stat
+from distutils import log
 from typing import Callable, TypeVar
 
 from .compat import py311
 
-from distutils import log
-
 try:
     from os import chmod  # pyright: ignore[reportAssignmentType]
+
     # Losing type-safety w/ pyright, but that's ok
 except ImportError:  # pragma: no cover
     # Jython compatibility

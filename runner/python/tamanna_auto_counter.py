@@ -1,7 +1,10 @@
+import random
 import threading
 import time
-import random
-from tamanna_master_attack import NODES, create_unit, broadcast_power, save_state
+
+from tamanna_master_attack import (NODES, broadcast_power, create_unit,
+                                   save_state)
+
 
 # =========================
 # PREDICTIVE ATTACK & COUNTER

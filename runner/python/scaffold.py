@@ -10,15 +10,12 @@ from datetime import timedelta
 from functools import update_wrapper
 
 from jinja2 import FileSystemLoader
-from werkzeug.exceptions import default_exceptions
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, default_exceptions
 
 from . import typing as ft
 from .cli import AppGroup
 from .globals import current_app
-from .helpers import get_root_path
-from .helpers import locked_cached_property
-from .helpers import send_from_directory
+from .helpers import get_root_path, locked_cached_property, send_from_directory
 from .templating import _default_template_ctx_processor
 
 if t.TYPE_CHECKING:  # pragma: no cover

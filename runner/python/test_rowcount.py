@@ -1,13 +1,6 @@
-from sqlalchemy import bindparam
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import select
-from sqlalchemy import String
-from sqlalchemy import Table
-from sqlalchemy import testing
-from sqlalchemy import text
-from sqlalchemy.testing import eq_
-from sqlalchemy.testing import fixtures
+from sqlalchemy import (Column, Integer, String, Table, bindparam, select,
+                        testing, text)
+from sqlalchemy.testing import eq_, fixtures
 
 
 class RowCountTest(fixtures.TablesTest):

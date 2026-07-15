@@ -26,22 +26,14 @@
 import decimal
 import re
 
-from .base import _DECIMAL_TYPES
-from .base import _FLOAT_TYPES
-from .base import _INT_TYPES
-from .base import PGCompiler
-from .base import PGDialect
-from .base import PGIdentifierPreparer
-from .base import UUID
-from .hstore import HSTORE
-from .json import JSON
-from .json import JSONB
-from ... import exc
-from ... import processors
-from ... import util
+from ... import exc, processors, util
 from ...sql.elements import Null
 from ...types import JSON as Json
 from ...types import Numeric
+from .base import (_DECIMAL_TYPES, _FLOAT_TYPES, _INT_TYPES, UUID, PGCompiler,
+                   PGDialect, PGIdentifierPreparer)
+from .hstore import HSTORE
+from .json import JSON, JSONB
 
 
 class _PGNumeric(Numeric):

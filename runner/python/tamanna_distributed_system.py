@@ -1,7 +1,7 @@
+import json
+import random
 import threading
 import time
-import random
-import json
 
 # =========================
 # DISTRIBUTED NODE CONFIG

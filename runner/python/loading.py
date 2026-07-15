@@ -14,25 +14,18 @@ as well as some of the attribute loading strategies.
 """
 from __future__ import absolute_import
 
+from .. import exc as sa_exc
+from .. import future, util
+from ..engine import result_tuple
+from ..engine.result import (ChunkedIteratorResult, FrozenResult,
+                             SimpleResultMetaData)
+from ..sql import util as sql_util
+from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL, SelectState
 from . import attributes
 from . import exc as orm_exc
-from . import path_registry
-from . import strategy_options
-from .base import _DEFER_FOR_STATE
-from .base import _RAISE_FOR_STATE
-from .base import _SET_DEFERRED_EXPIRED
-from .util import _none_set
-from .util import state_str
-from .. import exc as sa_exc
-from .. import future
-from .. import util
-from ..engine import result_tuple
-from ..engine.result import ChunkedIteratorResult
-from ..engine.result import FrozenResult
-from ..engine.result import SimpleResultMetaData
-from ..sql import util as sql_util
-from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
-from ..sql.selectable import SelectState
+from . import path_registry, strategy_options
+from .base import _DEFER_FOR_STATE, _RAISE_FOR_STATE, _SET_DEFERRED_EXPIRED
+from .util import _none_set, state_str
 
 _new_runid = util.counter()
 
@@ -441,7 +434,7 @@ def load_on_pk_identity(
     assert not q._is_lambda_element
 
     # TODO: fix these imports ....
-    from .context import QueryContext, ORMCompileState
+    from .context import ORMCompileState, QueryContext
 
     if load_options is None:
         load_options = QueryContext.default_load_options

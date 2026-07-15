@@ -12,21 +12,12 @@ import sys
 import types
 import weakref
 
-from . import coercions
-from . import elements
-from . import roles
-from . import schema
-from . import traversals
-from . import type_api
-from . import visitors
-from .base import _clone
-from .base import Options
+from .. import exc, inspection, util
+from ..util import collections_abc, compat
+from . import (coercions, elements, roles, schema, traversals, type_api,
+               visitors)
+from .base import Options, _clone
 from .operators import ColumnOperators
-from .. import exc
-from .. import inspection
-from .. import util
-from ..util import collections_abc
-from ..util import compat
 
 _closure_per_cache_key = util.LRUCache(1000)
 

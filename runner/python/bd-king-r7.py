@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-import os, time, hashlib, json
+import hashlib
+import json
+import os
+import time
 from datetime import datetime
 
 SYSTEM = "BD-KING-R7"

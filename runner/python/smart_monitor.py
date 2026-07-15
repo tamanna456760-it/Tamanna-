@@ -1,6 +1,6 @@
 import os
-import time
 import shutil
+import time
 from datetime import datetime
 
 WATCH_PATH = "."

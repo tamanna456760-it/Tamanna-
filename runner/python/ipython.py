@@ -1,6 +1,7 @@
 from IPython.core.magic import Magics, line_magic, magics_class  # type: ignore
-from IPython.core.magic_arguments import (argument, magic_arguments,  # type: ignore
-                                          parse_argstring)  # type: ignore
+from IPython.core.magic_arguments import parse_argstring  # type: ignore
+from IPython.core.magic_arguments import (argument,  # type: ignore
+                                          magic_arguments)
 
 from .main import find_dotenv, load_dotenv
 

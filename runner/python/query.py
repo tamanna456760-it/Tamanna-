@@ -22,53 +22,31 @@ import itertools
 import operator
 import types
 
-from . import exc as orm_exc
-from . import interfaces
-from . import loading
-from . import util as orm_util
-from .base import _assertions
-from .context import _column_descriptions
-from .context import _legacy_determine_last_joined_entity
-from .context import _legacy_filter_by_entity_zero
-from .context import LABEL_STYLE_LEGACY_ORM
-from .context import ORMCompileState
-from .context import ORMFromStatementCompileState
-from .context import QueryContext
-from .interfaces import ORMColumnsClauseRole
-from .util import aliased
-from .util import AliasedClass
-from .util import object_mapper
-from .util import with_parent
-from .util import with_polymorphic
 from .. import exc as sa_exc
-from .. import inspect
-from .. import inspection
-from .. import log
-from .. import sql
-from .. import util
-from ..sql import coercions
-from ..sql import elements
-from ..sql import expression
-from ..sql import roles
-from ..sql import Select
+from .. import inspect, inspection, log, sql, util
+from ..sql import Select, coercions, elements, expression, roles
 from ..sql import util as sql_util
 from ..sql import visitors
 from ..sql.annotation import SupportsCloneAnnotations
-from ..sql.base import _entity_namespace_key
-from ..sql.base import _generative
-from ..sql.base import Executable
-from ..sql.selectable import _MemoizedSelectEntities
-from ..sql.selectable import _SelectFromElements
-from ..sql.selectable import ForUpdateArg
-from ..sql.selectable import GroupedElement
-from ..sql.selectable import HasHints
-from ..sql.selectable import HasPrefixes
-from ..sql.selectable import HasSuffixes
-from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
-from ..sql.selectable import SelectBase
-from ..sql.selectable import SelectStatementGrouping
+from ..sql.base import Executable, _entity_namespace_key, _generative
+from ..sql.selectable import (LABEL_STYLE_TABLENAME_PLUS_COL, ForUpdateArg,
+                              GroupedElement, HasHints, HasPrefixes,
+                              HasSuffixes, SelectBase, SelectStatementGrouping,
+                              _MemoizedSelectEntities, _SelectFromElements)
 from ..sql.visitors import InternalTraversal
 from ..util import collections_abc
+from . import exc as orm_exc
+from . import interfaces, loading
+from . import util as orm_util
+from .base import _assertions
+from .context import (LABEL_STYLE_LEGACY_ORM, ORMCompileState,
+                      ORMFromStatementCompileState, QueryContext,
+                      _column_descriptions,
+                      _legacy_determine_last_joined_entity,
+                      _legacy_filter_by_entity_zero)
+from .interfaces import ORMColumnsClauseRole
+from .util import (AliasedClass, aliased, object_mapper, with_parent,
+                   with_polymorphic)
 
 __all__ = ["Query", "QueryContext", "aliased"]
 

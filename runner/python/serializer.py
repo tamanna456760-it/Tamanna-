@@ -55,19 +55,13 @@ needed for:
 
 import re
 
-from .. import Column
-from .. import Table
+from .. import Column, Table
 from ..engine import Engine
 from ..orm import class_mapper
 from ..orm.interfaces import MapperProperty
 from ..orm.mapper import Mapper
 from ..orm.session import Session
-from ..util import b64decode
-from ..util import b64encode
-from ..util import byte_buffer
-from ..util import pickle
-from ..util import text_type
-
+from ..util import b64decode, b64encode, byte_buffer, pickle, text_type
 
 __all__ = ["Serializer", "Deserializer", "dumps", "loads"]
 

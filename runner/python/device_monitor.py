@@ -1,6 +1,7 @@
 # device_monitor.py
-import subprocess
 import datetime
+import subprocess
+
 
 def log(message):
     with open("../logs/device_status.txt", "a") as f:

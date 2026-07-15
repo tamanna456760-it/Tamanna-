@@ -19,35 +19,18 @@ import collections
 import re
 import weakref
 
-from . import attributes
-from .base import _is_mapped_class
-from .base import state_str
-from .interfaces import MANYTOMANY
-from .interfaces import MANYTOONE
-from .interfaces import ONETOMANY
-from .interfaces import PropComparator
-from .interfaces import StrategizedProperty
-from .util import _orm_annotate
-from .util import _orm_deannotate
-from .util import CascadeOptions
 from .. import exc as sa_exc
-from .. import log
-from .. import schema
-from .. import sql
-from .. import util
+from .. import log, schema, sql, util
 from ..inspection import inspect
-from ..sql import coercions
-from ..sql import expression
-from ..sql import operators
-from ..sql import roles
-from ..sql import visitors
-from ..sql.util import _deep_deannotate
-from ..sql.util import _shallow_annotate
-from ..sql.util import adapt_criterion_to_null
-from ..sql.util import ClauseAdapter
-from ..sql.util import join_condition
-from ..sql.util import selectables_overlap
-from ..sql.util import visit_binary_product
+from ..sql import coercions, expression, operators, roles, visitors
+from ..sql.util import (ClauseAdapter, _deep_deannotate, _shallow_annotate,
+                        adapt_criterion_to_null, join_condition,
+                        selectables_overlap, visit_binary_product)
+from . import attributes
+from .base import _is_mapped_class, state_str
+from .interfaces import (MANYTOMANY, MANYTOONE, ONETOMANY, PropComparator,
+                         StrategizedProperty)
+from .util import CascadeOptions, _orm_annotate, _orm_deannotate
 
 
 def remote(expr):

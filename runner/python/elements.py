@@ -16,32 +16,14 @@ import itertools
 import operator
 import re
 
-from . import coercions
-from . import operators
-from . import roles
-from . import traversals
-from . import type_api
-from .annotation import Annotated
-from .annotation import SupportsWrappingAnnotations
-from .base import _clone
-from .base import _generative
-from .base import Executable
-from .base import HasMemoized
-from .base import Immutable
-from .base import NO_ARG
-from .base import PARSE_AUTOCOMMIT
-from .base import SingletonConstant
+from .. import exc, inspection, util
+from . import coercions, operators, roles, traversals, type_api
+from .annotation import Annotated, SupportsWrappingAnnotations
+from .base import (NO_ARG, PARSE_AUTOCOMMIT, Executable, HasMemoized,
+                   Immutable, SingletonConstant, _clone, _generative)
 from .coercions import _document_text_coercion
-from .traversals import HasCopyInternals
-from .traversals import MemoizedHasCacheKey
-from .traversals import NO_CACHE
-from .visitors import cloned_traverse
-from .visitors import InternalTraversal
-from .visitors import traverse
-from .visitors import Traversible
-from .. import exc
-from .. import inspection
-from .. import util
+from .traversals import NO_CACHE, HasCopyInternals, MemoizedHasCacheKey
+from .visitors import InternalTraversal, Traversible, cloned_traverse, traverse
 
 
 def collate(expression, collation):

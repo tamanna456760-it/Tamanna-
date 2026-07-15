@@ -12,19 +12,14 @@ basic add/delete mutation.
 
 """
 
+from .. import exc, log, util
+from ..engine import result
 from . import attributes
 from . import exc as orm_exc
-from . import interfaces
-from . import object_mapper
-from . import object_session
-from . import relationships
-from . import strategies
+from . import (interfaces, object_mapper, object_session, relationships,
+               strategies)
 from . import util as orm_util
 from .query import Query
-from .. import exc
-from .. import log
-from .. import util
-from ..engine import result
 
 
 @log.class_logger

@@ -1,6 +1,7 @@
-import time
 import random
+import time
 from collections import defaultdict
+
 
 class AdaptiveDefenseCore:
     def __init__(self, config):

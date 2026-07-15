@@ -12,39 +12,24 @@ from __future__ import absolute_import
 import collections
 import itertools
 
-from . import attributes
-from . import exc as orm_exc
-from . import interfaces
-from . import loading
-from . import path_registry
-from . import properties
-from . import query
-from . import relationships
-from . import unitofwork
-from . import util as orm_util
-from .base import _DEFER_FOR_STATE
-from .base import _RAISE_FOR_STATE
-from .base import _SET_DEFERRED_EXPIRED
-from .context import _column_descriptions
-from .context import ORMCompileState
-from .context import ORMSelectCompileState
-from .context import QueryContext
-from .interfaces import LoaderStrategy
-from .interfaces import StrategizedProperty
-from .session import _state_session
-from .state import InstanceState
-from .util import _none_set
-from .util import aliased
 from .. import event
 from .. import exc as sa_exc
-from .. import inspect
-from .. import log
-from .. import sql
-from .. import util
+from .. import inspect, log, sql, util
 from ..sql import util as sql_util
 from ..sql import visitors
-from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
-from ..sql.selectable import Select
+from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL, Select
+from . import attributes
+from . import exc as orm_exc
+from . import (interfaces, loading, path_registry, properties, query,
+               relationships, unitofwork)
+from . import util as orm_util
+from .base import _DEFER_FOR_STATE, _RAISE_FOR_STATE, _SET_DEFERRED_EXPIRED
+from .context import (ORMCompileState, ORMSelectCompileState, QueryContext,
+                      _column_descriptions)
+from .interfaces import LoaderStrategy, StrategizedProperty
+from .session import _state_session
+from .state import InstanceState
+from .util import _none_set, aliased
 
 
 def _register_attribute(

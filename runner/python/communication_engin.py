@@ -1,6 +1,7 @@
 # Tamanna Communication Engine
 import socket
 
+
 class CommunicationEngine:
     def __init__(self, host="localhost", port=8080):
         self.host = host

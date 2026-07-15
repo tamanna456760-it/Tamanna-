@@ -1,5 +1,6 @@
 import json
 
+
 def read_issues_from_file(issues_file):
     with open(issues_file, 'r') as f:
         issues = json.load(f)

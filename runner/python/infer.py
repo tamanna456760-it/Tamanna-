@@ -5,34 +5,18 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from typing import Optional
-from typing import Sequence
+from typing import Optional, Sequence
 
 from mypy.maptype import map_instance_to_supertype
 from mypy.messages import format_type
-from mypy.nodes import AssignmentStmt
-from mypy.nodes import CallExpr
-from mypy.nodes import Expression
-from mypy.nodes import FuncDef
-from mypy.nodes import MemberExpr
-from mypy.nodes import NameExpr
-from mypy.nodes import RefExpr
-from mypy.nodes import StrExpr
-from mypy.nodes import TypeInfo
-from mypy.nodes import Var
+from mypy.nodes import (AssignmentStmt, CallExpr, Expression, FuncDef,
+                        MemberExpr, NameExpr, RefExpr, StrExpr, TypeInfo, Var)
 from mypy.plugin import SemanticAnalyzerPluginInterface
 from mypy.subtypes import is_subtype
-from mypy.types import AnyType
-from mypy.types import CallableType
-from mypy.types import get_proper_type
-from mypy.types import Instance
-from mypy.types import NoneType
-from mypy.types import ProperType
-from mypy.types import TypeOfAny
-from mypy.types import UnionType
+from mypy.types import (AnyType, CallableType, Instance, NoneType, ProperType,
+                        TypeOfAny, UnionType, get_proper_type)
 
-from . import names
-from . import util
+from . import names, util
 
 
 def infer_type_from_right_hand_nameexpr(

@@ -37,13 +37,11 @@ connection arguments are the same as they are for that of :ref:`pysqlite`.
 
 """  # noqa
 
+from ... import pool, util
+from ...engine import AdaptedConnection
+from ...util.concurrency import await_fallback, await_only
 from .base import SQLiteExecutionContext
 from .pysqlite import SQLiteDialect_pysqlite
-from ... import pool
-from ... import util
-from ...engine import AdaptedConnection
-from ...util.concurrency import await_fallback
-from ...util.concurrency import await_only
 
 
 class AsyncAdapt_aiosqlite_cursor:

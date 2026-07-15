@@ -1,18 +1,10 @@
 # coding: utf-8
 """verrrrry basic unicode column name testing"""
 
-from sqlalchemy import desc
-from sqlalchemy import ForeignKey
-from sqlalchemy import Integer
-from sqlalchemy import MetaData
-from sqlalchemy import testing
-from sqlalchemy import util
-from sqlalchemy.testing import eq_
-from sqlalchemy.testing import fixtures
-from sqlalchemy.testing.schema import Column
-from sqlalchemy.testing.schema import Table
-from sqlalchemy.util import u
-from sqlalchemy.util import ue
+from sqlalchemy import ForeignKey, Integer, MetaData, desc, testing, util
+from sqlalchemy.testing import eq_, fixtures
+from sqlalchemy.testing.schema import Column, Table
+from sqlalchemy.util import u, ue
 
 
 class UnicodeSchemaTest(fixtures.TablesTest):

@@ -15,50 +15,22 @@ import collections
 import itertools
 from operator import attrgetter
 
-from . import coercions
-from . import operators
-from . import roles
-from . import traversals
-from . import type_api
-from . import visitors
-from .annotation import Annotated
-from .annotation import SupportsCloneAnnotations
-from .base import _clone
-from .base import _cloned_difference
-from .base import _cloned_intersection
-from .base import _entity_namespace_key
-from .base import _expand_cloned
-from .base import _from_objects
-from .base import _generative
-from .base import _select_iterables
-from .base import CacheableOptions
-from .base import ColumnCollection
-from .base import ColumnSet
-from .base import CompileState
-from .base import DedupeColumnCollection
-from .base import Executable
-from .base import Generative
-from .base import HasCompileState
-from .base import HasMemoized
-from .base import Immutable
-from .base import prefix_anon_map
-from .coercions import _document_text_coercion
-from .elements import _anonymous_label
-from .elements import and_
-from .elements import BindParameter
-from .elements import BooleanClauseList
-from .elements import ClauseElement
-from .elements import ClauseList
-from .elements import ColumnClause
-from .elements import GroupedElement
-from .elements import Grouping
-from .elements import literal_column
-from .elements import TableValuedColumn
-from .elements import UnaryExpression
-from .visitors import InternalTraversal
-from .. import exc
-from .. import util
+from .. import exc, util
 from ..inspection import inspect
+from . import coercions, operators, roles, traversals, type_api, visitors
+from .annotation import Annotated, SupportsCloneAnnotations
+from .base import (CacheableOptions, ColumnCollection, ColumnSet, CompileState,
+                   DedupeColumnCollection, Executable, Generative,
+                   HasCompileState, HasMemoized, Immutable, _clone,
+                   _cloned_difference, _cloned_intersection,
+                   _entity_namespace_key, _expand_cloned, _from_objects,
+                   _generative, _select_iterables, prefix_anon_map)
+from .coercions import _document_text_coercion
+from .elements import (BindParameter, BooleanClauseList, ClauseElement,
+                       ClauseList, ColumnClause, GroupedElement, Grouping,
+                       TableValuedColumn, UnaryExpression, _anonymous_label,
+                       and_, literal_column)
+from .visitors import InternalTraversal
 
 
 class _OffsetLimitParam(BindParameter):

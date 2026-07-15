@@ -3,6 +3,7 @@
 
 from datetime import datetime
 
+
 class TamannaMasterBus:
     def __init__(self):
         self.receivers = {}   # name -> handler function

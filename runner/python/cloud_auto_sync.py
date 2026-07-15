@@ -1,6 +1,8 @@
-import schedule
-import time
 import os
+import time
+
+import schedule
+
 
 def job():
     os.system("python tamanna_book_sync.py")

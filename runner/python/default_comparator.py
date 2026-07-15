@@ -9,22 +9,11 @@
 """
 
 
-from . import coercions
-from . import operators
-from . import roles
-from . import type_api
-from .elements import and_
-from .elements import BinaryExpression
-from .elements import ClauseList
-from .elements import collate
-from .elements import CollectionAggregate
-from .elements import False_
-from .elements import Null
-from .elements import or_
-from .elements import True_
-from .elements import UnaryExpression
-from .. import exc
-from .. import util
+from .. import exc, util
+from . import coercions, operators, roles, type_api
+from .elements import (BinaryExpression, ClauseList, CollectionAggregate,
+                       False_, Null, True_, UnaryExpression, and_, collate,
+                       or_)
 
 
 def _boolean_compare(

@@ -10,20 +10,15 @@ import re
 import sys
 
 import sqlalchemy as sa
-from . import assertions
-from . import config
-from . import schema
-from .entities import BasicEntity
-from .entities import ComparableEntity
-from .entities import ComparableMixin  # noqa
-from .util import adict
-from .util import drop_all_tables_from_metadata
-from .. import event
-from .. import util
-from ..orm import declarative_base
-from ..orm import registry
+
+from .. import event, util
+from ..orm import declarative_base, registry
 from ..orm.decl_api import DeclarativeMeta
 from ..schema import sort_tables_and_constraints
+from . import assertions, config, schema
+from .entities import ComparableMixin  # noqa
+from .entities import BasicEntity, ComparableEntity
+from .util import adict, drop_all_tables_from_metadata
 
 
 @config.mark_base_test_class()
@@ -176,7 +171,8 @@ class TestBase(object):
     def trans_ctx_manager_fixture(self, request, metadata):
         rollback, second_operation, begin_nested = request.param
 
-        from sqlalchemy import Table, Column, Integer, func, select
+        from sqlalchemy import Column, Integer, Table, func, select
+
         from . import eq_
 
         t = Table("test", metadata, Column("data", Integer))
@@ -313,8 +309,9 @@ _connection_fixture_connection = None
 @contextlib.contextmanager
 def _push_future_engine(engine):
 
-    from ..future.engine import Engine
     from sqlalchemy import testing
+
+    from ..future.engine import Engine
 
     facade = Engine._future_facade(engine)
     config._current.push_engine(facade, testing)
@@ -765,11 +762,8 @@ class ComputedReflectionFixtureTest(TablesTest):
 
     @classmethod
     def define_tables(cls, metadata):
-        from .. import Integer
-        from .. import testing
-        from ..schema import Column
-        from ..schema import Computed
-        from ..schema import Table
+        from .. import Integer, testing
+        from ..schema import Column, Computed, Table
 
         Table(
             "computed_default_table",

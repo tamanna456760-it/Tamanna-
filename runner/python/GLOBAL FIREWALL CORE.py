@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict
 
+
 class TamannaGlobalFirewall:
     def __init__(self, config):
         self.config = config

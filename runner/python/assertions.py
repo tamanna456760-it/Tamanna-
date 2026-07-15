@@ -12,22 +12,16 @@ import re
 import sys
 import warnings
 
-from . import assertsql
-from . import config
-from . import engines
-from . import mock
-from .exclusions import db_spec
-from .util import fail
 from .. import exc as sa_exc
-from .. import schema
-from .. import sql
+from .. import schema, sql
 from .. import types as sqltypes
 from .. import util
-from ..engine import default
-from ..engine import url
+from ..engine import default, url
 from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
-from ..util import compat
-from ..util import decorator
+from ..util import compat, decorator
+from . import assertsql, config, engines, mock
+from .exclusions import db_spec
+from .util import fail
 
 
 def expect_warnings(*messages, **kw):

@@ -20,10 +20,9 @@ r"""
 
 """  # noqa
 
-from .base import BIT
-from .base import MySQLDialect
-from .mysqldb import MySQLDialect_mysqldb
 from ... import util
+from .base import BIT, MySQLDialect
+from .mysqldb import MySQLDialect_mysqldb
 
 
 class _cymysqlBIT(BIT):

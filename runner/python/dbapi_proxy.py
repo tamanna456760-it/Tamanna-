@@ -15,9 +15,9 @@ today.
 
 """
 
-from .impl import QueuePool
 from .. import util
 from ..util import threading
+from .impl import QueuePool
 
 proxies = {}
 

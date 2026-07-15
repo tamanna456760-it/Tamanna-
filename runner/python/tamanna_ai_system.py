@@ -9,16 +9,16 @@ UID: auto-generated per run (or based on system)
 Making: Tamanna AI Team | Build 2025-04-12
 """
 
-import os
-import sys
-import re
-import json
-import uuid
-import platform
-import datetime
 import argparse
+import datetime
+import json
+import os
+import platform
+import re
+import sys
+import uuid
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 # ============================================================================
 # METADATA (Package info, version, target, UID, making)
@@ -64,6 +64,7 @@ THREAT_CATALOG = [
 
 import random
 import time
+
 
 def run_threat_simulation():
     """Simulate an AI threat detection scan."""

@@ -5,37 +5,17 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import List, Optional, Union
 
-from mypy.nodes import ARG_NAMED_OPT
-from mypy.nodes import Argument
-from mypy.nodes import AssignmentStmt
-from mypy.nodes import CallExpr
-from mypy.nodes import ClassDef
-from mypy.nodes import MDEF
-from mypy.nodes import MemberExpr
-from mypy.nodes import NameExpr
-from mypy.nodes import RefExpr
-from mypy.nodes import StrExpr
-from mypy.nodes import SymbolTableNode
-from mypy.nodes import TempNode
-from mypy.nodes import TypeInfo
-from mypy.nodes import Var
+from mypy.nodes import (ARG_NAMED_OPT, MDEF, Argument, AssignmentStmt,
+                        CallExpr, ClassDef, MemberExpr, NameExpr, RefExpr,
+                        StrExpr, SymbolTableNode, TempNode, TypeInfo, Var)
 from mypy.plugin import SemanticAnalyzerPluginInterface
 from mypy.plugins.common import add_method_to_class
-from mypy.types import AnyType
-from mypy.types import get_proper_type
-from mypy.types import Instance
-from mypy.types import NoneTyp
-from mypy.types import ProperType
-from mypy.types import TypeOfAny
-from mypy.types import UnboundType
-from mypy.types import UnionType
+from mypy.types import (AnyType, Instance, NoneTyp, ProperType, TypeOfAny,
+                        UnboundType, UnionType, get_proper_type)
 
-from . import infer
-from . import util
+from . import infer, util
 from .names import NAMED_TYPE_SQLA_MAPPED
 
 

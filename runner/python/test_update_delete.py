@@ -1,9 +1,7 @@
+from ... import Integer, String
 from .. import fixtures
 from ..assertions import eq_
-from ..schema import Column
-from ..schema import Table
-from ... import Integer
-from ... import String
+from ..schema import Column, Table
 
 
 class SimpleUpdateDeleteTest(fixtures.TablesTest):

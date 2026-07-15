@@ -27,11 +27,10 @@
 
 """  # noqa
 
-from .base import PGDialect
-from .base import PGExecutionContext
 from ... import processors
 from ... import types as sqltypes
 from ... import util
+from .base import PGDialect, PGExecutionContext
 
 
 class PGNumeric(sqltypes.Numeric):

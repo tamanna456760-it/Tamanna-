@@ -10,28 +10,17 @@ Provide :class:`_expression.Insert`, :class:`_expression.Update` and
 
 """
 from sqlalchemy.types import NullType
-from . import coercions
-from . import roles
-from . import util as sql_util
-from .base import _entity_namespace_key
-from .base import _exclusive_against
-from .base import _from_objects
-from .base import _generative
-from .base import ColumnCollection
-from .base import CompileState
-from .base import DialectKWArgs
-from .base import Executable
-from .base import HasCompileState
-from .elements import BooleanClauseList
-from .elements import ClauseElement
-from .elements import Null
-from .selectable import HasCTE
-from .selectable import HasPrefixes
-from .selectable import ReturnsRows
-from .visitors import InternalTraversal
-from .. import exc
-from .. import util
+
+from .. import exc, util
 from ..util import collections_abc
+from . import coercions, roles
+from . import util as sql_util
+from .base import (ColumnCollection, CompileState, DialectKWArgs, Executable,
+                   HasCompileState, _entity_namespace_key, _exclusive_against,
+                   _from_objects, _generative)
+from .elements import BooleanClauseList, ClauseElement, Null
+from .selectable import HasCTE, HasPrefixes, ReturnsRows
+from .visitors import InternalTraversal
 
 
 class DMLState(CompileState):

@@ -10,28 +10,22 @@ from __future__ import absolute_import
 import collections
 import weakref
 
-from sqlalchemy.orm import attributes
-from sqlalchemy.orm import instrumentation
+from sqlalchemy.orm import attributes, instrumentation
+
+from .. import event, exc, util
+from ..sql import expression
+from ..sql.schema import Column, Table
+from ..util import topological
 from . import clsregistry
 from . import exc as orm_exc
 from . import mapper as mapperlib
-from .attributes import InstrumentedAttribute
-from .attributes import QueryableAttribute
-from .base import _is_mapped_class
-from .base import InspectionAttr
-from .descriptor_props import CompositeProperty
-from .descriptor_props import SynonymProperty
+from .attributes import InstrumentedAttribute, QueryableAttribute
+from .base import InspectionAttr, _is_mapped_class
+from .descriptor_props import CompositeProperty, SynonymProperty
 from .interfaces import MapperProperty
 from .mapper import Mapper as mapper
 from .properties import ColumnProperty
 from .util import class_mapper
-from .. import event
-from .. import exc
-from .. import util
-from ..sql import expression
-from ..sql.schema import Column
-from ..sql.schema import Table
-from ..util import topological
 
 
 def _declared_mapping_info(cls):

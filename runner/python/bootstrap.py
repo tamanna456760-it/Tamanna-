@@ -18,7 +18,6 @@ package outside of SQLAlchemy.
 import os
 import sys
 
-
 bootstrap_file = locals()["bootstrap_file"]
 to_bootstrap = locals()["to_bootstrap"]
 

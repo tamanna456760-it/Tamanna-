@@ -1,5 +1,4 @@
-from .base import MariaDBIdentifierPreparer
-from .base import MySQLDialect
+from .base import MariaDBIdentifierPreparer, MySQLDialect
 
 
 class MariaDBDialect(MySQLDialect):

@@ -7,11 +7,9 @@
 """Public API functions and helpers for declarative."""
 
 
-from ... import inspection
-from ... import util
+from ... import inspection, util
 from ...orm import exc as orm_exc
-from ...orm import registry
-from ...orm import relationships
+from ...orm import registry, relationships
 from ...orm.base import _mapper_or_none
 from ...orm.clsregistry import _resolver
 from ...orm.decl_base import _DeferredMapperConfig

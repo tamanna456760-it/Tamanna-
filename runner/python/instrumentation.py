@@ -32,14 +32,9 @@ alternate instrumentation forms.
 
 import weakref
 
-from . import base
-from . import collections
-from . import exc
-from . import interfaces
-from . import state
 from .. import util
 from ..util import HasMemoized
-
+from . import base, collections, exc, interfaces, state
 
 DEL_ATTR = util.symbol("DEL_ATTR")
 

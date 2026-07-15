@@ -5,8 +5,8 @@
 # This module is part of SQLAlchemy and is released under
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
-from .base import SchemaEventTarget
 from .. import event
+from .base import SchemaEventTarget
 
 
 class DDLEvents(event.Events):

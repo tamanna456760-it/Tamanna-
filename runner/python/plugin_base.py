@@ -35,8 +35,9 @@ if py3k:
 
     ABC = abc.ABC
 else:
-    import ConfigParser as configparser
     import collections as collections_abc  # noqa
+
+    import ConfigParser as configparser
 
     class ABC(object):
         __metaclass__ = abc.ABCMeta
@@ -304,10 +305,10 @@ def post_begin():
     global util, fixtures, engines, exclusions, assertions, provision
     global warnings, profiling, config, testing
     from sqlalchemy import testing  # noqa
-    from sqlalchemy.testing import fixtures, engines, exclusions  # noqa
-    from sqlalchemy.testing import assertions, warnings, profiling  # noqa
-    from sqlalchemy.testing import config, provision  # noqa
     from sqlalchemy import util  # noqa
+    from sqlalchemy.testing import (assertions, config, engines,  # noqa
+                                    exclusions, fixtures, profiling, provision,
+                                    warnings)
 
     warnings.setup_filters()
 
@@ -403,8 +404,7 @@ def _set_disable_asyncio(opt, file_config):
 def _engine_uri(options, file_config):
 
     from sqlalchemy import testing
-    from sqlalchemy.testing import config
-    from sqlalchemy.testing import provision
+    from sqlalchemy.testing import config, provision
 
     if options.dburi:
         db_urls = list(options.dburi)
@@ -453,8 +453,8 @@ def _requirements(options, file_config):
 
 
 def _setup_requirements(argument):
-    from sqlalchemy.testing import config
     from sqlalchemy import testing
+    from sqlalchemy.testing import config
 
     if config.requirements is not None:
         return

@@ -21,9 +21,7 @@ import collections
 import types
 import weakref
 
-from .. import exc
-from .. import util
-
+from .. import exc, util
 
 _key_to_collection = collections.defaultdict(dict)
 """

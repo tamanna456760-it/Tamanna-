@@ -6,14 +6,13 @@
 # the MIT License: https://www.opensource.org/licenses/mit-license.php
 
 
-from . import base
-from . import url as _url
-from .mock import create_mock_engine
-from .. import event
-from .. import exc
+from .. import event, exc
 from .. import pool as poollib
 from .. import util
 from ..sql import compiler
+from . import base
+from . import url as _url
+from .mock import create_mock_engine
 
 
 @util.deprecated_params(

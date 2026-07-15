@@ -7,7 +7,6 @@ except ImportError:
 
 import argparse
 import collections
-from functools import update_wrapper
 import inspect
 import itertools
 import operator
@@ -15,9 +14,9 @@ import os
 import re
 import sys
 import uuid
+from functools import update_wrapper
 
 import pytest
-
 
 py2k = sys.version_info < (3, 0)
 if py2k:
@@ -156,8 +155,7 @@ def pytest_collection_finish(session):
 
 class XDistHooks(object):
     def pytest_configure_node(self, node):
-        from sqlalchemy.testing import provision
-        from sqlalchemy.testing import asyncio
+        from sqlalchemy.testing import asyncio, provision
 
         # the master for each node fills workerinput dictionary
         # which pytest-xdist will transfer to the subprocess
@@ -171,8 +169,7 @@ class XDistHooks(object):
         )
 
     def pytest_testnodedown(self, node, error):
-        from sqlalchemy.testing import provision
-        from sqlalchemy.testing import asyncio
+        from sqlalchemy.testing import asyncio, provision
 
         asyncio._maybe_async_provisioning(
             provision.drop_follower_db, node.workerinput["follower_ident"]
@@ -558,8 +555,8 @@ def getargspec(fn):
 def _pytest_fn_decorator(target):
     """Port of langhelpers.decorator with pytest-specific tricks."""
 
-    from sqlalchemy.util.langhelpers import format_argspec_plus
     from sqlalchemy.util.compat import inspect_getfullargspec
+    from sqlalchemy.util.langhelpers import format_argspec_plus
 
     def _exec_code_in_env(code, env, fn_name):
         exec(code, env)
@@ -762,8 +759,7 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
         return pytest.param(*parameters[1:], id=ident)
 
     def fixture(self, *arg, **kw):
-        from sqlalchemy.testing import config
-        from sqlalchemy.testing import asyncio
+        from sqlalchemy.testing import asyncio, config
 
         # wrapping pytest.fixture function.  determine if
         # decorator was called as @fixture or @fixture().

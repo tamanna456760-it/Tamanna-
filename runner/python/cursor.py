@@ -12,21 +12,13 @@
 import collections
 import functools
 
-from .result import Result
-from .result import ResultMetaData
-from .result import SimpleResultMetaData
-from .result import tuplegetter
-from .row import LegacyRow
-from .. import exc
-from .. import util
-from ..sql import expression
-from ..sql import sqltypes
+from .. import exc, util
+from ..sql import expression, sqltypes
 from ..sql import util as sql_util
 from ..sql.base import _generative
-from ..sql.compiler import RM_NAME
-from ..sql.compiler import RM_OBJECTS
-from ..sql.compiler import RM_RENDERED_NAME
-from ..sql.compiler import RM_TYPE
+from ..sql.compiler import RM_NAME, RM_OBJECTS, RM_RENDERED_NAME, RM_TYPE
+from .result import Result, ResultMetaData, SimpleResultMetaData, tuplegetter
+from .row import LegacyRow
 
 _UNPICKLED = util.symbol("unpickled")
 
