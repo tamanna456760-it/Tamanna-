@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-import os, glob
+import glob
+import os
+
 from openai import OpenAI
+
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 def refactor_file(path):

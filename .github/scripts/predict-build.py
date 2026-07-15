@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-import sys, json, os, pickle
+import json
+import os
+import pickle
+import sys
+
 import numpy as np
 import pandas as pd
-from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.models import Sequential
 
 MODEL_FILE = "build_forecast_model.pkl"
 

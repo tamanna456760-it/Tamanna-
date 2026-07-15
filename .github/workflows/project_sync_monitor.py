@@ -8,12 +8,12 @@ Project Structure Synchronizer & Monitor
 - Ensures the project stays exactly as defined
 """
 
-import os
-import sys
-import re
-import time
 import json
+import os
+import re
 import shutil
+import sys
+import time
 from pathlib import Path
 
 # ----------------------------------------------------------------------

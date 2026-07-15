@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-import json, sys, numpy as np
+import json
+import sys
+
+import numpy as np
+
+
 def main():
     cost_file = None
     for i, arg in enumerate(sys.argv):

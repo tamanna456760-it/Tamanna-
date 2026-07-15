@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-import sys, csv, re
+import csv
+import re
+import sys
+
+
 def main():
     threat_file = None
     for i, arg in enumerate(sys.argv):

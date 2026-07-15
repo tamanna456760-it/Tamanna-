@@ -11,15 +11,17 @@ Features:
 - Recursive directory scanning
 """
 
-import sys
-import os
-import shutil
 import argparse
 import glob
+import os
+import shutil
+import sys
 from pathlib import Path
+
 from ruamel.yaml import YAML
-from ruamel.yaml.error import YAMLError
 from ruamel.yaml.compat import StringIO
+from ruamel.yaml.error import YAMLError
+
 
 class YAMLMegaFixer:
     def __init__(self, indent=2, sequence_indent=4, offset=2, width=80, preserve_quotes=True, 

@@ -2,6 +2,7 @@
 
 import os
 
+
 def run_all_modules():
     print("🚀 AI System Starting...")
 

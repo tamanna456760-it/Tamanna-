@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-import os, sys
+import os
+import sys
+
 from openai import OpenAI
+
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 def main():
