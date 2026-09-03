@@ -35,8 +35,8 @@ jobs:
 
     - name: 🔄 Auto Commit Updates
       run: |
-        git config --global user.name "tamanna-ai-bot"
-        git config --global user.email "tamanna-ai@users.noreply.github.com"
+        git config --global user.name "tamanna456760-it"
+        git config --global user.email "tamanna456760@gmail.com.com"
         git add .
         git commit -m "🤖 Tamanna AI auto sync" || echo "No changes"
         git push
