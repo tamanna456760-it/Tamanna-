@@ -1,0 +1,14 @@
+{
+  "auto_save_enabled": true,
+  "git_auto_commit": true,
+  "git_auto_push": true,
+  "backup_before_fix": true,
+  "scan_extensions": [".py", ".js", ".java", ".go", ".rs"],
+  "exclude_dirs": ["__pycache__", ".git", "node_modules", ".venv", ".env"],
+  "log_level": "INFO",
+  "max_fixes_per_run": 50,
+  "auto_fix_severity_threshold": "medium",
+  "commit_message_template": "🤖 Tamanna Auto-Fix: {count} issues fixed",
+  "report_format": "json",
+  "enable_notifications": true
+}

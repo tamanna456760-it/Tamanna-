@@ -1,0 +1,10 @@
+{
+  "watch_extensions": [".py", ".js", ".json", ".yml", ".yaml"],
+  "autosave_interval": 5,
+  "autosave_dir": ".autosave",
+  "max_saves_per_file": 20,
+  "log_level": "INFO",
+  "enable_compression": false,
+  "backup_on_change": true,
+  "notify_on_save": true
+}
