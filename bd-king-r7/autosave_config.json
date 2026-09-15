@@ -1,10 +1,311 @@
 {
-  "watch_extensions": [".py", ".js", ".json", ".yml", ".yaml"],
-  "autosave_interval": 5,
-  "autosave_dir": ".autosave",
-  "max_saves_per_file": 20,
-  "log_level": "INFO",
-  "enable_compression": false,
-  "backup_on_change": true,
-  "notify_on_save": true
+  "engine": {
+    "enabled": true,
+    "mode": "smart",
+    "version": "2.0",
+    "log_level": "INFO"
+  },
+
+  "watcher": {
+    "enabled": true,
+    "recursive": true,
+    "watch_subdirectories": true,
+    "debounce_ms": 750,
+    "ignore_temporary_files": true,
+    "ignore_editor_files": true,
+    "ignore_lock_files": true
+  },
+
+  "scan_extensions": [
+    ".py",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".html",
+    ".css",
+    ".scss",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".java",
+    ".go",
+    ".rs",
+    ".php",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".sh",
+    ".sql",
+    ".md"
+  ],
+
+  "autosave": {
+    "enabled": true,
+    "interval_seconds": 5,
+    "save_on_change": true,
+    "save_on_create": true,
+    "save_on_delete": false,
+    "save_on_rename": true,
+    "save_on_move": true,
+    "save_before_fix": true,
+    "save_before_upgrade": true,
+    "save_before_refactor": true,
+    "save_before_git_operation": true
+  },
+
+  "storage": {
+    "autosave_dir": ".autosave",
+    "snapshot_dir": ".autosave/snapshots",
+    "history_dir": ".autosave/history",
+    "metadata_dir": ".autosave/metadata",
+    "temp_dir": ".autosave/tmp",
+
+    "max_saves_per_file": 50,
+    "max_total_snapshots": 1000,
+    "max_storage_mb": 2048,
+
+    "enable_compression": true,
+    "compression_format": "gzip",
+
+    "deduplicate_identical_files": true,
+    "store_file_hash": true,
+    "store_file_size": true,
+    "store_timestamp": true
+  },
+
+  "snapshots": {
+    "enabled": true,
+    "create_on_startup": true,
+    "create_before_auto_fix": true,
+    "create_before_upgrade": true,
+    "create_before_mass_change": true,
+    "create_before_git_push": true,
+
+    "daily_snapshot": true,
+    "weekly_snapshot": true,
+
+    "max_daily_snapshots": 7,
+    "max_weekly_snapshots": 4
+  },
+
+  "integrity": {
+    "enabled": true,
+    "algorithm": "sha256",
+    "verify_after_save": true,
+    "verify_before_restore": true,
+    "detect_corruption": true,
+    "detect_unexpected_change": true
+  },
+
+  "atomic_save": {
+    "enabled": true,
+    "write_temp_first": true,
+    "verify_temp_file": true,
+    "replace_original_after_success": true,
+    "recover_from_interrupted_save": true
+  },
+
+  "rollback": {
+    "enabled": true,
+    "automatic": true,
+
+    "rollback_on_write_failure": true,
+    "rollback_on_validation_failure": true,
+    "rollback_on_test_failure": true,
+    "rollback_on_corruption": true,
+
+    "max_rollback_versions": 50
+  },
+
+  "validation": {
+    "enabled": true,
+    "validate_before_save": true,
+    "validate_after_save": true,
+
+    "syntax_check": true,
+    "json_validation": true,
+    "yaml_validation": true,
+    "python_compile_check": true,
+
+    "run_tests_after_critical_change": true
+  },
+
+  "backup": {
+    "enabled": true,
+    "backup_on_change": true,
+    "backup_before_fix": true,
+    "backup_before_delete": true,
+    "backup_before_rename": true,
+    "backup_before_move": true,
+
+    "keep_last": 50,
+    "verify_backup": true,
+    "compress_backup": true,
+
+    "include_source": true,
+    "include_config": true,
+    "include_logs": false,
+
+    "exclude_secrets": true
+  },
+
+  "git": {
+    "integration": true,
+    "auto_commit": true,
+    "auto_push": true,
+
+    "branch": "main",
+
+    "commit_on_autosave": false,
+    "commit_on_major_change": true,
+    "commit_on_auto_fix": true,
+    "commit_on_upgrade": true,
+
+    "verify_before_commit": true,
+    "verify_before_push": true,
+
+    "allow_force_push": false,
+    "allow_history_rewrite": false,
+
+    "commit_message": "🤖 Tamanna AutoSave: {files} files changed"
+  },
+
+  "security": {
+    "protect_secrets": true,
+    "scan_for_secrets": true,
+    "never_modify_secrets": true,
+    "never_commit_secrets": true,
+    "never_push_secrets": true,
+
+    "protected_files": [
+      ".env",
+      ".env.*",
+      ".git/config",
+      "credentials.json",
+      "secrets.json",
+      "*.key",
+      "*.pem",
+      "*.token",
+      "*.secret"
+    ]
+  },
+
+  "exclude": {
+    "directories": [
+      ".git",
+      "__pycache__",
+      "node_modules",
+      ".venv",
+      "venv",
+      "env",
+      "dist",
+      "build",
+      ".cache",
+      ".pytest_cache",
+      ".mypy_cache",
+      "coverage",
+      ".autosave",
+      "backups",
+      "logs"
+    ],
+
+    "files": [
+      ".env",
+      ".env.*",
+      "*.tmp",
+      "*.temp",
+      "*.swp",
+      "*.swo",
+      "*.lock",
+      "*.log",
+      "*.secret",
+      "*.key",
+      "*.pem",
+      "*.token",
+      "credentials.json",
+      "secrets.json"
+    ]
+  },
+
+  "performance": {
+    "enabled": true,
+    "max_concurrent_saves": 4,
+    "queue_changes": true,
+    "merge_rapid_changes": true,
+    "skip_unchanged_files": true,
+    "hash_before_save": true,
+    "background_backup": true
+  },
+
+  "recovery": {
+    "enabled": true,
+    "recover_unsaved_changes": true,
+    "recover_after_crash": true,
+    "recover_after_power_loss": true,
+    "restore_last_valid_state": true,
+    "startup_recovery_scan": true
+  },
+
+  "notifications": {
+    "enabled": true,
+
+    "on_save": true,
+    "on_backup": true,
+    "on_error": true,
+    "on_validation_failure": true,
+    "on_rollback": true,
+    "on_recovery": true,
+    "on_major_change": true,
+
+    "quiet_success_notifications": true
+  },
+
+  "audit": {
+    "enabled": true,
+    "log_every_change": true,
+    "log_file": "data/autosave_audit.json",
+    "record_user_changes": true,
+    "record_automatic_changes": true,
+    "record_rollback": true,
+    "record_restore": true,
+    "record_git_operations": true
+  },
+
+  "reporting": {
+    "enabled": true,
+    "format": "json",
+
+    "include_changed_files": true,
+    "include_saved_versions": true,
+    "include_failed_saves": true,
+    "include_rollbacks": true,
+    "include_recovery_events": true,
+    "include_git_status": true
+  },
+
+  "cleanup": {
+    "enabled": true,
+    "auto_cleanup": true,
+    "cleanup_old_versions": true,
+    "cleanup_old_snapshots": true,
+    "cleanup_temp_files": true,
+    "cleanup_failed_operations": true,
+
+    "run_every_hours": 24
+  },
+
+  "safety": {
+    "never_auto_delete_source": true,
+    "never_overwrite_without_backup": true,
+    "never_modify_git_history": true,
+    "never_force_push": true,
+    "require_valid_backup_before_destructive_action": true,
+    "require_validation_after_automatic_change": true,
+    "rollback_if_validation_fails": true
+  }
 }
