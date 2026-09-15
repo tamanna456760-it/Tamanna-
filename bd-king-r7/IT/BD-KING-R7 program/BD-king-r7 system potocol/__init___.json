@@ -1,0 +1,233 @@
+{
+  "manifest_version": "2.0.0",
+
+  "project": {
+    "name": "Tamanna AI",
+    "programme": "BD-KING-R7 PROGRAMME AI",
+    "owner": "HM INSAN ALI",
+    "type": "AI Assistant",
+    "status": "active"
+  },
+
+  "identity": {
+    "project_id": "tamanna-ai",
+    "engine": "bd-king-r7-universal",
+    "manifest_id": "auto-generated",
+    "created_at": "auto-generated",
+    "updated_at": "auto-generated"
+  },
+
+  "runtime": {
+    "python": "3.x",
+    "entrypoint": "main.py",
+    "host": "127.0.0.1",
+    "port": 8000,
+    "environment": "development"
+  },
+
+  "architecture": {
+    "core": true,
+    "chat": true,
+    "memory": true,
+    "dynamic_router": true,
+    "module_system": true,
+    "tool_system": true,
+    "project_context": true,
+    "web_research": true,
+    "auto_save": true,
+    "auto_fix": true,
+    "backup": true,
+    "git_sync": true
+  },
+
+  "directories": {
+    "modules": "modules/",
+    "tools": "modules/tamanna/tools/",
+    "data": "data/",
+    "logs": "logs/",
+    "backups": "backups/",
+    "autosave": ".autosave/",
+    "frontend": "frontend/",
+    "tests": "tests/"
+  },
+
+  "entrypoints": {
+    "server": "main.py",
+    "cli": "tamanna",
+    "chat_api": "/api/chat",
+    "memory_api": "/api/memory"
+  },
+
+  "modules": {
+    "auto_discovery": true,
+    "auto_reload": true,
+    "dynamic_loading": true,
+    "health_check": true,
+    "registered": []
+  },
+
+  "tools": {
+    "auto_discovery": true,
+    "auto_reload": true,
+    "permission_required": true,
+    "registered": []
+  },
+
+  "memory": {
+    "enabled": true,
+    "chat_history": "data/chat_history.json",
+    "message_library": "data/message_library.json",
+    "persistent": true,
+    "project_context": true
+  },
+
+  "security": {
+    "enabled": true,
+
+    "env_protection": true,
+    "secret_detection": true,
+    "git_secret_scan": true,
+
+    "protected_files": [
+      ".env",
+      ".env.*",
+      "credentials.json",
+      "secrets.json",
+      "*.pem",
+      "*.key",
+      "*.token"
+    ],
+
+    "allow_force_push": false,
+    "allow_git_history_rewrite": false,
+    "require_backup_before_fix": true,
+    "require_validation_after_fix": true,
+    "rollback_on_failure": true
+  },
+
+  "auto_system": {
+    "auto_save": true,
+    "auto_fix": true,
+    "auto_backup": true,
+    "auto_commit": true,
+    "auto_push": true,
+    "auto_rollback": true,
+
+    "max_fixes_per_run": 50,
+    "severity_threshold": "medium"
+  },
+
+  "scan": {
+    "enabled": true,
+    "recursive": true,
+
+    "extensions": [
+      ".py",
+      ".js",
+      ".ts",
+      ".jsx",
+      ".tsx",
+      ".html",
+      ".css",
+      ".json",
+      ".yml",
+      ".yaml",
+      ".toml",
+      ".java",
+      ".go",
+      ".rs",
+      ".php",
+      ".sh"
+    ],
+
+    "exclude": [
+      ".git",
+      ".venv",
+      "venv",
+      "node_modules",
+      "__pycache__",
+      ".autosave",
+      "backups",
+      "logs"
+    ]
+  },
+
+  "integrity": {
+    "enabled": true,
+    "algorithm": "sha256",
+    "verify_manifest": true,
+    "verify_files": true,
+    "detect_unexpected_changes": true
+  },
+
+  "backup": {
+    "enabled": true,
+    "before_fix": true,
+    "before_upgrade": true,
+    "before_refactor": true,
+    "before_git_push": true,
+    "retention": 50,
+    "compression": true
+  },
+
+  "git": {
+    "enabled": true,
+    "auto_commit": true,
+    "auto_push": true,
+    "branch": "main",
+    "force_push": false,
+
+    "commit_template": "🤖 Tamanna Auto-Fix: {count} issues fixed"
+  },
+
+  "api": {
+    "enabled": true,
+    "cors": true,
+    "health_check": true,
+    "authentication": false
+  },
+
+  "health": {
+    "enabled": true,
+    "check_on_startup": true,
+    "check_modules": true,
+    "check_tools": true,
+    "check_memory": true,
+    "check_database": true,
+    "check_git": true
+  },
+
+  "logging": {
+    "enabled": true,
+    "level": "INFO",
+    "audit": true,
+    "security_events": true,
+    "auto_fix_events": true,
+    "git_events": true
+  },
+
+  "notifications": {
+    "enabled": true,
+    "on_error": true,
+    "on_fix": true,
+    "on_backup": true,
+    "on_rollback": true,
+    "on_git_push": true
+  },
+
+  "compatibility": {
+    "manifest_backward_compatible": true,
+    "auto_migrate": true,
+    "schema_validation": true
+  },
+
+  "state": {
+    "initialized": true,
+    "healthy": true,
+    "last_scan": null,
+    "last_fix": null,
+    "last_backup": null,
+    "last_commit": null,
+    "last_push": null
+  }
+}
