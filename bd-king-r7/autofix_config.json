@@ -3,12 +3,119 @@
   "git_auto_commit": true,
   "git_auto_push": true,
   "backup_before_fix": true,
-  "scan_extensions": [".py", ".js", ".java", ".go", ".rs"],
-  "exclude_dirs": ["__pycache__", ".git", "node_modules", ".venv", ".env"],
+
+  "scan_extensions": [
+    ".py",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".html",
+    ".css",
+    ".scss",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".java",
+    ".go",
+    ".rs",
+    ".php",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".sh"
+  ],
+
+  "exclude_dirs": [
+    "__pycache__",
+    ".git",
+    "node_modules",
+    ".venv",
+    "venv",
+    "env",
+    "dist",
+    "build",
+    ".next",
+    ".cache",
+    "coverage",
+    "logs",
+    "backups"
+  ],
+
+  "exclude_files": [
+    ".env",
+    ".env.*",
+    "*.secret",
+    "*.key",
+    "*.pem",
+    "*.token",
+    "id_rsa",
+    "id_ed25519"
+  ],
+
   "log_level": "INFO",
+
   "max_fixes_per_run": 50,
   "auto_fix_severity_threshold": "medium",
-  "commit_message_template": "🤖 Tamanna Auto-Fix: {count} issues fixed",
-  "report_format": "json",
-  "enable_notifications": true
+
+  "require_backup_before_auto_fix": true,
+  "require_validation_after_fix": true,
+  "rollback_on_validation_failure": true,
+
+  "git": {
+    "auto_commit": true,
+    "auto_push": true,
+    "push_branch": "main",
+    "verify_before_push": true,
+    "allow_force_push": false,
+    "commit_message_template": "🤖 Tamanna Auto-Fix: {count} issues fixed"
+  },
+
+  "backup": {
+    "enabled": true,
+    "keep_last": 10,
+    "include_source": true,
+    "include_config": true,
+    "exclude_secrets": true
+  },
+
+  "scan": {
+    "recursive": true,
+    "detect_syntax_errors": true,
+    "detect_import_errors": true,
+    "detect_security_issues": true,
+    "detect_unused_code": true,
+    "detect_duplicate_code": true,
+    "detect_missing_dependencies": true
+  },
+
+  "report": {
+    "format": "json",
+    "save_report": true,
+    "include_fixed_issues": true,
+    "include_remaining_issues": true,
+    "include_changed_files": true
+  },
+
+  "notifications": {
+    "enabled": true,
+    "on_fix": true,
+    "on_failure": true,
+    "on_rollback": true,
+    "on_push": true
+  },
+
+  "safety": {
+    "protected_files": [
+      ".env",
+      ".git/config",
+      "credentials.json",
+      "secrets.json"
+    ],
+    "never_auto_delete": true,
+    "never_modify_secrets": true,
+    "never_modify_git_history": true
+  }
 }
