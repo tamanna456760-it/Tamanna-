@@ -1,16 +1,73 @@
+# ============================================================
+# Tamanna Unified AI System
+# Owner: HM INSAN ALI
+# Mode: ULTRA
+# ============================================================
+
 system:
   name: Tamanna-Unified-AI-System
   mode: ultra
+  version: "1.0"
+  enabled: true
+
+  identity:
+    display_name: "Tamanna AI"
+    owner: "HM INSAN ALI"
+
+
+# ============================================================
+# AUTOMATION
+# ============================================================
 
 automation:
+  enabled: true
+
   issue_scan: true
   auto_fix: true
   system_monitor: true
   brain_core: true
 
+  backup_before_fix: true
+  audit_log: true
+  rollback_support: true
+
+  approval_required_for:
+    - security_changes
+    - credential_changes
+    - deployment_changes
+    - destructive_file_operations
+    - git_history_rewrite
+
+
+# ============================================================
+# GITHUB
+# ============================================================
+
 github:
   workflows: true
   scripts: true
+
+  integration:
+    enabled: true
+    branch: main
+
+  ci:
+    enabled: true
+    auto_trigger: true
+
+  sync:
+    enabled: true
+    auto_commit: false
+    auto_push: false
+
+  safety:
+    require_clean_check: true
+    protect_secrets: true
+
+
+# ============================================================
+# POWERHUB
+# ============================================================
 
 powerhub:
   enabled: true
@@ -18,63 +75,187 @@ powerhub:
   sync_pipeline: true
   backend: true
 
+  mode: ultra
+
+  modules:
+    discovery: true
+    routing: true
+    health_monitor: true
+    dependency_check: true
+    report_generation: true
+
+  safety:
+    destructive_operations: false
+    production_deploy: false
+    automatic_rollback: true
+
+
+# ============================================================
+# SERVICES
+# ============================================================
+
 services:
-  web_backend: true
-  web_frontend: true
-  aspnet_site: true
-  api_server: true
-  chat_server: true
-  mobile_app: true
+
+  web_backend:
+    enabled: true
+
+  web_frontend:
+    enabled: true
+
+  aspnet_site:
+    enabled: true
+
+  api_server:
+    enabled: true
+
+  chat_server:
+    enabled: true
+
+  mobile_app:
+    enabled: true
+
+
+# ============================================================
+# SECURITY
+# ============================================================
 
 security:
+
+  enabled: true
+
   integrity_watch: true
   defense_core: true
   network_defense: true
   self_defense: true
 
+  protections:
+    secret_scan: true
+    path_traversal_protection: true
+    unsafe_command_guard: true
+    destructive_command_guard: true
+    dependency_audit: true
+    file_integrity_check: true
+
+  secrets:
+    scan_environment_files: false
+    expose_secrets_in_logs: false
+    commit_secrets: false
+
+  approval:
+    security_changes: true
+    firewall_changes: true
+    network_changes: true
+    credential_changes: true
+
+
+# ============================================================
+# STATE
+# ============================================================
+
 state:
+
   root_config: config.json
-  reports: ai_report.json
-  logs: ROOT/logs
+
+  reports:
+    main: ai_report.json
+    directory: ROOT/reports
+
+  logs:
+    directory: ROOT/logs
+    enabled: true
+
+  cache:
+    directory: ROOT/.cache
+    enabled: true
+
+  snapshots:
+    directory: ROOT/.snapshots
+    enabled: true
+
+
+# ============================================================
+# FLOW
+# ============================================================
 
 flow:
+
   auto_trigger_ci: true
   self_heal: true
   ai_feedback_loop: true
 
-# 🧠 FILE FILTER ENGINE (NEW ADD)
+  pipeline:
+    scan: true
+    understand: true
+    validate: true
+    test: true
+    repair: true
+    report: true
+
+  failure_policy:
+    auto_retry: true
+    max_retries: 3
+    rollback_on_failure: true
+
+
+# ============================================================
+# FILE FILTER ENGINE
+# ============================================================
+
 file_filter:
 
+  enabled: true
+
+  # ----------------------------------------------------------
+  # Files/directories that should NOT be scanned
+  # ----------------------------------------------------------
+
   excluded_patterns:
+
     - ".git"
     - ".gitignore"
+
     - "gradle"
     - "gradlew"
     - "gradlew.*"
+
     - "node_modules"
+
     - ".snapshots"
     - ".idea"
     - ".vscode"
+
     - "*.log"
     - "*.tmp"
+
     - "target"
     - "dist"
     - "build"
+
     - ".DS_Store"
+
     - "*.bak"
     - "*.swp"
     - "*.swo"
     - "*.lock"
     - "*.iml"
+
     - "coverage"
+
     - "*.min.js"
     - "*.min.css"
+
     - "__pycache__"
+
     - ".marketing"
+
+    # Environment / secret files
     - ".env"
     - ".env.*"
 
-    # images
+    # --------------------------------------------------------
+    # Images
+    # --------------------------------------------------------
+
     - "*.jpg"
     - "*.jpeg"
     - "*.png"
@@ -92,7 +273,10 @@ file_filter:
     - "*.cr2"
     - "*.nef"
 
-    # videos
+    # --------------------------------------------------------
+    # Videos
+    # --------------------------------------------------------
+
     - "*.mp4"
     - "*.mov"
     - "*.avi"
@@ -102,7 +286,10 @@ file_filter:
     - "*.webm"
     - "*.m4v"
 
-    # project files
+    # --------------------------------------------------------
+    # Databases
+    # --------------------------------------------------------
+
     - "*.db"
     - "*.sqlite"
     - "*.sqlite3"
@@ -111,14 +298,20 @@ file_filter:
     - "*.sql"
     - "*.dump"
 
-    # archives
+    # --------------------------------------------------------
+    # Archives
+    # --------------------------------------------------------
+
     - "*.zip"
     - "*.tar"
     - "*.tar.gz"
     - "*.rar"
     - "*.7z"
 
-    # binaries
+    # --------------------------------------------------------
+    # Binaries
+    # --------------------------------------------------------
+
     - "*.exe"
     - "*.dll"
     - "*.so"
@@ -129,36 +322,248 @@ file_filter:
     - "*.aab"
     - "*.ipa"
 
-    # python/java
+    # --------------------------------------------------------
+    # Compiled Python / Java
+    # --------------------------------------------------------
+
     - "*.pyc"
     - "*.class"
-    - "__pycache__"
 
-    - ".npmrc"
+    # npm configuration is explicitly handled below.
+    # Do not treat it as a secret file automatically.
+    # ".npmrc" intentionally omitted from exclusion list.
+
+
+  # ----------------------------------------------------------
+  # Files that should be included even if not code files
+  # ----------------------------------------------------------
 
   included_patterns:
+
     - "build.gradle"
     - "settings.gradle"
     - "gradle.properties"
+
     - "pom.xml"
+
     - "Makefile"
     - "CMakeLists.txt"
+
     - "package.json"
     - "requirements.txt"
+
     - "Pipfile"
     - "Gemfile"
     - "composer.json"
+
     - ".editorconfig"
+
     - ".eslintrc.json"
     - ".eslintrc.js"
+
     - ".prettierrc"
     - ".babelrc"
+
     - ".dockerignore"
     - ".gitattributes"
+
     - ".stylelintrc"
+
     - ".npmrc"
 
+
+  # ----------------------------------------------------------
+  # Scan defaults
+  # ----------------------------------------------------------
+
   default:
+
     default_prompt: "Enter your prompt here"
+
     include_all_files: false
-    include_project_structure: true
+
+    follow_symlinks: false
+
+    max_file_size_mb: 10
+
+    max_total_scan_size_mb: 500
+
+    recursive: true
+
+    hidden_files: false
+
+    binary_files: false
+
+    generated_files: false
+
+
+# ============================================================
+# FILE ANALYSIS
+# ============================================================
+
+analysis:
+
+  enabled: true
+
+  syntax:
+    python: true
+    javascript: true
+    typescript: true
+    json: true
+    yaml: true
+    xml: true
+
+  project_structure:
+    enabled: true
+
+  dependency_analysis:
+    enabled: true
+
+  duplicate_detection:
+    enabled: true
+
+  unused_file_detection:
+    enabled: true
+
+  broken_import_detection:
+    enabled: true
+
+
+# ============================================================
+# AI BRAIN
+# ============================================================
+
+brain:
+
+  enabled: true
+
+  understanding: true
+  context_engine: true
+  reply_generator: true
+  project_context: true
+
+  memory:
+    enabled: true
+    use_message_library: true
+    avoid_duplicate_vocabulary: true
+
+  language:
+    enabled: true
+    alphabet_system: true
+    grammar_system: true
+    vocabulary_system: true
+    word_mapping: true
+
+
+# ============================================================
+# MONITORING
+# ============================================================
+
+monitor:
+
+  enabled: true
+
+  filesystem: true
+  processes: true
+  services: true
+  git: true
+  github_actions: true
+
+  health_check:
+    enabled: true
+    interval_seconds: 30
+
+
+# ============================================================
+# REPORTING
+# ============================================================
+
+reporting:
+
+  enabled: true
+
+  json: true
+  markdown: true
+
+  output:
+    json: ai_report.json
+    directory: ROOT/reports
+
+  include:
+    - scan_summary
+    - syntax_status
+    - dependency_status
+    - security_status
+    - test_status
+    - repair_status
+    - git_status
+    - system_health
+
+
+# ============================================================
+# ROLLBACK
+# ============================================================
+
+rollback:
+
+  enabled: true
+
+  backup_before_change: true
+  snapshot_before_fix: true
+
+  automatic:
+    enabled: true
+    on_test_failure: true
+    on_validation_failure: true
+    on_health_failure: true
+
+  git:
+    automatic_force_push: false
+    rewrite_history: false
+
+
+# ============================================================
+# DEFAULT OPERATION POLICY
+# ============================================================
+
+policy:
+
+  mode: safe-ultra
+
+  read:
+    allowed: true
+
+  analyze:
+    allowed: true
+
+  report:
+    allowed: true
+
+  modify:
+    allowed: true
+    require_backup: true
+
+  delete:
+    allowed: false
+    require_explicit_approval: true
+
+  deploy:
+    allowed: false
+    require_explicit_approval: true
+
+  network:
+    allowed: false
+    require_explicit_approval: true
+
+  credentials:
+    read: false
+    write: false
+
+  secrets:
+    expose: false
+    log: false
+
+
+# ============================================================
+# END
+# ============================================================
