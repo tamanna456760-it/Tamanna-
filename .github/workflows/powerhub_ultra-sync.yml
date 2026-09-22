@@ -2,15 +2,18 @@ name: BD-KING-R7 POWERHUB ULTRA
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 concurrency:
   group: powerhub
   cancel-in-progress: true
+
+permissions:
+  contents: write
 
 jobs:
   powerhub:
@@ -18,37 +21,110 @@ jobs:
     timeout-minutes: 20
 
     steps:
-    - name: ⬇️ Checkout
-      uses: actions/checkout@v4
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
 
-    - name: 🐍 Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: ⚡ Cache pip (SPEED BOOST)
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+      - name: ⚡ Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: 📦 Install dependencies
-      run: pip install -r requirements.txt
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
 
-    - name: 🧪 Pre-check (Power Scan)
-      run: |
-        python -m compileall .
-        echo "✔ Power scan passed"
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          else
+            echo "requirements.txt not found - skipping"
+          fi
 
-    - name: 🚀 Run POWERHUB CORE
-      run: |
-        python run.py
+      - name: 🧪 Pre-check - Power Scan
+        run: |
+          echo "======================================"
+          echo "BD-KING-R7 POWERHUB PRE-CHECK"
+          echo "======================================"
 
-    - name: 🔁 Auto Commit (SMART)
-      run: |
-        git config user.name "tamanna-bot"
-        git config user.email.tamanna456760@gmail.com.reply.github.com"
-        git status --porcelain | grep . && \
-        git add . && \
-        git commit -m "⚡ POWERHUB auto run" && \
-        git push || echo "No changes to push"
+          python --version
+
+          if [ -d . ]; then
+            python -m compileall -q . \
+              -x '(^|/)(\.git|\.venv|venv|__pycache__)(/|$)'
+            echo "✔ Python syntax scan passed"
+          fi
+
+      - name: 🔎 Check POWERHUB Runner
+        run: |
+          if [ -f run.py ]; then
+            echo "✔ run.py found"
+            python -m py_compile run.py
+          else
+            echo "⚠ run.py not found"
+            echo "Available Python entry points:"
+            find . -maxdepth 3 -type f -name "*.py" | sort | head -100
+          fi
+
+      - name: 🚀 Run POWERHUB CORE
+        if: ${{ hashFiles('run.py') != '' }}
+        run: |
+          echo "Starting POWERHUB CORE..."
+
+          # Prevent a long-running server from blocking GitHub Actions.
+          timeout 120s python run.py || {
+            code=$?
+            if [ "$code" -eq 124 ]; then
+              echo "✔ POWERHUB CORE ran for 120 seconds and was stopped safely."
+            else
+              echo "⚠ POWERHUB CORE exited with code: $code"
+              exit "$code"
+            fi
+          }
+
+      - name: 📊 POWERHUB Status
+        if: always()
+        run: |
+          echo "======================================"
+          echo "POWERHUB STATUS"
+          echo "======================================"
+          git status --short
+          echo ""
+          echo "Python files:"
+          find . \
+            -type f \
+            -name "*.py" \
+            -not -path "./.git/*" \
+            -not -path "./.venv/*" \
+            -not -path "./venv/*" \
+            | wc -l
+
+      - name: 🔁 Auto Commit - SMART
+        if: ${{ github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          git config user.name "tamanna-bot"
+          git config user.email "tamanna456760@gmail.com"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Changes detected."
+
+            git add .
+
+            git commit -m "⚡ POWERHUB auto run" || {
+              echo "No commit created."
+              exit 0
+            }
+
+            git push origin HEAD:${GITHUB_REF_NAME} || {
+              echo "⚠ Push failed."
+              exit 1
+            }
+          else
+            echo "✔ No changes to commit."
+          fi
