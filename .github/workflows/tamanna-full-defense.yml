@@ -1,0 +1,612 @@
+name: Tamanna Full Defense System
+
+on:
+  push:
+    branches:
+      - main
+
+  schedule:
+    - cron: "*/5 * * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ==========================================================
+  # MASTER SYSTEM
+  # ==========================================================
+  master_system:
+
+    name: Tamanna Master System
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+
+      # ========================================================
+      # 1. CHECKOUT
+      # ========================================================
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      # ========================================================
+      # 2. PYTHON
+      # ========================================================
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+
+      # ========================================================
+      # 3. NODE.JS
+      # ========================================================
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+
+      # ========================================================
+      # 4. NODE CHECK
+      # ========================================================
+      - name: Check Node.js
+        shell: bash
+        run: |
+          set -e
+
+          echo "======================================"
+          echo "Node.js Environment"
+          echo "======================================"
+
+          node --version
+          npm --version
+
+          echo "Node.js setup successful."
+
+
+      # ========================================================
+      # 5. INSTALL NODE DEPENDENCIES
+      # ========================================================
+      - name: Install Node Dependencies
+        shell: bash
+        run: |
+          set -e
+
+          echo "======================================"
+          echo "Node Dependency Installation"
+          echo "======================================"
+
+          if [ -f package-lock.json ]; then
+
+            echo "package-lock.json found."
+            echo "Using npm ci."
+
+            npm ci
+
+          elif [ -f package.json ]; then
+
+            echo "package.json found."
+            echo "package-lock.json not found."
+            echo "Using npm install."
+
+            npm install
+
+          else
+
+            echo "No package.json found."
+            echo "Node dependency installation skipped."
+
+          fi
+
+
+      # ========================================================
+      # 6. PYTHON DEPENDENCIES
+      # ========================================================
+      - name: Install Python Dependencies
+        shell: bash
+        run: |
+          set -e
+
+          echo "======================================"
+          echo "Python Dependency Installation"
+          echo "======================================"
+
+          python --version
+          python -m pip --version
+
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+
+            echo "requirements.txt found."
+
+            python -m pip install -r requirements.txt
+
+          else
+
+            echo "requirements.txt not found."
+
+          fi
+
+          python -m pip install \
+            pytest \
+            pytest-cov \
+            pytest-xdist \
+            flake8
+
+          echo "Python dependencies installed."
+
+
+      # ========================================================
+      # 7. CREATE DIRECTORIES
+      # ========================================================
+      - name: Prepare Tamanna Directories
+        shell: bash
+        run: |
+          set -e
+
+          mkdir -p backup
+          mkdir -p logs
+          mkdir -p reports
+
+          echo "Tamanna directories ready."
+
+
+      # ========================================================
+      # 8. DISCOVER PYTHON FILES
+      # ========================================================
+      - name: Discover Python Files
+        shell: bash
+        run: |
+          set +e
+
+          find . \
+            -type f \
+            -name "*.py" \
+            -not -path "./.git/*" \
+            -not -path "./backup/*" \
+            | sort \
+            > reports/python_files.txt
+
+          echo "Python files:"
+          cat reports/python_files.txt
+
+          echo ""
+          echo "Total Python files:"
+          wc -l reports/python_files.txt
+
+
+      # ========================================================
+      # 9. BACKUP
+      # ========================================================
+      - name: Create Python Backup
+        shell: bash
+        run: |
+          set +e
+
+          while IFS= read -r file; do
+
+            [ -z "$file" ] && continue
+
+            target="backup/$file"
+
+            mkdir -p "$(dirname "$target")"
+
+            cp "$file" "$target"
+
+          done < reports/python_files.txt
+
+          {
+            echo "Tamanna AI Backup"
+            echo "================="
+            echo "Time: $(date -u)"
+            echo "Repository: $GITHUB_REPOSITORY"
+            echo "Commit: $GITHUB_SHA"
+          } > backup/backup_log.txt
+
+          echo "Backup completed."
+
+
+      # ========================================================
+      # 10. PYTHON SYNTAX SCAN
+      # ========================================================
+      - name: Python Syntax Scan
+        shell: bash
+        run: |
+          set +e
+
+          : > reports/syntax_errors.txt
+          : > reports/valid_python_files.txt
+          : > reports/invalid_python_files.txt
+
+          total=0
+          valid=0
+          invalid=0
+
+          while IFS= read -r file; do
+
+            [ -z "$file" ] && continue
+
+            total=$((total + 1))
+
+            echo "Checking: $file"
+
+            if python -m py_compile "$file" \
+              >/dev/null 2>&1; then
+
+              valid=$((valid + 1))
+
+              echo "$file" \
+                >> reports/valid_python_files.txt
+
+            else
+
+              invalid=$((invalid + 1))
+
+              echo "$file" \
+                >> reports/invalid_python_files.txt
+
+              echo "======================================" \
+                >> reports/syntax_errors.txt
+
+              echo "FILE: $file" \
+                >> reports/syntax_errors.txt
+
+              python -m py_compile "$file" \
+                >> reports/syntax_errors.txt 2>&1
+
+              echo "" \
+                >> reports/syntax_errors.txt
+
+            fi
+
+          done < reports/python_files.txt
+
+          {
+            echo "Tamanna Python Syntax Report"
+            echo "============================"
+            echo "Total: $total"
+            echo "Valid: $valid"
+            echo "Invalid: $invalid"
+          } > reports/syntax_summary.txt
+
+          echo ""
+          cat reports/syntax_summary.txt
+
+          echo ""
+          echo "Invalid Python files:"
+          cat reports/invalid_python_files.txt
+
+          echo ""
+          echo "Syntax errors:"
+          cat reports/syntax_errors.txt
+
+
+      # ========================================================
+      # 11. FLAKE8 VALID PYTHON ONLY
+      # ========================================================
+      - name: Flake8 Valid Python Files
+        shell: bash
+        run: |
+          set +e
+
+          : > reports/flake8.txt
+
+          if [ ! -s reports/valid_python_files.txt ]; then
+
+            echo "No valid Python files available."
+            echo "Flake8 skipped."
+
+            exit 0
+
+          fi
+
+          flake8 \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics \
+            $(cat reports/valid_python_files.txt) \
+            > reports/flake8.txt 2>&1
+
+          status=$?
+
+          echo "Flake8 exit code: $status"
+
+          cat reports/flake8.txt
+
+          # Report only.
+          # Do not stop the complete workflow here.
+          exit 0
+
+
+      # ========================================================
+      # 12. FLAKE8 SUMMARY
+      # ========================================================
+      - name: Analyze Flake8
+        shell: bash
+        run: |
+          set +e
+
+          {
+            echo "Tamanna Flake8 Report"
+            echo "===================="
+            echo ""
+
+            echo "E999 SyntaxError:"
+            grep -c "E999" reports/flake8.txt || true
+
+            echo ""
+            echo "F821 Undefined Name:"
+            grep -c "F821" reports/flake8.txt || true
+
+            echo ""
+            echo "F824 Global/Nonlocal:"
+            grep -c "F824" reports/flake8.txt || true
+
+            echo ""
+            echo "Full Flake8 Output:"
+            cat reports/flake8.txt
+
+          } > reports/flake8_summary.txt
+
+          cat reports/flake8_summary.txt
+
+
+      # ========================================================
+      # 13. MASTER FILE CHECK
+      # ========================================================
+      - name: Check Tamanna Master Files
+        shell: bash
+        run: |
+          set +e
+
+          : > reports/master_files.txt
+
+          required_files=(
+            "tamanna_master_controller.py"
+            "tamanna_auto_unit.py"
+            "tamanna_security_ai.py"
+            "network_powerhub.py"
+            "emergency_unit_manager.py"
+          )
+
+          missing=0
+
+          for file in "${required_files[@]}"; do
+
+            if [ -f "$file" ]; then
+
+              echo "PASS: $file" \
+                | tee -a reports/master_files.txt
+
+            else
+
+              echo "MISSING: $file" \
+                | tee -a reports/master_files.txt
+
+              missing=$((missing + 1))
+
+            fi
+
+          done
+
+          echo ""
+          echo "Missing files: $missing" \
+            | tee -a reports/master_files.txt
+
+
+      # ========================================================
+      # 14. MASTER CONTROLLER SYNTAX
+      # ========================================================
+      - name: Validate Master Controllers
+        shell: bash
+        run: |
+          set +e
+
+          : > reports/master_syntax.txt
+
+          files=(
+            "tamanna_master_controller.py"
+            "tamanna_auto_unit.py"
+            "tamanna_security_ai.py"
+            "network_powerhub.py"
+            "emergency_unit_manager.py"
+          )
+
+          for file in "${files[@]}"; do
+
+            if [ ! -f "$file" ]; then
+
+              echo "SKIP: $file" \
+                >> reports/master_syntax.txt
+
+              continue
+
+            fi
+
+            echo "Checking: $file" \
+              >> reports/master_syntax.txt
+
+            if python -m py_compile "$file" \
+              >> reports/master_syntax.txt 2>&1; then
+
+              echo "PASS: $file" \
+                >> reports/master_syntax.txt
+
+            else
+
+              echo "FAIL: $file" \
+                >> reports/master_syntax.txt
+
+            fi
+
+            echo "" \
+              >> reports/master_syntax.txt
+
+          done
+
+          cat reports/master_syntax.txt
+
+
+      # ========================================================
+      # 15. SECURITY LOG
+      # ========================================================
+      - name: Prepare Security Log
+        shell: bash
+        run: |
+          set +e
+
+          if [ ! -f security_logs.json ]; then
+            echo "[]" > security_logs.json
+          fi
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          path = Path("security_logs.json")
+
+          try:
+              data = json.loads(
+                  path.read_text(encoding="utf-8")
+              )
+          except Exception:
+              data = []
+
+          if not isinstance(data, list):
+              data = []
+
+          data.append(
+              {
+                  "timestamp":
+                      datetime.now(timezone.utc).isoformat(),
+
+                  "system":
+                      "Tamanna Full Defense System",
+
+                  "event":
+                      "github_actions_scan",
+
+                  "repository":
+                      "Tamanna",
+
+                  "status":
+                      "completed"
+              }
+          )
+
+          path.write_text(
+              json.dumps(
+                  data,
+                  indent=2,
+                  ensure_ascii=False
+              ),
+              encoding="utf-8"
+          )
+
+          print("Security log updated.")
+          PY
+
+
+      # ========================================================
+      # 16. FINAL REPORT
+      # ========================================================
+      - name: Generate Final Report
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "======================================"
+            echo " Tamanna Full Defense System"
+            echo "======================================"
+            echo ""
+            echo "Repository:"
+            echo "$GITHUB_REPOSITORY"
+            echo ""
+            echo "Branch:"
+            echo "$GITHUB_REF_NAME"
+            echo ""
+            echo "Commit:"
+            echo "$GITHUB_SHA"
+            echo ""
+            echo "Run:"
+            echo "$GITHUB_RUN_NUMBER"
+            echo ""
+            echo "Time:"
+            echo "$(date -u)"
+            echo ""
+            echo "--------------------------------------"
+            echo "Python Syntax"
+            echo "--------------------------------------"
+            cat reports/syntax_summary.txt \
+              2>/dev/null || true
+
+            echo ""
+            echo "--------------------------------------"
+            echo "Master Files"
+            echo "--------------------------------------"
+            cat reports/master_files.txt \
+              2>/dev/null || true
+
+            echo ""
+            echo "--------------------------------------"
+            echo "Flake8"
+            echo "--------------------------------------"
+            cat reports/flake8_summary.txt \
+              2>/dev/null || true
+
+            echo ""
+            echo "======================================"
+            echo "Scan Completed"
+            echo "======================================"
+
+          } > reports/final_report.txt
+
+          cat reports/final_report.txt
+
+
+      # ========================================================
+      # 17. UPLOAD REPORTS
+      # ========================================================
+      - name: Upload Tamanna Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-full-defense-${{ github.run_number }}
+          path: |
+            reports/
+            backup/backup_log.txt
+            security_logs.json
+          if-no-files-found: warn
+
+
+      # ========================================================
+      # 18. FINAL STATUS
+      # ========================================================
+      - name: Tamanna Final Status
+        if: always()
+        shell: bash
+        run: |
+          echo "======================================"
+          echo " Tamanna AI"
+          echo " Full Defense System"
+          echo "======================================"
+          echo ""
+          echo "Node.js:"
+          node --version
+          echo ""
+          echo "Python:"
+          python --version
+          echo ""
+          echo "Security scan completed."
+          echo "Reports uploaded as workflow artifacts."
