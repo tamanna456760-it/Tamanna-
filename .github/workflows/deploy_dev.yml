@@ -4,18 +4,21 @@ on:
   push:
     branches:
       - dev
+
   workflow_dispatch:
     inputs:
       skip_tests:
-        description: 'Skip running tests'
+        description: "Skip running tests"
         type: boolean
         default: false
-      force_deploy:
-        description: 'Force deploy even if tests fail'
-        type: boolean
-        default: false
+        required: false
 
-# Cancel in-progress runs on the same branch
+      force_deploy:
+        description: "Force deploy even if tests fail"
+        type: boolean
+        default: false
+        required: false
+
 concurrency:
   group: deploy-dev-${{ github.ref }}
   cancel-in-progress: true
@@ -25,238 +28,521 @@ env:
   ARTIFACT_RETENTION: 7
 
 jobs:
+
+  # ==========================================================
+  # 1. PREPARE & VALIDATE
+  # ==========================================================
+
   prepare:
     name: Prepare & Validate
     runs-on: ubuntu-latest
+
     outputs:
-      has_python_files: ${{ steps.detect.outputs.has_python }}
+      has_python: ${{ steps.detect.outputs.has_python }}
       has_tests: ${{ steps.detect.outputs.has_tests }}
+      has_main: ${{ steps.detect.outputs.has_main }}
+
     steps:
+
       - name: 📥 Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # to detect changes
+          fetch-depth: 2
 
       - name: 🔍 Detect project structure
         id: detect
+        shell: bash
         run: |
-          echo "has_python=$([ -n "$(find . -name '*.py' -not -path './.git/*' -print -quit)" ] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "has_tests=$([ -d tests ] && echo true || echo false)" >> $GATHUB_OUTPUT
+          if find . \
+            -type f \
+            -name "*.py" \
+            -not -path "./.git/*" \
+            -print -quit | grep -q .; then
+            echo "has_python=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_python=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -d "tests" ] && \
+             find tests -type f -name "test_*.py" -print -quit | grep -q .; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -f "main.py" ]; then
+            echo "has_main=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_main=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "======================================"
+          echo "Tamanna AI Dev Detection"
+          echo "======================================"
+          echo "Python: $([ -f main.py ] && echo FOUND || echo CHECKED)"
+          echo "Tests directory: $([ -d tests ] && echo FOUND || echo NOT_FOUND)"
+          echo "main.py: $([ -f main.py ] && echo FOUND || echo NOT_FOUND)"
+
+
+  # ==========================================================
+  # 2. AUTO FIX & FORMAT
+  # ==========================================================
 
   fix-and-format:
     name: Auto Fix & Format
     runs-on: ubuntu-latest
     needs: prepare
+
     if: needs.prepare.outputs.has_python == 'true'
+
     steps:
+
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
-      - name: 📦 Install deps
+      - name: 📦 Install dependencies
+        shell: bash
         run: |
-          pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install autopep8 black isort
+          python -m pip install --upgrade pip
 
-      - name: 🔧 Run problem_fixer.py (if exists)
-        run: |
-          if [ -f problem_fixer.py ]; then
-            python problem_fixer.py
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
           else
-            echo "⚠️ problem_fixer.py not found, skipping."
+            echo "requirements.txt not found - skipping"
           fi
 
-      - name: 🎨 Auto-format all Python files
+          python -m pip install autopep8 black isort
+
+      - name: 🔧 Run problem_fixer.py
+        shell: bash
         run: |
+          if [ -f problem_fixer.py ]; then
+            echo "Running problem_fixer.py..."
+            python problem_fixer.py
+          else
+            echo "⚠ problem_fixer.py not found, skipping."
+          fi
+
+      - name: 🎨 Auto-format Python files
+        shell: bash
+        run: |
+          echo "Running Black..."
           black . --quiet || true
-          autopep8 --in-place --recursive . --aggressive --aggressive || true
+
+          echo "Running autopep8..."
+          autopep8 \
+            --in-place \
+            --recursive \
+            . \
+            --aggressive \
+            --aggressive || true
+
+          echo "Running isort..."
           isort . || true
 
-      - name: 💾 Save all Python file names
+      - name: 🧪 Validate Python syntax
+        shell: bash
         run: |
-          find . -name "*.py" -not -path "./.git/*" > all_file_names.txt
+          mkdir -p reports
+
+          python -m compileall -q . \
+            -x '(^|/)(\.git|\.venv|venv|__pycache__)(/|$)' \
+            > reports/compile.log 2>&1 || true
+
+          cat reports/compile.log
+
+      - name: 💾 Save Python file inventory
+        shell: bash
+        run: |
+          find . \
+            -type f \
+            -name "*.py" \
+            -not -path "./.git/*" \
+            -not -path "./.venv/*" \
+            -not -path "./venv/*" \
+            | sort > all_file_names.txt
+
           echo "Python files saved: $(wc -l < all_file_names.txt)"
 
-      - name: 📤 Upload formatted files (for debugging)
+      - name: 📤 Upload auto-fix report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dev-auto-fix-artifacts
           path: |
             all_file_names.txt
-            *.py
+            reports/
           retention-days: ${{ env.ARTIFACT_RETENTION }}
+
+
+  # ==========================================================
+  # 3. TEST
+  # ==========================================================
 
   test:
     name: Run Dev Tests
     runs-on: ubuntu-latest
-    needs: [prepare, fix-and-format]
+
+    needs:
+      - prepare
+      - fix-and-format
+
     if: |
-      !github.event.inputs.skip_tests &&
-      needs.prepare.outputs.has_tests == 'true'
+      needs.prepare.outputs.has_tests == 'true' &&
+      (
+        github.event_name != 'workflow_dispatch' ||
+        inputs.skip_tests != true
+      )
+
     steps:
+
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
-      - name: 📦 Install test deps
+      - name: 📦 Install test dependencies
         run: |
-          pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pytest pytest-cov pytest-xdist
+          python -m pip install --upgrade pip
 
-      - name: 🧪 Run tests with coverage
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          fi
+
+          python -m pip install pytest pytest-cov pytest-xdist
+
+      - name: 🧪 Run tests
         run: |
-          pytest tests/ -v --maxfail=3 --disable-warnings --cov=. --cov-report=xml --cov-report=term
-        continue-on-error: ${{ github.event.inputs.force_deploy == 'true' }}
+          pytest tests/ \
+            -v \
+            --maxfail=3 \
+            --disable-warnings \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term
 
-      - name: 📤 Upload coverage report
+        continue-on-error: ${{ inputs.force_deploy == true }}
+
+      - name: 📤 Upload coverage
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dev-coverage-report
           path: coverage.xml
           retention-days: ${{ env.ARTIFACT_RETENTION }}
 
+
+  # ==========================================================
+  # 4. MAIN RUNNER CHECK
+  # ==========================================================
+
   run-main:
     name: Run Main Runner
     runs-on: ubuntu-latest
-    needs: [fix-and-format, test]
-    if: always() && (needs.fix-and-format.result == 'success' || needs.test.result == 'success' || github.event.inputs.force_deploy == 'true')
+
+    needs:
+      - prepare
+      - fix-and-format
+      - test
+
+    if: |
+      always() &&
+      needs.fix-and-format.result == 'success' &&
+      (
+        needs.test.result == 'success' ||
+        needs.test.result == 'skipped' ||
+        inputs.force_deploy == true
+      )
+
     steps:
+
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.12"
 
       - name: 📦 Install dependencies
         run: |
-          pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install --upgrade pip
 
-      - name: 🚀 Run main.py
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          fi
+
+      - name: 🔎 Main syntax check
         run: |
           if [ -f main.py ]; then
-            python main.py
+            python -m py_compile main.py
+            echo "✔ main.py syntax OK"
           else
-            echo "⚠️ main.py not found, skipping."
+            echo "⚠ main.py not found"
           fi
+
+      - name: 🚀 Run main.py safely
+        run: |
+          if [ -f main.py ]; then
+
+            echo "Starting Tamanna AI main.py..."
+
+            timeout 120s python main.py || {
+              code=$?
+
+              if [ "$code" -eq 124 ]; then
+                echo "✔ main.py ran for 120 seconds and was stopped safely."
+              else
+                echo "❌ main.py failed with exit code: $code"
+                exit "$code"
+              fi
+
+            }
+
+          else
+            echo "⚠ main.py not found, skipping."
+          fi
+
+
+  # ==========================================================
+  # 5. COMMIT AUTO FIXES
+  # ==========================================================
 
   commit-changes:
     name: Commit Auto Fixes
     runs-on: ubuntu-latest
-    needs: [fix-and-format, run-main]
-    if: always() && (needs.fix-and-format.result == 'success' || needs.run-main.result == 'success')
+
+    needs:
+      - fix-and-format
+      - run-main
+
+    if: |
+      always() &&
+      needs.fix-and-format.result == 'success' &&
+      needs.run-main.result == 'success'
+
     permissions:
       contents: write
+
     steps:
-      - name: 📥 Checkout
+
+      - name: 📥 Checkout dev
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           ref: dev
+          fetch-depth: 0
 
-      - name: 📝 Commit auto changes (if any)
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 🔧 Apply safe formatting
         run: |
-          git config --global user.name "tamanna456760-it"
-          git config --global user.email "tamanna456760@gmail.com"
+          python -m pip install --upgrade pip
+          python -m pip install autopep8 black isort
+
+          black . --quiet || true
+          autopep8 --in-place --recursive . --aggressive --aggressive || true
+          isort . || true
+
+      - name: 📝 Commit changes
+        shell: bash
+        run: |
+          git config user.name "tamanna456760-it"
+          git config user.email "tamanna456760@gmail.com"
+
           git add -A
+
           if git diff --cached --quiet; then
             echo "✅ No changes to commit."
           else
-            git commit -m "🤖 chore: auto fix & sync dev [skip ci]"
-            git push origin dev
+
+            git commit \
+              -m "🤖 chore: auto fix & sync dev [skip ci]"
+
+            git push origin HEAD:dev
+
             echo "✅ Changes committed and pushed."
           fi
+
+
+  # ==========================================================
+  # 6. DEPLOY
+  # ==========================================================
 
   deploy:
     name: Deploy to Dev Server
     runs-on: ubuntu-latest
-    needs: [test, run-main, commit-changes]
+
+    needs:
+      - test
+      - run-main
+      - commit-changes
+
     if: |
-      (success() || github.event.inputs.force_deploy == 'true') &&
-      (github.ref == 'refs/heads/dev')
+      always() &&
+      github.ref == 'refs/heads/dev' &&
+      (
+        (
+          needs.test.result == 'success' ||
+          needs.test.result == 'skipped'
+        ) &&
+        needs.run-main.result == 'success' &&
+        needs.commit-changes.result == 'success'
+      ||
+        inputs.force_deploy == true
+      )
+
     environment:
       name: dev
-      url: https://dev.yourdomain.com  # change to your dev server URL
+      url: https://dev.yourdomain.com
+
     steps:
-      - name: 📥 Checkout latest code
+
+      - name: 📥 Checkout latest dev
         uses: actions/checkout@v4
         with:
           ref: dev
 
-      - name: 🚚 Deploy via rsync (example)
+      - name: 🚚 Deploy
         run: |
-          # Replace with your actual deployment commands
-          echo "🚀 Deploying to dev server..."
-          # Example using rsync over SSH:
-          # rsync -avz --delete ./ user@dev-server:/path/to/deploy/
-          # Or using a custom script:
-          # ./deploy.sh dev
-          echo "Deployment simulated (add your real commands)"
+          echo "======================================"
+          echo "🚀 Tamanna AI DEV DEPLOYMENT"
+          echo "======================================"
 
-      - name: 🔄 Restart services (if needed)
+          echo "Environment: $DEPLOY_ENV"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Commit: $GITHUB_SHA"
+
+          # Add your real deployment command here.
+          #
+          # Example:
+          # ./deploy.sh dev
+
+          echo "Deployment command placeholder completed."
+
+      - name: 🔄 Restart services
         run: |
           echo "Restarting application services..."
-          # e.g., ssh user@dev-server "systemctl --user restart myapp"
 
-      - name: ✅ Health check
+          # Example:
+          # ssh user@server "systemctl --user restart tamanna-ai"
+
+          echo "Service restart placeholder completed."
+
+      - name: ❤️ Health check
         run: |
-          echo "Waiting for deployment to stabilize..."
+          echo "Waiting for deployment..."
           sleep 5
-          curl --fail --max-time 30 https://dev.yourdomain.com/health || echo "⚠️ Health check failed"
-        continue-on-error: true
+
+          if curl \
+            --fail \
+            --silent \
+            --show-error \
+            --max-time 30 \
+            https://dev.yourdomain.com/health; then
+
+            echo "✔ Health check passed."
+
+          else
+            echo "⚠ Health check failed."
+          fi
+
+
+  # ==========================================================
+  # 7. ROLLBACK
+  # ==========================================================
 
   rollback-on-failure:
     name: Rollback on Failure
     runs-on: ubuntu-latest
-    needs: deploy
-    if: failure() && github.event_name == 'push'
+
+    needs:
+      - deploy
+
+    if: |
+      failure() &&
+      github.event_name == 'push'
+
+    permissions:
+      contents: write
+
     steps:
-      - name: 🔄 Rollback to previous commit
+
+      - name: 📥 Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: 🔄 Rollback information
         run: |
-          echo "⚠️ Deployment failed. Rolling back to previous commit..."
-          git fetch origin dev
-          git reset --hard HEAD~1
-          # Re-deploy the previous version
-          # ./deploy.sh dev --rollback
-          echo "Rollback completed."
+          echo "⚠ Deployment failed."
+          echo "Current commit: $GITHUB_SHA"
+
+          PREVIOUS_COMMIT=$(git rev-parse HEAD~1)
+
+          echo "Previous commit: $PREVIOUS_COMMIT"
+
+          # IMPORTANT:
+          # Actual production/dev rollback should be handled
+          # by your deployment script or server.
+          #
+          # Example:
+          # ./deploy.sh dev --rollback "$PREVIOUS_COMMIT"
+
+          echo "Rollback target identified."
+
+
+  # ==========================================================
+  # 8. FINAL STATUS
+  # ==========================================================
 
   notify:
     name: Notify Status
     runs-on: ubuntu-latest
-    needs: [deploy, rollback-on-failure]
-    if: always()
-    steps:
-      - name: 📊 Generate deployment summary
-        run: |
-          echo "## 🚀 Dev Environment Deployment Report" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: dev" >> $GITHUB_STEP_SUMMARY
-          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
 
-      - name: 🚨 Slack notification (on failure)
-        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_CHANNEL: '#dev-alerts'
-          SLACK_COLOR: '#FF0000'
-          SLACK_TITLE: 'Dev Deploy Failed'
-          SLACK_MESSAGE: |
-            Deployment to dev environment failed.
-            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    needs:
+      - prepare
+      - fix-and-format
+      - test
+      - run-main
+      - commit-changes
+      - deploy
+      - rollback-on-failure
+
+    if: always()
+
+    steps:
+
+      - name: 📊 Generate deployment summary
+        shell: bash
+        run: |
+          echo "## 🚀 Tamanna AI Dev Deployment Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "- **Environment:** dev" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Branch:** dev" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Commit:** ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Prepare:** ${{ needs.prepare.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Auto Fix:** ${{ needs.fix-and-format.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Tests:** ${{ needs.test.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Main Runner:** ${{ needs.run-main.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Auto Commit:** ${{ needs.commit-changes.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deploy:** ${{ needs.deploy.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Rollback:** ${{ needs.rollback-on-failure.result }}" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_STEP_SUMMARY"
