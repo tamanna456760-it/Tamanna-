@@ -4,60 +4,137 @@ on:
   push:
     branches:
       - main
+
   schedule:
-    - cron: '*/5 * * * *'  # প্রতি 5 মিনিটে auto-run
+    - cron: '*/5 * * * *'
+
+  workflow_dispatch:
 
 jobs:
   master_system:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            echo "requirements.txt not found; continuing without dependency install"
+          fi
 
-    - name: Prepare Backup & Logs
-      run: |
-        mkdir -p backup
-        cp -r *.py backup/
-        echo "Backup created at $(date)" >> backup/backup_log.txt
-        touch security_logs.json
-        echo "All previous versions saved"
+      - name: Validate Required Files
+        run: |
+          echo "Checking Tamanna master system files..."
 
-    - name: Run Master Controller
-      run: |
-        python tamanna_master_controller.py &
-        echo "Master Controller Started"
+          required_files=(
+            "tamanna_master_controller.py"
+            "tamanna_auto_unit.py"
+            "tamanna_security_ai.py"
+            "network_powerhub.py"
+            "emergency_unit_manager.py"
+          )
 
-    - name: Run Auto Unit Generator
-      run: |
-        python tamanna_auto_unit.py &
-        echo "Auto Unit Generator Started"
+          missing=0
 
-    - name: Run Security AI / Intrusion Detection
-      run: |
-        python tamanna_security_ai.py &
-        echo "Security AI Started"
+          for file in "${required_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "OK: $file"
+            else
+              echo "MISSING: $file"
+              missing=1
+            fi
+          done
 
-    - name: Run Network & PowerHub Communication
-      run: |
-        python network_powerhub.py &
-        echo "Network PowerHub Communication Started"
+          if [ "$missing" -ne 0 ]; then
+            echo "Required files are missing."
+            exit 1
+          fi
 
-    - name: Run Emergency Response Manager
-      run: |
-        python emergency_unit_manager.py &
-        echo "Emergency Response Manager Started"
+      - name: Python Syntax Check
+        run: |
+          python -m py_compile \
+            tamanna_master_controller.py \
+            tamanna_auto_unit.py \
+            tamanna_security_ai.py \
+            network_powerhub.py \
+            emergency_unit_manager.py
 
-    - name: Monitor Logs Live
-      run: |
-        tail -f security_logs.json
+          echo "Python syntax validation passed."
+
+      - name: Prepare Backup & Logs
+        run: |
+          mkdir -p backup
+          mkdir -p logs
+
+          for file in *.py; do
+            [ -f "$file" ] && cp "$file" backup/
+          done
+
+          echo "Backup created at $(date -u)" > backup/backup_log.txt
+
+          if [ ! -f security_logs.json ]; then
+            echo "[]" > security_logs.json
+          fi
+
+          echo "Backup and logs prepared."
+
+      - name: Run Master Controller
+        run: |
+          python -u tamanna_master_controller.py
+
+      - name: Run Auto Unit Generator
+        run: |
+          python -u tamanna_auto_unit.py
+
+      - name: Run Security AI / Intrusion Detection
+        run: |
+          python -u tamanna_security_ai.py
+
+      - name: Run Network & PowerHub Communication
+        run: |
+          python -u network_powerhub.py
+
+      - name: Run Emergency Response Manager
+        run: |
+          python -u emergency_unit_manager.py
+
+      - name: Monitor Logs
+        if: always()
+        run: |
+          echo "===== Tamanna System Status ====="
+          echo "Time: $(date -u)"
+          echo ""
+
+          if [ -f security_logs.json ]; then
+            echo "security_logs.json:"
+            tail -n 50 security_logs.json || true
+          else
+            echo "No security_logs.json found."
+          fi
+
+          echo ""
+          echo "===== Workspace ====="
+          ls -lah
+
+      - name: Upload Logs & Backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-master-system-${{ github.run_number }}
+          path: |
+            backup/
+            logs/
+            security_logs.json
+          if-no-files-found: warn
