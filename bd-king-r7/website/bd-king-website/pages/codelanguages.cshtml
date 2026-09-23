@@ -1,13 +1,752 @@
 @page
 @model GenericModel
-<h2>Code Languages & Tooling</h2>
 
-<p>Supported languages and example tools used by the automation:</p>
+@{
+    ViewData["Title"] = "Code Languages & Tooling";
+}
 
-<ul>
-  <li>Node.js — npm, eslint, prettier</li>
-  <li>Python — black, flake8, pytest</li>
-  <li>Rust — cargo fmt, cargo build, cargo test</li>
-  <li>C/C++ (firmware) — Makefiles, cross-compile toolchains</li>
-  <li>Dotnet — dotnet build, dotnet test</li>
-</ul>
+<main class="powerhub-page">
+
+    <!-- ========================================================
+         HERO
+         ======================================================== -->
+
+    <section class="hero-section" aria-labelledby="page-title">
+
+        <div class="hero-content">
+
+            <span class="eyebrow">
+                BD-KING-R7 • DEVELOPMENT • TOOLING
+            </span>
+
+            <h1 id="page-title">
+                Code Languages &amp; Tooling
+            </h1>
+
+            <p class="hero-description">
+                Supported programming languages, development
+                toolchains, formatters, linters, build systems,
+                testing frameworks and automation tools used by
+                the BD-KING-R7 Powerhub ecosystem.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SUPPORTED LANGUAGES
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="languages-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                LANGUAGES
+            </span>
+
+            <h2 id="languages-title">
+                Supported Code Languages
+            </h2>
+
+            <p>
+                The automation layer can use language-specific
+                tooling while maintaining a common build, test
+                and reporting workflow.
+            </p>
+
+        </div>
+
+
+        <div class="language-grid">
+
+            <!-- Node.js -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+                    <span class="language-number">01</span>
+
+                    <span class="language-status">
+                        Supported
+                    </span>
+                </div>
+
+                <h3>
+                    Node.js
+                </h3>
+
+                <p>
+                    JavaScript and Node.js tooling for web
+                    applications, automation scripts and
+                    frontend services.
+                </p>
+
+                <div class="tool-list">
+
+                    <span>npm</span>
+                    <span>ESLint</span>
+                    <span>Prettier</span>
+
+                </div>
+
+                <div class="command-list">
+
+                    <code>npm install</code>
+                    <code>npm run build</code>
+                    <code>npm test</code>
+
+                </div>
+
+            </article>
+
+
+            <!-- Python -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+                    <span class="language-number">02</span>
+
+                    <span class="language-status">
+                        Supported
+                    </span>
+                </div>
+
+                <h3>
+                    Python
+                </h3>
+
+                <p>
+                    Python tooling for AI services, automation,
+                    backend components, utilities and testing.
+                </p>
+
+                <div class="tool-list">
+
+                    <span>Black</span>
+                    <span>Flake8</span>
+                    <span>Pytest</span>
+
+                </div>
+
+                <div class="command-list">
+
+                    <code>python -m pytest</code>
+                    <code>black .</code>
+                    <code>flake8 .</code>
+
+                </div>
+
+            </article>
+
+
+            <!-- Rust -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+                    <span class="language-number">03</span>
+
+                    <span class="language-status">
+                        Supported
+                    </span>
+                </div>
+
+                <h3>
+                    Rust
+                </h3>
+
+                <p>
+                    Rust tooling for native utilities,
+                    performance-oriented components and
+                    system-level services.
+                </p>
+
+                <div class="tool-list">
+
+                    <span>Cargo</span>
+                    <span>cargo fmt</span>
+                    <span>cargo build</span>
+                    <span>cargo test</span>
+
+                </div>
+
+                <div class="command-list">
+
+                    <code>cargo fmt</code>
+                    <code>cargo build</code>
+                    <code>cargo test</code>
+
+                </div>
+
+            </article>
+
+
+            <!-- C / C++ -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+                    <span class="language-number">04</span>
+
+                    <span class="language-status">
+                        Firmware
+                    </span>
+                </div>
+
+                <h3>
+                    C / C++
+                </h3>
+
+                <p>
+                    Firmware development and embedded-system
+                    workflows using Makefiles and target-specific
+                    cross-compilation toolchains.
+                </p>
+
+                <div class="tool-list">
+
+                    <span>Make</span>
+                    <span>C/C++</span>
+                    <span>Cross Compiler</span>
+                    <span>Firmware SDK</span>
+
+                </div>
+
+                <div class="command-list">
+
+                    <code>make</code>
+                    <code>make clean</code>
+                    <code>make test</code>
+
+                </div>
+
+            </article>
+
+
+            <!-- .NET -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+                    <span class="language-number">05</span>
+
+                    <span class="language-status">
+                        Primary Web
+                    </span>
+                </div>
+
+                <h3>
+                    .NET / C#
+                </h3>
+
+                <p>
+                    .NET tooling for the BD-KING-R7 Powerhub
+                    website, backend services and automated tests.
+                </p>
+
+                <div class="tool-list">
+
+                    <span>.NET 8</span>
+                    <span>Razor Pages</span>
+                    <span>ASP.NET</span>
+                    <span>C#</span>
+
+                </div>
+
+                <div class="command-list">
+
+                    <code>dotnet restore</code>
+                    <code>dotnet build</code>
+                    <code>dotnet test</code>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         TOOLING PIPELINE
+         ======================================================== -->
+
+    <section class="integration-section"
+             aria-labelledby="pipeline-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                AUTOMATION PIPELINE
+            </span>
+
+            <h2 id="pipeline-title">
+                Standard Development Flow
+            </h2>
+
+            <p>
+                Language-specific tools can be connected to a
+                consistent validation pipeline.
+            </p>
+
+
+            <div class="pipeline">
+
+                <div class="pipeline-step">
+                    <strong>01</strong>
+                    <span>Source</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>02</strong>
+                    <span>Format</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>03</strong>
+                    <span>Lint</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>04</strong>
+                    <span>Build</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>05</strong>
+                    <span>Test</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>06</strong>
+                    <span>Report</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         TOOL CATEGORIES
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="categories-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                TOOL CATEGORIES
+            </span>
+
+            <h2 id="categories-title">
+                Development Capabilities
+            </h2>
+
+        </div>
+
+
+        <div class="capability-grid">
+
+            <article class="capability-card">
+
+                <h3>
+                    Formatting
+                </h3>
+
+                <p>
+                    Keeps source code consistent and easier to
+                    review.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Linting
+                </h3>
+
+                <p>
+                    Detects common code-quality and style issues
+                    before release.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Building
+                </h3>
+
+                <p>
+                    Compiles applications, services and firmware
+                    using their required toolchains.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Testing
+                </h3>
+
+                <p>
+                    Runs automated tests to validate project
+                    behavior before deployment.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Cross Compilation
+                </h3>
+
+                <p>
+                    Builds native and firmware components for
+                    supported target architectures.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    CI/CD
+                </h3>
+
+                <p>
+                    Connects source changes with automated build,
+                    test and release workflows.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         LANGUAGE MATRIX
+         ======================================================== -->
+
+    <section class="project-info"
+             aria-labelledby="matrix-title">
+
+        <h2 id="matrix-title">
+            Language &amp; Tool Matrix
+        </h2>
+
+        <div class="table-wrapper">
+
+            <table class="tool-matrix">
+
+                <thead>
+
+                    <tr>
+                        <th>Language</th>
+                        <th>Build</th>
+                        <th>Format</th>
+                        <th>Lint</th>
+                        <th>Test</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Node.js</td>
+                        <td>npm</td>
+                        <td>Prettier</td>
+                        <td>ESLint</td>
+                        <td>npm test</td>
+                    </tr>
+
+                    <tr>
+                        <td>Python</td>
+                        <td>Python</td>
+                        <td>Black</td>
+                        <td>Flake8</td>
+                        <td>Pytest</td>
+                    </tr>
+
+                    <tr>
+                        <td>Rust</td>
+                        <td>Cargo</td>
+                        <td>cargo fmt</td>
+                        <td>Cargo tooling</td>
+                        <td>cargo test</td>
+                    </tr>
+
+                    <tr>
+                        <td>C / C++</td>
+                        <td>Make</td>
+                        <td>Toolchain</td>
+                        <td>Compiler checks</td>
+                        <td>Project-defined</td>
+                    </tr>
+
+                    <tr>
+                        <td>.NET / C#</td>
+                        <td>dotnet build</td>
+                        <td>dotnet format</td>
+                        <td>Analyzer</td>
+                        <td>dotnet test</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         AUTOMATION INTEGRATION
+         ======================================================== -->
+
+    <section class="integration-section"
+             aria-labelledby="automation-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                BD-KING-R7 AUTOMATION
+            </span>
+
+            <h2 id="automation-title">
+                Toolchain Integration
+            </h2>
+
+            <p>
+                The automation layer can select a language-specific
+                workflow according to the detected project files
+                and configured build rules.
+            </p>
+
+
+            <div class="integration-flow">
+
+                <span>
+                    Project Scan
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Language Detection
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Tool Selection
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Build / Test
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Report
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         Tamanan AI CONNECTION
+         ======================================================== -->
+
+    <section class="future-section"
+             aria-labelledby="ai-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                AI INTEGRATION
+            </span>
+
+            <h2 id="ai-title">
+                Tamanna AI Development Assistance
+            </h2>
+
+            <p>
+                A future API integration can allow Tamanna AI to
+                inspect approved project context and help organize
+                development workflows.
+            </p>
+
+        </div>
+
+
+        <div class="future-grid">
+
+            <div class="future-item">
+
+                <h3>
+                    Project Context
+                </h3>
+
+                <p>
+                    Identify relevant source files and project
+                    configuration.
+                </p>
+
+            </div>
+
+
+            <div class="future-item">
+
+                <h3>
+                    Code Analysis
+                </h3>
+
+                <p>
+                    Analyze code structure and report detected
+                    development issues.
+                </p>
+
+            </div>
+
+
+            <div class="future-item">
+
+                <h3>
+                    Build Assistance
+                </h3>
+
+                <p>
+                    Prepare appropriate build and test workflows
+                    for supported projects.
+                </p>
+
+            </div>
+
+
+            <div class="future-item">
+
+                <h3>
+                    Reporting
+                </h3>
+
+                <p>
+                    Present build, test and automation results
+                    through the Powerhub interface.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SECURITY NOTICE
+         ======================================================== -->
+
+    <section class="notice-section">
+
+        <strong>
+            Security
+        </strong>
+
+        <p>
+            Tool commands should only execute inside an approved
+            project environment with appropriate permissions.
+            Secrets, tokens and private credentials must remain
+            outside source files and documentation JSON.
+        </p>
+
+    </section>
+
+
+    <!-- ========================================================
+         PROJECT INFORMATION
+         ======================================================== -->
+
+    <section class="project-info"
+             aria-labelledby="project-title">
+
+        <h2 id="project-title">
+            Project Information
+        </h2>
+
+        <dl>
+
+            <div>
+                <dt>Project</dt>
+                <dd>BD-KING-R7</dd>
+            </div>
+
+            <div>
+                <dt>Application</dt>
+                <dd>Tamanna AI</dd>
+            </div>
+
+            <div>
+                <dt>Website</dt>
+                <dd>Powerhub</dd>
+            </div>
+
+            <div>
+                <dt>Framework</dt>
+                <dd>ASP.NET Core 8 / Razor Pages</dd>
+            </div>
+
+            <div>
+                <dt>Container</dt>
+                <dd>Docker</dd>
+            </div>
+
+            <div>
+                <dt>Owner</dt>
+                <dd>HM INSAN ALI</dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+</main>
