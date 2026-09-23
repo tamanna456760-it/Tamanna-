@@ -1,13 +1,596 @@
 @page
-@model GenericModel
-<h2>Program & System — Tamanna System</h2>
+@model ProgramSystemModel
 
-<p>The "Tamanna system" is the automation layer for bd-king-r7. It includes:</p>
-<ol>
-  <li>Auto-sync agents that pull/push code, run fixers and builds.</li>
-  <li>Central orchestrator for tracking runs, failures, and history.</li>
-  <li>Web UI (this site) for documentation and quick status.</li>
-</ol>
+@{
+    ViewData["Title"] = "Program & System — Tamanna AI";
+}
 
-<h3>How it runs</h3>
-<p>Agents run periodically (configurable interval). They try to auto-fix (format/lint), build, and only commit & push when the build is successful. Failed builds leave changes staged for manual review.</p>
+<main class="powerhub-page">
+
+    <!-- ========================================================
+         HERO
+         ======================================================== -->
+
+    <section class="hero-section" aria-labelledby="program-title">
+
+        <div class="hero-content">
+
+            <span class="eyebrow">
+                BD-KING-R7 • TAMANNA AI • AUTOMATION
+            </span>
+
+            <h1 id="program-title">
+                Program &amp; System
+            </h1>
+
+            <p class="hero-description">
+                The Tamanna AI system is the automation layer
+                supporting the BD-KING-R7 Powerhub ecosystem.
+                It connects project management, automation,
+                build workflows, testing and reporting.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SYSTEM OVERVIEW
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="overview-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                SYSTEM OVERVIEW
+            </span>
+
+            <h2 id="overview-title">
+                Tamanna AI Automation Layer
+            </h2>
+
+            <p>
+                The system is designed around separate automation
+                components that can communicate through defined
+                interfaces and project configuration.
+            </p>
+
+        </div>
+
+
+        <div class="capability-grid">
+
+            <article class="capability-card">
+
+                <span class="language-number">
+                    01
+                </span>
+
+                <h3>
+                    Auto-Sync Agents
+                </h3>
+
+                <p>
+                    Agents can monitor configured repositories,
+                    synchronize approved changes and execute
+                    project-specific automation workflows.
+                </p>
+
+                <ul>
+                    <li>Pull / synchronization</li>
+                    <li>Code analysis</li>
+                    <li>Formatting and linting</li>
+                    <li>Build execution</li>
+                    <li>Approved commit / push workflow</li>
+                </ul>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <span class="language-number">
+                    02
+                </span>
+
+                <h3>
+                    Central Orchestrator
+                </h3>
+
+                <p>
+                    The orchestrator coordinates automation jobs
+                    and provides a central place to track execution
+                    state, failures and history.
+                </p>
+
+                <ul>
+                    <li>Job management</li>
+                    <li>Run tracking</li>
+                    <li>Failure reporting</li>
+                    <li>Execution history</li>
+                    <li>Workflow coordination</li>
+                </ul>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <span class="language-number">
+                    03
+                </span>
+
+                <h3>
+                    Powerhub Web UI
+                </h3>
+
+                <p>
+                    The Powerhub website provides documentation,
+                    system information and a foundation for
+                    displaying runtime status.
+                </p>
+
+                <ul>
+                    <li>Documentation</li>
+                    <li>Project information</li>
+                    <li>System status</li>
+                    <li>Tooling information</li>
+                    <li>Automation reports</li>
+                </ul>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         HOW IT RUNS
+         ======================================================== -->
+
+    <section class="integration-section"
+             aria-labelledby="runtime-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                EXECUTION FLOW
+            </span>
+
+            <h2 id="runtime-title">
+                How the Automation Runs
+            </h2>
+
+            <p>
+                Agents can execute on a configured schedule or
+                through an approved manual trigger.
+            </p>
+
+
+            <div class="pipeline">
+
+                <div class="pipeline-step">
+                    <strong>01</strong>
+                    <span>Trigger</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>02</strong>
+                    <span>Sync</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>03</strong>
+                    <span>Scan</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>04</strong>
+                    <span>Fix</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>05</strong>
+                    <span>Build</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>06</strong>
+                    <span>Test</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>07</strong>
+                    <span>Report</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         AUTO-FIX POLICY
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="fix-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                CHANGE CONTROL
+            </span>
+
+            <h2 id="fix-title">
+                Auto-Fix &amp; Build Policy
+            </h2>
+
+        </div>
+
+
+        <div class="capability-grid">
+
+            <article class="capability-card">
+
+                <h3>
+                    Format &amp; Lint
+                </h3>
+
+                <p>
+                    Configured formatters and linters may be used
+                    to detect or correct supported code-quality
+                    issues.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Build Validation
+                </h3>
+
+                <p>
+                    Changes should pass the configured build
+                    workflow before being considered ready for
+                    release automation.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Commit &amp; Push
+                </h3>
+
+                <p>
+                    Repository changes should only be committed
+                    or pushed according to the project's configured
+                    automation and permission rules.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    Failed Builds
+                </h3>
+
+                <p>
+                    Failed validation should remain available for
+                    manual investigation instead of being treated
+                    as a successful release state.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SCHEDULE
+         ======================================================== -->
+
+    <section class="project-info"
+             aria-labelledby="schedule-title">
+
+        <h2 id="schedule-title">
+            Agent Scheduling
+        </h2>
+
+        <dl>
+
+            <div>
+                <dt>Execution</dt>
+                <dd>
+                    Configurable interval or approved trigger
+                </dd>
+            </div>
+
+            <div>
+                <dt>Synchronization</dt>
+                <dd>
+                    Repository synchronization according to
+                    configured workflow
+                </dd>
+            </div>
+
+            <div>
+                <dt>Validation</dt>
+                <dd>
+                    Format, lint, build and test stages
+                </dd>
+            </div>
+
+            <div>
+                <dt>Failure State</dt>
+                <dd>
+                    Reported for review
+                </dd>
+            </div>
+
+            <div>
+                <dt>History</dt>
+                <dd>
+                    Run and result history
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+
+    <!-- ========================================================
+         SYSTEM COMPONENTS
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="components-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                ARCHITECTURE
+            </span>
+
+            <h2 id="components-title">
+                System Components
+            </h2>
+
+        </div>
+
+
+        <div class="language-grid">
+
+            <article class="language-card">
+
+                <h3>
+                    Agent Layer
+                </h3>
+
+                <p>
+                    Executes configured automation jobs.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Orchestrator
+                </h3>
+
+                <p>
+                    Coordinates jobs, execution state and
+                    automation history.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Build Layer
+                </h3>
+
+                <p>
+                    Runs project-specific compilation and
+                    validation commands.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Reporting Layer
+                </h3>
+
+                <p>
+                    Collects and presents automation results.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Powerhub UI
+                </h3>
+
+                <p>
+                    Provides the web interface for documentation
+                    and future live status integration.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Tamanna AI
+                </h3>
+
+                <p>
+                    Provides the AI integration layer for future
+                    approved project-context and development
+                    assistance workflows.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         DATA FLOW
+         ======================================================== -->
+
+    <section class="integration-section"
+             aria-labelledby="dataflow-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                SYSTEM DATA FLOW
+            </span>
+
+            <h2 id="dataflow-title">
+                Automation Data Flow
+            </h2>
+
+            <div class="integration-flow">
+
+                <span>Repository</span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>Agent</span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>Orchestrator</span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>Build / Test</span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>Report</span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>Powerhub</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SECURITY
+         ======================================================== -->
+
+    <section class="notice-section">
+
+        <strong>
+            Security &amp; Change Control
+        </strong>
+
+        <p>
+            Automation should operate only within explicitly
+            configured project boundaries. Repository credentials,
+            API tokens and other secrets must be stored through
+            secure environment or secret-management mechanisms,
+            not inside documentation or source-controlled JSON.
+        </p>
+
+        <p>
+            Destructive operations should require appropriate
+            authorization and should be recorded in an audit trail
+            when audit logging is enabled.
+        </p>
+
+    </section>
+
+
+    <!-- ========================================================
+         PROJECT IDENTITY
+         ======================================================== -->
+
+    <section class="project-info"
+             aria-labelledby="identity-title">
+
+        <h2 id="identity-title">
+            Project Identity
+        </h2>
+
+        <dl>
+
+            <div>
+                <dt>Application</dt>
+                <dd>Tamanna AI</dd>
+            </div>
+
+            <div>
+                <dt>Project</dt>
+                <dd>BD-KING-R7</dd>
+            </div>
+
+            <div>
+                <dt>Website</dt>
+                <dd>Powerhub</dd>
+            </div>
+
+            <div>
+                <dt>Framework</dt>
+                <dd>ASP.NET Core 8 / Razor Pages</dd>
+            </div>
+
+            <div>
+                <dt>Owner</dt>
+                <dd>HM INSAN ALI</dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+</main>
