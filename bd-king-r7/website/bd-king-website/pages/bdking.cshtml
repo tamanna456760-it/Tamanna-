@@ -1,13 +1,595 @@
 @page
 @model GenericModel
-<h2>bd-king-r7 AI</h2>
-<p>bd-king-r7 AI focuses on the powerhub product: firmware, management, telemetry, and deployment automation.</p>
 
-<section>
-  <h3>Scope</h3>
-  <ul>
-    <li>Firmware build automation (cross-compilation for target MCUs)</li>
-    <li>Power management control & safe flashing flows</li>
-    <li>CI/CD pipelines for releases</li>
-  </ul>
-</section>
+@{
+    ViewData["Title"] = "BD-KING-R7 Powerhub";
+}
+
+<!-- ============================================================
+     BD-KING-R7 / TAMANNA AI
+     Powerhub Home Page
+
+     Owner: HM INSAN ALI
+     ============================================================ -->
+
+<main class="powerhub-page">
+
+    <!-- ========================================================
+         HERO
+         ======================================================== -->
+
+    <section class="hero-section" aria-labelledby="page-title">
+
+        <div class="hero-content">
+
+            <span class="eyebrow">
+                BD-KING-R7 • POWERHUB
+            </span>
+
+            <h1 id="page-title">
+                Tamanna AI
+            </h1>
+
+            <h2>
+                BD-KING-R7 Powerhub
+            </h2>
+
+            <p class="hero-description">
+                A project control and documentation platform for
+                firmware, power management, telemetry, deployment
+                automation, and future Tamanna AI integration.
+            </p>
+
+            <div class="hero-actions">
+
+                <a
+                    class="btn btn-primary"
+                    asp-page="/Projects/Index">
+                    View Projects
+                </a>
+
+                <a
+                    class="btn btn-secondary"
+                    asp-page="/Status/Index">
+                    System Status
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SYSTEM OVERVIEW
+         ======================================================== -->
+
+    <section
+        class="overview-section"
+        aria-labelledby="overview-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                SYSTEM
+            </span>
+
+            <h2 id="overview-title">
+                Powerhub Overview
+            </h2>
+
+            <p>
+                The Powerhub website provides a central web interface
+                for project information, system status, deployment
+                documentation, and future automation integration.
+            </p>
+
+        </div>
+
+
+        <div class="status-grid">
+
+            <article class="status-card">
+
+                <span class="status-indicator"
+                      aria-hidden="true">
+                    ●
+                </span>
+
+                <h3>
+                    Website
+                </h3>
+
+                <p>
+                    ASP.NET Core 8 Razor Pages
+                </p>
+
+                <strong>
+                    Ready
+                </strong>
+
+            </article>
+
+
+            <article class="status-card">
+
+                <span class="status-indicator"
+                      aria-hidden="true">
+                    ●
+                </span>
+
+                <h3>
+                    Project Store
+                </h3>
+
+                <p>
+                    JSON-based project content
+                </p>
+
+                <strong>
+                    Ready
+                </strong>
+
+            </article>
+
+
+            <article class="status-card">
+
+                <span class="status-indicator"
+                      aria-hidden="true">
+                    ●
+                </span>
+
+                <h3>
+                    Docker
+                </h3>
+
+                <p>
+                    Containerized deployment
+                </p>
+
+                <strong>
+                    Ready
+                </strong>
+
+            </article>
+
+
+            <article class="status-card">
+
+                <span class="status-indicator"
+                      aria-hidden="true">
+                    ●
+                </span>
+
+                <h3>
+                    Tamanna AI
+                </h3>
+
+                <p>
+                    API integration layer
+                </p>
+
+                <strong>
+                    Integration Ready
+                </strong>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         PROJECT SCOPE
+         ======================================================== -->
+
+    <section
+        class="scope-section"
+        aria-labelledby="scope-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                PROJECT SCOPE
+            </span>
+
+            <h2 id="scope-title">
+                Core Powerhub Systems
+            </h2>
+
+            <p>
+                The platform is focused on controlled firmware,
+                power-management, telemetry, and deployment workflows.
+            </p>
+
+        </div>
+
+
+        <div class="scope-grid">
+
+            <!-- Firmware -->
+
+            <article class="scope-card">
+
+                <div class="scope-number">
+                    01
+                </div>
+
+                <h3>
+                    Firmware Build Automation
+                </h3>
+
+                <p>
+                    Build and release workflows for firmware,
+                    including cross-compilation for supported
+                    target microcontrollers.
+                </p>
+
+                <ul>
+                    <li>
+                        Cross-compilation
+                    </li>
+
+                    <li>
+                        Target-specific builds
+                    </li>
+
+                    <li>
+                        Build validation
+                    </li>
+
+                    <li>
+                        Release artifacts
+                    </li>
+                </ul>
+
+            </article>
+
+
+            <!-- Power Management -->
+
+            <article class="scope-card">
+
+                <div class="scope-number">
+                    02
+                </div>
+
+                <h3>
+                    Power Management
+                </h3>
+
+                <p>
+                    Controlled power-management workflows with
+                    validation and safe firmware flashing procedures.
+                </p>
+
+                <ul>
+                    <li>
+                        Power control
+                    </li>
+
+                    <li>
+                        Device validation
+                    </li>
+
+                    <li>
+                        Safe flashing flows
+                    </li>
+
+                    <li>
+                        Recovery procedures
+                    </li>
+                </ul>
+
+            </article>
+
+
+            <!-- CI/CD -->
+
+            <article class="scope-card">
+
+                <div class="scope-number">
+                    03
+                </div>
+
+                <h3>
+                    CI/CD Automation
+                </h3>
+
+                <p>
+                    Continuous integration and deployment workflows
+                    for testing, validation, and controlled releases.
+                </p>
+
+                <ul>
+                    <li>
+                        Automated builds
+                    </li>
+
+                    <li>
+                        Automated tests
+                    </li>
+
+                    <li>
+                        Release pipelines
+                    </li>
+
+                    <li>
+                        Deployment validation
+                    </li>
+                </ul>
+
+            </article>
+
+
+            <!-- Telemetry -->
+
+            <article class="scope-card">
+
+                <div class="scope-number">
+                    04
+                </div>
+
+                <h3>
+                    Telemetry
+                </h3>
+
+                <p>
+                    Structured monitoring and telemetry capabilities
+                    for project and device information.
+                </p>
+
+                <ul>
+                    <li>
+                        Runtime metrics
+                    </li>
+
+                    <li>
+                        System status
+                    </li>
+
+                    <li>
+                        Event monitoring
+                    </li>
+
+                    <li>
+                        Health information
+                    </li>
+                </ul>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         TAMANNA AI INTEGRATION
+         ======================================================== -->
+
+    <section
+        class="integration-section"
+        aria-labelledby="integration-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                AI INTEGRATION
+            </span>
+
+            <h2 id="integration-title">
+                Tamanna AI
+            </h2>
+
+            <p>
+                The Powerhub website can act as the web interface
+                for a separate Tamanna AI backend. The AI services
+                can remain independently managed behind an API
+                boundary.
+            </p>
+
+
+            <div class="integration-flow"
+                 aria-label="Tamanna AI integration flow">
+
+                <span>
+                    Powerhub
+                </span>
+
+                <span aria-hidden="true">
+                    →
+                </span>
+
+                <span>
+                    API
+                </span>
+
+                <span aria-hidden="true">
+                    →
+                </span>
+
+                <span>
+                    Tamanna AI
+                </span>
+
+                <span aria-hidden="true">
+                    →
+                </span>
+
+                <span>
+                    Response
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         FUTURE SYSTEMS
+         ======================================================== -->
+
+    <section
+        class="future-section"
+        aria-labelledby="future-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                EXPANSION
+            </span>
+
+            <h2 id="future-title">
+                Future Integration Areas
+            </h2>
+
+        </div>
+
+
+        <div class="future-grid">
+
+            <div class="future-item">
+                <h3>Language System</h3>
+                <p>
+                    Language, alphabet, vocabulary, grammar and
+                    language-processing services.
+                </p>
+            </div>
+
+
+            <div class="future-item">
+                <h3>Memory</h3>
+                <p>
+                    Message memory and approved project knowledge
+                    integration.
+                </p>
+            </div>
+
+
+            <div class="future-item">
+                <h3>Understanding</h3>
+                <p>
+                    Structured message understanding and
+                    intent-processing services.
+                </p>
+            </div>
+
+
+            <div class="future-item">
+                <h3>Module Router</h3>
+                <p>
+                    Controlled communication with approved Tamanna AI
+                    modules and tools.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         PROJECT INFORMATION
+         ======================================================== -->
+
+    <section
+        class="project-info"
+        aria-labelledby="project-info-title">
+
+        <h2 id="project-info-title">
+            Project Information
+        </h2>
+
+        <dl>
+
+            <div>
+                <dt>
+                    Project
+                </dt>
+
+                <dd>
+                    BD-KING-R7
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>
+                    Platform
+                </dt>
+
+                <dd>
+                    Powerhub
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>
+                    Application
+                </dt>
+
+                <dd>
+                    Tamanna AI
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>
+                    Framework
+                </dt>
+
+                <dd>
+                    ASP.NET Core 8 / Razor Pages
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>
+                    Deployment
+                </dt>
+
+                <dd>
+                    Docker
+                </dd>
+            </div>
+
+
+            <div>
+                <dt>
+                    Owner
+                </dt>
+
+                <dd>
+                    HM INSAN ALI
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+
+    <!-- ========================================================
+         FOOTER NOTE
+         ======================================================== -->
+
+    <section class="notice-section">
+
+        <p>
+            System status shown on this page should be connected
+            to real health checks or API responses before being
+            treated as live runtime information.
+        </p>
+
+    </section>
+
+</main>
