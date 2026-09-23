@@ -1,16 +1,767 @@
 @page
-@model GenericModel
-<h2>Tamanna AI</h2>
-<p>This section documents Tamanna AI: its purpose, components, and how it integrates with bd-king-r7 Powerhub.</p>
+@model BD_KING_Website.Pages.TamannaAiModel
 
-<section>
-    <h3>Purpose</h3>
-    <p>Tamanna AI assists with automated code syncing, auto-fixing, build orchestration, and reporting. It acts as the supervisory layer that can reason about fixes and coordinate agents.</p>
+@{
+    ViewData["Title"] = "Tamanna AI";
+}
 
-    <h3>Components</h3>
-    <ul>
-        <li>Agent: runs on servers to sync code, run linters & tests, and report results.</li>
-        <li>Orchestrator: central server that stores reports and shows history.</li>
-        <li>Auto-fix pipelines: rules & fixers tailored to project languages.</li>
-    </ul>
-</section>
+<main class="powerhub-page tamanna-ai-page">
+
+    <!-- ========================================================
+         HERO
+         ======================================================== -->
+
+    <section class="hero-section"
+             aria-labelledby="tamanna-title">
+
+        <div class="hero-content">
+
+            <span class="eyebrow">
+                BD-KING-R7 • POWERHUB • AI SYSTEM
+            </span>
+
+            <h1 id="tamanna-title">
+                Tamanna AI
+            </h1>
+
+            <p class="hero-description">
+                The AI and automation layer designed to assist
+                with project understanding, code synchronization,
+                development workflows, build orchestration and
+                reporting across the BD-KING-R7 Powerhub ecosystem.
+            </p>
+
+            <div class="page-actions">
+
+                <a class="btn"
+                   asp-page="/Index">
+                    ← Powerhub
+                </a>
+
+                <a class="btn"
+                   asp-page="/CodeLanguages">
+                    Code Languages
+                </a>
+
+                <span class="status-badge">
+                    @Model.SystemStatus
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SYSTEM STATUS
+         ======================================================== -->
+
+    <section class="status-grid"
+             aria-label="Tamanna AI system status">
+
+        <article class="status-card">
+
+            <span class="status-label">
+                SYSTEM
+            </span>
+
+            <strong>
+                @Model.SystemStatus
+            </strong>
+
+        </article>
+
+
+        <article class="status-card">
+
+            <span class="status-label">
+                PROJECT
+            </span>
+
+            <strong>
+                @Model.ProjectName
+            </strong>
+
+        </article>
+
+
+        <article class="status-card">
+
+            <span class="status-label">
+                COMPONENTS
+            </span>
+
+            <strong>
+                @Model.ComponentCount
+            </strong>
+
+        </article>
+
+
+        <article class="status-card">
+
+            <span class="status-label">
+                FRAMEWORK
+            </span>
+
+            <strong>
+                @Model.Framework
+            </strong>
+
+        </article>
+
+    </section>
+
+
+    <!-- ========================================================
+         PURPOSE
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="purpose-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                PURPOSE
+            </span>
+
+            <h2 id="purpose-title">
+                Tamanna AI Automation Layer
+            </h2>
+
+        </div>
+
+        <div class="project-content">
+
+            <p>
+                Tamanna AI is intended to assist the development
+                and automation workflow surrounding BD-KING-R7.
+                It can serve as a supervisory software layer that
+                coordinates approved automation components and
+                presents their results.
+            </p>
+
+            <p>
+                The system can be extended with project context,
+                language understanding, memory, module routing,
+                code analysis and reporting services.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         COMPONENTS
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="components-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                CORE COMPONENTS
+            </span>
+
+            <h2 id="components-title">
+                System Components
+            </h2>
+
+            <p>
+                The architecture separates execution, coordination
+                and reporting responsibilities.
+            </p>
+
+        </div>
+
+
+        <div class="language-grid">
+
+            <!-- Agent -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+
+                    <span class="language-number">
+                        01
+                    </span>
+
+                    <span class="language-status">
+                        @Model.AgentStatus
+                    </span>
+
+                </div>
+
+                <h3>
+                    Agent
+                </h3>
+
+                <p>
+                    Executes approved automation tasks within a
+                    configured environment.
+                </p>
+
+                <ul>
+                    <li>Repository synchronization</li>
+                    <li>Code scanning</li>
+                    <li>Linters and formatters</li>
+                    <li>Build and test execution</li>
+                    <li>Result reporting</li>
+                </ul>
+
+            </article>
+
+
+            <!-- Orchestrator -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+
+                    <span class="language-number">
+                        02
+                    </span>
+
+                    <span class="language-status">
+                        @Model.OrchestratorStatus
+                    </span>
+
+                </div>
+
+                <h3>
+                    Orchestrator
+                </h3>
+
+                <p>
+                    Coordinates automation jobs and provides a
+                    central execution and reporting layer.
+                </p>
+
+                <ul>
+                    <li>Job coordination</li>
+                    <li>Run tracking</li>
+                    <li>Failure handling</li>
+                    <li>Execution history</li>
+                    <li>Report aggregation</li>
+                </ul>
+
+            </article>
+
+
+            <!-- Auto-Fix -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+
+                    <span class="language-number">
+                        03
+                    </span>
+
+                    <span class="language-status">
+                        @Model.AutoFixStatus
+                    </span>
+
+                </div>
+
+                <h3>
+                    Auto-Fix Pipelines
+                </h3>
+
+                <p>
+                    Language-specific rules and fixers can be
+                    connected to supported development workflows.
+                </p>
+
+                <ul>
+                    <li>Formatting</li>
+                    <li>Lint fixes</li>
+                    <li>Static analysis</li>
+                    <li>Build validation</li>
+                    <li>Test validation</li>
+                </ul>
+
+            </article>
+
+
+            <!-- Reporting -->
+
+            <article class="language-card">
+
+                <div class="language-card-header">
+
+                    <span class="language-number">
+                        04
+                    </span>
+
+                    <span class="language-status">
+                        @Model.ReportingStatus
+                    </span>
+
+                </div>
+
+                <h3>
+                    Reporting
+                </h3>
+
+                <p>
+                    Collects automation results and presents
+                    useful information through the Powerhub UI.
+                </p>
+
+                <ul>
+                    <li>Build results</li>
+                    <li>Test results</li>
+                    <li>Error information</li>
+                    <li>Run history</li>
+                    <li>System status</li>
+                </ul>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         ARCHITECTURE FLOW
+         ======================================================== -->
+
+    <section class="integration-section"
+             aria-labelledby="architecture-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                ARCHITECTURE
+            </span>
+
+            <h2 id="architecture-title">
+                Tamanna AI Workflow
+            </h2>
+
+            <p>
+                A typical approved automation workflow can be
+                represented as the following pipeline.
+            </p>
+
+
+            <div class="pipeline">
+
+                <div class="pipeline-step">
+                    <strong>01</strong>
+                    <span>Request</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>02</strong>
+                    <span>Context</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>03</strong>
+                    <span>Plan</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>04</strong>
+                    <span>Execute</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>05</strong>
+                    <span>Validate</span>
+                </div>
+
+                <span class="pipeline-arrow">→</span>
+
+                <div class="pipeline-step">
+                    <strong>06</strong>
+                    <span>Report</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         AUTOMATION STAGES
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="automation-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                AUTOMATION
+            </span>
+
+            <h2 id="automation-title">
+                Development Automation Stages
+            </h2>
+
+        </div>
+
+
+        <div class="capability-grid">
+
+            <article class="capability-card">
+
+                <h3>
+                    01. Scan
+                </h3>
+
+                <p>
+                    Inspect approved project files, configuration
+                    and available development tooling.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    02. Analyze
+                </h3>
+
+                <p>
+                    Identify relevant code, configuration and
+                    validation requirements.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    03. Fix
+                </h3>
+
+                <p>
+                    Apply configured and authorized formatting,
+                    linting or other supported corrections.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    04. Build
+                </h3>
+
+                <p>
+                    Execute the project's configured build process.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    05. Test
+                </h3>
+
+                <p>
+                    Run available automated tests and collect
+                    validation results.
+                </p>
+
+            </article>
+
+
+            <article class="capability-card">
+
+                <h3>
+                    06. Report
+                </h3>
+
+                <p>
+                    Store or display the resulting status,
+                    diagnostics and execution history.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         INTEGRATION
+         ======================================================== -->
+
+    <section class="integration-section"
+             aria-labelledby="integration-title">
+
+        <div class="integration-content">
+
+            <span class="section-label">
+                POWERHUB INTEGRATION
+            </span>
+
+            <h2 id="integration-title">
+                Tamanna AI ↔ BD-KING-R7
+            </h2>
+
+            <p>
+                The Powerhub website provides a documentation and
+                monitoring interface. A future runtime integration
+                can connect the UI to actual orchestrator APIs and
+                live execution data.
+            </p>
+
+
+            <div class="integration-flow">
+
+                <span>
+                    Tamanna AI
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Orchestrator
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Agents
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Build / Test
+                </span>
+
+                <span aria-hidden="true">→</span>
+
+                <span>
+                    Powerhub
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         FUTURE AI LAYERS
+         ======================================================== -->
+
+    <section class="overview-section"
+             aria-labelledby="future-title">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                EXTENSIBILITY
+            </span>
+
+            <h2 id="future-title">
+                Future Tamanna AI Layers
+            </h2>
+
+        </div>
+
+
+        <div class="language-grid">
+
+            <article class="language-card">
+
+                <h3>
+                    Language System
+                </h3>
+
+                <p>
+                    Language definitions, alphabets, grammar,
+                    vocabulary and language-aware processing.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Understanding
+                </h3>
+
+                <p>
+                    Context and meaning processing for incoming
+                    requests.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Memory
+                </h3>
+
+                <p>
+                    Approved conversation and project knowledge
+                    storage.
+                </p>
+
+            </article>
+
+
+            <article class="language-card">
+
+                <h3>
+                    Module Router
+                </h3>
+
+                <p>
+                    Routes requests to appropriate project
+                    capabilities.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         SECURITY
+         ======================================================== -->
+
+    <section class="notice-section">
+
+        <strong>
+            Security &amp; Permission Model
+        </strong>
+
+        <p>
+            Automation components should operate within explicit
+            project boundaries and configured permissions.
+            Credentials, API tokens and other secrets should not
+            be stored in source-controlled documentation.
+        </p>
+
+        <p>
+            Operations that modify project files or repositories
+            should use appropriate authorization, validation and
+            audit mechanisms.
+        </p>
+
+    </section>
+
+
+    <!-- ========================================================
+         PROJECT INFORMATION
+         ======================================================== -->
+
+    <section class="project-info"
+             aria-labelledby="identity-title">
+
+        <h2 id="identity-title">
+            System Identity
+        </h2>
+
+        <dl>
+
+            <div>
+                <dt>Application</dt>
+                <dd>
+                    @Model.ApplicationName
+                </dd>
+            </div>
+
+            <div>
+                <dt>Project</dt>
+                <dd>
+                    @Model.ProjectName
+                </dd>
+            </div>
+
+            <div>
+                <dt>Website</dt>
+                <dd>
+                    @Model.WebsiteName
+                </dd>
+            </div>
+
+            <div>
+                <dt>Architecture</dt>
+                <dd>
+                    @Model.Architecture
+                </dd>
+            </div>
+
+            <div>
+                <dt>Framework</dt>
+                <dd>
+                    @Model.Framework
+                </dd>
+            </div>
+
+            <div>
+                <dt>Owner</dt>
+                <dd>
+                    @Model.OwnerName
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+
+    <!-- ========================================================
+         NAVIGATION
+         ======================================================== -->
+
+    <section class="page-actions-section">
+
+        <a class="btn"
+           asp-page="/Index">
+            ← Back to Powerhub
+        </a>
+
+        <a class="btn"
+           asp-page="/ProgramSystem">
+            Program &amp; System
+        </a>
+
+        <a class="btn"
+           asp-page="/CodeLanguages">
+            Code Languages
+        </a>
+
+    </section>
+
+</main>
