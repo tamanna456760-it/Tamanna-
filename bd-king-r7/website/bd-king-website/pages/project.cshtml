@@ -1,15 +1,398 @@
 @page
-@model ProjectModel
-@if (Model.Item == null)
-{
-    <h3>Project not found</h3>
-    <p>Check Data/projects.json for defined entries.</p>
+@model BD_KING_Website.Pages.ProjectModel
+
+@{
+    ViewData["Title"] = Model.Item?.Title
+        ?? "Project";
+
+    var projectId = Model.Item != null
+        ? Convert.ToString(Model.Item.Id)
+        : null;
 }
-else
-{
-    <h2>@Model.Item.Title</h2>
-    <p>@Model.Item.Short</p>
-    <article class="content">@Html.Raw(Model.Item.Content)</article>
-    <p><strong>Languages:</strong> @string.Join(", ", Model.Item.Languages)</p>
-    <p><strong>Tags:</strong> @string.Join(", ", Model.Item.Tags)</p>
-}
+
+<main class="powerhub-page project-page">
+
+    @if (!Model.ProjectFound)
+    {
+        <!-- ====================================================
+             ERROR / NOT FOUND
+             ==================================================== -->
+
+        <section class="hero-section project-error"
+                 aria-labelledby="project-error-title">
+
+            <div class="hero-content">
+
+                <span class="eyebrow">
+                    BD-KING-R7 • POWERHUB
+                </span>
+
+                <h1 id="project-error-title">
+                    Project Not Found
+                </h1>
+
+                <p class="hero-description">
+                    @Model.StatusMessage
+                </p>
+
+                <div class="page-actions">
+
+                    <a class="btn"
+                       asp-page="/Index">
+                        ← Back to Projects
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="notice-section">
+
+            <strong>
+                Project data unavailable
+            </strong>
+
+            <p>
+                Verify the project identifier and check
+                <code>Data/projects.json</code>.
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Status))
+            {
+                <p>
+                    <strong>Status:</strong>
+                    @Model.Status
+                </p>
+            }
+
+        </section>
+    }
+    else
+    {
+        <!-- ====================================================
+             PROJECT HERO
+             ==================================================== -->
+
+        <section class="hero-section"
+                 aria-labelledby="project-title">
+
+            <div class="hero-content">
+
+                <span class="eyebrow">
+                    BD-KING-R7 • POWERHUB • PROJECT
+                </span>
+
+                <h1 id="project-title">
+                    @Model.Item!.Title
+                </h1>
+
+                <p class="hero-description">
+                    @Model.Item.Short
+                </p>
+
+                <div class="page-actions">
+
+                    <a class="btn"
+                       asp-page="/Index">
+                        ← All Projects
+                    </a>
+
+                    <span class="status-badge">
+                        @Model.Status
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================================
+             QUICK PROJECT STATS
+             ==================================================== -->
+
+        <section class="status-grid"
+                 aria-label="Project statistics">
+
+            <article class="status-card">
+
+                <span class="status-label">
+                    STATUS
+                </span>
+
+                <strong>
+                    @Model.Status
+                </strong>
+
+            </article>
+
+
+            <article class="status-card">
+
+                <span class="status-label">
+                    LANGUAGES
+                </span>
+
+                <strong>
+                    @Model.LanguageCount
+                </strong>
+
+            </article>
+
+
+            <article class="status-card">
+
+                <span class="status-label">
+                    TAGS
+                </span>
+
+                <strong>
+                    @Model.TagCount
+                </strong>
+
+            </article>
+
+
+            <article class="status-card">
+
+                <span class="status-label">
+                    CONTENT
+                </span>
+
+                <strong>
+                    @Model.ContentLength
+                </strong>
+
+            </article>
+
+        </section>
+
+
+        <!-- ====================================================
+             PROJECT CONTENT
+             ==================================================== -->
+
+        <section class="project-detail-section"
+                 aria-labelledby="content-title">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    PROJECT DOCUMENTATION
+                </span>
+
+                <h2 id="content-title">
+                    @Model.Item.Title
+                </h2>
+
+            </div>
+
+
+            <article class="content project-content">
+
+                @Html.Raw(Model.Item.Content)
+
+            </article>
+
+        </section>
+
+
+        <!-- ====================================================
+             LANGUAGES
+             ==================================================== -->
+
+        <section class="overview-section"
+                 aria-labelledby="languages-title">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    DEVELOPMENT
+                </span>
+
+                <h2 id="languages-title">
+                    Languages &amp; Technologies
+                </h2>
+
+            </div>
+
+
+            @if (Model.Languages.Count > 0)
+            {
+                <div class="tag-grid">
+
+                    @foreach (var language in Model.Languages)
+                    {
+                        <span class="project-tag">
+                            @language
+                        </span>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    No languages have been defined for this
+                    project.
+                </div>
+            }
+
+        </section>
+
+
+        <!-- ====================================================
+             TAGS
+             ==================================================== -->
+
+        <section class="overview-section"
+                 aria-labelledby="tags-title">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    CLASSIFICATION
+                </span>
+
+                <h2 id="tags-title">
+                    Project Tags
+                </h2>
+
+            </div>
+
+
+            @if (Model.Tags.Count > 0)
+            {
+                <div class="tag-grid">
+
+                    @foreach (var tag in Model.Tags)
+                    {
+                        <span class="project-tag">
+                            #@tag
+                        </span>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    No tags have been defined for this project.
+                </div>
+            }
+
+        </section>
+
+
+        <!-- ====================================================
+             PROJECT INFORMATION
+             ==================================================== -->
+
+        <section class="project-info"
+                 aria-labelledby="information-title">
+
+            <h2 id="information-title">
+                Project Information
+            </h2>
+
+            <dl>
+
+                <div>
+                    <dt>Project ID</dt>
+                    <dd>
+                        @projectId
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Project</dt>
+                    <dd>
+                        @Model.Item.Title
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Application</dt>
+                    <dd>
+                        @Model.ApplicationName
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>System</dt>
+                    <dd>
+                        @Model.ProjectName Powerhub
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Framework</dt>
+                    <dd>
+                        @Model.Framework
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Content Source</dt>
+                    <dd>
+                        Data/projects.json
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Owner</dt>
+                    <dd>
+                        @Model.OwnerName
+                    </dd>
+                </div>
+
+            </dl>
+
+        </section>
+
+
+        <!-- ====================================================
+             DATA SOURCE
+             ==================================================== -->
+
+        <section class="notice-section">
+
+            <strong>
+                Data Source
+            </strong>
+
+            <p>
+                This project page reads its documentation data
+                through the existing <code>ProjectStore</code>.
+                The configured source is
+                <code>Data/projects.json</code>.
+            </p>
+
+            <p>
+                Project content can therefore be updated through
+                the data source without changing the Razor page
+                structure.
+            </p>
+
+        </section>
+
+
+        <!-- ====================================================
+             NAVIGATION
+             ==================================================== -->
+
+        <section class="page-actions-section">
+
+            <a class="btn"
+               asp-page="/Index">
+                ← Back to Project List
+            </a>
+
+        </section>
+    }
+
+</main>
