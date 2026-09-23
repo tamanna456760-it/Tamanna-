@@ -1,15 +1,206 @@
-# Simple container for the Razor Pages site
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
+# ============================================================
+# BD-KING-R7 / TAMANNA AI
+# ULTIMATE ASP.NET 8 RAZOR PAGES CONTAINER
+#
+# Owner: HM INSAN ALI
+# Application: bd-king-website
+# Runtime: ASP.NET 8
+# Database: PostgreSQL
+# ============================================================
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+# ============================================================
+# BUILD ARGUMENTS
+# ============================================================
+
+ARG DOTNET_VERSION=8.0
+ARG APP_NAME=bd-king-website
+
+
+# ============================================================
+# STAGE 1 — RUNTIME BASE
+# ============================================================
+
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS base
+
+WORKDIR /app
+
+
+# ------------------------------------------------------------
+# Runtime configuration
+# ------------------------------------------------------------
+
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENV ASPNETCORE_HTTP_PORTS=8080
+
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+ENV DOTNET_NOLOGO=true
+
+
+# ------------------------------------------------------------
+# Application metadata
+# ------------------------------------------------------------
+
+ENV TAMANNA_AI_NAME="Tamanna AI"
+
+ENV BD_KING_PROJECT="BD-KING-R7"
+
+ENV BD_KING_OWNER="HM INSAN ALI"
+
+
+# ------------------------------------------------------------
+# Container port
+# ------------------------------------------------------------
+
+EXPOSE 8080
+
+
+# ============================================================
+# STAGE 2 — BUILD
+# ============================================================
+
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
+
 WORKDIR /src
-COPY . .
-RUN dotnet restore
-RUN dotnet publish -c Release -o /app/publish
 
-FROM base
+
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+ENV DOTNET_NOLOGO=true
+
+
+# ------------------------------------------------------------
+# Copy solution/project files first
+# ------------------------------------------------------------
+
+COPY *.sln ./
+COPY *.csproj ./
+
+
+# ------------------------------------------------------------
+# Restore NuGet dependencies
+# ------------------------------------------------------------
+
+RUN dotnet restore
+
+
+# ------------------------------------------------------------
+# Copy application source
+# ------------------------------------------------------------
+
+COPY . .
+
+
+# ============================================================
+# STAGE 3 — BUILD APPLICATION
+# ============================================================
+
+RUN dotnet build \
+    -c Release \
+    --no-restore \
+    -o /app/build
+
+
+# ============================================================
+# STAGE 4 — PUBLISH
+# ============================================================
+
+FROM build AS publish
+
+RUN dotnet publish \
+    -c Release \
+    --no-restore \
+    --no-build \
+    -o /app/publish \
+    /p:UseAppHost=false \
+    /p:DebugType=None \
+    /p:DebugSymbols=false \
+    /p:GenerateDocumentationFile=false
+
+
+# ============================================================
+# STAGE 5 — FINAL RUNTIME
+# ============================================================
+
+FROM base AS final
+
 WORKDIR /app
-COPY --from=build /app/publish .
+
+
+# ------------------------------------------------------------
+# Copy published application
+# ------------------------------------------------------------
+
+COPY --from=publish /app/publish ./
+
+
+# ------------------------------------------------------------
+# Application directories
+# ------------------------------------------------------------
+
+RUN mkdir -p \
+    /app/data \
+    /app/logs \
+    /app/temp \
+    /app/backups
+
+
+# ============================================================
+# BUILD INFORMATION
+# ============================================================
+
+ARG BUILD_DATE
+
+ARG VERSION=1.0.0
+
+ARG COMMIT_SHA=unknown
+
+ENV APP_VERSION=${VERSION}
+
+ENV BUILD_DATE=${BUILD_DATE}
+
+ENV COMMIT_SHA=${COMMIT_SHA}
+
+
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=10s \
+    --start-period=30s \
+    --retries=3 \
+    CMD wget \
+        --no-verbose \
+        --tries=1 \
+        --spider \
+        http://127.0.0.1:8080/health \
+        || exit 1
+
+
+# ============================================================
+# SECURITY
+# ============================================================
+
+USER $APP_UID
+
+
+# ============================================================
+# GRACEFUL SHUTDOWN
+# ============================================================
+
+STOPSIGNAL SIGTERM
+
+
+# ============================================================
+# APPLICATION START
+# ============================================================
+
 ENTRYPOINT ["dotnet", "bd-king-website.dll"]
