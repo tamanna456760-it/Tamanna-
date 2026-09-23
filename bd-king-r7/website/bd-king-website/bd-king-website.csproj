@@ -1,10 +1,106 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- ======================================================
+       BD-KING-R7 / TAMANNA AI
+       ASP.NET 8 Razor Pages
+       Owner: HM INSAN ALI
+       ====================================================== -->
+
   <PropertyGroup>
+
     <TargetFramework>net8.0</TargetFramework>
+
     <Nullable>enable</Nullable>
+
     <ImplicitUsings>enable</ImplicitUsings>
+
+    <LangVersion>latest</LangVersion>
+
+    <AssemblyName>bd-king-website</AssemblyName>
+
+    <RootNamespace>BD_KING_Website</RootNamespace>
+
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <Deterministic>true</Deterministic>
+
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <DebugType>none</DebugType>
+
+    <DebugSymbols>false</DebugSymbols>
+
+    <PublishTrimmed>false</PublishTrimmed>
+
+    <PublishSingleFile>false</PublishSingleFile>
+
+    <SelfContained>false</SelfContained>
+
   </PropertyGroup>
+
+
+  <!-- ======================================================
+       PACKAGES
+       ====================================================== -->
+
   <ItemGroup>
-    <PackageReference Include="YamlDotNet" Version="12.0.2" />
+
+    <PackageReference
+      Include="YamlDotNet"
+      Version="12.0.2"
+      PrivateAssets="all"
+      GeneratePathProperty="true" />
+
+    <PackageReference
+      Include="Microsoft.EntityFrameworkCore"
+      Version="8.0.0" />
+
+    <PackageReference
+      Include="Npgsql.EntityFrameworkCore.PostgreSQL"
+      Version="8.0.0" />
+
   </ItemGroup>
+
+
+  <!-- ======================================================
+       CONFIGURATION FILES
+       ====================================================== -->
+
+  <ItemGroup>
+
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>
+        PreserveNewest
+      </CopyToOutputDirectory>
+    </Content>
+
+    <Content Update="appsettings.Production.json">
+      <CopyToOutputDirectory>
+        PreserveNewest
+      </CopyToOutputDirectory>
+    </Content>
+
+  </ItemGroup>
+
+
+  <!-- ======================================================
+       RELEASE
+       ====================================================== -->
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+
+    <Optimize>true</Optimize>
+
+    <DebugSymbols>false</DebugSymbols>
+
+    <DebugType>None</DebugType>
+
+    <PublishTrimmed>false</PublishTrimmed>
+
+    <PublishSingleFile>false</PublishSingleFile>
+
+    <SelfContained>false</SelfContained>
+
+  </PropertyGroup>
+
 </Project>
