@@ -39,8 +39,8 @@ services:
     ports:
       - "3002:3002"
     environment:
-      - OPENAI_API_KEY=your_openai_key_here
-      - MODEL=gpt-4
+      - OPENAI_API_KEY=MmABNbYUoH3mmqyeD82hXw2O5KVifHfDa3zhbzStgQ2Nvc2UXZadl6anTl9YczTqFNr6y10SshT3BlbkFJ_orWb9I7viU8wICW41FOjIhTa1FwaAjUtp11MnM-j9HdOhrIeMkiTgOCe-b9p7wEWGj8giYpEA
+      - MODEL=tamanna
       - MAX_TOKENS=2000
     networks:
       - bdking-network
