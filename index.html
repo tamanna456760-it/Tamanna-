@@ -1,11 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
-<meta charset="UTF-8">
-<title>Tamanna AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamanna AI</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
+  
+
+<style>
+#tamanna-system-dashboard {
+  margin: 20px auto;
+  max-width: 1000px;
+  padding: 20px;
+  font-family: system-ui, sans-serif;
+}
+
+.tamanna-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.tamanna-dashboard-header h2 {
+  margin: 0;
+}
+
+#tamanna-online {
+  font-weight: 700;
+}
+
+.tamanna-card {
+  margin: 15px 0;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(120, 70, 180, .08);
+  border: 1px solid rgba(120, 70, 180, .25);
+}
+
+.tamanna-command-row {
+  display: flex;
+  gap: 10px;
+}
+
+.tamanna-command-row input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #aaa;
+}
+
+.tamanna-card button,
+#tamanna-refresh {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+pre {
+  white-space: pre-wrap;
+  overflow-x: auto;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.08);
+}
+</style>
+
+<script src="/static/tamanna_system_panel.js"></script>
+  
 <body>
-<h1>Tamanna AI is Online</h1>
-<p>GitHub Pages is working.</p>
+
+    <div class="chat-app">
+
+        <header class="chat-header">
+            <div>
+                <h1>🤖 Tamanna AI</h1>
+                <span>AI Assistant</span>
+            </div>
+        </header>
+
+        <main id="chatBox" class="chat-box">
+            <div class="message ai-message">
+                <div class="message-name">Tamanna AI</div>
+                <div class="message-text">
+                    আমি Tamanna AI। কীভাবে সাহায্য করতে পারি?
+                </div>
+            </div>
+        </main>
+
+        <div class="typing-area">
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="আপনার মেসেজ লিখুন..."
+                autocomplete="off"
+            >
+
+            <button id="sendButton">
+                Send
+            </button>
+        </div>
+
+    </div>
+
+    <script src="js/chat.js?v=20251125_debug1"></script>
+
 </body>
 </html>
+
