@@ -1,0 +1,11 @@
+"""Basic .gitignore for the project."""
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+.DS_Store
+logs/
