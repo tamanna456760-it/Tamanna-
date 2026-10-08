@@ -1,4 +1,4 @@
-"""Tamanna AI package."""
+"""Tamanna AI package root."""
 
 from .skills import TamannaSkillManager
 from .code_builder import IntelligentCodeBuilder
