@@ -2887,3 +2887,14 @@ except Exception as exc:
 # ============================================================
 # END CENTRAL AUTOMATION API BRIDGE
 # ============================================================
+
+# TAMANNA_ECHO_CONTROLLER_ROUTE_V1
+# Additive integration: preserves the existing /api/chat route.
+from tamanna_ai.core.controller import tamanna_controller as _tamanna_controller
+
+@app.post("/api/tamanna/echo")
+async def tamanna_echo_controller_route(payload: dict):
+    """Route Echo commands through the Tamanna AI controller."""
+    message = str(payload.get("message", ""))
+    return _tamanna_controller.respond(message)
+

@@ -1,0 +1,25 @@
+{
+  "name": "Tamanna AI Resource Registry",
+  "owner": "HM INSAN ALI",
+  "version": "1.0",
+  "resources": [],
+  "categories": [
+    "ai",
+    "llm",
+    "coding",
+    "coding-ai",
+    "agents",
+    "rag",
+    "local-ai",
+    "multimodal",
+    "vision",
+    "speech",
+    "automation",
+    "security",
+    "threat-intelligence",
+    "osint",
+    "deep-dark-web-research",
+    "datasets",
+    "documentation"
+  ]
+}
