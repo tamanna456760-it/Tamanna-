@@ -22,7 +22,7 @@ Run Locally
 
 python3 main.py
 
-Open: http://127.0.0.1:8000
+Open: http://www.tamanna.com
 
 ⸻
 
