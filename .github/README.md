@@ -1,5 +1,32 @@
-  <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="300"/>
+  <img src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="300">
+  <h1>TI Tamanna AI</h1>
+  <p><strong>Intelligent Personal AI System</strong></p>
+</div>
 
+⸻
+
+About
+
+Tamanna AI is a personal AI system focused on intelligent chat, project development, memory, and automation.
+
+Features
+
+* AI Chat
+* Python and FastAPI backend
+* Dynamic module routing
+* Project context and memory
+* Development tools and automation
+* GitHub project management
+
+Run Locally
+
+python3 main.py
+
+Open: http://127.0.0.1:8000
+
+⸻
+
+Owner: HM INSAN ALI
 # 🤖 AI Auto System Runner
 
 এই প্রজেক্টটি একটি সম্পূর্ণ **AI-powered automation system**, যা GitHub repository এর কোডগুলোকে:
