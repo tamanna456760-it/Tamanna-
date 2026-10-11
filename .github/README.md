@@ -1,5 +1,5 @@
-  <img src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="300">
-  <h1>TI Tamanna AI</h1>
+  <img src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/tamanna-logo.svg" alt="Tamanna Logo" width="300">
+  <h1> Tamanna </h1>
   <p><strong>Intelligent Personal AI System</strong></p>
 </div>
 
