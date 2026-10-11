@@ -121,7 +121,7 @@ python3 main.py
 
 Local address, when the server starts successfully:
 
-http://127.0.0.1:8000
+http://www.tamanna.com
 
 🌌 The Vision
 
