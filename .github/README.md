@@ -1,3 +1,5 @@
+  <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="300"/>
+
 # 🤖 AI Auto System Runner
 
 এই প্রজেক্টটি একটি সম্পূর্ণ **AI-powered automation system**, যা GitHub repository এর কোডগুলোকে:
