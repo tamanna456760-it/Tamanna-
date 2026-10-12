@@ -1,0 +1,41 @@
+{
+  "project": "Tamanna AI",
+  "owner": "HM INSAN ALI",
+  "version": "1.0.0",
+  "enabled": true,
+  "mode": "monitor_only",
+  "detection": {
+    "failed_login_threshold": 5,
+    "failed_login_window_seconds": 300,
+    "request_rate_threshold": 60,
+    "request_rate_window_seconds": 60,
+    "suspicious_path_detection": true,
+    "malformed_event_detection": true
+  },
+  "event_collection": {
+    "enabled": true,
+    "max_event_size_bytes": 16384,
+    "max_events_in_memory": 1000,
+    "redact_secrets": true
+  },
+  "alerts": {
+    "enabled": true,
+    "minimum_severity": "medium",
+    "include_detection_reason": true
+  },
+  "storage": {
+    "format": "jsonl",
+    "directory": "ids/data",
+    "filename": "security_events.jsonl"
+  },
+  "reports": {
+    "enabled": true,
+    "directory": "ids/reports",
+    "filename": "ids_report.json"
+  },
+  "enforcement": {
+    "automatic_ip_blocking": false,
+    "modify_system_firewall": false,
+    "require_manual_approval": true
+  }
+}
