@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+# Virtual environments
+.venv/
+venv/
+env/
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+# Local runtime data and security logs
+data/*.jsonl
+reports/*.json
+*.log
+# Local secrets
+.env
+.env.*
+!.env.example
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
