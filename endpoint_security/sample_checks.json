@@ -1,0 +1,22 @@
+[
+  {
+    "name": "configuration_policy",
+    "status": "PASS",
+    "details": "Example only: security configuration policy was marked as passing."
+  },
+  {
+    "name": "file_integrity",
+    "status": "PASS",
+    "details": "Example only: file integrity check was marked as passing."
+  },
+  {
+    "name": "event_log_validation",
+    "status": "PASS",
+    "details": "Example only: event log validation was marked as passing."
+  },
+  {
+    "name": "dependency_review",
+    "status": "UNKNOWN",
+    "details": "Example only: dependency review has not been performed."
+  }
+]
