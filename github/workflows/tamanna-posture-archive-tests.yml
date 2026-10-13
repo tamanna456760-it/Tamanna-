@@ -1,0 +1,51 @@
+name: Tamanna AI - Posture Archive Tests
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "endpoint_security/posture_archive_index.py"
+      - "endpoint_security/posture_archive_verifier.py"
+      - "endpoint_security/tests/test_posture_archive_index.py"
+      - "endpoint_security/tests/test_posture_archive_verifier.py"
+      - ".github/workflows/tamanna-posture-archive-tests.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "endpoint_security/posture_archive_index.py"
+      - "endpoint_security/posture_archive_verifier.py"
+      - "endpoint_security/tests/test_posture_archive_index.py"
+      - "endpoint_security/tests/test_posture_archive_verifier.py"
+      - ".github/workflows/tamanna-posture-archive-tests.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tamanna-posture-archive-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  archive-tests:
+    name: Test Archive Integrity Utilities
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile archive modules
+        run: |
+          python -m py_compile \
+            endpoint_security/posture_archive_index.py \
+            endpoint_security/posture_archive_verifier.py
+      - name: Test archive index
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_archive_index -v
+      - name: Test archive verifier
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_archive_verifier -v
