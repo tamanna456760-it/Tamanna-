@@ -1,0 +1,47 @@
+{
+  "project": "Tamanna AI",
+  "owner": "HM INSAN ALI",
+  "component": "Web Application Firewall",
+  "version": "1.0.0",
+  "enabled": true,
+  "mode": "monitor_only",
+  "request_limits": {
+    "max_request_size_bytes": 1048576,
+    "max_url_length": 8192,
+    "max_header_count": 100,
+    "max_header_value_length": 8192,
+    "max_query_parameters": 200
+  },
+  "detection": {
+    "sql_injection_detection": true,
+    "cross_site_scripting_detection": true,
+    "path_traversal_detection": true,
+    "malformed_request_detection": true,
+    "suspicious_user_agent_detection": true,
+    "oversized_request_detection": true
+  },
+  "rules": {
+    "inspect_query_string": true,
+    "inspect_path": true,
+    "inspect_headers": true,
+    "inspect_request_body": true,
+    "maximum_body_inspection_bytes": 65536,
+    "case_insensitive_matching": true
+  },
+  "logging": {
+    "enabled": true,
+    "file": "data/waf_events.jsonl",
+    "redact_secrets": true,
+    "max_event_size_bytes": 16384
+  },
+  "alerts": {
+    "enabled": true,
+    "minimum_severity": "medium",
+    "include_detection_reason": true
+  },
+  "enforcement": {
+    "block_requests": false,
+    "modify_system_firewall": false,
+    "require_manual_approval": true
+  }
+}
