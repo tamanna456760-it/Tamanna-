@@ -1,0 +1,8 @@
+# Tamanna AI Web Application Firewall
+# Owner: HM INSAN ALI
+#
+# Runtime:
+# No third-party Python packages are currently required.
+#
+# Development and testing:
+pytest>=8.0,<10.0
