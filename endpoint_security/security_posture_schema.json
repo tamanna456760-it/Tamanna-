@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tamanna AI Security Posture Report",
+  "description": "Schema for validating read-only security posture reports.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "owner",
+    "generated_at_utc",
+    "status",
+    "checks",
+    "checks_passed",
+    "checks_failed",
+    "checks_error",
+    "read_only"
+  ],
+  "properties": {
+    "project": {
+      "const": "Tamanna AI"
+    },
+    "owner": {
+      "const": "HM INSAN ALI"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "VALID",
+        "REPORTS_READ",
+        "REVIEW_REQUIRED",
+        "INVALID",
+        "ERROR",
+        "NO_REPORTS",
+        "NO_VALID_REPORTS",
+        "REPORT_DIRECTORY_MISSING"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "PASSED",
+              "OK",
+              "FAIL",
+              "FAILED",
+              "ERROR",
+              "UNKNOWN"
+            ]
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "checks_passed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "checks_failed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "checks_error": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reports_found": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reports_read": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reports_invalid": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "read_only": {
+      "const": true
+    },
+    "note": {
+      "type": "string"
+    }
+  }
+}
