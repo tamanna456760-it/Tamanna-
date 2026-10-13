@@ -30,13 +30,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
+      - name: Install validator dependency
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "jsonschema>=4.20,<5.0"
       - name: Compile archive security modules
         run: |
           python -m py_compile \
             endpoint_security/posture_archive_index.py \
             endpoint_security/posture_archive_verifier.py \
-            endpoint_security/posture_archive_policy.py
+            endpoint_security/posture_archive_policy.py \
+            endpoint_security/posture_archive_preflight.py \
+            endpoint_security/posture_archive_preflight_validator.py
       - name: Run archive index tests
         run: |
           python -m unittest \
@@ -49,3 +54,15 @@ jobs:
         run: |
           python -m unittest \
             endpoint_security.tests.test_posture_archive_policy -v
+      - name: Run archive integration tests
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_archive_integration -v
+      - name: Run archive preflight tests
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_archive_preflight -v
+      - name: Run preflight validator tests
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_archive_preflight_validator -v
