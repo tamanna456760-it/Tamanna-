@@ -1,0 +1,48 @@
+{
+  "project": "Tamanna AI",
+  "owner": "HM INSAN ALI",
+  "policy_version": "1.0.0",
+  "environment": "production",
+  "policy_mode": "enforce_before_release",
+  "release_requirements": {
+    "require_immutable_image_digest": true,
+    "allow_latest_tag": false,
+    "require_release_record": true,
+    "require_rollback_image": true,
+    "require_security_scan_record": true,
+    "require_operator_approval": true
+  },
+  "approved_images": {
+    "tamanna_ai": {
+      "image_reference": "",
+      "required_format": "registry/repository@sha256:<64-hex-digest>",
+      "status": "NOT_CONFIGURED"
+    },
+    "nginx": {
+      "image_reference": "",
+      "required_format": "registry/repository@sha256:<64-hex-digest>",
+      "status": "NOT_CONFIGURED"
+    }
+  },
+  "release_record_fields": [
+    "release_id",
+    "created_at_utc",
+    "git_commit",
+    "image_digest",
+    "security_scan_result",
+    "health_check_result",
+    "approved_by"
+  ],
+  "rollback_rules": [
+    "Use a previously verified immutable image digest.",
+    "Confirm the rollback image belongs to the intended application.",
+    "Do not overwrite the previous release record.",
+    "Re-run health and HTTPS checks after rollback."
+  ],
+  "safety": {
+    "automatic_deployment": false,
+    "automatic_rollback": false,
+    "secrets_in_repository": false,
+    "note": "Policy document only; it does not enforce Docker settings by itself."
+  }
+}
