@@ -1,0 +1,13 @@
+{
+  "project": "Tamanna AI",
+  "owner": "HM INSAN ALI",
+  "release_id": "tamanna-example-001",
+  "git_commit": "0123456789abcdef0123456789abcdef01234567",
+  "images": {
+    "tamanna-ai": "registry.example.com/tamanna-ai@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "security_scan_status": "PASS",
+  "approved_by": "REPLACE_WITH_REAL_APPROVER",
+  "created_at_utc": "2026-10-22T00:00:00Z",
+  "notes": "EXAMPLE ONLY — replace all placeholder values before use."
+}
