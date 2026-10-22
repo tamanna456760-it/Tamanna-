@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tamanna AI Release Manifest",
+  "description": "Schema for validating a Tamanna AI production release manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "owner",
+    "release_id",
+    "git_commit",
+    "images",
+    "security_scan_status",
+    "approved_by"
+  ],
+  "properties": {
+    "project": {
+      "const": "Tamanna AI"
+    },
+    "owner": {
+      "const": "HM INSAN ALI"
+    },
+    "release_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "git_commit": {
+      "type": "string",
+      "pattern": "^(?:[a-fA-F0-9]{40}|[a-fA-F0-9]{64})$"
+    },
+    "images": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[^@\\s]+@sha256:[a-fA-F0-9]{64}$"
+      }
+    },
+    "security_scan_status": {
+      "const": "PASS"
+    },
+    "approved_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    }
+  }
+}
