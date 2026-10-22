@@ -1,0 +1,58 @@
+
+{
+  "system": "TAMANNA SYSTEM",
+  "owner": "HM INSAN ALI",
+  "version": "v1.0.1-ADVANCED",
+  "build_type": "MASTER-SYNC",
+  "release": "stable",
+  "sync_level": "full",
+  "identity": {
+    "name": "Tamanna AI",
+    "system_id": "01856992843",
+    "environment": "production",
+    "manifest_version": 1
+  },
+  "boot_policy": {
+    "verify_integrity_before_online": true,
+    "fail_on_integrity_mismatch": true,
+    "preserve_existing_data": true,
+    "automatic_destructive_actions": false,
+    "require_authorization_for_privileged_actions": true
+  },
+  "boot_stages": [
+    "initialize-zero-state",
+    "load-identity",
+    "activate-dual-engine",
+    "sync-heartbeat-loop",
+    "engage-ficar-power",
+    "link-powerhub",
+    "verify-integrity",
+    "system-online"
+  ],
+  "modules": [
+    "core.boot",
+    "core.engine.dual",
+    "core.engine.mirror",
+    "core.heartbeat.loop",
+    "core.identity",
+    "bd-king-r7.powerhub.link"
+  ],
+  "integrity": {
+    "algorithm": "sha256",
+    "files": {}
+  },
+  "integrations": {
+    "dual_engine": {
+      "enabled": false,
+      "status": "not_configured"
+    },
+    "heartbeat": {
+      "enabled": false,
+      "status": "not_configured"
+    },
+    "powerhub": {
+      "enabled": false,
+      "status": "not_configured"
+    }
+  }
+}
