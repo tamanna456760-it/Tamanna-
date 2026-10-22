@@ -9,3 +9,14 @@ venv/
 .env
 .DS_Store
 logs/
+
+# Tamanna AI: local secrets and credentials
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+api/token
+api/token.txt
+**/credentials.json
