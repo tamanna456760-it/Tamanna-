@@ -1,0 +1,44 @@
+{
+  "project": "Tamanna AI",
+  "owner": "HM INSAN ALI",
+  "component": "Endpoint Security",
+  "version": "1.0.0",
+  "enabled": true,
+  "mode": "monitor_only",
+  "monitoring": {
+    "process_monitoring": true,
+    "file_integrity_monitoring": true,
+    "security_event_logging": true,
+    "network_connection_inventory": false,
+    "startup_item_monitoring": false
+  },
+  "process_monitoring": {
+    "collect_command_line": false,
+    "collect_environment_variables": false,
+    "alert_on_unknown_executables": true,
+    "allowlist": []
+  },
+  "file_integrity": {
+    "enabled": true,
+    "paths": [],
+    "recursive": false,
+    "hash_algorithm": "sha256",
+    "alert_on_change": true,
+    "alert_on_delete": true,
+    "follow_symlinks": false,
+    "max_file_size_bytes": 10485760
+  },
+  "logging": {
+    "enabled": true,
+    "file": "data/endpoint_security_events.jsonl",
+    "redact_secrets": true,
+    "max_event_size_bytes": 16384
+  },
+  "enforcement": {
+    "kill_processes": false,
+    "quarantine_files": false,
+    "delete_files": false,
+    "modify_system_settings": false,
+    "require_manual_approval": true
+  }
+}

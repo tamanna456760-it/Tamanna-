@@ -1,0 +1,89 @@
+
+{
+  "name": "Tamanna AI Advanced Defense Firewall",
+  "version": "1.0.0",
+  "owner": "HM INSAN ALI",
+  "enabled": true,
+  "mode": "audit_only",
+
+  "security_policy": {
+    "default_policy": "deny",
+    "least_privilege": true,
+    "require_explicit_authorization": true,
+    "require_approval_for_system_changes": true,
+    "fail_closed": true
+  },
+
+  "network_protection": {
+    "inspect_listening_ports": true,
+    "allow_loopback": true,
+    "allowed_ips": [
+      "127.0.0.1",
+      "::1"
+    ],
+    "blocked_ips": [],
+    "allowed_ports": [],
+    "block_unapproved_ports": true
+  },
+
+  "authentication": {
+    "require_authentication_for_admin": true,
+    "role_based_access_control": true,
+    "least_privilege": true,
+    "allow_anonymous_admin": false
+  },
+
+  "api_protection": {
+    "enabled": true,
+    "validate_requests": true,
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 60,
+      "burst_limit": 10
+    },
+    "restrict_cross_origin_access": true
+  },
+
+  "threat_detection": {
+    "enabled": true,
+    "monitor_failed_logins": true,
+    "monitor_suspicious_requests": true,
+    "automatic_ip_blocking": false,
+    "require_review_before_blocking": true
+  },
+
+  "ai_tool_security": {
+    "restrict_shell_access": true,
+    "sandbox_untrusted_code": true,
+    "require_approval_for_destructive_actions": true,
+    "audit_tool_actions": true
+  },
+
+  "audit": {
+    "enabled": true,
+    "log_file": "firewall_audit.jsonl",
+    "record_denied_requests": true,
+    "record_configuration_changes": true,
+    "avoid_logging_secrets": true
+  },
+
+  "backup": {
+    "require_backup_before_policy_changes": true,
+    "verify_backup_integrity": true,
+    "require_recovery_test": true
+  },
+
+  "defense_improvement": {
+    "enabled": true,
+    "require_tests_before_activation": true,
+    "require_regression_tests": true,
+    "count_only_verified_modules": true,
+    "preserve_existing_files": true
+  },
+
+  "system_firewall": {
+    "integration": "not_configured",
+    "modify_system_rules": false,
+    "require_explicit_approval": true
+  }
+}

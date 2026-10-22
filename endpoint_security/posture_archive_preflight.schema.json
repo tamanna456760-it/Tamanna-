@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tamanna AI Posture Archive Preflight Result",
+  "description": "Schema for read-only posture archive preflight results.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "owner",
+    "status",
+    "findings",
+    "read_only"
+  ],
+  "properties": {
+    "project": {
+      "type": "string",
+      "const": "Tamanna AI"
+    },
+    "owner": {
+      "type": "string",
+      "const": "HM INSAN ALI"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "REVIEW_REQUIRED"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "report_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "read_only": {
+      "type": "boolean",
+      "const": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "findings": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "REVIEW_REQUIRED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "findings": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+name: Tamanna AI IDS Security Checks
+on:
+  push:
+    paths:
+      - "ids/**"
+      - ".github/workflows/tamanna-ids-security.yml"
+  pull_request:
+    paths:
+      - "ids/**"
+      - ".github/workflows/tamanna-ids-security.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tamanna-ids-security-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  security-checks:
+    name: Configuration and Security Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install -r ids/requirements-dev.txt
+      - name: Validate IDS configuration
+        run: python -m ids.ids_cli config
+      - name: Run security-focused tests
+        run: |
+          python -m unittest \
+            ids.tests.test_security_config \
+            ids.tests.test_config_loader_security \
+            ids.tests.test_event_collector_security \
+            ids.tests.test_alert_manager_security \
+            ids.tests.test_detection_engine_security \
+            ids.tests.test_ids_manager_security \
+            -v
+      - name: Validate monitor-only safety
+        run: python -m ids.validate_project

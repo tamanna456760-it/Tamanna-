@@ -1,0 +1,67 @@
+{
+  "project": "Tamanna AI",
+  "owner": "HM INSAN ALI",
+  "version": "1.0.0",
+  "purpose": "Document a safe manual deployment rollback procedure",
+  "mode": "manual_only",
+  "automatic_rollback": false,
+  "production_domain": "www.tamanna.com",
+  "rollback_policy": {
+    "require_known_good_image": true,
+    "require_predeployment_backup": true,
+    "require_health_check": true,
+    "require_operator_approval": true,
+    "never_delete_previous_image": true,
+    "never_overwrite_database_backup": true
+  },
+  "failure_triggers": [
+    "HTTPS smoke test fails",
+    "Application health check fails",
+    "Unexpected HTTP 5xx responses",
+    "Application fails to start",
+    "Critical security regression is detected"
+  ],
+  "manual_procedure": [
+    {
+      "step": 1,
+      "action": "Stop further deployment changes",
+      "verification": "Record the deployment error and timestamp"
+    },
+    {
+      "step": 2,
+      "action": "Identify the last known-good immutable Docker image",
+      "verification": "Confirm the image digest and deployment record"
+    },
+    {
+      "step": 3,
+      "action": "Check backup availability",
+      "verification": "Confirm required backups exist and are readable"
+    },
+    {
+      "step": 4,
+      "action": "Obtain operator approval",
+      "verification": "Record the approved rollback target"
+    },
+    {
+      "step": 5,
+      "action": "Restore the previous application version",
+      "verification": "Use the approved deployment procedure"
+    },
+    {
+      "step": 6,
+      "action": "Run application health and HTTPS smoke tests",
+      "verification": "Confirm expected responses and valid TLS"
+    },
+    {
+      "step": 7,
+      "action": "Record rollback outcome",
+      "verification": "Save logs, image digest, and test results"
+    }
+  ],
+  "safety_notes": [
+    "Do not use an unpinned latest image as a rollback target.",
+    "Application rollback does not automatically reverse database migrations.",
+    "Never commit secrets, access tokens, or private keys to this file.",
+    "This file documents a procedure; it does not perform rollback."
+  ]
+}

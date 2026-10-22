@@ -1,0 +1,84 @@
+
+name: Tamanna AI Main Runner
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "main.py"
+      - "Main.py"
+      - "requirements.txt"
+      - ".github/workflows/tamanna-main-run.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  run-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Tamanna AI
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install runtime packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install fastapi uvicorn
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile main.py Main.py
+
+      - name: Start Tamanna AI
+        env:
+          HOST: 127.0.0.1
+          PORT: "8000"
+        run: |
+          python main.py > tamanna.log 2>&1 &
+          echo $! > tamanna.pid
+
+      - name: Test HTTP server
+        run: |
+          python - <<'PY'
+          import time
+          import urllib.request
+
+          url = "http://127.0.0.1:8000/openapi.json"
+
+          for attempt in range(20):
+              try:
+                  with urllib.request.urlopen(
+                      url, timeout=2
+                  ) as response:
+                      print("HTTP status:", response.status)
+                      print("Tamanna AI API is responding.")
+                      break
+              except Exception:
+                  time.sleep(1)
+          else:
+              print("Server did not become ready.")
+              raise SystemExit(1)
+          PY
+
+      - name: Show server logs
+        if: always()
+        run: |
+          if [ -f tamanna.log ]; then
+            cat tamanna.log
+          fi
+
+      - name: Stop temporary server
+        if: always()
+        run: |
+          if [ -f tamanna.pid ]; then
+            kill "$(cat tamanna.pid)" 2>/dev/null || true
+          fi

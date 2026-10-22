@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {
+      "name": "JSON Schema validation",
+      "status": "PASS"
+    },
+    {
+      "name": "Placeholder check",
+      "status": "FAIL"
+    }
+  ]
+}

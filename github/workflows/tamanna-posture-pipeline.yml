@@ -1,0 +1,50 @@
+name: Tamanna AI - Posture Pipeline Tests
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "endpoint_security/**"
+      - ".github/workflows/tamanna-posture-pipeline.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "endpoint_security/**"
+      - ".github/workflows/tamanna-posture-pipeline.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tamanna-posture-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  posture-tests:
+    name: Validate Posture Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: endpoint_security/requirements.txt
+      - name: Install dependencies
+        run: python -m pip install -r endpoint_security/requirements.txt
+      - name: Validate sample checks JSON
+        run: python -m json.tool endpoint_security/sample_checks.json > /dev/null
+      - name: Validate posture schema JSON
+        run: python -m json.tool endpoint_security/security_posture_schema.json > /dev/null
+      - name: Run posture pipeline unit tests
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_pipeline \
+            -v
+      - name: Run posture integration tests
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_integration \
+            -v

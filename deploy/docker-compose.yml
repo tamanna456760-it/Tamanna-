@@ -1,0 +1,44 @@
+# =====================================================
+# Tamanna AI — Deployment Configuration
+# Owner: HM INSAN ALI
+# Domain: www.tamanna.com
+# =====================================================
+services:
+  tamanna-ai:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: tamanna-ai
+    restart: unless-stopped
+    # App is accessible only through the local host.
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      TAMANNA_ENV: "production"
+      PYTHONUNBUFFERED: "1"
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - tamanna-network
+  nginx:
+    image: nginx:stable
+    container_name: tamanna-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - tamanna-ai
+    networks:
+      - tamanna-network
+networks:
+  tamanna-network:
+    driver: bridge

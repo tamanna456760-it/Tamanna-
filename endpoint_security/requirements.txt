@@ -1,0 +1,4 @@
+# Tamanna AI - Endpoint Security
+# Owner: HM INSAN ALI
+# Running process inventory
+psutil>=5.9,<8.0
