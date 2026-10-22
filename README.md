@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="assets/tamanna-logo.svg"
+       alt="TI Tamanna AI Logo"
+       width="280">
+</p>
+
 # Project Documentation
 
 ## Overview
