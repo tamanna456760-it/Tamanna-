@@ -41,28 +41,19 @@ jobs:
             endpoint_security/posture_archive_verifier.py \
             endpoint_security/posture_archive_policy.py \
             endpoint_security/posture_archive_preflight.py \
-            endpoint_security/posture_archive_preflight_validator.py
+            endpoint_security/posture_archive_preflight_validator.py \
+            endpoint_security/posture_archive_summary.py
       - name: Run archive index tests
-        run: |
-          python -m unittest \
-            endpoint_security.tests.test_posture_archive_index -v
+        run: python -m unittest endpoint_security.tests.test_posture_archive_index -v
       - name: Run archive verifier tests
-        run: |
-          python -m unittest \
-            endpoint_security.tests.test_posture_archive_verifier -v
+        run: python -m unittest endpoint_security.tests.test_posture_archive_verifier -v
       - name: Run archive policy tests
-        run: |
-          python -m unittest \
-            endpoint_security.tests.test_posture_archive_policy -v
+        run: python -m unittest endpoint_security.tests.test_posture_archive_policy -v
       - name: Run archive integration tests
-        run: |
-          python -m unittest \
-            endpoint_security.tests.test_posture_archive_integration -v
+        run: python -m unittest endpoint_security.tests.test_posture_archive_integration -v
       - name: Run archive preflight tests
-        run: |
-          python -m unittest \
-            endpoint_security.tests.test_posture_archive_preflight -v
+        run: python -m unittest endpoint_security.tests.test_posture_archive_preflight -v
       - name: Run preflight validator tests
-        run: |
-          python -m unittest \
-            endpoint_security.tests.test_posture_archive_preflight_validator -v
+        run: python -m unittest endpoint_security.tests.test_posture_archive_preflight_validator -v
+      - name: Run posture archive summary tests
+        run: python -m unittest endpoint_security.tests.test_posture_archive_summary -v
