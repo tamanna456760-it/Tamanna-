@@ -55,7 +55,7 @@ LANGUAGE_CONFIGS = {
         ],
         "issue_counter": ["ruff", "check", "{file}", "--statistics"],
     },
-    ".js": LANGUAGE_CONFIGS[".js"] = {  # JS and TS share same fixers
+    ".js": {  # JS and TS share same fixers
         "name": "JavaScript",
         "fixers": [
             {"cmd": ["npx", "eslint", "--fix", "{file}"], "optional": False, "dry_run_arg": "--fix-dry-run"},

@@ -30,11 +30,23 @@ jobs:
     
     - name: Install Dependencies
       run: |
-        pip install pylint flake8 black isort autopep8 bandit safety
-        pip install radon xenon mypy pytest
+        python -m pip install --upgrade pip
+        python -m pip install ruff rich
     
     - name: Auto Code Sync & Fix
-      run: python .github/scripts/auto_code_fixer.py
+      run: |
+        python -m py_compile .github/scripts/auto_code_fixer.py
+        mapfile -t files < <(find . -type f -name '*.py' \
+          -not -path './.git/*' \
+          -not -path '*/.venv/*' \
+          -not -path '*/venv/*' \
+          -not -path '*/__pycache__/*' \
+          -not -path '*/node_modules/*')
+        if [ "${#files[@]}" -eq 0 ]; then
+          echo "No Python files found."
+          exit 1
+        fi
+        python .github/scripts/auto_code_fixer.py "${files[@]}" --jobs 4
     
     - name: Commit & Push Fixes
       run: |
