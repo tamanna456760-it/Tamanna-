@@ -1,0 +1,56 @@
+TAMANNA AI MODULE AUDIT
+Owner: HM INSAN ALI
+Root: /root/GitHub/Tamanna-
+
+=== EXPECTED PATHS ===
+PRESENT  main.py
+PRESENT  Main.py
+PRESENT  requirements.txt
+PRESENT  tamanna_ai/core/controller.py
+PRESENT  tamanna_ai/brain/brain.py
+PRESENT  tamanna_ai/tools/echo_power.py
+PRESENT  modules/tamanna/module_router.py
+PRESENT  modules/tamanna/module_bridge.py
+PRESENT  data/unified.py
+PRESENT  firewall/firewall_manager.py
+PRESENT  waf
+PRESENT  ids
+PRESENT  endpoint_security
+
+=== MODULE COUNTS ===
+tamanna_ai: 170 Python files
+tamanna_ai_advanced: 21 Python files
+modules: 8 Python files
+data: 48 Python files
+api: 0 Python files
+core: 3 Python files
+firewall: 77 Python files
+waf: 15 Python files
+ids: 28 Python files
+endpoint_security: 60 Python files
+tamanna_security: 4 Python files
+tamanna-server: 1 Python files
+runner: 1025 Python files
+
+=== PYTHON SYNTAX CHECK ===
+Files parsed: 1489
+Syntax errors: 13
+runner/python/signal.py: SyntaxError
+runner/python/tamanna_deep_power.py: IndentationError
+runner/python/radar.py: SyntaxError
+runner/python/tamanna_update.py: SyntaxError
+runner/python/ai_file_serial_manager.py: SyntaxError
+runner/python/automated_upgrade.py: SyntaxError
+runner/python/auto_code_manager.py: SyntaxError
+runner/python/tamanna_core.py: IndentationError
+runner/python/tamanna_ai.py: SyntaxError
+runner/python/tamanna_r.py: SyntaxError
+runner/python/bd-king-r7_ai.py: SyntaxError
+.github/workflows/test.py: SyntaxError
+.github/scripts/auto_code_fixer.py: SyntaxError
+
+=== CORE DEPENDENCIES ===
+uvicorn: MISSING
+fastapi: MISSING
+pydantic: MISSING
+pytest: MISSING
