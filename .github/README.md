@@ -7,10 +7,6 @@
   />
 </p>
 
-
-<p align="center">
-  <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="260">
-</p>
 <h1 align="center">TAMANNA AI</h1>
 <p align="center">
   <strong>Personal AI System · Automation · Project Intelligence · Security</strong>
