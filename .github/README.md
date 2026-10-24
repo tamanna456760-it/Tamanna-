@@ -1,7 +1,7 @@
 
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/tamanna-logo.svg"
+    src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/tamanna-logo.png"
     alt="TI Tamanna AI Logo"
     width="280"
   />
