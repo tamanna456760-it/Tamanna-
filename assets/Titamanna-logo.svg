@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1024" height="1024"
+     viewBox="0 0 1024 1024">
+  <title>Tamanna AI — TI Logo</title>
+  <desc>Futuristic neon Tamanna AI logo with a couple portrait.</desc>
+  <defs>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="48%" stop-color="#315cff"/>
+      <stop offset="100%" stop-color="#ff22ed"/>
+    </linearGradient>
+    <radialGradient id="background">
+      <stop offset="0%" stop-color="#071a50"/>
+      <stop offset="100%" stop-color="#02030e"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="portraitClip">
+      <circle cx="512" cy="420" r="350"/>
+    </clipPath>
+  </defs>
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="80" fill="url(#background)"/>
+  <!-- Neon circular frame -->
+  <circle cx="512" cy="450" r="420"
+          fill="none" stroke="url(#neon)"
+          stroke-width="10" filter="url(#glow)"/>
+  <circle cx="512" cy="450" r="398"
+          fill="none" stroke="#167dff"
+          stroke-width="2" stroke-dasharray="12 12"/>
+  <!-- Couple portrait: upload Tamanna-logo.png beside this SVG -->
+  <image x="162" y="70" width="700" height="700"
+         preserveAspectRatio="xMidYMid slice"
+         clip-path="url(#portraitClip)"
+         xlink:href="Tamanna-logo.png"/>
+  <!-- Monogram badge -->
+  <circle cx="512" cy="730" r="82"
+          fill="#03091e" stroke="url(#neon)"
+          stroke-width="7" filter="url(#glow)"/>
+  <text x="512" y="752"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="66" font-weight="900"
+        text-anchor="middle" fill="url(#neon)">TI</text>
+  <!-- Brand name -->
+  <path d="M100 790 L924 790 L964 840 L924 890 L100 890 L60 840 Z"
+        fill="#04091c" stroke="url(#neon)"
+        stroke-width="5" filter="url(#glow)"/>
+  <text x="512" y="851"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="76" font-weight="900"
+        text-anchor="middle" fill="#ffffff"
+        letter-spacing="2">TAMANNA <tspan fill="#ed55ff">AI</tspan></text>
+  <!-- Tagline -->
+  <text x="512" y="928"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="20" font-weight="600"
+        text-anchor="middle" fill="#bcecff"
+        letter-spacing="2">YOUR AI. YOUR SYSTEM. YOUR CONTROL.</text>
+  <!-- Neon heart -->
+  <path d="M512 976
+           C485 955 470 939 485 926
+           C497 916 509 925 512 934
+           C520 918 540 918 550 931
+           C562 948 535 967 512 976 Z"
+        fill="url(#neon)" filter="url(#glow)"/>
+</svg>
