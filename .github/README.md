@@ -1,3 +1,18 @@
+
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/tamanna-logo.svg"
+    alt="TI Tamanna AI Logo"
+    width="280"
+  />
+</p>
+
+<h1 align="center">TAMANNA AI</h1>
+
+<p align="center">
+  <b>Your AI. Your System. Your Control.</b>
+</p>
+
 <p align="center">
   <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="260">
 </p>
