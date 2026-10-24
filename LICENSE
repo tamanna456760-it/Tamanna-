@@ -1,0 +1,200 @@
+TAMANNA AI — PROPRIETARY SOFTWARE LICENSE
+
+Project Name: Tamanna AI
+Project Owner: HM INSAN ALI
+Copyright Notice: Copyright © 2026 HM INSAN ALI
+License Type: Proprietary Software License
+Version: 1.0
+Effective Date: October 24, 2026
+
+All rights reserved, subject to the terms below and applicable law.
+
+⸻
+
+1. PURPOSE AND SCOPE
+
+This Proprietary Software License governs the use, copying, modification, distribution, and other handling of the proprietary components of Tamanna AI.
+
+Tamanna AI is an artificial intelligence and software development project that may include source code, application interfaces, automation tools, memory systems, knowledge management modules, security components, server configurations, documentation, and related technical materials.
+
+This license applies only to materials owned by or lawfully controlled by the project owner. Third-party materials remain subject to their own licenses and legal terms.
+
+2. OWNERSHIP AND COPYRIGHT
+
+The original proprietary portions of Tamanna AI are owned by HM INSAN ALI, unless a different ownership statement or applicable agreement establishes otherwise.
+
+Protected materials may include:
+
+* Original source code and scripts.
+* Original software architecture and system designs.
+* Application interfaces and user experience designs.
+* Original documentation and technical descriptions.
+* Original project-specific automation and orchestration code.
+* Original memory, indexing, and knowledge-management implementations.
+* Original security configurations, tools, and integration code.
+* Project branding, names, logos, and original visual assets.
+* Original build, deployment, and configuration files.
+
+Nothing in this license transfers ownership of the proprietary project to a user, contributor, customer, or other party.
+
+3. REPOSITORY ACCESS
+
+Public visibility of a repository does not, by itself, grant permission to use, modify, redistribute, or commercially exploit its proprietary code.
+
+Viewing publicly available source code for inspection and evaluation is permitted where lawful and consistent with the repository’s access settings.
+
+Any broader permissions must come from this license, another applicable license, or explicit written authorization from the relevant rights holder.
+
+4. RESTRICTIONS ON COPYING AND REDISTRIBUTION
+
+Unless expressly permitted in writing by the relevant rights holder or by another applicable license, you may not:
+
+1. Republish or redistribute proprietary portions of Tamanna AI.
+2. Sell, sublicense, lease, or commercially distribute those portions.
+3. Publish modified proprietary versions as a separate product.
+4. Repackage proprietary code and claim it as your own original work.
+5. Remove or falsify applicable copyright or ownership notices.
+6. Provide unauthorized copies to third parties.
+7. Use the project’s name or branding to falsely imply official approval or affiliation.
+8. Circumvent access controls or technical restrictions unlawfully.
+
+These restrictions do not override rights that applicable law grants and does not permit the owner to restrict.
+
+5. MODIFICATION AND DERIVATIVE WORKS
+
+You may not distribute modified versions of proprietary Tamanna AI components without the necessary authorization, except where another applicable license or mandatory legal right permits that activity.
+
+Ownership of independently created modifications, contributions, and derivative works must be determined under applicable law and any relevant written agreement.
+
+Submitting a contribution does not automatically transfer ownership of unrelated code or grant unrestricted rights to the entire project.
+
+6. COMMERCIAL USE
+
+Commercial use of proprietary Tamanna AI components requires written permission from the relevant rights holder unless another applicable license expressly authorizes that use.
+
+Commercial activities may include selling copies, offering paid access, incorporating proprietary components into a commercial product, sublicensing the software, or distributing it as part of a paid service.
+
+Commercial permission may be subject to a separate agreement covering fees, attribution, support, permitted deployment, and other conditions.
+
+7. TRADEMARKS AND BRANDING
+
+The Tamanna AI name, project identity, logos, and associated original branding may be protected by applicable intellectual property laws.
+
+This license does not grant ownership of those marks or unrestricted permission to use them.
+
+You may not falsely represent a product, service, or organization as officially produced, sponsored, or endorsed by the Tamanna AI project owner.
+
+Any use of project branding must comply with applicable law and any separate written permission.
+
+8. THIRD-PARTY SOFTWARE AND CONTENT
+
+Tamanna AI may contain or interact with third-party software, libraries, frameworks, APIs, datasets, documentation, or other materials.
+
+Those materials are not automatically owned by HM INSAN ALI.
+
+Each third-party component remains subject to its applicable license, copyright notice, terms of service, and other legal requirements.
+
+Where a third-party license grants rights that differ from this license, that third-party license governs the relevant component to the extent required by law.
+
+Users are responsible for reviewing and complying with applicable third-party terms.
+
+9. OPEN-SOURCE COMPONENTS
+
+Nothing in this document removes permissions already granted under a valid open-source license.
+
+If a component is distributed under an MIT, Apache-2.0, GPL, BSD, or another open-source license, the terms of that license apply to that component.
+
+This document must not be interpreted as relicensing third-party code without authorization from its rights holder.
+
+10. SECURITY AND RESPONSIBLE USE
+
+Users must comply with applicable laws when operating, testing, modifying, or deploying Tamanna AI.
+
+This license does not authorize unauthorized access to systems, unlawful surveillance, credential theft, malicious activity, or circumvention of security controls.
+
+Any security testing must be conducted only on systems for which the user has appropriate authorization.
+
+Users remain responsible for configuring their own servers, credentials, access controls, network security, backups, and deployment environments.
+
+11. PRIVACY AND DATA
+
+This license does not independently grant permission to collect, process, disclose, or transfer personal data.
+
+Any use of Tamanna AI involving personal information must comply with applicable privacy and data-protection laws, relevant platform requirements, and any applicable agreements.
+
+Users are responsible for the data they provide to or process through their own deployments, subject to applicable law.
+
+12. CONTRIBUTIONS
+
+Contributions may be submitted through pull requests or other project-approved processes.
+
+Unless a separate agreement states otherwise, submitting a contribution does not automatically transfer copyright ownership to the project owner.
+
+The contributor must have the legal right to submit the contribution and must identify any third-party restrictions that apply.
+
+The project owner may accept or reject proposed contributions at their discretion, subject to applicable law and any existing agreements.
+
+13. DISCLAIMER OF WARRANTIES
+
+To the maximum extent permitted by applicable law, the proprietary software and associated materials are provided “AS IS” and “AS AVAILABLE”, without warranties of any kind, whether express, implied, or statutory.
+
+This includes, where legally disclaimable, warranties of merchantability, fitness for a particular purpose, title, and non-infringement.
+
+No guarantee is made that the software will be uninterrupted, error-free, secure in every environment, or suitable for every intended use.
+
+14. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by applicable law, the relevant rights holder shall not be liable for indirect, incidental, special, consequential, or punitive damages arising from the use or inability to use the proprietary software.
+
+Nothing in this section excludes or limits liability where such exclusion or limitation is prohibited by applicable law.
+
+15. TERMINATION
+
+Any permission granted under a separate written agreement may be terminated in accordance with that agreement and applicable law.
+
+If a user exceeds the permissions granted under this license, the rights holder may pursue remedies available under applicable law.
+
+Termination does not eliminate rights or obligations that applicable law requires to survive.
+
+16. PERMISSION REQUESTS
+
+Requests for commercial use, redistribution, sublicensing, integration into proprietary products, or other permissions beyond those granted here should be submitted to the project owner.
+
+Project: Tamanna AI
+Owner: HM INSAN ALI
+
+A permission request should describe the intended use, relevant components, distribution method, and whether the use is commercial.
+
+No additional permission is granted merely because a request has been submitted.
+
+17. CHANGES TO THIS LICENSE
+
+A revised license may be published for future versions or distributions of Tamanna AI.
+
+A change to this document does not automatically override a separate written agreement or a valid license previously granted for a particular version.
+
+Users should review the applicable license associated with the specific version they use.
+
+18. GOVERNING LAW
+
+The governing law, jurisdiction, and dispute-resolution process should be established by an applicable written agreement or determined under the relevant legal rules.
+
+Nothing in this document is intended to override mandatory legal protections.
+
+19. ENTIRE LICENSE
+
+This document describes the general conditions for using the proprietary portions of Tamanna AI.
+
+If a separate written agreement conflicts with this document, the relationship between the documents will be determined by their terms and applicable law.
+
+If any provision is found unenforceable, the remaining provisions will continue to apply to the extent permitted by law.
+
+20. COPYRIGHT AND RIGHTS NOTICE
+
+Copyright © 2026 HM INSAN ALI. All rights reserved in the original proprietary portions of Tamanna AI.
+
+Third-party components, trademarks, and materials remain the property of their respective rights holders.
+
+TAMANNA AI — PROPRIETARY SOFTWARE LICENSE
+Owner: HM INSAN ALI
+Version 1.0 — October 24, 2026
