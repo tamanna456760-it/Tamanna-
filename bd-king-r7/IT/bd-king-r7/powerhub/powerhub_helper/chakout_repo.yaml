@@ -1,44 +1,118 @@
-name: BD-KING-R7 PowerHub Auto Builder
+
+name: "BD-KING-R7 PowerHub Build"
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - "bd-king-r7/IT/bd-king-r7/powerhub/**"
+      - ".github/workflows/powerhub-build.yml"
   pull_request:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - "bd-king-r7/IT/bd-king-r7/powerhub/**"
+      - ".github/workflows/powerhub-build.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: powerhub-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-helper:
+  build:
+    name: Build PowerHub
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      # 1. Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # 2. Setup environment (example: Node.js, Python, or custom)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            bd-king-r7/IT/bd-king-r7/powerhub/package-lock.json
+            bd-king-r7/IT/bd-king-r7/powerhub/powerhub_helper/package-lock.json
 
-      # 3. Install dependencies
+      - name: Locate PowerHub Node.js project
+        id: locate
+        shell: bash
+        run: |
+          BASE="bd-king-r7/IT/bd-king-r7/powerhub"
+          APP_DIR=""
+
+          for candidate in "$BASE" "$BASE/powerhub_helper"; do
+            if [ -f "$candidate/package.json" ]; then
+              APP_DIR="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$APP_DIR" ]; then
+            echo "ERROR: package.json not found in PowerHub directories."
+            echo "Check where the actual Node.js application is stored."
+            exit 1
+          fi
+
+          echo "app_dir=$APP_DIR" >> "$GITHUB_OUTPUT"
+          echo "Using Node.js project: $APP_DIR"
+
       - name: Install dependencies
-        run: npm install
+        working-directory: ${{ steps.locate.outputs.app_dir }}
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
-      # 4. Run build script
+      - name: Verify build script
+        working-directory: ${{ steps.locate.outputs.app_dir }}
+        run: |
+          node -e "
+            const p = require('./package.json');
+            if (!p.scripts || !p.scripts.build) {
+              console.error('ERROR: package.json has no build script.');
+              process.exit(1);
+            }
+            console.log('Build script found.');
+          "
+
       - name: Build PowerHub
+        working-directory: ${{ steps.locate.outputs.app_dir }}
         run: npm run build
 
-      # 5. Run tests (optional)
-      - name: Run tests
-        run: npm test
+      - name: Run tests when available
+        working-directory: ${{ steps.locate.outputs.app_dir }}
+        run: npm test --if-present
 
-      # 6. Upload build artifacts
-      - name: Upload build output
-        uses: actions/upload-artifact@v3
+      - name: Verify build output
+        working-directory: ${{ steps.locate.outputs.app_dir }}
+        run: |
+          if [ ! -d dist ]; then
+            echo "ERROR: dist/ directory was not created."
+            echo "Adjust the output path if this project uses another build directory."
+            exit 1
+          fi
+
+          if [ -z "$(find dist -type f -print -quit)" ]; then
+            echo "ERROR: dist/ contains no files."
+            exit 1
+          fi
+
+          echo "Build output verified."
+          find dist -maxdepth 3 -type f -print
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: powerhub-build
-          path: dist/
+          name: powerhub-build-${{ github.run_id }}
+          path: ${{ steps.locate.outputs.app_dir }}/dist/
+          if-no-files-found: error
+          retention-days: 14
