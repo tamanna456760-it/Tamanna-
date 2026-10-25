@@ -9,61 +9,76 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: tamanna-ai-debug-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ai-debug:
+    name: Scan and Review
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "pip"
 
       - name: Install dependencies
-        run: python -m pip install --upgrade pip openai
-
-      - name: Scan code
         run: |
-          if [ -f scripts/scan.py ]; then
-            python scripts/scan.py
-          else
+          python -m pip install --upgrade pip
+          python -m pip install openai
+
+      - name: Validate required files
+        run: |
+          test -f scripts/scan.py || {
             echo "ERROR: scripts/scan.py not found"
             exit 1
-          fi
+          }
+          test -f scripts/ai_debugger.py || {
+            echo "ERROR: scripts/ai_debugger.py not found"
+            exit 1
+          }
+
+      - name: Run static code scanner
+        run: python scripts/scan.py
 
       - name: Run AI debugger
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "ERROR: Configure OPENAI_API_KEY in GitHub Actions Secrets."
-            exit 1
-          fi
-          if [ ! -f scripts/ai_debugger.py ]; then
-            echo "ERROR: scripts/ai_debugger.py not found"
-            exit 1
-          fi
-          python scripts/ai_debugger.py
+          OPENAI_MODEL: gpt-4o-mini
+        run: python scripts/ai_debugger.py
 
-      - name: Show report
+      - name: Show scanner report
         if: always()
         run: |
           if [ -f report.txt ]; then
             cat report.txt
           else
-            echo "No report.txt was generated."
+            echo "Scanner report was not generated."
           fi
 
-      - name: Upload report
+      - name: Show AI report status
+        if: always()
+        run: |
+          if [ -f ai_debugger_report.txt ]; then
+            echo "AI debugger report generated."
+          else
+            echo "AI debugger report was not generated."
+          fi
+
+      - name: Upload debug reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-ai-debug-report
-          path: report.txt
+          name: tamanna-ai-debug-reports
+          path: |
+            report.txt
+            ai_debugger_report.txt
           if-no-files-found: ignore
           retention-days: 7
