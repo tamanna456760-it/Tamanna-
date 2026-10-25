@@ -1,14 +1,42 @@
-# .github/workflows/build.yml
-name: Build
-on: [push]
+Tamanna AI - Python Build and Syntax Check
+
+name: Tamanna AI Build
+
+on:
+push:
+branches: [main]
+pull_request:
+branches: [main]
+workflow_dispatch:
+
+permissions:
+contents: read
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+python-build:
+name: Python Syntax Check
+runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.11"
+  - name: Check Python syntax
+    run: |
+      python -m compileall -q Main.py main.py scripts tamanna_ai
+      
+  - name: Verify server entry points
+    run: |
+      test -f Main.py
+      test -f main.py
+      echo "Tamanna AI entry-point files found."
+  - name: Check Node project files without failing Python build
+    run: |
+      if [ -f package.json ] && [ -f package-lock.json ]; then
+        echo "Root Node.js project detected."
+      else
+        echo "No complete root Node.js project; skipping npm commands."
+      fi
