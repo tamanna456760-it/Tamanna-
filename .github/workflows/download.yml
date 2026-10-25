@@ -1,8 +1,72 @@
-            - name: Download a Build Artifact
-  uses: actions/download-artifact@v3.1.0
-  with:
-    # Artifact name
-    name: # optional
-    # Destination path
-    path: # optional
-          
+
+name: "Tamanna Artifact Downloader"
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Source GitHub Actions run ID"
+        required: true
+        type: string
+      artifact_name:
+        description: "Exact artifact name to download"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  download:
+    name: Download build artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Validate inputs
+        env:
+          SOURCE_RUN_ID: ${{ inputs.run_id }}
+          ARTIFACT_NAME: ${{ inputs.artifact_name }}
+        run: |
+          if ! [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: run_id must contain digits only."
+            exit 1
+          fi
+
+          if [ -z "$ARTIFACT_NAME" ]; then
+            echo "ERROR: artifact_name is required."
+            exit 1
+          fi
+
+      - name: Download artifact from source run
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: downloaded-artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.run_id }}
+
+      - name: Verify downloaded files
+        run: |
+          if [ ! -d downloaded-artifact ]; then
+            echo "ERROR: Download directory not found."
+            exit 1
+          fi
+
+          if [ -z "$(find downloaded-artifact -type f -print -quit)" ]; then
+            echo "ERROR: Artifact contains no files."
+            exit 1
+          fi
+
+          echo "Downloaded files:"
+          find downloaded-artifact -type f -print
+
+      - name: Upload downloaded copy
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-downloaded-copy-${{ github.run_id }}
+          path: downloaded-artifact/
+          if-no-files-found: error
+          retention-days: 7
