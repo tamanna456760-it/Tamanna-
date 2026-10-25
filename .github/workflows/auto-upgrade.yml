@@ -1,42 +1,108 @@
-name: AI Auto-Upgrade Codebase
+
+name: Tamanna Auto Upgrade - Safe Review
 
 on:
-  schedule:
-    - cron: '0 0 * * 0'   # প্রতি রবিবার রাত ১২টা
-  workflow_dispatch:       # ম্যানুয়ালি চালানোর বাটন
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
+# Read-only: no repository writes or automatic upgrades.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+concurrency:
+  group: tamanna-auto-upgrade-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  ai-upgrade:
+  review:
+    name: Read-Only Upgrade Review
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: 20
+          python-version: "3.11"
 
-      - name: Install dependencies
-        run: npm install axios @octokit/rest
+      - name: Scan Python syntax
+        id: scan
+        shell: bash
+        run: |
+          set -u
 
-      - name: Run AI upgrade script
+          mkdir -p audit-report
+          : > audit-report/python-errors.txt
+
+          error_count=0
+          export PYTHONPYCACHEPREFIX=/tmp/tamanna-pycache
+
+          while IFS= read -r -d '' file; do
+            if ! python -m py_compile "$file" \
+              2>> audit-report/python-errors.txt; then
+              error_count=$((error_count + 1))
+              printf 'FAIL: %s\n' "$file"
+            fi
+          done < <(
+            find . \
+              -type d \( \
+                -name .git -o \
+                -name .venv -o \
+                -name venv -o \
+                -name node_modules -o \
+                -name __pycache__ \
+              \) -prune -o \
+              -type f -name '*.py' -print0
+          )
+
+          echo "error_count=$error_count" >> "$GITHUB_OUTPUT"
+          echo "Python files with syntax errors: $error_count"
+
+      - name: Check repository whitespace
+        id: diffcheck
+        shell: bash
+        run: |
+          set -u
+
+          if git diff --check; then
+            echo "result=PASS" >> "$GITHUB_OUTPUT"
+            echo "Whitespace check passed."
+          else
+            echo "result=FAIL" >> "$GITHUB_OUTPUT"
+            echo "Whitespace check found issues."
+          fi
+
+      - name: Create review report
+        if: always()
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: node .github/scripts/ai-upgrade.js
+          PYTHON_ERRORS: ${{ steps.scan.outputs.error_count }}
+          DIFF_RESULT: ${{ steps.diffcheck.outputs.result }}
+        shell: bash
+        run: |
+          {
+            echo "# Tamanna Auto Upgrade - Review Report"
+            echo
+            echo "- Python syntax errors: ${PYTHON_ERRORS:-not available}"
+            echo "- Whitespace check: ${DIFF_RESULT:-not available}"
+            echo
+            echo "Automatic code upgrades are disabled."
+            echo "No AI-generated code was written to repository files."
+            echo "No commit, pull request, or push was created."
+            echo "Review findings before making any changes."
+          } > audit-report/review-summary.md
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+      - name: Upload review report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "🤖 AI auto-upgrade: code improvements"
-          title: "Auto-upgrade by AI Copilot"
-          body: "এই PR AI নিজে তৈরি করেছে। রিভিউ করে মার্জ করুন।"
-          branch: ai-auto-upgrade
-          base: main
-          delete-branch: true
+          name: tamanna-upgrade-review-${{ github.run_id }}
+          path: audit-report/
+          if-no-files-found: warn
+          retention-days: 7
