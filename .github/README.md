@@ -1,10 +1,7 @@
 <p align="center">
-  <img
-    src="assets/66EA0828-3C61-4162-8695-42D3032168C6.png"
-    alt="TI Tamanna AI Logo"
-    width="280"
-  />
+  <img src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/66EA0828-3C61-4162-8695-42D3032168C6.png" alt="TI Tamanna AI Logo" width="280">
 </p>
+
 
 <h1 align="center">Tamanna AI</h1>
 <p align="center">
