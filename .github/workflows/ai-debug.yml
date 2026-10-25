@@ -1,1 +1,80 @@
-1
+
+name: Tamanna AI Debug
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    name: Python Debug Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest flake8
+
+      - name: Check analyzer files
+        run: |
+          for file in scripts/analyzer.py scripts/fixer.py; do
+            if [ ! -f "$file" ]; then
+              echo "ERROR: Required file missing: $file"
+              exit 1
+            fi
+          done
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile scripts/analyzer.py scripts/fixer.py
+
+      - name: Run lint
+        run: |
+          flake8 scripts/analyzer.py scripts/fixer.py
+
+      - name: Run analyzer
+        shell: bash
+        run: |
+          set +e
+          python scripts/analyzer.py
+          status=$?
+          set -e
+
+          if [ "$status" -gt 1 ]; then
+            echo "ERROR: Analyzer could not complete."
+            exit "$status"
+          fi
+
+          echo "Analyzer finished; review findings above."
+
+      - name: Run fixer in report-only mode
+        run: python scripts/fixer.py
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-ai-debug-reports
+          path: |
+            /tmp/tamanna_analyzer_report.json
+            /tmp/tamanna_fixer_report.json
+          if-no-files-found: ignore
+          retention-days: 14
