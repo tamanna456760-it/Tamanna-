@@ -1,38 +1,50 @@
+
 name: Tamanna Auto Sync
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch: {}
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-validation-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  sync:
-    name: Sync Tamanna System
+  validate:
+    name: Validate repository sync state
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          submodules: false
 
-      - name: Configure Git
+      - name: Check repository structure
+        shell: bash
         run: |
-          git config --local user.email "tamanna456760@gmail.com"
-          git config --local user.name "tamanna456760-it[bot]"
+          set -eu
 
-      - name: Auto Fix Missing Files
-        run: |
-          echo "Auto fixing Tamanna System..."
-          mkdir -p sync_output
-          cp -r * sync_output/ 2>/dev/null || true
+          for file in main.py Main.py requirements.txt; do
+            if [ ! -f "$file" ]; then
+              echo "ERROR: Required file missing: $file"
+              exit 1
+            fi
+            echo "PASS: $file"
+          done
 
-      - name: Commit Sync Changes
+      - name: Check Python syntax
+        run: python -m py_compile main.py Main.py
+
+      - name: Report current commit
         run: |
-          git add .
-          if ! git diff --cached --quiet; then
-            git commit -m "Auto Sync: Tamanna system updated"
-            git push
-          else
-            echo "Nothing to sync"
-          fi
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Commit: $GITHUB_SHA"
+          echo "Validation complete; no files were pushed or modified."
