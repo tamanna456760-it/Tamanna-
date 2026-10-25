@@ -1,5 +1,5 @@
  <p align="center">
-  <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="220">
+  <img src="assets/66EA0828-3C61-4162-8695-42D3032168C6.png "alt="TI Tamanna AI Logo" width="220">
 </p>
 <h1 align="center">Tamanna AI</h1>
 <p align="center">
