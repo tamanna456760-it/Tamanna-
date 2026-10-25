@@ -48,30 +48,33 @@ jobs:
 
       - name: Run lint
         run: |
-          flake8 scripts/analyzer.py scripts/fixer.py || true
+          flake8 scripts/analyzer.py scripts/fixer.py
 
       - name: Run analyzer
-        run: python scripts/analyzer.py
-
-      - name: Run fixer in report-only mode
-        env:
-          TAMANNA_DRY_RUN: "1"
-        run: python scripts/fixer.py
-
-      - name: Show report
-        if: always()
+        shell: bash
         run: |
-          if [ -f final_report.txt ]; then
-            cat final_report.txt
-          else
-            echo "No final_report.txt was produced."
+          set +e
+          python scripts/analyzer.py
+          status=$?
+          set -e
+
+          if [ "$status" -gt 1 ]; then
+            echo "ERROR: Analyzer could not complete."
+            exit "$status"
           fi
 
-      - name: Upload report
+          echo "Analyzer finished; review findings above."
+
+      - name: Run fixer in report-only mode
+        run: python scripts/fixer.py
+
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-ai-debug-report
-          path: final_report.txt
+          name: tamanna-ai-debug-reports
+          path: |
+            /tmp/tamanna_analyzer_report.json
+            /tmp/tamanna_fixer_report.json
           if-no-files-found: ignore
           retention-days: 14
