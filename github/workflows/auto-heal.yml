@@ -1,0 +1,83 @@
+
+name: Tamanna Auto Heal - Safe Audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Find empty files
+        shell: bash
+        run: |
+          set -eu
+          find . -type f -size 0 \
+            -not -path './.git/*' \
+            -not -path './.venv/*' \
+            -not -path './node_modules/*' \
+            -print > empty-files.txt
+          cat empty-files.txt
+
+      - name: Check Python syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          ignored = {
+              ".git", ".venv", "venv",
+              "node_modules", "__pycache__"
+          }
+          errors = []
+
+          for path in Path(".").rglob("*.py"):
+              if any(part in ignored for part in path.parts):
+                  continue
+              try:
+                  source = path.read_text(
+                      encoding="utf-8", errors="replace"
+                  )
+                  ast.parse(source, filename=str(path))
+              except SyntaxError as exc:
+                  errors.append(
+                      f"{path}:{exc.lineno}: {exc.msg}"
+                  )
+
+          Path("python-syntax-report.txt").write_text(
+              "\n".join(errors)
+              if errors else "No syntax errors found.",
+              encoding="utf-8"
+          )
+          print(Path("python-syntax-report.txt").read_text())
+
+          if errors:
+              raise SystemExit(1)
+          PY
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-auto-heal-audit
+          path: |
+            empty-files.txt
+            python-syntax-report.txt
+          if-no-files-found: warn
+          retention-days: 14
