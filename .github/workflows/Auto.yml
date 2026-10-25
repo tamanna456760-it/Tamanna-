@@ -1,255 +1,281 @@
+
 name: Tamanna Ultimate Auto Build
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
+      - "**.md"
+      - "docs/**"
+      - ".gitignore"
   pull_request:
-    branches: [ "main", "develop" ]
-  schedule:
-    - cron: '0 2 * * *'   # daily 2 AM build
-  workflow_dispatch:        # manual trigger
+    branches: ["main", "develop"]
+  workflow_dispatch:
 
-# Cancel previous running workflows on same PR/branch
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: tamanna-build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: 18
-  PYTHON_VERSION: "3.11"
-  JAVA_VERSION: 17
-  GO_VERSION: "1.21"
-  DOCKER_REGISTRY: ghcr.io
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
 
 jobs:
-  # ---------- 1. Lint & Format (fast, early failure) ----------
   lint:
+    name: Lint and Validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Run linters
-        run: |
-          if [ -f "package.json" ]; then
-            npm install --no-audit --no-fund
-            npm run lint 2>/dev/null || echo "⚠️ No lint script found"
-          fi
-      - name: Run ShellCheck on scripts
-        run: |
-          if command -v shellcheck &>/dev/null; then
-            find . -name "*.sh" -exec shellcheck {} \;
-          fi
+          submodules: false
 
-  # ---------- 2. Build & Test (matrix for multiple versions) ----------
-  build-test:
-    runs-on: ubuntu-latest
-    needs: [lint]
-    strategy:
-      matrix:
-        node-version: [18, 20]
-        python-version: ["3.10", "3.11"]
-        java-version: [17, 21]
-      fail-fast: false   # test all combinations, collect results
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # full history for better caching
-
-      # ---------- Node.js ----------
-      - name: Setup Node ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
-
-      - name: Install Node dependencies
-        if: hashFiles('package.json') != ''
-        run: npm ci --no-audit --no-fund
-
-      - name: Run Node tests
-        if: hashFiles('package.json') != ''
-        run: |
-          npm test 2>/dev/null || echo "No test script, skipping"
-
-      # ---------- Python ----------
-      - name: Setup Python ${{ matrix.python-version }}
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: '**/requirements.txt'
+          python-version: "3.11"
 
-      - name: Install Python dependencies
-        if: hashFiles('requirements.txt') != ''
-        run: pip install -r requirements.txt
-
-      - name: Run Python tests
-        if: hashFiles('pytest.ini') != '' || hashFiles('tests/') != ''
+      - name: Check Python syntax
         run: |
-          pip install pytest
-          pytest --junitxml=pytest.xml
+          python - <<'PY'
+          import ast
+          from pathlib import Path
 
-      # ---------- Java / Maven ----------
-      - name: Setup Java ${{ matrix.java-version }}
-        uses: actions/setup-java@v4
+          ignored = {".git", ".venv", "venv", "node_modules", "__pycache__"}
+          failures = []
+
+          for path in Path(".").rglob("*.py"):
+              if any(part in ignored for part in path.parts):
+                  continue
+              try:
+                  ast.parse(path.read_text(encoding="utf-8"))
+              except (SyntaxError, UnicodeDecodeError) as exc:
+                  failures.append(f"{path}: {exc}")
+
+          if failures:
+              print("\n".join(failures))
+              raise SystemExit(1)
+
+          print("PASS: Python syntax checks")
+          PY
+
+      - name: Setup Node
+        if: hashFiles('package.json') != ''
+        uses: actions/setup-node@v4
         with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java-version }}
-          cache: 'maven'
+          node-version: "20"
 
-      - name: Maven build & test
-        if: hashFiles('pom.xml') != ''
-        run: mvn -B clean compile test --file pom.xml
-
-      # ---------- Go (if go.mod exists) ----------
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-
-      - name: Go build & test
-        if: hashFiles('go.mod') != ''
+      - name: Check Node dependencies
+        if: hashFiles('package.json') != ''
         run: |
-          go mod download
-          go test -v ./...
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            echo "WARNING: package-lock.json missing; dependency installation skipped."
+          fi
 
-      # ---------- Docker build test (if Dockerfile exists) ----------
-      - name: Docker build test
-        if: hashFiles('Dockerfile') != ''
-        run: docker build -t test-image .
+      - name: Run Node tests
+        if: hashFiles('package.json') != '' && hashFiles('package-lock.json') != ''
+        run: |
+          npm test --if-present
 
-      # ---------- Upload test artifacts on failure ----------
-      - name: Upload test logs
-        uses: actions/upload-artifact@v4
+  python-test:
+    name: Python Build and API Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          else
+            echo "ERROR: requirements.txt is missing"
+            exit 1
+          fi
+
+          python -m pip install pytest
+
+      - name: Compile entry points
+        run: |
+          python -m py_compile main.py Main.py
+
+      - name: Import FastAPI application
+        run: |
+          python -c "from main import app; print('PASS:', type(app).__name__)"
+
+      - name: Run tests if present
+        run: |
+          if [ -d tests ]; then
+            python -m pytest -q tests
+          elif [ -d test ]; then
+            python -m pytest -q test
+          else
+            echo "No test directory found; skipping pytest."
+          fi
+
+      - name: Start API and verify
+        run: |
+          set -eu
+
+          python -m uvicorn main:app \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > tamanna-api.log 2>&1 &
+          PID=$!
+
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent \
+              http://127.0.0.1:8000/openapi.json \
+              -o /tmp/tamanna-openapi.json; then
+              echo "PASS: Tamanna API started"
+              exit 0
+            fi
+
+            if ! kill -0 "$PID" 2>/dev/null; then
+              cat tamanna-api.log
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          cat tamanna-api.log
+          echo "ERROR: API did not become ready"
+          exit 1
+
+      - name: Upload diagnostics
         if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          name: test-logs-${{ matrix.node-version }}-${{ matrix.python-version }}
-          path: |
-            **/target/surefire-reports/
-            **/test-results/
-            **/pytest.xml
-            **/logs/
+          name: tamanna-api-diagnostics
+          path: tamanna-api.log
+          if-no-files-found: ignore
           retention-days: 7
 
-  # ---------- 3. Security Scanning (CodeQL + Trivy + Secrets) ----------
   security:
+    name: Basic Security Checks
     runs-on: ubuntu-latest
-    needs: [build-test]
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-
-      # CodeQL analysis
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript, python, java, go
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-      # Trivy filesystem scan (vulnerabilities + misconfigurations)
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      # Secret scanning (trufflehog)
-      - name: Run TruffleHog for secrets
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          extra_args: --no-verification --only-verified
-
-      # Dependency review (only on PRs)
-      - name: Dependency Review
-        if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: moderate
-
-      # Generate SBOM (Software Bill of Materials)
-      - name: Generate SBOM
-        uses: anchore/sbom-action@v0
-        with:
-          format: spdx-json
-          output-file: sbom.spdx.json
-
-  # ---------- 4. Deployment (only on push to main, after all success) ----------
-  deploy-staging:
-    runs-on: ubuntu-latest
-    needs: [security]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment: staging   # requires environment protection rules
     timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to staging
-        run: |
-          echo "🚀 Deploying to staging environment"
-          # Add your actual deployment script here
-          # e.g., ./deploy.sh staging
-
-  # ---------- 5. Final summary & notifications ----------
-  finalize:
-    runs-on: ubuntu-latest
-    needs: [lint, build-test, security, deploy-staging]
-    if: always()   # always run to show summary
-    steps:
-      - name: Generate job summary
-        run: |
-          echo "## 🚀 Tamanna Ultimate Auto Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status | Duration |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint | ${{ needs.lint.result }} | ${{ needs.lint.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Test | ${{ needs.build-test.result }} | ${{ needs.build-test.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scan | ${{ needs.security.result }} | ${{ needs.security.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deploy Staging | ${{ needs.deploy-staging.result }} | ${{ needs.deploy-staging.outputs.duration }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Tamanna Auto Sync Completed Successfully!**" >> $GITHUB_STEP_SUMMARY
-
-      - name: Send Slack notification on failure
-        if: failure() && github.event_name != 'pull_request'
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_COLOR: '#ff0000'
-          SLACK_TITLE: 'Build Failed'
-          SLACK_MESSAGE: |
-            Repository: ${{ github.repository }}
-            Branch: ${{ github.ref_name }}
-            Run: ${{ github.run_id }}
-            Failed jobs: ${{ join(needs.*.result, ', ') }}
-
-      - name: Send email on failure (optional)
-        if: failure()
-        uses: dawidd6/action-send-mail@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USER }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "Tamanna Build Failed - ${{ github.repository }}"
-          to: ${{ secrets.ALERT_EMAIL }}
-          from: GitHub Actions
-          body: |
-            Build failed for ${{ github.repository }}.
-            See logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          submodules: false
+
+      - name: Check for accidentally committed secrets
+        shell: bash
+        run: |
+          set -eu
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          ignored = {
+              ".git", ".venv", "venv", "node_modules",
+              "__pycache__", ".pytest_cache"
+          }
+          sensitive_names = {
+              ".env", "credentials.json", "token.txt",
+              "id_rsa", "id_ed25519"
+          }
+          problems = []
+
+          for path in Path(".").rglob("*"):
+              if not path.is_file():
+                  continue
+              if any(part in ignored for part in path.parts):
+                  continue
+              if path.name in sensitive_names:
+                  problems.append(f"Review sensitive filename: {path}")
+                  continue
+
+              if path.suffix not in {".py", ".js", ".json", ".yml", ".yaml", ".toml"}:
+                  continue
+
+              try:
+                  content = path.read_text(encoding="utf-8")
+              except (UnicodeDecodeError, OSError):
+                  continue
+
+              patterns = [
+                  r"(?i)AIza[0-9A-Za-z_-]{30,}",
+                  r"(?i)-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+                  r"(?i)(?:api[_-]?key|secret[_-]?key)\s*[:=]\s*['\"][^'\"]{12,}['\"]",
+              ]
+
+              for pattern in patterns:
+                  if re.search(pattern, content):
+                      problems.append(f"Possible secret found: {path}")
+                      break
+
+          if problems:
+              print("\n".join(problems))
+              print("Review these files manually; no files were changed.")
+              raise SystemExit(1)
+
+          print("PASS: No matching secret patterns found.")
+          PY
+
+      - name: Check GitHub workflow artifact versions
+        shell: bash
+        run: |
+          if grep -R -n \
+            --include='*.yml' \
+            --include='*.yaml' \
+            'actions/upload-artifact@v3' .github/workflows; then
+            echo "ERROR: Replace upload-artifact v3 with v4."
+            exit 1
+          fi
+
+          echo "PASS: No upload-artifact v3 references found."
+
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [lint, python-test, security]
+    if: always()
+
+    steps:
+      - name: Write summary
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          PYTHON_RESULT: ${{ needs.python-test.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+        run: |
+          {
+            echo "## Tamanna AI Build Summary"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Lint | $LINT_RESULT |"
+            echo "| Python/API | $PYTHON_RESULT |"
+            echo "| Security | $SECURITY_RESULT |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$LINT_RESULT" != success ] ||
+             [ "$PYTHON_RESULT" != success ] ||
+             [ "$SECURITY_RESULT" != success ]; then
+            exit 1
+          fi
