@@ -1,42 +1,65 @@
+
 name: Tamanna AI Auto Run
 
 on:
   push:
-    branches: [ "main" ]
-
-  schedule:
-    - cron: "0 */6 * * *"   # every 6 hours
-
+    branches: ["main"]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   run-tamanna:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-    - name: ⬇️ Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: 🐍 Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name: 📦 Install dependencies
-      run: |
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
 
-    - name: ⚡ Run Tamanna AI Head
-      env:
-        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-      run: |
-        echo "$GOOGLE_CREDENTIALS" > credentials.json
-        python run.py
+      - name: Check Python syntax
+        run: |
+          python -m py_compile main.py Main.py
 
-    - name: 🔄 Auto Commit Updates
-      run: |
-        git config --global user.name "tamanna-ai-bot"
-        git config --global user.email "tamanna-ai@users.noreply.github.com"
-        git add .
-        git commit -m "🤖 Tamanna AI auto sync" || echo "No changes"
-        git push
+      - name: Start and test Tamanna API
+        run: |
+          set -eu
+
+          python -m uvicorn main:app \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > /tmp/tamanna.log 2>&1 &
+
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 30); do
+            if curl --fail --silent \
+              http://127.0.0.1:8000/openapi.json \
+              -o /tmp/tamanna-openapi.json; then
+              echo "PASS: Tamanna API started successfully"
+              exit 0
+            fi
+
+            if ! kill -0 "$PID" 2>/dev/null; then
+              cat /tmp/tamanna.log
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          cat /tmp/tamanna.log
+          echo "FAIL: Tamanna API did not become ready"
+          exit 1
