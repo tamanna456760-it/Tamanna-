@@ -1,38 +1,69 @@
-name: 🤖 Real AI Debugger
+
+name: "Tamanna AI Real AI Debugger"
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   ai-debug:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: 🐍 Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
+          cache: "pip"
 
-      - name: 📦 Install OpenAI
-        run: pip install openai
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip openai
 
-      - name: 🔍 Scan Code
-        run: python scripts/scan.py
+      - name: Scan code
+        run: |
+          if [ -f scripts/scan.py ]; then
+            python scripts/scan.py
+          else
+            echo "ERROR: scripts/scan.py not found"
+            exit 1
+          fi
 
-      - name: 🤖 AI Debugger Run
+      - name: Run AI debugger
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python scripts/ai_debugger.py
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "ERROR: Configure OPENAI_API_KEY in GitHub Actions Secrets."
+            exit 1
+          fi
+          if [ ! -f scripts/ai_debugger.py ]; then
+            echo "ERROR: scripts/ai_debugger.py not found"
+            exit 1
+          fi
+          python scripts/ai_debugger.py
 
-      - name: 📊 Show Report
-        run: cat report.txt || true
+      - name: Show report
+        if: always()
+        run: |
+          if [ -f report.txt ]; then
+            cat report.txt
+          else
+            echo "No report.txt was generated."
+          fi
 
-      - name: 📁 Upload Report
-        uses: actions/upload-artifact@v3
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: ai-debug-report
+          name: tamanna-ai-debug-report
           path: report.txt
+          if-no-files-found: ignore
+          retention-days: 7
