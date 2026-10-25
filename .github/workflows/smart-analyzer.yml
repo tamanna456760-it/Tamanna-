@@ -1,58 +1,77 @@
-name: 🚀 Smart AI Code Analyzer
+
+name: Tamanna Smart Analyzer
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  smart-check:
+  analyze:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      - name: 📦 Install
+      - name: Install tools
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Validate analyzer files
         run: |
-          pip install -r requirements.txt
+          test -f scripts/analyzer.py
+          test -f scripts/fixer.py
+          python -m py_compile \
+            scripts/analyzer.py scripts/fixer.py
 
-      - name: 🔍 Lint Check
+      - name: Run analyzer
+        shell: bash
+        env:
+          TAMANNA_ANALYZER_REPORT: ${{ runner.temp }}/tamanna_analyzer_report.json
         run: |
-          flake8 . || true
+          set +e
+          python scripts/analyzer.py
+          status=$?
+          set -e
 
-      - name: 🧪 Run Tests
+          if [ "$status" -gt 1 ]; then
+            echo "Analyzer failed to complete."
+            exit "$status"
+          fi
+
+      - name: Create review-only fix plan
+        env:
+          TAMANNA_ANALYZER_REPORT: ${{ runner.temp }}/tamanna_analyzer_report.json
+          TAMANNA_FIXER_REPORT: ${{ runner.temp }}/tamanna_fix_plan.json
+        run: python scripts/fixer.py
+
+      - name: Run tests if present
+        shell: bash
         run: |
-          pytest || true
+          if [ -d tests ]; then
+            python -m pytest -q
+          else
+            echo "No tests directory; test step skipped."
+          fi
 
-      - name: 🧠 Analyze Code
-        run: |
-          python scripts/analyze.py
-
-      - name: 🤖 Explain Errors
-        run: |
-          python scripts/explain.py
-
-      - name: ▶️ Run Python Files
-        run: |
-          for file in $(find . -name "*.py"); do
-            echo "Running $file"
-            python $file >> run_log.txt 2>&1 || echo "[FAILED] $file" >> run_log.txt
-          done
-
-      - name: 📊 Show Final Report
-        run: |
-          echo "===== FINAL REPORT ====="
-          cat final_report.txt || true
-
-      - name: 📁 Upload Report
-        uses: actions/upload-artifact@v3
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: report
+          name: tamanna-smart-analyzer-report
           path: |
-            final_report.txt
-            run_log.txt
+            ${{ runner.temp }}/tamanna_analyzer_report.json
+            ${{ runner.temp }}/tamanna_fix_plan.json
+          if-no-files-found: warn
+          retention-days: 14
