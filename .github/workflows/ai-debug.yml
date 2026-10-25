@@ -1,40 +1,77 @@
-name: 🚀 AI Debug System
+
+name: Tamanna AI Debug
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   debug:
+    name: Python Debug Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v3
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          python-version: "3.10"
+          submodules: false
 
-      - name: 📦 Install
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test tools
         run: |
-          pip install pytest flake8
+          python -m pip install --upgrade pip
+          python -m pip install pytest flake8
 
-      - name: 🔍 Lint Check
-        run: flake8 . || true
+      - name: Check analyzer files
+        run: |
+          for file in scripts/analyzer.py scripts/fixer.py; do
+            if [ ! -f "$file" ]; then
+              echo "ERROR: Required file missing: $file"
+              exit 1
+            fi
+          done
 
-      - name: 🧠 Run Analyzer
+      - name: Check Python syntax
+        run: |
+          python -m py_compile scripts/analyzer.py scripts/fixer.py
+
+      - name: Run lint
+        run: |
+          flake8 scripts/analyzer.py scripts/fixer.py || true
+
+      - name: Run analyzer
         run: python scripts/analyzer.py
 
-      - name: 🤖 Run AI Fixer
+      - name: Run fixer in report-only mode
+        env:
+          TAMANNA_DRY_RUN: "1"
         run: python scripts/fixer.py
 
-      - name: 📊 Show Report
-        run: cat final_report.txt || true
+      - name: Show report
+        if: always()
+        run: |
+          if [ -f final_report.txt ]; then
+            cat final_report.txt
+          else
+            echo "No final_report.txt was produced."
+          fi
 
-      - name: 📁 Upload Report
-        uses: actions/upload-artifact@v3
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: ai-debug-report
+          name: tamanna-ai-debug-report
           path: final_report.txt
+          if-no-files-found: ignore
+          retention-days: 14
