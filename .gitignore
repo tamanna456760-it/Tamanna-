@@ -20,3 +20,7 @@ logs/
 api/token
 api/token.txt
 **/credentials.json
+
+.env
+.env.*
+!.env.example
