@@ -1,14 +1,30 @@
-def detect_intrusion(event):
-    suspicious = ["unauthorized", "failed_login", "strange_ip", "file_change"]
-    for key in suspicious:
-        if key in event.lower():
-            return True
-    return False
-def tamanna_defense(event):
+
+"""Tamanna AI intrusion-signal helpers.
+
+This module classifies supplied event text.
+It does not modify system settings or block connections.
+"""
+
+SUSPICIOUS_MARKERS = (
+    "unauthorized",
+    "failed_login",
+    "strange_ip",
+    "file_change",
+)
+
+
+def detect_intrusion(event: str) -> bool:
+    """Detect known suspicious markers in an event."""
+    normalized = str(event).lower()
+    return any(marker in normalized for marker in SUSPICIOUS_MARKERS)
+
+
+def tamanna_defense(event: str) -> str:
+    """Return a human-readable security status."""
     if detect_intrusion(event):
         return "Tamanna: সতর্ক! সন্দেহজনক কার্যকলাপ ধরা পড়েছে."
-    else:
-        return "Tamanna: সব ঠিক আছে, সিস্টেম শান্ত."
-        print(tamanna_defense("failed_login from unknown IP"))
-Tamanna: সতর্ক! সন্দেহজনক কার্যকলাপ ধরা পড়েছে.
+    return "Tamanna: সব ঠিক আছে, সিস্টেম শান্ত."
 
+
+if __name__ == "__main__":
+    print(tamanna_defense("failed_login from unknown IP"))
