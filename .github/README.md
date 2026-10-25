@@ -1,520 +1,245 @@
-
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/tamanna456760-it/Tamanna-/main/assets/66EA0828-3C61-4162-8695-42D3032168C6.png"
-    alt="TI Tamanna AI Logo"
-    width="280"
-  />
+ <p align="center">
+  <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="220">
 </p>
-
-<h1 align="center">TAMANNA AI</h1>
+<h1 align="center">Tamanna AI</h1>
 <p align="center">
-  <strong>Personal AI System · Automation · Project Intelligence · Security</strong>
+  A modular AI assistant and automation platform with a FastAPI server, memory and knowledge components, project tools, and security modules.
 </p>
+<p align="center"><strong>Owner: HM INSAN ALI</strong></p>
 <p align="center">
-  <em>Owner: HM INSAN ALI</em>
-</p>
-<p align="center">
-  <a href="https://github.com/tamanna456760-it/Tamanna-">GitHub Repository</a> ·
-  <a href="https://github.com/tamanna456760-it/Tamanna-/issues">Issues & Support</a>
+  <a href="https://github.com/tamanna456760-it/Tamanna-">Repository</a> ·
+  <a href="https://github.com/tamanna456760-it/Tamanna-/actions">GitHub Actions</a> ·
+  <a href="https://github.com/tamanna456760-it/Tamanna-/issues">Issues</a>
 </p>
 
 ⸻
 
-About Tamanna AI
+Table of Contents
 
-Tamanna AI is a modular AI and automation project designed to bring conversational interfaces, project analysis, developer tools, system monitoring, and security components together in one extensible platform.
+* Overview
+* Features and Modules
+* Repository Structure
+* Requirements
+* Local Installation
+* Environment Configuration
+* Docker Deployment
+* API and Health Check
+* Security
+* Testing
+* Production Deployment
+* Contributing
+* License
 
-The project is being developed toward a user-controlled AI environment where the owner can manage project files, configure integrations, inspect system activity, and decide which operations are permitted.
+Overview
 
-Tamanna AI is designed to grow incrementally. Features described as planned or under development must not be assumed to be production-ready until their implementation and tests have been verified.
+Tamanna AI is an evolving software project that brings together assistant APIs, project utilities, memory and knowledge components, automation, and defensive security tools.
 
-বাংলা পরিচিতি
+The primary FastAPI application is implemented in Main.py. The lowercase main.py file is a compatibility launcher that imports the existing application.
 
-Tamanna AI হলো HM INSAN ALI-এর নিজস্ব AI system project। এর লক্ষ্য হলো AI chat, code analysis, project management, automation, memory, server management এবং security tools-কে একটি modular platform-এ একত্র করা।
+Project status: Active development. The repository contains many modules and workflows, but the presence of a file does not guarantee that its functionality is integrated, production-ready, or successfully tested.
 
-প্রকল্পটির মূল নীতি:
+Features and Modules
 
-* নিজের system ও project-এর ওপর ব্যবহারকারীর নিয়ন্ত্রণ।
-* অনুমতি ছাড়া গুরুত্বপূর্ণ file বা system পরিবর্তন না করা।
-* Sensitive command-এর আগে authorization ও confirmation যাচাই করা।
-* Security checks, logs এবং test results-এর মাধ্যমে কাজ যাচাই করা।
-* নতুন module যোগ করার সময় পুরোনো working functionality অক্ষত রাখা।
+The repository currently includes code for:
 
-Project Goals
+* AI Assistant API: Chat, status, skills, and project-operation endpoints.
+* Skills and Code Tools: Skill discovery, matching, code inspection, and builder-related operations.
+* Memory: Local memory and history modules.
+* Knowledge Layer: A foundation for organizing and searching project resources.
+* Security: Firewall, Web Application Firewall (WAF), Intrusion Detection System (IDS), endpoint checks, audit, and integrity utilities.
+* Deployment: Docker configuration, Nginx/TLS examples, and deployment validation scripts.
+* Automation: GitHub Actions workflows for builds, testing, security checks, and maintenance.
+* Application Security: An admin API-key verification helper is present; its coverage across sensitive endpoints must be verified.
 
-* Develop an extensible AI assistant and API server.
-* Provide a foundation for project scanning and code analysis.
-* Support controlled file operations and developer automation.
-* Organize security tools into separate, testable modules.
-* Maintain auditable logs and predictable error handling.
-* Integrate external AI providers only when explicitly configured.
-* Support user-controlled deployment and future self-hosted operation.
+Some integrations, including a dedicated Gemini client and a documentation indexer, may still need implementation or integration.
 
-Features and Implementation Status
+Repository Structure
 
-Component	Purpose	Status
-FastAPI server	HTTP API and application entry point	Implemented; deployment testing required
-Chat API	Receive messages and return responses	Implemented; end-to-end verification required
-Knowledge and memory	Basic knowledge and memory operations	Basic implementation; persistence needs verification
-Project scanning	Inspect project files and Python syntax	Partial; coverage needs testing
-Code Builder	Plan and manage code changes	Partial; real file-write behavior needs verification
-Skill Manager	Organize assistant skills	Partial; actual skill execution needs verification
-Linux tools	Provide a foundation for system utilities	Partial; secure execution required
-File action bridge	Route file-operation requests	Partial; actual operations need verification
-Firewall components	Organize firewall-related utilities	Requires platform-level validation
-WAF components	Web request protection utilities	Live request integration must be verified
-IDS components	Intrusion detection utilities	Detection and alerting tests required
-Endpoint Security	Security posture and audit checks	Partial; monitoring and enforcement must be distinguished
-GitHub Actions	Automated checks and workflow execution	Available workflows require run-by-run verification
-External AI provider	Connect a real LLM	Requires provider configuration and integration testing
-Production deployment	Run a hardened public service	Not declared production-ready
-
-Repository
-
-Main repository:
-
-https://github.com/tamanna456760-it/Tamanna-
-
-Default branch: main
-
-Main project areas
-
-Tamanna-/
-├── .github/
-│   └── workflows/
-├── assets/
-│   └── tamanna-logo.svg
-├── core/
-├── data/
-│   ├── action_router/
-│   ├── autonomous/
-│   ├── control_center/
-│   └── linux/
-├── endpoint_security/
-├── firewall/
-├── ids/
-├── modules/
-│   └── tamanna/
-├── runner/
-├── tamanna_ai/
-│   ├── brain/
-│   ├── core/
-│   ├── tools/
-│   ├── code_builder.py
-│   └── skills.py
-├── waf/
-├── Main.py
-├── main.py
-├── requirements.txt
-├── .gitignore
-└── README.md
-
-This is a high-level map of important project areas, not a guarantee that every optional file or subdirectory exists in every revision.
+Path	Purpose
+Main.py	Main FastAPI application
+main.py	Python launch wrapper
+tamanna_ai/	AI modules, skills, memory, and knowledge components
+app_security/	Application security helpers
+firewall/	Firewall policies, access controls, monitoring, and tests
+waf/	Web application firewall components
+ids/	Intrusion detection components and tests
+endpoint_security/	Endpoint integrity, posture, audit, and validation
+core/	Boot identity and integrity-related modules
+deploy/	Deployment checks, Nginx configuration, and release validation
+data/	Runtime data, depending on enabled modules
+assets/	Static assets and project logo
+.github/workflows/	GitHub Actions workflows
+Dockerfile	Container image instructions
+docker-compose.yml	Root Docker Compose configuration
+requirements-server.txt	Server dependency list
+requirements.txt	Broader project dependencies
+requirements-optional.txt	Optional feature dependencies
 
 Requirements
 
-The basic server environment uses:
+For the Python server:
 
-* Python 3.12 recommended for CI compatibility.
-* Git.
-* pip.
-* FastAPI.
-* Uvicorn.
-* Additional dependencies required by the modules you enable.
+* Python 3.12 is used by the current root Dockerfile.
+* Git and Python pip.
+* A Python virtual environment for local development.
+* Docker Engine and the Docker Compose plugin, if using containers.
 
-Some optional project components may require operating-system packages, database services, AI-provider credentials, audio libraries, or additional configuration.
+Some optional features may require additional operating-system libraries or external services.
 
-Important: Install only dependencies needed for your selected environment. The repository’s full requirements.txt may contain optional or platform-specific packages; verify compatibility before installing everything.
+Local Installation
 
-Installation
-
-1. Clone the repository
+Clone the repository:
 
 git clone https://github.com/tamanna456760-it/Tamanna-.git
 cd Tamanna-
 
-If the repository is already cloned, open its existing project directory instead of cloning it again.
-
-2. Create a virtual environment
-
-Linux, macOS, or compatible shell:
+Create and activate a virtual environment:
 
 python3 -m venv .venv
 source .venv/bin/activate
-
-Upgrade pip:
-
 python -m pip install --upgrade pip
 
-3. Install the basic server dependencies
+Install server dependencies:
 
-python -m pip install fastapi uvicorn
+pip install -r requirements-server.txt
 
-Before installing the full dependency list, inspect requirements.txt and resolve any unsupported or unnecessary packages for your operating system.
+Create a local environment file:
 
-If the complete dependency file has been validated for your environment, install it with:
+cp .env.example .env
 
-python -m pip install -r requirements.txt
+Edit .env locally and enter only the configuration required by your setup.
 
-4. Check Python syntax
-
-python -m py_compile main.py Main.py
-
-A successful command returns without a syntax error. This does not prove that all dependencies, routes, integrations, or runtime operations work.
-
-5. Start the application
-
-First inspect main.py to confirm how it launches the application. If it is the intended launcher:
+Start the application:
 
 python main.py
 
-If the launcher does not start the server itself, and Main.py exposes the FastAPI object as app, use:
+The launcher defaults to 127.0.0.1:8000.
 
-python -m uvicorn Main:app --host 127.0.0.1 --port 8000
-
-Do not start both commands simultaneously on the same port.
-
-6. Verify the local API
-
-If the server starts successfully, open:
+When the server is running, open:
 
 * API documentation: http://127.0.0.1:8000/docs
-* OpenAPI schema: http://127.0.0.1:8000/openapi.json
+* ReDoc: http://127.0.0.1:8000/redoc
+* Health check: http://127.0.0.1:8000/health
 
-These endpoints are available only if the server is running and its configuration permits them.
+These addresses are for local development and work only while the server is running.
 
-API Overview
+Environment Configuration
 
-The application contains chat and system-control functionality. The following endpoints must be confirmed against the running server’s OpenAPI schema before use.
+The tracked .env.example is a template, not a place to store real secrets.
 
-Endpoint	Purpose
-/docs	Interactive API documentation, when enabled
-/openapi.json	API schema, when enabled
-/api/chat	Chat request handling
-/api/command	Command preview and controlled execution flow
-/api/linux/shell	Linux command functionality; sensitive and potentially dangerous
-/api/memory/add	Memory operation, if enabled in the running configuration
+Variable	Purpose
+HOST	Server bind address; the launcher defaults to 127.0.0.1
+PORT	HTTP port; defaults to 8000
+RELOAD	Development auto-reload toggle
+GEMINI_API_KEY	Placeholder for a Gemini credential if the integration is configured
+TAMANNA_MEMORY_FILE	Optional memory-file path
+DEBUG	Debug-mode setting; keep disabled in production
 
-Chat API example
+Never commit API keys, passwords, private keys, or production credentials. Use local environment variables or your hosting provider’s secret-management facility. If a secret is committed accidentally, revoke or rotate it; removing it from the latest file does not remove it from Git history.
 
-The following is a generic example. Confirm the exact request schema in /docs before sending it.
+Docker Deployment
 
-curl -X POST http://127.0.0.1:8000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message":"Hello Tamanna"}'
+The root Compose configuration references .env. Create it first:
 
-A valid response should be inspected for its status code, response structure, and error fields. A successful HTTP response alone does not prove that an external AI model was invoked.
+cp .env.example .env
 
-Command execution policy
+Validate the Compose configuration, then build and start:
 
-System commands can change files, permissions, network configuration, or application state. A request field such as confirm: true is not a substitute for identity verification or authorization.
+docker compose config
+docker compose build
+docker compose up -d
+docker compose ps
+docker compose logs -f tamanna-ai
 
-Before enabling command execution:
+Check the health endpoint:
 
-* Require authenticated access.
-* Apply role-based permissions.
-* Allow only explicitly approved commands and arguments.
-* Avoid shell-string execution.
-* Enforce timeouts and resource limits.
-* Record permitted operations in an audit log.
-* Keep administrative endpoints private until tested.
+curl --fail http://127.0.0.1:8000/health
 
-Do not expose a command-execution API directly to the public internet without these protections.
+Stop the service:
 
-AI Provider Configuration
+docker compose down
 
-Tamanna AI can be extended to use an external or self-hosted AI model, but an AI provider should be considered connected only after its credentials, client implementation, error handling, and real response path have been tested.
+The Compose file defines a named volume for application data. Verify the actual write paths used by each module before assuming all memory, chat history, or runtime state is persisted there.
 
-Recommended configuration practices:
+Docker commands require Docker Engine to be installed and available.
 
-1. Choose the intended AI provider.
-2. Read its official API documentation.
-3. Store credentials in environment variables or an approved secret manager.
-4. Keep credentials out of source files, logs, and README examples.
-5. Configure request timeouts, usage limits, and error handling.
-6. Test a real request using non-sensitive input.
-7. Document which components require the provider.
+API and Health Check
 
-Example environment-variable names:
+The main application declares routes for chat, skills, code-builder utilities, Linux tools, self-healing, and other project operations.
 
-AI_PROVIDER=
-AI_API_KEY=
-AI_MODEL=
+* GET /health — basic health endpoint.
+* GET /docs — interactive API documentation.
+* GET /redoc — alternative API documentation.
 
-These names are illustrative. The application must explicitly implement and read the corresponding variables before they have any effect.
+Treat endpoints that execute commands, edit files, apply code, or trigger autonomous actions as privileged. Verify authentication, authorization, input validation, audit logging, rate limits, and execution boundaries before exposing them publicly.
 
-Never commit a real API key.
+Security
 
-Memory and Data Management
+The repository contains defensive security modules. Their presence alone does not prove that a deployed service is secure.
 
-Memory functionality should clearly distinguish between:
+Before a public deployment:
 
-* Temporary, in-process memory.
-* Persistent storage on disk.
-* Database-backed memory.
-* External provider or service storage.
+1. Restrict CORS to trusted frontend origins.
+2. Require authentication and authorization for administrative, shell, file-write, code-apply, and automation endpoints.
+3. Keep credentials out of Git and client-side code.
+4. Run dependency and secret scans and review the results.
+5. Configure HTTPS with valid certificates.
+6. Verify the reverse-proxy upstream and network boundaries.
+7. Run tests and smoke checks against the exact release being deployed.
+8. Back up persistent data and test restoration.
+9. Review GitHub Actions permissions and apply least privilege.
+10. Require explicit approval for workflows that make consequential changes or deploy production code.
 
-Do not assume that memory survives a server restart unless persistence has been implemented and tested.
-
-Recommended safeguards:
-
-* Validate input before saving.
-* Limit stored data and request sizes.
-* Protect memory endpoints with authentication.
-* Avoid storing passwords, API keys, or sensitive personal information.
-* Define retention and backup policies.
-* Test recovery and data deletion procedures.
-
-Security Architecture
-
-Tamanna AI contains separate security-related project areas, including firewall, WAF, IDS, and endpoint-security components.
-
-These components are intended to form a layered security approach. Their actual protection depends on correct implementation, integration, configuration, and testing.
-
-1. Application security
-
-* Authenticate users before sensitive operations.
-* Authorize each administrative action separately.
-* Validate request data.
-* Limit request rates and payload sizes.
-* Avoid exposing stack traces or secrets in API responses.
-* Configure trusted CORS origins explicitly.
-
-2. Firewall
-
-Firewall functionality should be tested on the intended operating system with least-privilege rules and a recovery plan. A Python module alone does not establish that operating-system firewall rules are active.
-
-3. Web Application Firewall
-
-A WAF must inspect real incoming traffic through an integrated middleware or reverse-proxy layer. Test both allowed and blocked requests, including false positives.
-
-4. Intrusion Detection System
-
-IDS functionality should have tested event sources, detection rules, alert delivery, and evidence records. Detection-only functionality must not be described as automatic blocking.
-
-5. Endpoint security
-
-Endpoint monitoring and security enforcement are different capabilities. Clearly document whether each check only reports a finding or actually takes an authorized protective action.
-
-6. HTTPS and TLS
-
-Use HTTPS for remote deployments. Manage certificates, renewals, trusted proxy configuration, and secure transport settings. Never assume that HTTPS is active simply because a TLS configuration file exists.
-
-7. Logs and audit records
-
-Logs should include useful event details without exposing credentials, session tokens, or private data. Protect logs against unauthorized modification and define retention limits.
-
-GitHub Actions and CI
-
-The repository contains GitHub Actions workflows for application startup checks and security-related testing.
-
-The CI pipeline should progressively verify:
-
-1. Python syntax.
-2. Dependency installation.
-3. Module imports.
-4. Configuration and JSON validation.
-5. Unit tests.
-6. Security checks.
-7. Application startup.
-8. API health checks.
-9. Chat and memory integration tests.
-10. Authorization and command-safety tests.
-
-A passing syntax check or an HTTP response from /openapi.json does not establish that every feature is working.
-
-Run workflows
-
-1. Open the repository on GitHub.
-2. Select Actions.
-3. Choose the workflow you want to inspect.
-4. Open its latest run.
-5. Review each step’s result and logs.
-
-GitHub Actions workflow files must be located under .github/workflows/ to be recognized as standard repository workflows.
+Do not treat a successful workflow badge or a configuration file as proof of production security. Validate the live deployment independently.
 
 Testing
 
-Run the tests that exist in the repository and confirm their actual results before declaring a component functional.
+Security-related test suites exist in several modules. From the repository root, run:
 
-Basic checks
+python -m compileall -q Main.py main.py tamanna_ai app_security
 
-python -m py_compile main.py Main.py
+If the relevant test dependencies are installed, run:
 
-Inspect available test files:
+python -m pytest firewall/tests ids/tests endpoint_security/tests
 
-find . -type f -name 'test_*.py' \
-  -not -path './.git/*' \
-  -not -path './.venv/*'
+Inspect any failures and fix the underlying issue instead of hiding failures with || true.
 
-If pytest is installed and the repository’s tests are configured for it:
+For each release candidate, record the tested commit, Python/dependency versions, test results, security scan results, and Docker/deployment smoke-test results where applicable.
 
-python -m pytest -q
+Check the current GitHub Actions results before relying on a build.
 
-If the project uses unittest, run the relevant test modules according to their documented invocation.
+Production Deployment
 
-Minimum release checklist
+Deployment examples and validation scripts are available under deploy/.
 
-* [ ]	Application imports successfully.
-* [ ]	Server starts without an unexpected exception.
-* [ ]	Health and OpenAPI endpoints respond as expected.
-* [ ]	Chat request validation works.
-* [ ]	AI integration is verified, if configured.
-* [ ]	Memory persistence behavior is documented and tested.
-* [ ]	Unauthorized requests cannot execute sensitive operations.
-* [ ]	Command execution uses an enforced allowlist.
-* [ ]	Security configuration validators behave correctly.
-* [ ]	Audit tests pass on valid and invalid configurations.
-* [ ]	Logs do not expose credentials.
-* [ ]	Backup and restore procedures have been tested.
-* [ ]	Deployment uses HTTPS where remote access is enabled.
+Before using them, verify:
 
-Configuration and Secrets
+* DNS for tamanna.com and www.tamanna.com points to the intended server.
+* TLS certificate paths match the installed certificate.
+* Nginx forwards requests to the correct reachable application address.
+* In a shared Docker Compose network, the upstream may need to use the service name instead of host loopback.
+* Only required network ports are exposed.
+* Production environment variables and persistent volumes are configured.
+* HTTPS, health checks, logs, restarts, and recovery procedures have been tested.
 
-Do not store secrets or private credentials in source control.
-
-Common sensitive items include:
-
-* .env and environment-specific configuration.
-* API keys and access tokens.
-* api/token and api/token.txt.
-* Credential JSON files.
-* Private keys and TLS certificates.
-* Database credentials and session secrets.
-
-Use environment variables or a dedicated secret manager. Keep .env.example limited to placeholder values.
-
-Important: .gitignore prevents matching untracked files from being added by normal Git workflows, but it does not automatically remove a secret file that is already tracked. If a real credential has been committed, revoke or rotate it first and then remove it from version control appropriately.
-
-Backup and Recovery
-
-Before making major changes:
-
-1. Check the current Git status.
-2. Create a backup of important uncommitted work.
-3. Review the planned changes.
-4. Run relevant tests.
-5. Commit only the intended files.
-6. Verify the resulting commit and CI run.
-
-For sensitive configuration and user data, maintain a separate protected backup. Do not commit backups containing secrets or personal data.
-
-A rollback procedure should be tested before being relied upon for recovery.
-
-Troubleshooting
-
-ModuleNotFoundError
-
-Activate the correct virtual environment and install the dependencies required by the missing module.
-
-Port 8000 is already in use
-
-Inspect the process listening on the port before stopping anything. Do not terminate an unknown process blindly.
-
-Server starts but chat does not work
-
-Check the application logs, chat route schema, required environment variables, provider credentials, and the configured AI integration.
-
-GitHub Actions fails during installation
-
-Inspect the first failing installation step. Check Python compatibility, platform-specific dependencies, and whether all listed packages are required for that workflow.
-
-Security audit fails
-
-Inspect the individual validator outputs and test results. Confirm that result types and error handling are consistent. Do not suppress a failed check merely to obtain a green workflow.
-
-A module reports success without changing anything
-
-Verify the implementation and inspect the resulting file, system state, or audit evidence. Status messages alone are not proof that an operation completed.
-
-Development Principles
-
-Contributions to Tamanna AI should follow these principles:
-
-* Prefer additive, reviewable changes.
-* Preserve existing working behavior unless a change is intentional.
-* Keep security-sensitive functionality isolated and permission-controlled.
-* Use clear module boundaries.
-* Validate all external input.
-* Avoid silent exception handling.
-* Add tests for bug fixes.
-* Document incomplete features honestly.
-* Never include real secrets in code, test fixtures, or documentation.
-
-Roadmap
-
-The following are development goals, not claims that the features are already complete.
-
-Phase 1 — Core stability
-
-* [ ]	Complete the README and installation instructions.
-* [ ]	Standardize runtime dependencies.
-* [ ]	Verify application startup and API routes.
-* [ ]	Fix security-audit and validation defects.
-* [ ]	Establish reliable automated tests.
-
-Phase 2 — Security hardening
-
-* [ ]	Enforce authentication and authorization.
-* [ ]	Secure command execution.
-* [ ]	Restrict CORS and administrative endpoints.
-* [ ]	Verify WAF and IDS integration.
-* [ ]	Improve logging and audit evidence.
-* [ ]	Test backup and recovery.
-
-Phase 3 — AI capabilities
-
-* [ ]	Integrate and test a real AI provider.
-* [ ]	Improve persistent memory.
-* [ ]	Add verified code analysis and generation.
-* [ ]	Make file operations transactional and auditable.
-* [ ]	Add controlled tool execution.
-
-Phase 4 — User-controlled deployment
-
-* [ ]	Provide reproducible deployment configuration.
-* [ ]	Add HTTPS and TLS verification.
-* [ ]	Improve monitoring and health checks.
-* [ ]	Document private-server deployment.
-* [ ]	Add tested update and rollback procedures.
-
-Phase 5 — Advanced automation
-
-* [ ]	Add approval-based automation workflows.
-* [ ]	Improve project indexing and search.
-* [ ]	Add controlled Git integration.
-* [ ]	Verify integrations with external services.
-* [ ]	Expand regression and security testing.
+Configuration examples do not provision a server or deploy the application by themselves.
 
 Contributing
 
-Contributions should include a clear description of the problem, the intended behavior, the changes made, and the tests performed.
+1. Create a focused branch for your change.
+2. Keep changes small and avoid committing virtual environments, generated files, logs, or credentials.
+3. Add or update tests for behaviour changes.
+4. Run the relevant checks and review the diff.
+5. Describe changes, test results, and security impact in the pull request.
 
-For bug reports, include:
-
-* Relevant module or file.
-* Steps to reproduce.
-* Expected behavior.
-* Actual behavior.
-* Sanitized logs or error messages.
-* Environment and Python version.
-
-Do not publish secrets, private credentials, or sensitive production logs in issues.
+Avoid removing existing functionality as part of an unrelated change. Report suspected security vulnerabilities privately to the maintainer rather than publishing sensitive exploit details.
 
 License
 
-A license has not been confirmed in this documentation. Review the repository’s licensing status before redistributing, modifying, or commercially using the project.
-
-Project Ownership
-
-Project: Tamanna AI
-Owner attribution: HM INSAN ALI
-Repository: tamanna456760-it/Tamanna-
+See the repository’s LICENSE file for the applicable terms.
 
 ⸻
 
 <p align="center">
-  <strong>TAMANNA AI</strong><br>
-  <em>Build carefully. Verify every feature. Keep the system under user control.</em>
+  <sub>Tamanna AI · Owner: HM INSAN ALI</sub>
 </p>
