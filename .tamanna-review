@@ -1,0 +1,33 @@
+Tamanna AI Workflow Hardening Checklist
+
+1. auto-upgrade.yml
+   - contents: read
+   - pull-requests: read
+   - Remove automatic source rewriting and automatic PR creation.
+   - Do not send repository source to an external AI service without approval.
+
+2. auto-sync-bd-king-r7.yml
+   - Remove contents: write.
+   - Remove automatic git add/commit/push.
+   - Keep build and validation steps read-only.
+
+3. ai-debug.yml
+   - Set TAMANNA_ANALYZER_REPORT explicitly.
+   - Set TAMANNA_FIXER_REPORT explicitly.
+   - Upload the exact paths those scripts actually create.
+   - Do not ignore missing reports silently.
+
+4. tamanna-ai-altimate.yml
+   - Pass github.event.comment.body through env: COMMENT.
+   - Do not interpolate comment text into a shell command.
+   - Use an exact command allowlist.
+   - Keep deployment and destructive actions behind explicit approval.
+
+5. security-checks.yml
+   - Pin third-party actions to reviewed immutable commit SHAs.
+   - Do not use || true for mandatory security checks.
+   - Upload reports even on failure.
+   - Do not publish secret values in logs.
+TXT
+
+cat .tamanna-review/workflow-hardening.txt
