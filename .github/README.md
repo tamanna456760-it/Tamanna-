@@ -1,6 +1,11 @@
- <p align="center">
-  <img src="assets/66EA0828-3C61-4162-8695-42D3032168C6.png"alt="TI Tamanna AI Logo" width="220">
+<p align="center">
+  <img
+    src="assets/66EA0828-3C61-4162-8695-42D3032168C6.png"
+    alt="TI Tamanna AI Logo"
+    width="280"
+  />
 </p>
+
 <h1 align="center">Tamanna AI</h1>
 <p align="center">
   A modular AI assistant and automation platform with a FastAPI server, memory and knowledge components, project tools, and security modules.
