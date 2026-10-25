@@ -1,0 +1,45 @@
+
+name: Tamanna Server Health Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "main.py"
+      - "Main.py"
+      - "requirements.txt"
+      - "scripts/tamanna_health_check.py"
+      - ".github/workflows/tamanna-health-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run health check
+        run: python scripts/tamanna_health_check.py
+
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-health-report
+          path: reports/tamanna_health_check.json
+          if-no-files-found: warn
+          retention-days: 14
