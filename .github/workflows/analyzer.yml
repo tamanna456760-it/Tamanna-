@@ -1,50 +1,92 @@
-name: 🔥 Advanced Code Analyzer
+
+name: Tamanna Advanced Code Analyzer
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - main
+    paths:
+      - "scripts/analyzer.py"
+      - "scripts/fixer.py"
+      - ".github/workflows/analyzer.yml"
+      - "**.py"
+      - "**.json"
   pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/**"
+      - ".github/workflows/analyzer.yml"
+      - "**.py"
+      - "**.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-analyzer-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
+    name: Read-only security and syntax scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
-      - name: 📦 Install Dependencies
+      - name: Verify analyzer exists
         run: |
-          pip install -r requirements.txt
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/analyzer.py")
+          if not path.is_file():
+              raise SystemExit("ERROR: scripts/analyzer.py is missing")
+          print("PASS: scripts/analyzer.py exists")
+          PY
 
-      - name: 🔍 Lint Check (flake8)
+      - name: Run Tamanna analyzer
+        id: scan
+        continue-on-error: true
+        env:
+          TAMANNA_ANALYZER_REPORT: ${{ runner.temp }}/tamanna_analyzer_report.json
         run: |
-          echo "Lint Checking..."
-          flake8 . || true
+          python scripts/analyzer.py
+          echo "analyzer_exit_code=$?" >> "$GITHUB_OUTPUT"
 
-      - name: 🧪 Run Tests (pytest)
+      - name: Build review-only fix plan
+        if: always()
+        env:
+          TAMANNA_ANALYZER_REPORT: ${{ runner.temp }}/tamanna_analyzer_report.json
+          TAMANNA_FIXER_REPORT: ${{ runner.temp }}/tamanna_fix_plan.json
         run: |
-          echo "Running Tests..."
-          pytest || true
+          if [ -f "$TAMANNA_ANALYZER_REPORT" ] && [ -f scripts/fixer.py ]; then
+            python scripts/fixer.py
+          else
+            echo "Fix plan skipped: report or fixer.py is missing."
+          fi
 
-      - name: 🧠 Run Analyzer Script
-        run: |
-          python scripts/analyze.py
+      - name: Upload analyzer reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-analyzer-reports
+          path: |
+            ${{ runner.temp }}/tamanna_analyzer_report.json
+            ${{ runner.temp }}/tamanna_fix_plan.json
+          if-no-files-found: warn
+          retention-days: 14
 
-      - name: ▶️ Try Running All Python Files
+      - name: Report scan status
+        if: always()
         run: |
-          for file in $(find . -name "*.py"); do
-            echo "Running $file"
-            python $file >> run_log.txt 2>&1 || echo "[FAILED] $file" >> run_log.txt
-          done
-
-      - name: 📊 Show Report
-        run: |
-          echo "===== ANALYZER REPORT ====="
-          cat report.txt || true
-          echo "===== RUN LOG ====="
-          cat run_log.txt || true
+          echo "Tamanna analyzer workflow finished."
+          echo "Review the uploaded artifact for findings."
