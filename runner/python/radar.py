@@ -1,125 +1,154 @@
+#!/usr/bin/env python3
+"""
+Tamanna AI - Radar Scanner
+Owner: HM INSAN ALI
+"""
+
 import hashlib
 import json
-import os
-import pathlib
-import time
+from datetime import datetime, timezone
+from pathlib import Path
 
-import import
-import Path
-
-==============================
-
-Tamanna Radar - File & Code Detector
-
-==============================
-
-Features:
-
-- Scan files and folders
-
-- Detect suspicious extensions
-
-- Detect dangerous keywords in code
-
-- SHA256 hash generator
-
-- Save scan report to JSON
-
-- Real-time terminal output
-
-==============================
-
-SUSPICIOUS_EXTENSIONS = { '.exe', '.bat', '.cmd', '.vbs', '.ps1', '.sh', '.apk', '.jar', '.py', '.php', '.js' }
-
-DANGEROUS_KEYWORDS = [ 'os.system', 'subprocess', 'eval(', 'exec(', 'base64', 'socket', 'requests', 'wget', 'curl', 'rm -rf', 'chmod 777', 'nc -e', 'powershell', 'token', 'webhook', 'cryptography' ]
-
-SCAN_RESULTS = []
-
-def sha256_hash(file_path): """Generate SHA256 hash of file""" sha256 = hashlib.sha256()
-
-try:
-    with open(file_path, 'rb') as f:
-        while chunk := f.read(4096):
-            sha256.update(chunk)
-    return sha256.hexdigest()
-
-except Exception as e:
-    return f'Hash Error: {e}'
-
-def analyze_code(file_path): """Analyze file content for suspicious code""" findings = []
-
-try:
-    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-        content = f.read().lower()
-
-    for keyword in DANGEROUS_KEYWORDS:
-        if keyword.lower() in content:
-            findings.append(keyword)
-
-except Exception as e:
-    findings.append(f'Read Error: {e}')
-
-return findings
-
-def scan_directory(target_dir): """Scan all files in directory""" print(f'\n[+] Scanning Started: {target_dir}\n')
-
-total_files = 0
-suspicious_files = 0
-
-for root, dirs, files in os.walk(target_dir):
-    for file in files:
-        total_files += 1
-
-        full_path = os.path.join(root, file)
-        ext = Path(full_path).suffix.lower()
-
-        file_info = {
-            'file': full_path,
-            'extension': ext,
-            'size_kb': round(os.path.getsize(full_path) / 1024, 2),
-            'sha256': sha256_hash(full_path),
-            'suspicious_keywords': []
-        }
-
-        if ext in SUSPICIOUS_EXTENSIONS:
-            findings = analyze_code(full_path)
-            file_info['suspicious_keywords'] = findings
-
-            if findings:
-                suspicious_files += 1
-                print(f'[!] Suspicious File Detected: {full_path}')
-                print(f'    Keywords: {findings}')
-                print('-' * 60)
-
-        SCAN_RESULTS.append(file_info)
-
-print(f'\n[✓] Scan Completed')
-print(f'Total Files: {total_files}')
-print(f'Suspicious Files: {suspicious_files}')
-
-def save_report(output_file='tamanna_radar_report.json'): """Save scan report to JSON file"""
-
-report = {
-    'scanner': 'Tamanna Radar',
-    'scan_time': time.ctime(),
-    'total_results': len(SCAN_RESULTS),
-    'results': SCAN_RESULTS
+SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "node_modules",
 }
 
-with open(output_file, 'w', encoding='utf-8') as f:
-    json.dump(report, f, indent=4)
+SUSPICIOUS_EXTENSIONS = {
+    ".exe", ".dll", ".bat", ".cmd", ".ps1", ".scr"
+}
 
-print(f'\n[+] Report Saved: {output_file}')
+MAX_FILE_SIZE = 5 * 1024 * 1024
 
-def main(): print('=' * 60) print('        Tamanna Radar - File & Code Detector') print('=' * 60)
 
-target = input('\nEnter folder path to scan: ').strip()
+def calculate_sha256(file_path):
+    digest = hashlib.sha256()
 
-if not os.path.exists(target):
-    print('[X] Invalid Path!')
-    return
+    with file_path.open("rb") as file:
+        for chunk in iter(lambda: file.read(65536), b""):
+            digest.update(chunk)
 
-scan_directory(target)
-save_report()
+    return digest.hexdigest()
 
-if name == 'main': main()
+
+def scan_file(file_path, root):
+    result = {
+        "path": str(file_path.relative_to(root)),
+        "status": "ok",
+        "findings": [],
+    }
+
+    try:
+        if file_path.is_symlink() or not file_path.is_file():
+            result["status"] = "skipped"
+            return result
+
+        size = file_path.stat().st_size
+        result["size_bytes"] = size
+
+        if size > MAX_FILE_SIZE:
+            result["status"] = "skipped_too_large"
+            return result
+
+        result["sha256"] = calculate_sha256(file_path)
+
+        if file_path.suffix.lower() in SUSPICIOUS_EXTENSIONS:
+            result["findings"].append({
+                "type": "suspicious_extension",
+                "severity": "review",
+            })
+
+        if file_path.suffix.lower() in {".py", ".js", ".sh"}:
+            content = file_path.read_text(
+                encoding="utf-8",
+                errors="replace",
+            )
+
+            patterns = (
+                "eval(",
+                "exec(",
+                "shell=True",
+                "os.system(",
+            )
+
+            for line_number, line in enumerate(
+                content.splitlines(), start=1
+            ):
+                for pattern in patterns:
+                    if pattern in line:
+                        result["findings"].append({
+                            "type": "code_pattern",
+                            "pattern": pattern,
+                            "line": line_number,
+                            "severity": "review",
+                        })
+
+    except OSError as error:
+        result["status"] = "error"
+        result["error"] = str(error)
+
+    return result
+
+
+def scan_directory(directory="."):
+    root = Path(directory).resolve()
+
+    if not root.is_dir():
+        raise NotADirectoryError(str(root))
+
+    results = []
+
+    for current in root.rglob("*"):
+        if any(part in SKIP_DIRS for part in current.parts):
+            continue
+
+        if current.is_file() or current.is_symlink():
+            results.append(scan_file(current, root))
+
+    return {
+        "scanner": "Tamanna Radar",
+        "owner": "HM INSAN ALI",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "directory": str(root),
+        "files_scanned": len(results),
+        "findings_count": sum(
+            len(item["findings"]) for item in results
+        ),
+        "results": results,
+        "read_only": True,
+    }
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Tamanna AI read-only Radar scanner"
+    )
+    parser.add_argument("directory", nargs="?", default=".")
+    parser.add_argument(
+        "--output",
+        default="tamanna_radar_report.json",
+    )
+    args = parser.parse_args()
+
+    report = scan_directory(args.directory)
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    print("Tamanna Radar scan complete")
+    print(f"Files scanned: {report['files_scanned']}")
+    print(f"Findings: {report['findings_count']}")
+    print(f"Report: {output}")
+    print("Source files were not modified.")
+
+
+if __name__ == "__main__":
+    main()
