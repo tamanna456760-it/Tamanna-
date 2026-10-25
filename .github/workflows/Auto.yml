@@ -44,15 +44,19 @@ jobs:
           import ast
           from pathlib import Path
 
-          ignored = {".git", ".venv", "venv", "node_modules", "__pycache__"}
+          ignored = {
+              ".git", ".venv", "venv", "node_modules",
+              "__pycache__", ".pytest_cache"
+          }
           failures = []
 
           for path in Path(".").rglob("*.py"):
               if any(part in ignored for part in path.parts):
                   continue
               try:
-                  ast.parse(path.read_text(encoding="utf-8"))
-              except (SyntaxError, UnicodeDecodeError) as exc:
+                  ast.parse(path.read_text(encoding="utf-8"),
+                            filename=str(path))
+              except (SyntaxError, UnicodeDecodeError, OSError) as exc:
                   failures.append(f"{path}: {exc}")
 
           if failures:
@@ -67,20 +71,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
 
-      - name: Check Node dependencies
+      - name: Install Node dependencies
         if: hashFiles('package.json') != ''
         run: |
           if [ -f package-lock.json ]; then
             npm ci --no-audit --no-fund
           else
-            echo "WARNING: package-lock.json missing; dependency installation skipped."
+            echo "WARNING: package-lock.json missing; skipped npm ci."
           fi
 
       - name: Run Node tests
         if: hashFiles('package.json') != '' && hashFiles('package-lock.json') != ''
-        run: |
-          npm test --if-present
+        run: npm test --if-present
 
   python-test:
     name: Python Build and API Test
@@ -97,8 +101,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
-          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: |
@@ -111,11 +113,10 @@ jobs:
             exit 1
           fi
 
-          python -m pip install pytest
+          python -m pip install pytest uvicorn
 
       - name: Compile entry points
-        run: |
-          python -m py_compile main.py Main.py
+        run: python -m py_compile main.py Main.py
 
       - name: Import FastAPI application
         run: |
@@ -186,8 +187,6 @@ jobs:
       - name: Check for accidentally committed secrets
         shell: bash
         run: |
-          set -eu
-
           python - <<'PY'
           from pathlib import Path
           import re
@@ -211,7 +210,9 @@ jobs:
                   problems.append(f"Review sensitive filename: {path}")
                   continue
 
-              if path.suffix not in {".py", ".js", ".json", ".yml", ".yaml", ".toml"}:
+              if path.suffix not in {
+                  ".py", ".js", ".json", ".yml", ".yaml", ".toml"
+              }:
                   continue
 
               try:
@@ -222,7 +223,7 @@ jobs:
               patterns = [
                   r"(?i)AIza[0-9A-Za-z_-]{30,}",
                   r"(?i)-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
-                  r"(?i)(?:api[_-]?key|secret[_-]?key)\s*[:=]\s*['\"][^'\"]{12,}['\"]",
+                  r"""(?i)(?:api[_-]?key|secret[_-]?key)\s*[:=]\s*['"][^'"]{12,}['"]""",
               ]
 
               for pattern in patterns:
@@ -232,16 +233,19 @@ jobs:
 
           if problems:
               print("\n".join(problems))
-              print("Review these files manually; no files were changed.")
+              print("Review these files manually.")
               raise SystemExit(1)
 
           print("PASS: No matching secret patterns found.")
           PY
 
-      - name: Check GitHub workflow artifact versions
+      - name: Check workflow artifact versions
         shell: bash
         run: |
+          set -eu
+
           if grep -R -n \
+            --exclude='Auto.yml' \
             --include='*.yml' \
             --include='*.yaml' \
             'actions/upload-artifact@v3' .github/workflows; then
