@@ -1,0 +1,17 @@
+
+import json
+from pathlib import Path
+
+CHAT_HISTORY_FILE = Path("data/chat_history.json")
+
+
+def ensure_chat_history_file() -> Path:
+    CHAT_HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    if not CHAT_HISTORY_FILE.exists():
+        CHAT_HISTORY_FILE.write_text(
+            "[]\n",
+            encoding="utf-8",
+        )
+
+    return CHAT_HISTORY_FILE
