@@ -1,31 +1,27 @@
-name: Build Tamanna APK (Advanced)
+
+name: "Build Tamanna APK"
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'Build type'
+        description: "APK build type"
         required: true
-        default: 'debug'
+        default: debug
         type: choice
         options:
           - debug
           - release
-      upload_artifact:
-        description: 'Upload APK as artifact'
-        type: boolean
-        default: true
 
-# Cancel in-progress runs on same branch
+permissions:
+  contents: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: tamanna-apk-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -35,145 +31,101 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # ------------------------------------------------------------------
-      # 1) Setup Java + Cache
-      # ------------------------------------------------------------------
-      - name: ☕ Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
-
-      # ------------------------------------------------------------------
-      # 2) Setup Android SDK with caching
-      # ------------------------------------------------------------------
-      - name: 🤖 Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 'latest'
-          packages: 'platforms;android-33 build-tools;33.0.0'
-
-      # ------------------------------------------------------------------
-      # 3) Cache Gradle & Android build cache
-      # ------------------------------------------------------------------
-      - name: 💾 Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      # ------------------------------------------------------------------
-      # 4) Set up signing (if secrets exist)
-      # ------------------------------------------------------------------
-      - name: 🔐 Prepare keystore for release build
-        if: github.event.inputs.build_type == 'release' && secrets.KEYSTORE_BASE64 != ''
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Verify Android project
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > keystore.jks
-          echo "KEYSTORE_FILE=$PWD/keystore.jks" >> $GITHUB_ENV
-          echo "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> $GITHUB_ENV
-          echo "KEY_ALIAS=$KEY_ALIAS" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=$KEY_PASSWORD" >> $GITHUB_ENV
-
-      # ------------------------------------------------------------------
-      # 5) Grant execute permission to gradlew
-      # ------------------------------------------------------------------
-      - name: 🔧 Grant permission
-        run: chmod +x gradlew
-
-      # ------------------------------------------------------------------
-      # 6) Build APK (Debug or Release)
-      # ------------------------------------------------------------------
-      - name: 🏗️ Build ${{ github.event.inputs.build_type || 'debug' }} APK
-        id: build
-        run: |
-          BUILD_TYPE="${{ github.event.inputs.build_type || 'debug' }}"
-          if [ "$BUILD_TYPE" = "release" ]; then
-            ./gradlew assembleRelease --stacktrace
-            APK_PATH="app/build/outputs/apk/release/app-release.apk"
-          else
-            ./gradlew assembleDebug --stacktrace
-            APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-          fi
-          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
-          echo "APK built at $APK_PATH"
-
-      # ------------------------------------------------------------------
-      # 7) Rename APK with version info (if available)
-      # ------------------------------------------------------------------
-      - name: 📝 Rename APK with version
-        id: rename
-        run: |
-          APK_PATH="${{ steps.build.outputs.apk_path }}"
-          if [ ! -f "$APK_PATH" ]; then
-            echo "APK not found at $APK_PATH"
+          if [ ! -f gradlew ]; then
+            echo "ERROR: gradlew not found at repository root."
             exit 1
           fi
-          # Try to get version from gradle properties
-          VERSION_NAME=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle 2>/dev/null || echo "1.0")
-          VERSION_CODE=$(grep -oP 'versionCode\s+\K\d+' app/build.gradle 2>/dev/null || echo "1")
-          BUILD_TYPE="${{ github.event.inputs.build_type || 'debug' }}"
-          TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
-          NEW_NAME="tamanna_${VERSION_NAME}_${VERSION_CODE}_${BUILD_TYPE}_${TIMESTAMP}.apk"
-          NEW_PATH="app/build/outputs/apk/${NEW_NAME}"
-          cp "$APK_PATH" "$NEW_PATH"
-          echo "new_apk_path=$NEW_PATH" >> $GITHUB_OUTPUT
-          echo "Renamed to $NEW_NAME"
 
-      # ------------------------------------------------------------------
-      # 8) Upload APK as artifact (optional)
-      # ------------------------------------------------------------------
-      - name: 📤 Upload APK
-        if: github.event.inputs.upload_artifact != 'false'
+          if [ ! -d app ]; then
+            echo "ERROR: app/ directory not found at repository root."
+            exit 1
+          fi
+
+          chmod +x gradlew
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Determine build type
+        id: build_type
+        env:
+          INPUT_BUILD_TYPE: ${{ inputs.build_type }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          BUILD_TYPE="${INPUT_BUILD_TYPE:-debug}"
+
+          if [ "$EVENT_NAME" != "workflow_dispatch" ]; then
+            BUILD_TYPE="debug"
+          fi
+
+          if [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
+            echo "ERROR: Unsupported build type."
+            exit 1
+          fi
+
+          echo "value=$BUILD_TYPE" >> "$GITHUB_OUTPUT"
+
+      - name: Build debug APK
+        if: steps.build_type.outputs.value == 'debug'
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Build release APK
+        if: steps.build_type.outputs.value == 'release'
+        run: ./gradlew --no-daemon assembleRelease
+
+      - name: Locate APK files
+        id: apk
+        env:
+          BUILD_TYPE: ${{ steps.build_type.outputs.value }}
+        run: |
+          APK_DIR="app/build/outputs/apk/$BUILD_TYPE"
+
+          if [ ! -d "$APK_DIR" ]; then
+            echo "ERROR: Expected APK directory not found: $APK_DIR"
+            exit 1
+          fi
+
+          mkdir -p packaged-apk
+          find "$APK_DIR" -maxdepth 1 -type f -name '*.apk' -exec cp {} packaged-apk/ \;
+
+          if [ -z "$(find packaged-apk -type f -name '*.apk' -print -quit)" ]; then
+            echo "ERROR: Gradle did not produce an APK."
+            exit 1
+          fi
+
+          echo "APK files produced:"
+          find packaged-apk -type f -name '*.apk' -print
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-apk-${{ github.run_id }}
-          path: ${{ steps.rename.outputs.new_apk_path }}
-          retention-days: 30
+          name: tamanna-apk-${{ steps.build_type.outputs.value }}-${{ github.run_id }}
+          path: packaged-apk/*.apk
+          if-no-files-found: error
+          retention-days: 14
 
-      # ------------------------------------------------------------------
-      # 9) Generate build summary
-      # ------------------------------------------------------------------
-      - name: 📊 Build summary
+      - name: Build summary
         if: always()
-        run: |
-          echo "## 📱 Tamanna APK Build Report" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build type**: ${{ github.event.inputs.build_type || 'debug' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK**: [Download artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
-
-      # ------------------------------------------------------------------
-      # 10) Slack notification (optional)
-      # ------------------------------------------------------------------
-      - name: 🚨 Slack notification on failure
-        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
-        uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_CHANNEL: '#alerts'
-          SLACK_COLOR: '#FF0000'
-          SLACK_TITLE: 'Tamanna APK Build Failed'
-          SLACK_MESSAGE: |
-            Repository: ${{ github.repository }}
-            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            Branch: ${{ github.ref_name }}
-            Type: ${{ github.event.inputs.build_type || 'debug' }}
-
-      - name: ✅ Completion
-        run: echo "🎉 Build finished. APK is available as artifact."
+          BUILD_TYPE: ${{ steps.build_type.outputs.value }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            echo "## Tamanna APK Build"
+            echo "- Build type: ${BUILD_TYPE:-unknown}"
+            echo "- Branch: $GITHUB_REF_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Status: $JOB_STATUS"
+          } >> "$GITHUB_STEP_SUMMARY"
