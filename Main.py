@@ -8,7 +8,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
-
+import os
+from dotenv import load_dotenv
 
 # ============================================================
 # PATH
