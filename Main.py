@@ -347,7 +347,14 @@ if JS_DIR.exists():
         name="js"
     )
 
+STATIC_DIR = BASE_DIR / "static"
 
+if STATIC_DIR.is_dir():
+    app.mount(
+        "/static",
+        StaticFiles(directory=STATIC_DIR),
+        name="static",
+    )
 # ============================================================
 # INDEX
 # ============================================================
