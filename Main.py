@@ -1,15 +1,15 @@
 from pathlib import Path
 import json
 from datetime import datetime
-
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
-import os
-from dotenv import load_dotenv
+
 
 # ============================================================
 # PATH
