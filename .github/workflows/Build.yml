@@ -1,42 +1,56 @@
-Tamanna AI - Python Build and Syntax Check
 
-name: Tamanna AI Build
+name: Tamanna AI Build and Test
 
 on:
-push:
-branches: [main]
-pull_request:
-branches: [main]
-workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
-contents: read
+  contents: read
 
 jobs:
-python-build:
-name: Python Syntax Check
-runs-on: ubuntu-latest
+  build-and-test:
+    name: Python and Node.js Checks
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
-  - name: Set up Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: "3.11"
-  - name: Check Python syntax
-    run: |
-      python -m compileall -q Main.py main.py scripts tamanna_ai
-      
-  - name: Verify server entry points
-    run: |
-      test -f Main.py
-      test -f main.py
-      echo "Tamanna AI entry-point files found."
-  - name: Check Node project files without failing Python build
-    run: |
-      if [ -f package.json ] && [ -f package-lock.json ]; then
-        echo "Root Node.js project detected."
-      else
-        echo "No complete root Node.js project; skipping npm commands."
-      fi
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Validate JSON files
+        run: |
+          python -c "import json; json.load(open('package.json', encoding='utf-8')); json.load(open('package-lock.json', encoding='utf-8')); print('PASS: JSON files are valid')"
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Run Node.js tests
+        run: npm test
+
+      - name: Run Node.js build check
+        run: npm run build
+
+      - name: Check Python syntax
+        run: python -m compileall -q Main.py main.py scripts tamanna_ai
+
+      - name: Verify server entry points
+        run: |
+          test -f Main.py
+          test -f main.py
+          echo "PASS: Tamanna AI entry-point files found."
