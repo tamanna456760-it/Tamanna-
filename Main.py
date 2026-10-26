@@ -16,6 +16,16 @@ import uvicorn
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env", override=False)
+
+try:
+    from tamanna_ai.integrations.gemini import GeminiClient
+except Exception as exc:
+    GeminiClient = None
+    print(
+        "[TAMANNA AI] Gemini integration unavailable:",
+        type(exc).__name__,
+    )
 
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
