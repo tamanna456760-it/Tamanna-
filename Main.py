@@ -669,7 +669,35 @@ async def chat(request: ChatRequest):
 
         # Normal Master Response continues below.
 
+    # ========================================================
+    # GEMINI CHAT
+    # ========================================================
+    gemini_enabled = os.getenv(
+        "TAMANNA_GEMINI_CHAT", "1"
+    ).strip().lower() in {"1", "true", "yes", "on"}
 
+    if (
+        gemini_enabled
+        and os.getenv("GEMINI_API_KEY", "").strip()
+        and GeminiClient is not None
+    ):
+        try:
+            gemini_reply = await GeminiClient().generate(message)
+
+            if gemini_reply and gemini_reply.strip():
+                save_chat(message, gemini_reply)
+                return {
+                    "reply": gemini_reply,
+                    "handled": True,
+                    "source": "gemini",
+                }
+
+        except Exception as exc:
+            print(
+                "[TAMANNA AI] Gemini failed; "
+                "using existing pipeline:",
+                type(exc).__name__,
+            )
     # ========================================================
     # MASTER RESPONSE PIPELINE
     # ========================================================
