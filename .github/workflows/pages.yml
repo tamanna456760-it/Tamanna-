@@ -1,0 +1,74 @@
+name: Tamanna AI GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Prepare Static Website
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Website Files
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          test -f index.html
+
+          rm -rf _site
+          mkdir -p _site
+
+          cp index.html _site/index.html
+
+          for item in css js assets static; do
+            if [ -d "$item" ]; then
+              cp -R "$item" "_site/$item"
+            fi
+          done
+
+          if [ -f CNAME ]; then
+            cp CNAME _site/CNAME
+          fi
+
+          touch _site/.nojekyll
+
+          echo "Website files prepared:"
+          find _site -maxdepth 3 -type f -print
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Publish Website
+    runs-on: ubuntu-latest
+    needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
