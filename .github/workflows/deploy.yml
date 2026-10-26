@@ -1,0 +1,37 @@
+name: Tamanna Deployment Preflight
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-deployment-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-deployment:
+    name: Validate Release Configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Deployment Configuration
+        run: python deploy/preflight.py
+
+      - name: Validate Release Files
+        run: python deploy/validate_release.py
