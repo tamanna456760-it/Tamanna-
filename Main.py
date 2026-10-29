@@ -2766,18 +2766,9 @@ try:
     tamanna_code_builder = AdvancedCodeBuilder(
         TAMANNA_PROJECT_ROOT
     )
-
-    @app.get("/api/code-builder/status")
-    async def code_builder_status():
-
-        return {
-            "ok": True,
-            "service": "advanced_code_builder",
-            "status": "online",
-            "project_root": str(
-                TAMANNA_PROJECT_ROOT
-            ),
-        }
+    # The canonical /api/code-builder/status route
+    # is registered by IntelligentCodeBuilder above.
+    # Keep the AdvancedCodeBuilder routes below.
 
     @app.get("/api/code-builder/project")
     async def code_builder_project():
