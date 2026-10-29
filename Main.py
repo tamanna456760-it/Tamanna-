@@ -316,12 +316,26 @@ except Exception as exc:
 
 
 
+
+# Restrict browser access to explicitly trusted frontend origins.
+# Add development origins through TAMANNA_CORS_ORIGINS when needed.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "TAMANNA_CORS_ORIGINS",
+        "https://www.tamanna.com,https://tamanna.com",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
 )
 
 
