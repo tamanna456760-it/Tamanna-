@@ -336,7 +336,6 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-)
 
 
 # ============================================================
