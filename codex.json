@@ -1,0 +1,21 @@
+{
+  "thread_start_params": {
+    "approvalPolicy": "on-request",
+    "approvalsReviewer": "auto_review",
+    "sandbox": "workspace-write",
+    "environments": [
+      {
+        "environmentId": "connected-environment-id",
+        "cwd": "/known/absolute/repository/path"
+      }
+    ]
+  },
+  "turn_start_params": {
+    "input": [
+      {
+        "type": "text",
+        "text": "Implement the requested change, run relevant checks, and summarize the result."
+      }
+    ]
+  }
+}
