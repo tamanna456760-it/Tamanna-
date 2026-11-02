@@ -224,7 +224,7 @@ try:
     )
 
     @app.get("/api/code-builder/status")
-    async def code_builder_status():
+    async def code_builder_status(_admin: bool = Depends(verify_admin_key)):
         return {
             "status": "online",
             "engine": "Tamanna Intelligent Code Builder",
@@ -234,12 +234,13 @@ try:
         }
 
     @app.get("/api/code-builder/scan")
-    async def code_builder_scan():
+    async def code_builder_scan(_admin: bool = Depends(verify_admin_key)):
         return TAMANNA_CODE_BUILDER.scan_project()
 
     @app.post("/api/code-builder/inspect")
     async def code_builder_inspect(
         payload: dict,
+        _admin: bool = Depends(verify_admin_key),
     ):
         path = payload.get("path")
 
@@ -254,6 +255,7 @@ try:
     @app.post("/api/code-builder/propose")
     async def code_builder_propose(
         payload: dict,
+        _admin: bool = Depends(verify_admin_key),
     ):
         path = payload.get("path")
         content = payload.get("content")
@@ -1398,7 +1400,7 @@ try:
     from data.linux.tool_manager import linux_tools
 
     @app.get("/api/linux/tools")
-    async def linux_tools_api():
+    async def linux_tools_api(_admin: bool = Depends(verify_admin_key)):
         return {
             "ok": True,
             "system": linux_tools.system,
@@ -1450,7 +1452,7 @@ try:
     from data.security.kali_tool_manager import kali_tools
 
     @app.get("/api/security/tools")
-    async def security_tools():
+    async def security_tools(_admin: bool = Depends(verify_admin_key)):
         return kali_tools.discover()
 
     print(
@@ -1500,7 +1502,7 @@ try:
     from data.system.system_controller import tamanna_system
 
     @app.get("/api/tamanna/system")
-    async def tamanna_system_overview():
+    async def tamanna_system_overview(_admin: bool = Depends(verify_admin_key)):
         return tamanna_system.overview()
 
     print("[TAMANNA AI] Unified System Controller: ONLINE")
@@ -1517,7 +1519,7 @@ try:
     from data.self_healing.engine import self_healing
 
     @app.get("/api/linux/shell/status")
-    async def linux_shell_status():
+    async def linux_shell_status(_admin: bool = Depends(verify_admin_key)):
         return {
             "online": True,
             "project_root": str(shell_bridge.root),
@@ -1563,12 +1565,12 @@ try:
     from data.autonomous.project_brain import project_brain
 
     @app.get("/api/autonomous/think")
-    async def autonomous_think():
+    async def autonomous_think(_admin: bool = Depends(verify_admin_key)):
 
         return project_brain.think()
 
     @app.get("/api/autonomous/files")
-    async def autonomous_files():
+    async def autonomous_files(_admin: bool = Depends(verify_admin_key)):
 
         return {
             "root": str(project_brain.root),
@@ -1638,7 +1640,7 @@ except Exception as import_error:
 
 
 @app.get("/api/autonomous/startup")
-async def autonomous_startup():
+async def autonomous_startup(_admin: bool = Depends(verify_admin_key)):
 
     return AUTONOMOUS_STARTUP_STATE
 
@@ -1653,14 +1655,14 @@ try:
     from data.autonomous.builder import safe_builder
 
     @app.get("/api/autonomous/plans")
-    async def autonomous_plans():
+    async def autonomous_plans(_admin: bool = Depends(verify_admin_key)):
 
         return {
             "plans": autonomous_planner.status()
         }
 
     @app.post("/api/autonomous/plan")
-    async def autonomous_make_plan():
+    async def autonomous_make_plan(_admin: bool = Depends(verify_admin_key)):
 
         brain = project_brain.think()
 
@@ -1715,7 +1717,7 @@ try:
     from data.autonomous.repair_engine import repair_engine
 
     @app.get("/api/autonomous/repair/status")
-    async def autonomous_repair_status():
+    async def autonomous_repair_status(_admin: bool = Depends(verify_admin_key)):
         return repair_engine.status()
 
     @app.post("/api/autonomous/repair")
@@ -1725,7 +1727,7 @@ try:
         return repair_engine.diagnose_and_repair()
 
     @app.get("/api/autonomous/repair/history")
-    async def autonomous_repair_history():
+    async def autonomous_repair_history(_admin: bool = Depends(verify_admin_key)):
         return {
             "history": repair_engine.history()
         }
@@ -1758,7 +1760,7 @@ try:
     )
 
     @app.get("/api/autonomous/status")
-    async def autonomous_status():
+    async def autonomous_status(_admin: bool = Depends(verify_admin_key)):
 
         return tamanna_autonomous.status()
 
@@ -2792,7 +2794,7 @@ try:
     # Keep the AdvancedCodeBuilder routes below.
 
     @app.get("/api/code-builder/project")
-    async def code_builder_project():
+    async def code_builder_project(_admin: bool = Depends(verify_admin_key)):
 
         return tamanna_code_builder.discover()
 
@@ -2923,7 +2925,7 @@ try:
         return unified_system.health()
 
     @app.get("/api/unified/project")
-    async def unified_project():
+    async def unified_project(_admin: bool = Depends(verify_admin_key)):
         return unified_system.discover()
 
     print("[TAMANNA AI] Unified System: ONLINE")
