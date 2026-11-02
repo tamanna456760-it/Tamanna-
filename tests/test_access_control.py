@@ -106,6 +106,8 @@ def test_project_inventory_and_status_gets_require_login(monkeypatch):
         "/api/code-builder/project",
         "/api/unified/project",
         "/api/security/tools",
+        "/api/code-builder/scan",
+        "/api/code-builder/status",
     ]
 
     for path in protected_paths:
@@ -160,3 +162,26 @@ def test_regular_signup_does_not_need_admin_bootstrap_token(monkeypatch):
     monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@tamanna.com")
     monkeypatch.delenv("TAMANNA_ADMIN_SIGNUP_TOKEN", raising=False)
     authorize_admin_signup("member@example.com", None)
+
+
+def test_every_admin_route_is_also_session_protected():
+    assert access.ADMIN_ROUTES <= access.USER_ROUTES
+
+
+def test_all_sensitive_get_routes_require_login(monkeypatch):
+    monkeypatch.setattr(access, "current_user", lambda token: None)
+    app = access.TamannaAccessControl(lambda *args: None)
+
+    for path in sorted(access.READ_ROUTES):
+        result = invoke(app, path=path, headers=[], method="GET")
+        assert status(result) == 401, path
+
+
+def test_admin_route_without_admin_configuration_fails_closed(monkeypatch):
+    from fastapi import HTTPException
+
+    monkeypatch.delenv("TAMANNA_ADMIN_EMAIL", raising=False)
+    monkeypatch.setattr(access, "current_user", lambda token: {"email": "owner@example.com"})
+    app = access.TamannaAccessControl(lambda *args: None)
+    result = invoke(app, path="/api/command", headers=[(b"cookie", b"tamanna_session=test")])
+    assert status(result) == 503
