@@ -38,7 +38,20 @@ jobs:
           python -m pip install pytest
 
       - name: Check Python syntax
-        run: python -m compileall -q tamanna_ai tests
+        run: python -m compileall -q tamanna_ai tests scripts
+
+      - name: Validate memory JSON files
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for path in sorted(Path('tamanna_ai/memory').glob('*.json')):
+              with path.open(encoding='utf-8') as stream:
+                  value = json.load(stream)
+              if not isinstance(value, dict):
+                  raise SystemExit(f'{path}: expected a JSON object')
+          print('Memory JSON validation passed.')
+          PY
 
       - name: Run test suite
         run: python -m pytest -q
