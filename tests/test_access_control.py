@@ -111,3 +111,21 @@ def test_project_inventory_and_status_gets_require_login(monkeypatch):
     for path in protected_paths:
         result = invoke(app, path=path, headers=[], method="GET")
         assert status(result) == 401, path
+
+
+def test_skill_matching_and_code_inspection_require_login(monkeypatch):
+    monkeypatch.setattr(access, "current_user", lambda token: None)
+    app = access.TamannaAccessControl(lambda *args: None)
+
+    for path in ["/api/skills/match", "/api/code-builder/inspect"]:
+        result = invoke(app, path=path, headers=[])
+        assert status(result) == 401, path
+
+
+def test_sensitive_status_endpoints_require_login(monkeypatch):
+    monkeypatch.setattr(access, "current_user", lambda token: None)
+    app = access.TamannaAccessControl(lambda *args: None)
+
+    for path in ["/api/self-improvement/status", "/api/tamanna/system"]:
+        result = invoke(app, path=path, headers=[], method="GET")
+        assert status(result) == 401, path
