@@ -125,6 +125,7 @@ try:
     @app.post("/api/skills/create")
     async def tamanna_skill_create(
         payload: dict,
+        _admin: bool = Depends(verify_admin_key),
     ):
         interview = payload.get(
             "interview"
@@ -147,6 +148,7 @@ try:
     @app.post("/api/skills/test")
     async def tamanna_skill_test(
         payload: dict,
+        _admin: bool = Depends(verify_admin_key),
     ):
         path = payload.get("path")
 
@@ -163,6 +165,7 @@ try:
     @app.post("/api/skills/refine")
     async def tamanna_skill_refine(
         payload: dict,
+        _admin: bool = Depends(verify_admin_key),
     ):
         path = payload.get("path")
         correction = payload.get(
@@ -2964,7 +2967,10 @@ except Exception as exc:
 from tamanna_ai.core.controller import tamanna_controller as _tamanna_controller
 
 @app.post("/api/tamanna/echo")
-async def tamanna_echo_controller_route(payload: dict):
+async def tamanna_echo_controller_route(
+    payload: dict,
+    _admin: bool = Depends(verify_admin_key),
+):
     """Route Echo commands through the Tamanna AI controller."""
     message = str(payload.get("message", ""))
     return _tamanna_controller.respond(message)
