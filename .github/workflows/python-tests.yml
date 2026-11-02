@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: tamanna-python-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pytest:
     name: Install server dependencies and run pytest
