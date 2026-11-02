@@ -165,7 +165,7 @@ EOF
           retention-days: 7
 
       - name: 🚨 Slack Notification (only on failure in main branch)
-        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && github.ref == 'refs/heads/main' && vars.SLACK_NOTIFICATIONS == 'true'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -179,7 +179,7 @@ EOF
             Iterations: ${{ env.MAX_ITERATIONS }}
 
       - name: ✅ Success Notification (optional)
-        if: success() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        if: success() && github.ref == 'refs/heads/main' && vars.SLACK_NOTIFICATIONS == 'true'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
