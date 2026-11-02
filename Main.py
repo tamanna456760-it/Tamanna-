@@ -1480,7 +1480,7 @@ try:
         return self_improvement.status()
 
     @app.post("/api/self-improvement/analyze")
-    async def self_improvement_analyze():
+    async def self_improvement_analyze(_admin: bool = Depends(verify_admin_key)):
         return self_improvement.analyze()
 
     print(
