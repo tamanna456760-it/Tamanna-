@@ -21,8 +21,8 @@ services:
       TAMANNA_ENV: "production"
       PYTHONUNBUFFERED: "1"
     volumes:
-      # Preserve accounts.sqlite3 and chat history across container recreation.
-      - tamanna-data:/app/data
+      # Keep the existing production data volume across container recreation.
+      - tamanna-ai-data:/app/data
     init: true
     security_opt:
       - no-new-privileges:true
@@ -68,13 +68,9 @@ services:
     stop_grace_period: 15s
 
 volumes:
-  tamanna-data:
-    name: tamanna-data
+  tamanna-ai-data:
+    name: tamanna-ai-data
 
 networks:
   tamanna-network:
     driver: bridge
-
-volumes:
-  tamanna-data:
-    name: tamanna-ai-data
