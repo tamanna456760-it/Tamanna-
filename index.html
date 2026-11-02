@@ -15,7 +15,7 @@
         <h1>🤖 Tamanna AI</h1>
         <span>AI Assistant</span>
       </div>
-      <button id="openSettings" class="settings-trigger" type="button" aria-haspopup="dialog" aria-controls="settingsPanel">⚙ সেটিংস</button>
+      <div class="header-actions"><button id="openAuth" class="header-action" type="button">লগইন</button><button id="openSettings" class="settings-trigger" type="button" aria-haspopup="dialog" aria-controls="settingsPanel">⚙ সেটিংস</button></div>
     </header>
 
     <main id="chatBox" class="chat-box" aria-live="polite">
@@ -70,6 +70,32 @@
     <p id="settingsSaveStatus" role="status" aria-live="polite"></p>
   </aside>
 
+
+  <div id="authBackdrop" class="settings-backdrop" hidden></div>
+  <section id="authPanel" class="settings-panel auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
+    <div class="settings-heading"><h2 id="authTitle">Tamanna AI Account</h2><button id="closeAuth" class="settings-close" type="button" aria-label="বন্ধ করুন">✕</button></div>
+    <p id="authStatus" class="settings-note" role="status" aria-live="polite">অ্যাকাউন্টে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+    <div class="auth-tabs"><button id="showLogin" type="button" class="settings-secondary">লগইন</button><button id="showSignup" type="button" class="settings-secondary">সাইন আপ</button></div>
+    <form id="loginForm" class="auth-form">
+      <label for="loginEmail">ইমেইল</label><input id="loginEmail" type="email" autocomplete="email" required maxlength="254">
+      <label for="loginPassword">পাসওয়ার্ড</label><input id="loginPassword" type="password" autocomplete="current-password" required maxlength="128">
+      <button type="submit">লগইন</button>
+    </form>
+    <form id="signupForm" class="auth-form" hidden>
+      <label for="signupName">আপনার নাম</label><input id="signupName" type="text" autocomplete="name" required minlength="2" maxlength="80">
+      <label for="signupEmail">ইমেইল</label><input id="signupEmail" type="email" autocomplete="email" required maxlength="254">
+      <label for="signupPassword">পাসওয়ার্ড (কমপক্ষে ১২ অক্ষর)</label><input id="signupPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="128">
+      <button type="submit">অ্যাকাউন্ট তৈরি করুন</button>
+    </form>
+    <div id="accountDetails" hidden>
+      <p id="accountIdentity"></p>
+      <form id="profileForm" class="auth-form"><label for="profileName">নাম পরিবর্তন</label><input id="profileName" type="text" minlength="2" maxlength="80" required><button type="submit">প্রোফাইল সংরক্ষণ</button></form>
+      <button id="logoutButton" class="settings-secondary" type="button">লগআউট</button>
+    </div>
+    <p class="settings-note">পাসওয়ার্ড নিরাপদভাবে হ্যাশ করে সার্ভারে রাখা হয়। পাসওয়ার্ড ব্রাউজারে সংরক্ষণ করা হয় না।</p>
+  </section>
+
+  <script src="js/auth.js?v=20261102_auth"></script>
   <script src="js/chat.js?v=20261102_settings"></script>
   <script src="js/settings.js?v=20261102_settings"></script>
 </body>
