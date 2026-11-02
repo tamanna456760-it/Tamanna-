@@ -54,3 +54,32 @@ The CI validation also rejects tracked private environment files other than the 
 ## Audit finding requiring owner action
 
 The audit found a GitHub personal access token embedded in the historical version of `runner/python/ai_backup_network.py`. The active file on this security branch has been replaced with a local, read-only inventory utility, but this commit does not revoke the exposed credential or erase it from existing Git history. The repository owner must revoke that token immediately, review its access logs, and only then create a least-privilege replacement if needed.
+
+
+## Admin account bootstrap protection
+
+Registration of the email configured in `TAMANNA_ADMIN_EMAIL` requires a separate bootstrap token. This prevents an unauthenticated visitor from registering the known admin email first and gaining the administrator identity.
+
+1. Generate a unique token on the private server (do not paste it into GitHub):
+
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(48))"
+   ```
+
+2. Put the generated value in the server's untracked `.env` file as `TAMANNA_ADMIN_SIGNUP_TOKEN=...`, alongside `TAMANNA_ADMIN_EMAIL`.
+3. During the first registration only, submit the token in the signup JSON field `admin_bootstrap_token`. Never put the token in frontend JavaScript, a public config, GitHub, chat logs, or a URL.
+4. After the admin account is successfully created, remove `TAMANNA_ADMIN_SIGNUP_TOKEN` from the server environment and restart the service. Existing admin login continues to work; new registrations using the admin email remain blocked.
+5. If the token may have been exposed, replace it before attempting registration.
+
+Example request body shape (use a private HTTPS request; replace every placeholder locally):
+
+```json
+{
+  "email": "your-admin-email@example.com",
+  "name": "Admin",
+  "password": "a-long-unique-password",
+  "admin_bootstrap_token": "YOUR_PRIVATE_BOOTSTRAP_TOKEN"
+}
+```
+
+The example file contains only an empty placeholder. Never commit the generated token or a real `.env` file.
