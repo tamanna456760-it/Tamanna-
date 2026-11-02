@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tamanna AI deployment preflight checks."""
+"""Read-only preflight checks for Tamanna AI self-hosted deployment."""
 
 from pathlib import Path
 import json
@@ -11,9 +11,14 @@ REQUIRED_FILES = (
     "index.html",
     "Main.py",
     "main.py",
+    "Dockerfile",
+    "requirements-server.txt",
+    ".dockerignore",
     "CNAME",
     ".github/workflows/deploy.yml",
     ".github/workflows/pages.yml",
+    "deploy/docker-compose.yml",
+    "deploy/nginx/tamanna-https.conf",
 )
 
 
@@ -22,43 +27,72 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
+def read_text(relative: str) -> str:
+    try:
+        return (ROOT / relative).read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        fail(f"Cannot read {relative}: {type(exc).__name__}")
+        raise AssertionError("unreachable")
+
+
 def main() -> None:
     for relative in REQUIRED_FILES:
-        path = ROOT / relative
+        if not (ROOT / relative).is_file():
+            fail(f"Required deployment file missing: {relative}")
 
-        if not path.is_file():
-            fail(f"Required file missing: {relative}")
-
-    cname = (ROOT / "CNAME").read_text(
-        encoding="utf-8"
-    ).strip().lower()
-
+    cname = read_text("CNAME").strip().lower()
     if cname != "www.tamanna.com":
-        fail(
-            "CNAME must contain exactly "
-            "www.tamanna.com"
-        )
+        fail("CNAME must contain exactly www.tamanna.com")
+
+    dockerignore = set(read_text(".dockerignore").splitlines())
+    for pattern in (".env", ".env.*"):
+        if pattern not in dockerignore:
+            fail(f".dockerignore must exclude {pattern!r}")
+
+    compose = read_text("deploy/docker-compose.yml")
+    required_compose_markers = (
+        "127.0.0.1:8000:8000",
+        "no-new-privileges:true",
+        "condition: service_healthy",
+        "/health",
+        "80:80",
+        "443:443",
+    )
+    for marker in required_compose_markers:
+        if marker not in compose:
+            fail(f"Docker Compose is missing required setting: {marker}")
+
+    nginx = read_text("deploy/nginx/tamanna-https.conf")
+    for marker in (
+        "server_name www.tamanna.com",
+        "ssl_certificate",
+        "ssl_certificate_key",
+        "ssl_protocols TLSv1.2 TLSv1.3",
+        "proxy_pass http://tamanna-ai:8000",
+    ):
+        if marker not in nginx:
+            fail(f"Nginx configuration is missing: {marker}")
+
+    dockerfile = read_text("Dockerfile")
+    if 'CMD ["python", "-m", "uvicorn", "Main:app"' not in dockerfile:
+        fail("Dockerfile does not start the expected FastAPI application")
 
     package_json = ROOT / "package.json"
-
     if package_json.is_file():
         try:
-            json.loads(
-                package_json.read_text(
-                    encoding="utf-8"
-                )
-            )
+            json.loads(package_json.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
             fail(f"Invalid package.json: {exc}")
 
-    print("PASS: Required files exist.")
-    print("PASS: CNAME configuration is correct.")
+    print("PASS: Required website and self-hosted deployment files exist.")
+    print("PASS: Private environment files are excluded from Docker context.")
+    print("PASS: Compose health gating and local-only backend binding are configured.")
+    print("PASS: Nginx TLS and Docker upstream configuration are present.")
     print("PASS: Deployment preflight completed.")
-
     print(
-        "NOTE: DNS, domain ownership, "
-        "GitHub Pages settings and TLS "
-        "must be verified separately."
+        "NOTE: This is a static check. DNS records, certificate validity, "
+        "server firewall, host access, and live HTTPS must be tested on the "
+        "actual hosting server."
     )
 
 
