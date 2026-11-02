@@ -56,12 +56,13 @@ def main() -> None:
         "no-new-privileges:true",
         "condition: service_healthy",
         "/health",
-        "tamanna-data:/app/data",
+        "tamanna-ai-data:/app/data",
         "80:80",
         "443:443",
-        "tamanna-data:/app/data",
         "name: tamanna-ai-data",
     )
+    if compose.count("\\nvolumes:\\n") != 1:
+        fail("Docker Compose must declare exactly one top-level volumes section")
     for marker in required_compose_markers:
         if marker not in compose:
             fail(f"Docker Compose is missing required setting: {marker}")
