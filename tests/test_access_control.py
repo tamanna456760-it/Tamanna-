@@ -129,3 +129,34 @@ def test_sensitive_status_endpoints_require_login(monkeypatch):
     for path in ["/api/self-improvement/status", "/api/tamanna/system"]:
         result = invoke(app, path=path, headers=[], method="GET")
         assert status(result) == 401, path
+
+
+def test_admin_signup_requires_bootstrap_token(monkeypatch):
+    from fastapi import HTTPException
+    from tamanna_ai.authentication.router import authorize_admin_signup
+
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "Tamanna456760@gmail.com")
+    monkeypatch.delenv("TAMANNA_ADMIN_SIGNUP_TOKEN", raising=False)
+
+    try:
+        authorize_admin_signup("tamanna456760@gmail.com", None)
+        assert False, "Admin signup must fail closed without a bootstrap token."
+    except HTTPException as exc:
+        assert exc.status_code == 503
+
+    monkeypatch.setenv("TAMANNA_ADMIN_SIGNUP_TOKEN", "a" * 48)
+    try:
+        authorize_admin_signup("TAManna456760@gmail.com", "wrong-token")
+        assert False, "Incorrect bootstrap token must be rejected."
+    except HTTPException as exc:
+        assert exc.status_code == 403
+
+    authorize_admin_signup("tamanna456760@gmail.com", "a" * 48)
+
+
+def test_regular_signup_does_not_need_admin_bootstrap_token(monkeypatch):
+    from tamanna_ai.authentication.router import authorize_admin_signup
+
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@tamanna.com")
+    monkeypatch.delenv("TAMANNA_ADMIN_SIGNUP_TOKEN", raising=False)
+    authorize_admin_signup("member@example.com", None)
