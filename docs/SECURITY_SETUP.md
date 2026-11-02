@@ -75,6 +75,10 @@ The root Compose file binds the application port to `127.0.0.1:8000`, not every 
 - Set `TAMANNA_AGENT_AUTH_TOKEN` only when the automation agent must report to its HTTPS orchestration endpoint. Do not store it in the YAML agent configuration.
 - The automation agent no longer performs automatic `git reset --hard` or stages the entire repository. Configure only approved relative paths in `stage_paths`.
 
+## 6A. Dev workflow safety
+
+The legacy `.github/workflows/deploy_dev.yml` automatically reformatted broad portions of the repository, staged all files with `git add -A`, pushed commits to `dev`, and included a force-deploy bypass. It has been replaced on the security-fix branch with a manual, read-only validation workflow. It does not auto-format, commit, push, deploy, or roll back. Reintroduce deployment only after adding a reviewed deployment environment, explicit approvals, least-privilege credentials, and tested rollback procedures.
+
 ## 7. Remaining security work
 
 This change is a targeted hardening pass, not a complete security certification. Rotate the exposed Gemini key before deployment, then coordinate Git history cleanup with all collaborators. Review chat-driven action routing, all shell bridge implementations, workflow permissions, dependency advisories, and the deployment origin before production use.
