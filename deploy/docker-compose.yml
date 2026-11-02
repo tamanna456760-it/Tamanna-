@@ -20,6 +20,9 @@ services:
       PORT: "8000"
       TAMANNA_ENV: "production"
       PYTHONUNBUFFERED: "1"
+    volumes:
+      # Preserve accounts.sqlite3 and chat history across container recreation.
+      - tamanna-data:/app/data
     init: true
     security_opt:
       - no-new-privileges:true
@@ -40,6 +43,7 @@ services:
         max-file: "5"
     networks:
       - tamanna-network
+    stop_grace_period: 30s
 
   nginx:
     image: nginx:stable
@@ -61,7 +65,12 @@ services:
         max-file: "5"
     networks:
       - tamanna-network
+    stop_grace_period: 15s
 
 networks:
   tamanna-network:
     driver: bridge
+
+volumes:
+  tamanna-data:
+    name: tamanna-ai-data
