@@ -2963,3 +2963,19 @@ except Exception as tamanna_auth_error:
 # ============================================================
 # END TAMANNA ACCOUNT AUTHENTICATION API
 # ============================================================
+
+# ============================================================
+# TAMANNA PRIVILEGED API ACCESS CONTROL
+# Sensitive write/execute routes require an authenticated account;
+# server/code execution routes additionally require TAMANNA_ADMIN_EMAIL.
+# ============================================================
+try:
+    from tamanna_ai.authentication.access_control import TamannaAccessControl
+    app.add_middleware(TamannaAccessControl)
+    print("[TAMANNA SECURITY] Sensitive API access control: ENABLED")
+except Exception as tamanna_access_error:
+    # Fail closed: refuse startup rather than silently expose protected APIs.
+    raise RuntimeError("Tamanna access-control middleware failed to load") from tamanna_access_error
+# ============================================================
+# END TAMANNA PRIVILEGED API ACCESS CONTROL
+# ============================================================
