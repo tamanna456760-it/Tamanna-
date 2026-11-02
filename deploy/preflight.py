@@ -57,6 +57,8 @@ def main() -> None:
         "/health",
         "80:80",
         "443:443",
+        "tamanna-data:/app/data",
+        "name: tamanna-ai-data",
     )
     for marker in required_compose_markers:
         if marker not in compose:
@@ -86,7 +88,8 @@ def main() -> None:
 
     print("PASS: Required website and self-hosted deployment files exist.")
     print("PASS: Private environment files are excluded from Docker context.")
-    print("PASS: Compose health gating and local-only backend binding are configured.")
+    print("PASS: Compose health gating and localhost-only API binding are configured.")
+    print("PASS: Account database and chat history use a persistent named volume.")
     print("PASS: Nginx TLS and Docker upstream configuration are present.")
     print("PASS: Deployment preflight completed.")
     print(
