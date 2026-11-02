@@ -11,7 +11,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 ENV_FILE = ROOT / ".env"
-EMAIL_RE = re.compile(r"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
+EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 
 def set_env_value(content: str, key: str, value: str) -> str:
@@ -19,7 +19,7 @@ def set_env_value(content: str, key: str, value: str) -> str:
     pattern = re.compile(rf"(?m)^{re.escape(key)}=.*$")
     if pattern.search(content):
         return pattern.sub(lambda _: line, content)
-    return content.rstrip() + "\\n" + line + "\\n"
+    return content.rstrip() + "\n" + line + "\n"
 
 
 def main() -> int:
