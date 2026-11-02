@@ -93,7 +93,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-PY
-
-python3 -m py_compile scripts/tamanna_repair_planner.py
-python3 scripts/tamanna_repair_planner.py
