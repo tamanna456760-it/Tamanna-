@@ -67,6 +67,10 @@ services:
       - tamanna-network
     stop_grace_period: 15s
 
+volumes:
+  tamanna-data:
+    name: tamanna-data
+
 networks:
   tamanna-network:
     driver: bridge
