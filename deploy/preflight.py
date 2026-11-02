@@ -61,7 +61,7 @@ def main() -> None:
         "443:443",
         "name: tamanna-ai-data",
     )
-    if compose.count("\\nvolumes:\\n") != 1:
+    if compose.count("\nvolumes:\n") != 1:
         fail("Docker Compose must declare exactly one top-level volumes section")
     for marker in required_compose_markers:
         if marker not in compose:
