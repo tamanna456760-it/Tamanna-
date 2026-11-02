@@ -35,10 +35,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-server.txt
+          python -m pip install -r runner/python/requirements.txt
           python -m pip install pytest
 
       - name: Check Python syntax
-        run: python -m compileall -q tamanna_ai tests scripts
+        run: python -m compileall -q tamanna_ai tests scripts runner/python
 
       - name: Validate memory JSON files
         run: |
@@ -52,6 +53,9 @@ jobs:
                   raise SystemExit(f'{path}: expected a JSON object')
           print('Memory JSON validation passed.')
           PY
+
+      - name: Inventory workflow directory
+        run: python scripts/audit_workflows.py
 
       - name: Run test suite
         run: python -m pytest -q
