@@ -49,3 +49,47 @@ def test_existing_high_risk_routes_remain_protected():
         "/api/code-builder/compile",
     ):
         assert "verify_admin_key" in _dependency_names(_route(path))
+
+
+def test_project_inspection_routes_require_admin_key():
+    for path in (
+        "/api/code-builder/status",
+        "/api/code-builder/scan",
+        "/api/code-builder/inspect",
+        "/api/code-builder/propose",
+        "/api/linux/tools",
+        "/api/security/tools",
+        "/api/tamanna/system",
+        "/api/linux/shell/status",
+        "/api/autonomous/think",
+        "/api/autonomous/files",
+        "/api/autonomous/startup",
+        "/api/autonomous/plans",
+        "/api/autonomous/repair/status",
+        "/api/autonomous/repair/history",
+        "/api/autonomous/status",
+        "/api/code-builder/project",
+        "/api/unified/project",
+    ):
+        method = "POST" if path in (
+            "/api/code-builder/inspect",
+            "/api/code-builder/propose",
+        ) else "GET"
+        assert "verify_admin_key" in _dependency_names(
+            _route(path, method)
+        )
+
+
+def test_autonomous_planning_route_requires_admin_key():
+    assert "verify_admin_key" in _dependency_names(
+        _route("/api/autonomous/plan")
+    )
+
+
+def test_public_chat_and_health_routes_remain_available():
+    assert "verify_admin_key" not in _dependency_names(
+        _route("/api/chat")
+    )
+    assert "verify_admin_key" not in _dependency_names(
+        _route("/health", "GET")
+    )
