@@ -1,26 +1,44 @@
-"""Basic .gitignore for the project."""
-
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.ven/
 .venv/
 venv/
-.env
-.DS_Store
-logs/
+env/
 
-# Tamanna AI: local secrets and credentials
+# Secrets and local environment
 .env
 .env.*
 !.env.example
 **/.env
 **/.env.*
 !**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+**/credentials.json
 api/token
 api/token.txt
-**/credentials.json
 
-.env
-.env.*
-!.env.example
+# Runtime data and logs
+logs/
+*.log
+data/*.sqlite
+data/*.db
+data/chat_history.json
+
+# Build and editor artifacts
+build/
+dist/
+node_modules/
+.DS_Store
