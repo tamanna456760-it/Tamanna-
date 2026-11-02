@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: tamanna-runtime-check-\${{ github.ref }}
+  group: tamanna-runtime-check-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   validate:
