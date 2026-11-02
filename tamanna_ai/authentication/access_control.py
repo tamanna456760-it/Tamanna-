@@ -9,6 +9,7 @@ USER_ROUTES = {
     "/api/self-improvement/analyze", "/api/self-healing/diagnose",
     "/api/self-healing/cycle", "/api/autonomous/build",
     "/api/autonomous/repair", "/api/code-builder/apply",
+    "/api/skills/create", "/api/skills/refine", "/api/code-builder/propose",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
 }
@@ -39,7 +40,12 @@ class TamannaAccessControl:
             token = item.value if item else None
         except Exception:
             token = None
-        user = current_user(token)
+        try:
+            user = current_user(token)
+        except RuntimeError:
+            response = JSONResponse({"detail": "Authentication is unavailable; configure the server session secret."}, status_code=503)
+            await response(scope, receive, send)
+            return
         if not user:
             response = JSONResponse({"detail": "Sign in required."}, status_code=401)
             await response(scope, receive, send)
