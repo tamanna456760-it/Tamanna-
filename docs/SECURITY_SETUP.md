@@ -28,3 +28,24 @@ Review each source/configuration file and search for imports, references, build 
 ## Current scope
 
 This document describes repository-side safeguards. It does not prove that the live website, DNS, TLS, server, or production deployment has been verified.
+
+## Credential exposure response
+
+If a GitHub personal access token, cloud key, session secret, or private key has ever been committed:
+1. Revoke the exposed credential immediately in its provider console. Removing it in a later commit does not invalidate it.
+2. Create a replacement with the minimum required scopes and store it only in the private server environment or GitHub Actions secrets.
+3. Review provider audit logs for unexpected use.
+4. Treat the old value as compromised even if the repository is private.
+5. Coordinate Git history cleanup separately; history rewriting does not replace revocation.
+
+The repository scanner can be run with:
+
+```bash
+python scripts/security_secret_scan.py --root .
+```
+
+The scanner reports file paths, line numbers, and rule identifiers only; it does not print matched credential values. It is a pattern-based check and cannot guarantee that every secret format is detected.
+
+## Privileged API safeguards
+
+The access-control middleware protects sensitive write and execution routes. Admin-only routes require the signed session belonging to `TAMANNA_ADMIN_EMAIL`. State-changing requests with a browser Origin header are accepted only from `TAMANNA_CORS_ORIGINS`. Keep this allowlist limited to trusted frontend origins.
