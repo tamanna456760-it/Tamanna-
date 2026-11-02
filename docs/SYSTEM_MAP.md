@@ -28,7 +28,10 @@ Owner: HM INSAN ALI
 ## Security and execution boundaries
 
 - `app_security/auth.py` validates the X-API-KEY header against TAMANNA_ADMIN_API_KEY.
-- Protected admin routes fail closed with HTTP 503 when the admin key is absent.
+- Protected admin and internal project-inspection routes fail closed with HTTP 503 when the admin key is absent.
+- Public chat and health remain available; the admin key is not a browser login token.
+- Nginx limits API traffic to 20 requests/second per client (1,200/minute), burst 40 and 20 concurrent connections; excess requests receive HTTP 429.
+- HTTPS responses include HSTS, frame, content-type, referrer and permissions policy headers.
 - `data/linux/shell_bridge.py` is intentionally read-only and allow-listed.
 - `runner/python/server.py` authenticates its build endpoint but returns HTTP 501 until a real isolated executor is implemented.
 - Never store API keys, tokens, certificates or private keys in Git. Configure them in a private root `.env` or a hosting secrets manager.
