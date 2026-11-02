@@ -55,6 +55,15 @@ jobs:
               sys.exit(1)
           PY
 
+      - name: Scan tracked files for exposed credentials
+        run: python scripts/security_secret_scan.py --root .
+
+      - name: Install focused test dependencies
+        run: python -m pip install --disable-pip-version-check pytest fastapi
+
+      - name: Run security regression tests
+        run: python -m pytest -q tests/test_access_control.py
+
       - name: Inventory and review workflow directory
         run: |
           python scripts/audit_workflow_directory.py \
