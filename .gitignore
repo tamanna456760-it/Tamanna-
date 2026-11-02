@@ -36,6 +36,7 @@ logs/
 data/*.sqlite
 data/*.db
 data/chat_history.json
+data/tamanna_memory.json
 
 # Build and editor artifacts
 build/
