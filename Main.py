@@ -3,12 +3,13 @@ import json
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
+from app_security.auth import verify_admin_key
 
 
 # ============================================================
@@ -274,6 +275,7 @@ try:
     @app.post("/api/code-builder/apply")
     async def code_builder_apply(
         payload: dict,
+        _admin: bool = Depends(verify_admin_key),
     ):
         path = payload.get("path")
         content = payload.get("content")
@@ -1402,7 +1404,10 @@ try:
 
 
     @app.post("/api/linux/run")
-    async def linux_run_api(payload: dict):
+    async def linux_run_api(
+        payload: dict,
+        _admin: bool = Depends(verify_admin_key),
+    ):
         command = str(
             payload.get("command", "")
         ).strip()
@@ -1517,7 +1522,10 @@ try:
         }
 
     @app.post("/api/linux/shell")
-    async def linux_shell(payload: dict):
+    async def linux_shell(
+        payload: dict,
+        _admin: bool = Depends(verify_admin_key),
+    ):
         command = str(payload.get("command", "")).strip()
 
         return shell_bridge.run(command)
@@ -1531,7 +1539,9 @@ try:
         return self_healing.analyze()
 
     @app.post("/api/self-healing/cycle")
-    async def self_healing_cycle():
+    async def self_healing_cycle(
+        _admin: bool = Depends(verify_admin_key),
+    ):
         return self_healing.cycle()
 
     print("[TAMANNA AI] Linux Shell Bridge: ONLINE")
@@ -1659,7 +1669,10 @@ try:
         }
 
     @app.post("/api/autonomous/build")
-    async def autonomous_build(payload: dict):
+    async def autonomous_build(
+        payload: dict,
+        _admin: bool = Depends(verify_admin_key),
+    ):
 
         plan = payload.get("plan")
 
@@ -1703,7 +1716,9 @@ try:
         return repair_engine.status()
 
     @app.post("/api/autonomous/repair")
-    async def autonomous_repair():
+    async def autonomous_repair(
+        _admin: bool = Depends(verify_admin_key),
+    ):
         return repair_engine.diagnose_and_repair()
 
     @app.get("/api/autonomous/repair/history")
@@ -2197,7 +2212,10 @@ try:
 
 
     @app.post("/api/command")
-    async def tamanna_command(payload: dict):
+    async def tamanna_command(
+        payload: dict,
+        _admin: bool = Depends(verify_admin_key),
+    ):
 
         if not isinstance(payload, dict):
             return {
