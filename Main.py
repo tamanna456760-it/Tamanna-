@@ -2948,3 +2948,18 @@ async def tamanna_echo_controller_route(payload: dict):
     message = str(payload.get("message", ""))
     return _tamanna_controller.respond(message)
 
+
+
+# ============================================================
+# TAMANNA ACCOUNT AUTHENTICATION API
+# Additive integration; existing routes remain unchanged.
+# ============================================================
+try:
+    from tamanna_ai.authentication.router import router as tamanna_auth_router
+    app.include_router(tamanna_auth_router)
+    print("[TAMANNA AUTH] Account API registered: /api/auth/*")
+except Exception as tamanna_auth_error:
+    print("[TAMANNA AUTH] Integration failed:", type(tamanna_auth_error).__name__, tamanna_auth_error)
+# ============================================================
+# END TAMANNA ACCOUNT AUTHENTICATION API
+# ============================================================
