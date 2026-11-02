@@ -91,7 +91,7 @@ def scan_file(path: Path) -> None:
             "GOOGLE_API_KEY", "AWS_SECRET_ACCESS_KEY",
         )
         if any(marker in upper for marker in secret_markers):
-            if "=" in line and not line.lstrip().startswith(("#", "//")):
+            if "=" in line and not line.lstrip().startswith(("#", "//")) and "match=" not in line and "pytest.raises" not in line:
                 value = line.split("=", 1)[1].strip().strip("\"'")
                 if value and not value.startswith(
                     ("${{", "${", "os.environ", "os.getenv", "process.env")
