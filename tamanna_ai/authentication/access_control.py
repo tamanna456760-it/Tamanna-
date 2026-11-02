@@ -33,6 +33,27 @@ USER_ROUTES = {
     "/api/command",
 }
 
+# GET endpoints that disclose project inventory or internal operational state.
+READ_ROUTES = {
+    "/api/autonomous/think",
+    "/api/autonomous/files",
+    "/api/autonomous/startup",
+    "/api/autonomous/plans",
+    "/api/autonomous/repair/status",
+    "/api/autonomous/repair/history",
+    "/api/autonomous/status",
+    "/api/linux/tools",
+    "/api/linux/status",
+    "/api/linux/shell/status",
+    "/api/self-healing/status",
+    "/api/code-builder/status",
+    "/api/code-builder/scan",
+    "/api/code-builder/project",
+    "/api/unified/status",
+    "/api/unified/project",
+    "/api/security/tools",
+}
+
 ADMIN_ROUTES = {
     "/api/skills/create",
     "/api/skills/test",
@@ -75,7 +96,9 @@ class TamannaAccessControl:
 
         method = scope.get("method", "GET").upper()
         path = scope.get("path", "")
-        if method not in {"POST", "PUT", "PATCH", "DELETE"} or path not in USER_ROUTES:
+        mutating = method in {"POST", "PUT", "PATCH", "DELETE"}
+        protected_read = method in {"GET", "HEAD"} and path in READ_ROUTES
+        if path not in USER_ROUTES or not (mutating or protected_read):
             await self.app(scope, receive, send)
             return
 
