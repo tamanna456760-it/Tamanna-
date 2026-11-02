@@ -71,3 +71,21 @@ def test_code_propose_allows_configured_admin(monkeypatch):
     ])
     assert called == [True]
     assert status(result) == 204
+
+
+
+def test_chat_and_planning_routes_require_login(monkeypatch):
+    monkeypatch.setattr(access, "current_user", lambda token: None)
+    app = access.TamannaAccessControl(lambda *args: None)
+
+    protected_paths = [
+        "/api/chat",
+        "/api/chat/master",
+        "/api/tamanna/echo",
+        "/api/autonomous/plan",
+        "/api/code-builder/plan",
+    ]
+
+    for path in protected_paths:
+        result = invoke(app, path=path, headers=[])
+        assert status(result) == 401, path
