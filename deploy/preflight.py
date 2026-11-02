@@ -19,6 +19,7 @@ REQUIRED_FILES = (
     ".github/workflows/pages.yml",
     "deploy/docker-compose.yml",
     "deploy/nginx/tamanna-https.conf",
+    "deploy/deploy.sh",
 )
 
 
@@ -74,6 +75,14 @@ def main() -> None:
     ):
         if marker not in nginx:
             fail(f"Nginx configuration is missing: {marker}")
+
+    deploy_script = read_text("deploy/deploy.sh")
+    if "docker compose -f \"$COMPOSE_FILE\" up -d" not in deploy_script:
+        fail("Deployment script does not start the Compose services")
+    if "docker compose down -v" in deploy_script:
+        fail("Deployment script must never delete persistent volumes")
+    if "TAMANNA_SESSION_SECRET" not in deploy_script or "GEMINI_API_KEY" not in deploy_script:
+        fail("Deployment script must validate private authentication and Gemini settings")
 
     dockerfile = read_text("Dockerfile")
     if 'CMD ["python", "-m", "uvicorn", "Main:app"' not in dockerfile:
