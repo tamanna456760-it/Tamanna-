@@ -9,12 +9,12 @@ USER_ROUTES = {
     "/api/self-improvement/analyze", "/api/self-healing/diagnose",
     "/api/self-healing/cycle", "/api/autonomous/build",
     "/api/autonomous/repair", "/api/code-builder/apply",
-    "/api/skills/create", "/api/skills/refine", "/api/code-builder/propose",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
 }
 ADMIN_ROUTES = {
-    "/api/self-healing/cycle", "/api/autonomous/build",
+    "/api/skills/create", "/api/skills/test", "/api/skills/refine",
+    "/api/code-builder/propose", "/api/self-healing/cycle", "/api/autonomous/build",
     "/api/autonomous/repair", "/api/code-builder/apply",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
