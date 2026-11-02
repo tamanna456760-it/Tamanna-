@@ -39,15 +39,39 @@
     document.body.classList.toggle("compact-chat", preferences.compactMode);
   }
 
-  function savePreferences() {
+  async function savePreferences() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
       applyPreferences();
-      if (status) status.textContent = "সেটিংস সংরক্ষিত হয়েছে";
-    } catch {
-      if (status) status.textContent = "এই ডিভাইসে সেটিংস সংরক্ষণ করা যায়নি";
+      if (window.TamannaAuth?.getUser()) {
+        await window.TamannaAuth.api("/preferences", {
+          method: "PUT",
+          body: JSON.stringify({ preferences })
+        });
+        if (status) status.textContent = "সেটিংস অ্যাকাউন্টে সংরক্ষিত হয়েছে";
+      } else if (status) {
+        status.textContent = "এই ডিভাইসে সংরক্ষিত হয়েছে। অ্যাকাউন্টে লগইন করলে cloud sync হবে।";
+      }
+    } catch (error) {
+      if (status) status.textContent = "সেটিংস সংরক্ষণে সমস্যা: " + error.message;
     }
   }
+
+  async function loadAccountPreferences() {
+    if (!window.TamannaAuth?.getUser()) return;
+    try {
+      const result = await window.TamannaAuth.api("/preferences");
+      preferences = { ...preferences, ...result.preferences };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+      syncControls();
+      applyPreferences();
+    } catch (error) {
+      if (status) status.textContent = "অ্যাকাউন্টের সেটিংস লোড করা যায়নি: " + error.message;
+    }
+  }
+
+  window.addEventListener("tamanna:authenticated", loadAccountPreferences);
+
 
   function openSettings() {
     if (!panel || !backdrop) return;
@@ -104,4 +128,10 @@
 
   applyPreferences();
   syncControls();
+  window.addEventListener("tamanna:loggedout", () => {
+    preferences = readPreferences();
+    syncControls();
+    applyPreferences();
+  });
+  window.addEventListener("tamanna:authenticated", loadAccountPreferences);
 })();
