@@ -29,7 +29,7 @@ def forget(key: str) -> bool:
     key = str(key).strip()
     if not key:
         return False
-    return memory_store.store.pop(key, None) is not None
+    return memory_store.delete(key)
 
 
 __all__ = ["remember", "recall", "recall_all", "forget"]
