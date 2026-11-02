@@ -6,6 +6,7 @@ from tamanna_ai.authentication.router import COOKIE, current_user
 
 USER_ROUTES = {
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
+    "/api/code-builder/propose",
     "/api/self-improvement/analyze", "/api/self-healing/diagnose",
     "/api/self-healing/cycle", "/api/autonomous/build",
     "/api/autonomous/repair", "/api/code-builder/apply",
