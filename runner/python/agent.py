@@ -134,8 +134,8 @@ class Agent:
             return None, str(e)
 
     def git(self, cmd, cwd=None, timeout=300):
-        full = f"git {cmd}"
-        rc, out = run(full, cwd=str(cwd or self.repo_path), timeout=timeout)
+        args = list(cmd) if isinstance(cmd, (list, tuple)) else shlex.split(cmd)
+        rc, out = run(["git", *args], cwd=str(cwd or self.repo_path), timeout=timeout)
         return rc, out
 
     def perform_run(self):
