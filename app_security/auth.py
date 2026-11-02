@@ -1,3 +1,4 @@
+import hmac
 import os
 from fastapi import Header, HTTPException, status
 
@@ -27,7 +28,7 @@ def verify_admin_key(x_api_key: str = Header(None)):
             detail="Missing API key",
         )
 
-    if x_api_key != admin_key:
+    if not hmac.compare_digest(x_api_key, admin_key):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API key",
