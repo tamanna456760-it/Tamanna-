@@ -1,38 +1,88 @@
 """Fail-closed access checks for sensitive API routes."""
 import os
 from http.cookies import SimpleCookie
+
 from starlette.responses import JSONResponse
+
 from tamanna_ai.authentication.router import COOKIE, current_user
 
+# Every mutating or execution-capable endpoint must be listed here.
+# ADMIN_ROUTES are also members of USER_ROUTES and require the configured
+# TAMANNA_ADMIN_EMAIL account.
 USER_ROUTES = {
-    "/api/skills/create", "/api/skills/test", "/api/skills/refine",
-    "/api/self-improvement/analyze", "/api/self-healing/diagnose",
-    "/api/self-healing/cycle", "/api/autonomous/build",
-    "/api/autonomous/repair", "/api/code-builder/apply",
-    "/api/code-builder/build", "/api/code-builder/compile",
-    "/api/linux/run", "/api/linux/shell", "/api/command",
-}
-ADMIN_ROUTES = {
-    "/api/skills/create", "/api/skills/test", "/api/skills/refine",
-    "/api/code-builder/propose", "/api/self-healing/cycle", "/api/autonomous/build",
-    "/api/autonomous/repair", "/api/code-builder/apply",
-    "/api/code-builder/build", "/api/code-builder/compile",
-    "/api/linux/run", "/api/linux/shell", "/api/command",
+    "/api/skills/create",
+    "/api/skills/test",
+    "/api/skills/refine",
+    "/api/self-improvement/analyze",
+    "/api/self-healing/diagnose",
+    "/api/self-healing/cycle",
+    "/api/autonomous/build",
+    "/api/autonomous/repair",
+    "/api/code-builder/propose",
+    "/api/code-builder/apply",
+    "/api/code-builder/build",
+    "/api/code-builder/compile",
+    "/api/linux/run",
+    "/api/linux/shell",
+    "/api/command",
 }
 
+ADMIN_ROUTES = {
+    "/api/skills/create",
+    "/api/skills/test",
+    "/api/skills/refine",
+    "/api/self-healing/cycle",
+    "/api/autonomous/build",
+    "/api/autonomous/repair",
+    "/api/code-builder/propose",
+    "/api/code-builder/apply",
+    "/api/code-builder/build",
+    "/api/code-builder/compile",
+    "/api/linux/run",
+    "/api/linux/shell",
+    "/api/command",
+}
+
+
+def _trusted_origins() -> set[str]:
+    raw = os.getenv(
+        "TAMANNA_CORS_ORIGINS",
+        "https://www.tamanna.com,https://tamanna.com",
+    )
+    return {value.strip().rstrip("/") for value in raw.split(",") if value.strip()}
+
+
 class TamannaAccessControl:
+    """Protect privileged write/execute routes with session and origin checks."""
+
     def __init__(self, app):
         self.app = app
 
+    async def _reject(self, scope, receive, send, status: int, detail: str):
+        response = JSONResponse({"detail": detail}, status_code=status)
+        await response(scope, receive, send)
+
     async def __call__(self, scope, receive, send):
-        if scope.get("type") != "http" or scope.get("method") not in {"POST", "PUT", "PATCH", "DELETE"}:
+        if scope.get("type") != "http":
             await self.app(scope, receive, send)
             return
+
+        method = scope.get("method", "GET").upper()
         path = scope.get("path", "")
-        if path not in USER_ROUTES:
+        if method not in {"POST", "PUT", "PATCH", "DELETE"} or path not in USER_ROUTES:
             await self.app(scope, receive, send)
             return
-        cookie_header = dict(scope.get("headers", [])).get(b"cookie", b"").decode("latin-1")
+
+        headers = {key.lower(): value for key, value in scope.get("headers", [])}
+        origin = headers.get(b"origin", b"").decode("latin-1").strip().rstrip("/")
+        # Browser state-changing requests carrying cookies must originate from
+        # an explicitly trusted Tamanna frontend. Requests without Origin
+        # (e.g. server-to-server clients) still require a valid session.
+        if origin and origin not in _trusted_origins():
+            await self._reject(scope, receive, send, 403, "Untrusted request origin.")
+            return
+
+        cookie_header = headers.get(b"cookie", b"").decode("latin-1")
         jar = SimpleCookie()
         try:
             jar.load(cookie_header)
@@ -40,24 +90,30 @@ class TamannaAccessControl:
             token = item.value if item else None
         except Exception:
             token = None
+
         try:
             user = current_user(token)
         except RuntimeError:
-            response = JSONResponse({"detail": "Authentication is unavailable; configure the server session secret."}, status_code=503)
-            await response(scope, receive, send)
+            await self._reject(
+                scope, receive, send, 503,
+                "Authentication is unavailable; configure the server session secret.",
+            )
             return
+
         if not user:
-            response = JSONResponse({"detail": "Sign in required."}, status_code=401)
-            await response(scope, receive, send)
+            await self._reject(scope, receive, send, 401, "Sign in required.")
             return
+
         if path in ADMIN_ROUTES:
             admin_email = os.getenv("TAMANNA_ADMIN_EMAIL", "").strip().lower()
             if not admin_email:
-                response = JSONResponse({"detail": "Admin access is disabled until TAMANNA_ADMIN_EMAIL is configured."}, status_code=503)
-                await response(scope, receive, send)
+                await self._reject(
+                    scope, receive, send, 503,
+                    "Admin access is disabled until TAMANNA_ADMIN_EMAIL is configured.",
+                )
                 return
-            if user.get("email", "").lower() != admin_email:
-                response = JSONResponse({"detail": "Administrator access required."}, status_code=403)
-                await response(scope, receive, send)
+            if user.get("email", "").strip().lower() != admin_email:
+                await self._reject(scope, receive, send, 403, "Administrator access required.")
                 return
+
         await self.app(scope, receive, send)
