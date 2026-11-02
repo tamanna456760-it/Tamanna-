@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - security/full-system-hardening
   pull_request:
     branches:
       - main
