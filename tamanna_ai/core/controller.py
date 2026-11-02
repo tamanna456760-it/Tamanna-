@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Dict
 
-from tamanna_ai.brain.brain import knowledge_brain
+from tamanna_ai.brain.brain import KnowledgeBrain
 from tamanna_ai.tools.echo_power import tamanna_echo, power_status
 
 
@@ -11,7 +11,8 @@ class TamannaController:
     """Coordinate basic responses, knowledge and system status."""
 
     def __init__(self):
-        self.brain = knowledge_brain
+        # Keep conversational memory isolated per controller/session.
+        self.brain = KnowledgeBrain()
 
     def respond(self, message: str) -> Dict[str, Any]:
         message = message.strip()
