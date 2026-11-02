@@ -70,8 +70,14 @@ class Agent:
         self.push_changes = bool(cfg.get("push_changes", False))
         self.fix_cmds = cfg.get("fix_cmds", [])
         self.build_cmds = cfg.get("build_cmds", [])
-        self.ficar = cfg.get("ficar", "ficar")
-        self.powersync = cfg.get("power_sync", "power_sync")
+        # Only explicitly configured relative paths may be staged.
+        self.stage_paths = cfg.get("stage_paths", [])
+        if not isinstance(self.stage_paths, list):
+            raise ValueError("stage_paths must be a list")
+        for item in self.stage_paths:
+            candidate = Path(str(item))
+            if candidate.is_absolute() or ".." in candidate.parts or not str(item).strip():
+                raise ValueError("stage_paths entries must be safe relative paths")
         self.lockfile = Path(
             cfg.get("lockfile", "/var/lock/bd-king-r7-powerhub.lock"))
         self.logfile = Path(
@@ -153,14 +159,8 @@ class Agent:
                 else:
                     rc, out = self.git(f"checkout -b {self.branch}")
             self._write_log("checked out branch")
-            # try reset to remote branch to avoid divergence
-            rc, _ = self.git(
-                f"ls-remote --exit-code {self.remote} {self.branch}")
-            if rc == 0:
-                self.git(f"reset --hard {self.remote}/{self.branch}")
-
-            # pull latest
-            self.git(f"pull --rebase {self.remote} {self.branch}")
+            # Never reset --hard or pull/rebase automatically: preserve local and
+            # operator changes for review instead of overwriting the worktree.
 
             # run fixers
             fixer_out = []
@@ -170,8 +170,9 @@ class Agent:
                 rc, out = run(cmd, cwd=str(self.repo_path))
                 fixer_out.append({"cmd": cmd, "rc": rc, "out": out})
 
-            # stage all changes
-            self.git("add -A")
+            # Stage only operator-approved paths; never stage the entire repository.
+            for item in self.stage_paths:
+                self.git(["add", "--", item])
 
             # run build/test
             build_ok = True
@@ -185,15 +186,8 @@ class Agent:
                     build_ok = False
                     break
 
-            # update marker files
-            uid = str(uuid.uuid4())
-            self.repo_path.joinpath(self.ficar).write_text(
-                f"Updated at: {now_iso()}\nUUID: {uid}\n"
-            )
-            self.repo_path.joinpath(self.powersync).write_text(
-                f"Last run: {now_iso()} BUILD_OK={build_ok}\n"
-            )
-            run(["git", "add", "--", self.ficar, self.powersync], cwd=str(self.repo_path), timeout=30)
+            # Do not create or stage marker files at arbitrary configured paths.
+            # Status and results are reported to the orchestrator instead.
 
             changes_rc, changes_out = self.git("status --porcelain")
             has_changes = bool(changes_out.strip())
