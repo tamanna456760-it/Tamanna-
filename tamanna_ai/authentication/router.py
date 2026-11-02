@@ -106,6 +106,22 @@ class Signup(BaseModel):
     email: str = Field(min_length=5, max_length=254)
     name: str = Field(min_length=2, max_length=80)
     password: str = Field(min_length=12, max_length=128)
+    admin_bootstrap_token: Optional[str] = Field(default=None, max_length=256)
+
+
+def authorize_admin_signup(email: str, supplied_token: Optional[str]) -> None:
+    """Require an out-of-band bootstrap secret before creating the admin account."""
+    admin_email = os.getenv("TAMANNA_ADMIN_EMAIL", "").strip().lower()
+    if not admin_email or email.strip().lower() != admin_email:
+        return
+    expected = os.getenv("TAMANNA_ADMIN_SIGNUP_TOKEN", "").strip()
+    if len(expected) < 32:
+        raise HTTPException(
+            503,
+            "Admin account setup is locked. Configure a strong TAMANNA_ADMIN_SIGNUP_TOKEN first.",
+        )
+    if not supplied_token or not hmac.compare_digest(supplied_token, expected):
+        raise HTTPException(403, "A valid admin bootstrap token is required for this email.")
 class Login(BaseModel):
     email: str = Field(min_length=5, max_length=254)
     password: str = Field(min_length=1, max_length=128)
@@ -126,6 +142,7 @@ def signup(data: Signup, request: Request, response: Response):
     check_origin(request)
     email, name = data.email.strip().lower(), data.name.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(422, "Enter a valid email address.")
+    authorize_admin_signup(email, data.admin_bootstrap_token)
     try:
         with db() as c:
             cur = c.execute("INSERT INTO users(email,name,password_hash,created_at,updated_at) VALUES(?,?,?,?,?)",
