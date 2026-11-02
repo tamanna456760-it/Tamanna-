@@ -60,3 +60,15 @@ The account API is integrated under `/api/auth` and uses SQLite, PBKDF2-HMAC-SHA
 - `GET/PUT /api/auth/preferences` — read/save account preferences
 
 Email verification and email-based password reset are not enabled; they require a configured mail provider. Existing legacy application routes have not been globally protected by this initial rollout. Do not treat login as an access-control boundary for those routes until each sensitive route is explicitly secured and tested.
+
+### Sensitive API access control
+
+The access-control middleware protects state-changing skill, repair, automation, and code-builder endpoints. Server/code execution endpoints additionally require the signed-in user's email to match `TAMANNA_ADMIN_EMAIL`. If the admin email is not configured, those privileged endpoints return HTTP 503 (fail closed); a non-admin account receives HTTP 403, and an unauthenticated request receives HTTP 401.
+
+Set the following only in the private server `.env` (never commit personal account configuration):
+
+```dotenv
+TAMANNA_ADMIN_EMAIL=the-admin-account-email@example.com
+```
+
+Use the same email address as the account created through `/api/auth/signup`. Keep `TAMANNA_SESSION_SECRET` unique and private. This middleware is an additional API boundary; it does not replace OS-level isolation, a reverse-proxy firewall, rate limiting, backups, or review of each feature's own file/path validation.
