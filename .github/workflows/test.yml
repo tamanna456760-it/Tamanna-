@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: tamanna-full-code-tests-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test-all-files:
