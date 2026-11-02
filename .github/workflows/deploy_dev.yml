@@ -90,6 +90,12 @@ jobs:
       - name: Run security regression tests
         run: python -m pytest -q tests/test_access_control.py
 
+      - name: Audit automatic Git mutation commands
+        run: |
+          python scripts/audit_git_mutations.py \\
+            --root . \\
+            --output "$RUNNER_TEMP/git-mutation-audit.json"
+
       - name: Inventory and review workflow directory
         run: |
           python scripts/audit_workflow_directory.py \
@@ -101,6 +107,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: workflow-directory-inventory
-          path: ${{ runner.temp }}/workflow-directory-inventory.json
+          path: |
+            ${{ runner.temp }}/workflow-directory-inventory.json
+            ${{ runner.temp }}/git-mutation-audit.json
           if-no-files-found: warn
           retention-days: 14
