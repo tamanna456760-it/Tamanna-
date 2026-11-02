@@ -77,7 +77,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-PY
-
-python3 -m py_compile scripts/tamanna_python_audit.py
-python3 scripts/tamanna_python_audit.py
