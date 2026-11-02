@@ -145,7 +145,7 @@ jobs:
           retention-days: 7
 
       - name: 🚨 Notify on Failure (Slack)
-        if: failure() && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && github.ref == 'refs/heads/main' && vars.SLACK_NOTIFICATIONS == 'true'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
