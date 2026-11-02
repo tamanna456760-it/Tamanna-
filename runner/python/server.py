@@ -1,28 +1,53 @@
+"""Small authenticated build-status endpoint for the runner."""
+
+import hmac
+import os
 import subprocess
 import threading
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
-building = False
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
+_build_lock = threading.Lock()
 
-def run_cmd(cmd):
-    try:
-        return subprocess.check_output(
-            cmd, shell=True, stderr=subprocess.STDOUT, text=True
-        )
-    except subprocess.CalledProcessError as e:
-        return e.output
 
-@app.route("/build")
+def _authorized() -> bool:
+    expected = os.environ.get("TAMANNA_RUNNER_API_KEY", "")
+    supplied = request.headers.get("X-API-KEY", "")
+    return bool(expected and supplied and hmac.compare_digest(expected, supplied))
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"ok": True, "service": "tamanna-runner"})
+
+
+@app.route("/build", methods=["POST"])
 def build():
-    global building
+    if not _authorized():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
 
-    if building:
-        return jsonify({"log": "⏳ Build already running, please wait..."})
+    if not _build_lock.acquire(blocking=False):
+        return jsonify({"ok": False, "error": "build already running"}), 409
 
-    building = True
-    output = run_cmd("echo Building... && ls")
-    building = False
-
-    return jsonify({"log": "✔ Build completed successfully\n" + output})
+    try:
+        result = subprocess.run(
+            ["ls", "-la"],
+            cwd=os.environ.get("TAMANNA_RUNNER_WORKDIR", "."),
+            shell=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        return jsonify({
+            "ok": result.returncode == 0,
+            "log": result.stdout[-8000:],
+            "error": result.stderr[-2000:],
+            "returncode": result.returncode,
+        }), (200 if result.returncode == 0 else 500)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return jsonify({"ok": False, "error": type(exc).__name__}), 500
+    finally:
+        _build_lock.release()
