@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: tamanna-python-tests-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   pytest:
