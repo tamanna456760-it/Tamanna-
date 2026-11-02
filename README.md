@@ -59,7 +59,7 @@ The account API is integrated under `/api/auth` and uses SQLite, PBKDF2-HMAC-SHA
 - `POST /api/auth/change-password` — change password and revoke sessions
 - `GET/PUT /api/auth/preferences` — read/save account preferences
 
-Email verification and email-based password reset are not enabled; they require a configured mail provider. Existing legacy application routes have not been globally protected by this initial rollout. Do not treat login as an access-control boundary for those routes until each sensitive route is explicitly secured and tested.
+Email verification and email-based password reset are not enabled; they require a configured mail provider. The access-control middleware currently protects a defined set of state-changing and privileged routes; it does not mean every legacy API route requires login. Review the route allowlist whenever new APIs are added.
 
 ### Sensitive API access control
 
