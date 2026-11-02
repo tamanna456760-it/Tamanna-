@@ -16,6 +16,8 @@ USER_ROUTES = {
     "/api/tamanna/echo",
     "/api/autonomous/plan",
     "/api/code-builder/plan",
+    "/api/skills/match",
+    "/api/code-builder/inspect",
     "/api/skills/create",
     "/api/skills/test",
     "/api/skills/refine",
@@ -52,6 +54,8 @@ READ_ROUTES = {
     "/api/unified/status",
     "/api/unified/project",
     "/api/security/tools",
+    "/api/self-improvement/status",
+    "/api/tamanna/system",
 }
 
 ADMIN_ROUTES = {
