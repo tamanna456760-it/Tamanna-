@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: tamanna-js-safety-\${{ github.ref }}
+  group: tamanna-js-safety-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   inspect:
