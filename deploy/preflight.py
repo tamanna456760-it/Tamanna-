@@ -56,6 +56,7 @@ def main() -> None:
         "no-new-privileges:true",
         "condition: service_healthy",
         "/health",
+        "tamanna-data:/app/data",
         "80:80",
         "443:443",
         "tamanna-data:/app/data",
@@ -87,6 +88,15 @@ def main() -> None:
     dockerfile = read_text("Dockerfile")
     if 'CMD ["python", "-m", "uvicorn", "Main:app"' not in dockerfile:
         fail("Dockerfile does not start the expected FastAPI application")
+
+    main_app = read_text("Main.py")
+    if '@app.get("/health")' not in main_app:
+        fail("Main.py is missing the unauthenticated container health endpoint")
+
+    requirements = read_text("requirements-server.txt").lower()
+    for dependency in ("httpx", "python-dotenv", "fastapi", "uvicorn"):
+        if dependency not in requirements:
+            fail(f"Server requirements are missing: {dependency}")
 
     package_json = ROOT / "package.json"
     if package_json.is_file():
