@@ -24,3 +24,17 @@ api/token.txt
 .env
 .env.*
 !.env.example
+
+# Private credentials and local state (never commit)
+*.pem
+*.p12
+*.pfx
+*.key
+**/credentials.json
+**/secrets.json
+.env
+.env.*
+!.env.example
+data/*.sqlite3
+data/*.sqlite3-*
+backups/
