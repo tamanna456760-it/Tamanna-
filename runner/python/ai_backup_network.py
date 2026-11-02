@@ -7,7 +7,7 @@ import time
 import requests
 
 # 🔐 CONFIG
-GITHUB_TOKEN = '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'
+GITHUB_TOKEN = os.environ.get("TAMANNA_BACKUP_GITHUB_TOKEN", "").strip()
 REPO_OWNER = 'tamanna456760-it'
 REPO_NAME = 'tamanna-'
 
@@ -48,14 +48,18 @@ def get_hash(content):
 # =========================
 def get_repo_files():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents"
-    res = requests.get(url, headers=HEADERS)
+    if not GITHUB_TOKEN:
+        return []
+    res = requests.get(url, headers=HEADERS, timeout=15)
     if res.status_code != 200:
         return []
     return res.json()
 
 
 def get_file_content(file):
-    res = requests.get(file['url'], headers=HEADERS)
+    if not GITHUB_TOKEN:
+        return None
+    res = requests.get(file['url'], headers=HEADERS, timeout=15)
     if res.status_code != 200:
         return None
     data = res.json()
