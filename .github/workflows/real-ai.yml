@@ -66,15 +66,15 @@ jobs:
         run: python scripts/scan.py
 
       - name: Run AI debugger when API secret is configured
-        if: ${{ secrets.OPENAI_API_KEY != '' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: gpt-4o-mini
-        run: python scripts/ai_debugger.py
-
-      - name: Explain AI debugger was skipped
-        if: ${{ secrets.OPENAI_API_KEY == '' }}
-        run: echo "AI debugger skipped: OPENAI_API_KEY repository secret is not configured."
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "AI debugger skipped: OPENAI_API_KEY repository secret is not configured."
+          else
+            python scripts/ai_debugger.py
+          fi
 
       - name: Show scanner report
         if: always()
