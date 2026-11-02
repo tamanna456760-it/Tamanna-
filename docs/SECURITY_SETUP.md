@@ -10,6 +10,15 @@ A credential-like value was found in the tracked `.ven` file. Treat it as compro
 4. Never paste the key into source files, issue comments, chat logs, or GitHub commits.
 5. Removing a file from the latest commit does not remove it from Git history. After rotation, arrange a coordinated history cleanup before force-pushing rewritten history.
 
+## 1A. Rotate the exposed GitHub backup token
+
+A hardcoded GitHub personal access token was also found in `runner/python/ai_backup_network.py`. The source now reads `TAMANNA_BACKUP_GITHUB_TOKEN` from the process environment and makes no authenticated backup requests when it is unset.
+
+1. Revoke the exposed token in GitHub **Settings → Developer settings → Personal access tokens** (check both fine-grained and classic tokens).
+2. If backup access is still required, create a new token with the minimum repository permissions needed for the backup operation.
+3. Store it as the server-side environment variable `TAMANNA_BACKUP_GITHUB_TOKEN`; never commit it or put it in browser code.
+4. Review token audit/activity and Git history. Removing the value from the current file does not erase old commits.
+
 ## 2. Configure the private server environment
 
 Copy `.env.example` to `.env` on the server. Keep `.env` outside version control and restrict its permissions (for example, `chmod 600 .env`). Set at least:
