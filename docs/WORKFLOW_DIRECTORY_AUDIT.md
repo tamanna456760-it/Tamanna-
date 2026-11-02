@@ -5,14 +5,14 @@
 
 ## Inventory snapshot
 
-The GitHub Contents API returned 142 direct entries in `.github/workflows/` on the audited branch.
+The GitHub Contents API returned 141 direct entries in `.github/workflows/` on the audited branch.
 
 | Classification by filename | Count |
 |---|---:|
-| Valid `.yml` extension | 66 |
+| Valid `.yml` extension | 65 |
 | Valid `.yaml` extension | 1 |
 | Non-workflow or malformed extension | 75 |
-| **Total** | **142** |
+| **Total** | **141** |
 
 The 75 non-workflow entries include source files and assets with these extensions:
 
@@ -54,6 +54,8 @@ The following workflows were changed on this security branch to manual-only quar
 - `real-ai.yml` — sent repository scan/debug inputs to an external AI service using a secret key; keep disabled until data-sharing approval and redaction controls exist.
 
 Quarantine is temporary. Reintroduce any capability only after a reviewed design with least-privilege permissions, explicit approval for mutations, bounded execution, and tests.
+
+The non-workflow Markdown notes formerly stored as `.github/workflows/tamanna_sync.yml` were copied to `docs/BD_KING_R7_SYNC_REFERENCE.md` and the misplaced workflow entry was removed after a repository reference search found no references.
 
 ## Remaining remediation
 
