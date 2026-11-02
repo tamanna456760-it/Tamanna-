@@ -65,7 +65,7 @@ jobs:
 
           tracked = subprocess.run(
               ["git", "ls-files", "-z"], check=True, capture_output=True
-          ).stdout.decode("utf-8", "replace").split("\\0")
+          ).stdout.decode("utf-8", "replace").split(chr(0))
           unsafe = []
           for name in tracked:
               if not name:
