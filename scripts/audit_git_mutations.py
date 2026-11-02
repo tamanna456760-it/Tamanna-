@@ -14,7 +14,7 @@ RULES = [
     ("force_push", "critical", re.compile(r"\bgit\s+push\b[^\n]*(?:--force\b|\s-f\b)", re.I)),
     ("credential_in_remote_url", "critical", re.compile(r"https?://[^\s/@:]+:[^\s/@]+@github\.com", re.I)),
     ("git_push", "high", re.compile(r"\bgit\s+push\b", re.I)),
-    ("stage_all_files", "high", re.compile(r"\bgit\s+add\s+(?:-A|--all|\.)\b?", re.I)),
+    ("stage_all_files", "high", re.compile(r"\bgit\s+add\s+(?:-A\b|--all\b|\.)", re.I)),
     ("git_commit", "medium", re.compile(r"\bgit\s+commit\b", re.I)),
 ]
 
