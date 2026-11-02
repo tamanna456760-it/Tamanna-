@@ -1,9 +1,9 @@
 name: Tamanna AI GitHub Pages
 
+# Self-hosted deployment is the primary hosting method.
+# GitHub Pages remains available for manual use only.
+
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -42,14 +42,7 @@ jobs:
             fi
           done
 
-          if [ -f CNAME ]; then
-            cp CNAME _site/CNAME
-          fi
-
           touch _site/.nojekyll
-
-          echo "Website files prepared:"
-          find _site -maxdepth 3 -type f -print
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
