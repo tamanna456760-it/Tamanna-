@@ -9,6 +9,7 @@ __pycache__/
 htmlcov/
 
 # Virtual environments
+.ven
 .ven/
 .venv/
 venv/
