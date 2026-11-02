@@ -1,113 +1,76 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tamanna AI</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <title>Tamanna AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/settings.css">
 </head>
-  
-
-<style>
-#tamanna-system-dashboard {
-  margin: 20px auto;
-  max-width: 1000px;
-  padding: 20px;
-  font-family: system-ui, sans-serif;
-}
-
-.tamanna-dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.tamanna-dashboard-header h2 {
-  margin: 0;
-}
-
-#tamanna-online {
-  font-weight: 700;
-}
-
-.tamanna-card {
-  margin: 15px 0;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(120, 70, 180, .08);
-  border: 1px solid rgba(120, 70, 180, .25);
-}
-
-.tamanna-command-row {
-  display: flex;
-  gap: 10px;
-}
-
-.tamanna-command-row input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #aaa;
-}
-
-.tamanna-card button,
-#tamanna-refresh {
-  padding: 10px 16px;
-  border: 0;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-pre {
-  white-space: pre-wrap;
-  overflow-x: auto;
-  padding: 12px;
-  border-radius: 10px;
-  background: rgba(0,0,0,.08);
-}
-</style>
-
-<script src="/static/tamanna_system_panel.js"></script>
-  
 <body>
+  <div class="chat-app">
+    <header class="chat-header">
+      <div>
+        <h1>🤖 Tamanna AI</h1>
+        <span>AI Assistant</span>
+      </div>
+      <button id="openSettings" class="settings-trigger" type="button" aria-haspopup="dialog" aria-controls="settingsPanel">⚙ সেটিংস</button>
+    </header>
 
-    <div class="chat-app">
+    <main id="chatBox" class="chat-box" aria-live="polite">
+      <div class="message ai-message">
+        <div class="message-name">Tamanna AI</div>
+        <div class="message-text">আমি Tamanna AI। কীভাবে সাহায্য করতে পারি?</div>
+      </div>
+    </main>
 
-        <header class="chat-header">
-            <div>
-                <h1>🤖 Tamanna AI</h1>
-                <span>AI Assistant</span>
-            </div>
-        </header>
+    <div class="typing-area">
+      <input id="messageInput" type="text" placeholder="আপনার মেসেজ লিখুন..." autocomplete="off" aria-label="আপনার মেসেজ">
+      <button id="sendButton" type="button">Send</button>
+    </div>
+  </div>
 
-        <main id="chatBox" class="chat-box">
-            <div class="message ai-message">
-                <div class="message-name">Tamanna AI</div>
-                <div class="message-text">
-                    আমি Tamanna AI। কীভাবে সাহায্য করতে পারি?
-                </div>
-            </div>
-        </main>
-
-        <div class="typing-area">
-            <input
-                id="messageInput"
-                type="text"
-                placeholder="আপনার মেসেজ লিখুন..."
-                autocomplete="off"
-            >
-
-            <button id="sendButton">
-                Send
-            </button>
-        </div>
-
+  <div id="settingsBackdrop" class="settings-backdrop" hidden></div>
+  <aside id="settingsPanel" class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+    <div class="settings-heading">
+      <h2 id="settingsTitle">অ্যাপ সেটিংস</h2>
+      <button id="closeSettings" class="settings-close" type="button" aria-label="সেটিংস বন্ধ করুন">✕</button>
     </div>
 
-    <script src="js/chat.js?v=20251125_debug1"></script>
+    <section class="settings-group">
+      <h3>Appearance / থিম</h3>
+      <div class="setting-row"><label for="themeSetting">Theme</label><select id="themeSetting" data-setting="theme"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+      <div class="setting-row"><label for="accentSetting">Accent color</label><select id="accentSetting" data-setting="accent"><option value="purple">Purple</option><option value="blue">Blue</option><option value="teal">Teal</option></select></div>
+      <div class="setting-row"><label for="fontSetting">Font size</label><select id="fontSetting" data-setting="fontSize"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></div>
+      <div class="setting-row"><label for="compactSetting">Compact chat</label><input id="compactSetting" type="checkbox" data-setting="compactMode"></div>
+    </section>
 
+    <section class="settings-group">
+      <h3>General / সাধারণ</h3>
+      <div class="setting-row"><label for="languageSetting">Language</label><select id="languageSetting" data-setting="language"><option value="bn">বাংলা</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="ar">العربية</option></select></div>
+    </section>
+
+    <section class="settings-group">
+      <h3>Chat & Notifications</h3>
+      <div class="setting-row"><label for="historySetting">Chat history preference</label><input id="historySetting" type="checkbox" data-setting="chatHistory"></div>
+      <div class="setting-row"><label for="notificationsSetting">Notifications preference</label><input id="notificationsSetting" type="checkbox" data-setting="notifications"></div>
+      <p class="settings-note">এই দুটি অপশন আপাতত UI preference হিসেবে সংরক্ষিত হয়; সার্ভারের chat history বা push notification behavior পরিবর্তন করে না।</p>
+      <div class="settings-actions"><button id="clearLocalChat" class="settings-secondary" type="button">স্ক্রিনের চ্যাট পরিষ্কার</button></div>
+    </section>
+
+    <section class="settings-group">
+      <h3>Account & Security</h3>
+      <p class="settings-note">Login, signup, password reset এবং secure account sessions এখনো backend authentication service-এর সঙ্গে যুক্ত নয়। নিরাপত্তার জন্য এখানে কোনো password browser storage-এ রাখা হয় না।</p>
+    </section>
+
+    <div class="settings-actions">
+      <button id="resetSettings" class="settings-secondary" type="button">Reset settings</button>
+    </div>
+    <p id="settingsSaveStatus" role="status" aria-live="polite"></p>
+  </aside>
+
+  <script src="js/chat.js?v=20261102_settings"></script>
+  <script src="js/settings.js?v=20261102_settings"></script>
 </body>
 </html>
-
