@@ -1,181 +1,80 @@
-import base64
-import hashlib
+"""Read-only local repository inventory for the legacy backup-network module.
+
+The previous implementation embedded a GitHub personal access token and could
+write restored content to the GitHub repository automatically. That behavior
+has been removed. This module performs no network access and no repository
+writes. Use the dedicated backup/deployment process after human review.
+"""
+from __future__ import annotations
+
+import argparse
 import json
-import random
-import time
+from pathlib import Path
 
-import requests
-
-# 🔐 CONFIG
-GITHUB_TOKEN = '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'
-REPO_OWNER = 'tamanna456760-it'
-REPO_NAME = 'tamanna-'
-
-HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
+EXCLUDED_DIRS = {
+    ".git", ".venv", "venv", "__pycache__", "node_modules",
+    ".pytest_cache", ".mypy_cache",
+}
+SENSITIVE_NAMES = {
+    ".env", ".env.local", ".env.production", "credentials.json",
+    "secrets.json", "id_rsa", "id_ed25519",
 }
 
-# 📦 Backup Storage
-BACKUP_FILE = "ai_backup_db.json"
-NETWORK_FILE = "ai_network_state.json"
 
-
-# =========================
-# 📦 LOAD/SAVE SYSTEM
-# =========================
-def load_json(file):
-    try:
-        with open(file, "r") as f:
-            return json.load(f)
-    except:
-        return {}
-
-def save_json(file, data):
-    with open(file, "w") as f:
-        json.dump(data, f, indent=2)
-
-
-# =========================
-# 🔍 HASH SYSTEM
-# =========================
-def get_hash(content):
-    return hashlib.md5(content.encode()).hexdigest()
-
-
-# =========================
-# 🌐 FETCH FILES
-# =========================
-def get_repo_files():
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents"
-    res = requests.get(url, headers=HEADERS)
-    if res.status_code != 200:
-        return []
-    return res.json()
-
-
-def get_file_content(file):
-    res = requests.get(file['url'], headers=HEADERS)
-    if res.status_code != 200:
-        return None
-    data = res.json()
-    return base64.b64decode(data['content']).decode('utf-8')
-
-
-# =========================
-# 📦 BACKUP CREATOR (2x AI)
-# =========================
-def create_dual_backup(path, content, backup_db):
-    backup_db[path] = {
-        "primary": content,
-        "secondary": content[::-1],  # simple mirrored backup
-        "hash": get_hash(content)
-    }
-
-
-# =========================
-# 🔄 RESTORE SYSTEM
-# =========================
-def restore_file(path, backup_db):
-    if path in backup_db:
-        return backup_db[path]["primary"]
-    return None
-
-
-# =========================
-# 🤖 AI COMMUNICATION
-# =========================
-def update_network_state(state):
-    save_json(NETWORK_FILE, state)
-
-
-def broadcast_status(network_state, file, status):
-    network_state[file] = {
-        "status": status,
-        "timestamp": time.time(),
-        "node_id": random.randint(1000, 9999)
-    }
-
-
-# =========================
-# 🚨 ATTACK DETECTION
-# =========================
-def detect_attack(content):
-    danger = ["rm -rf", "exec(", "eval(", "os.system"]
-    return any(d in content for d in danger)
-
-
-# =========================
-# 🔄 UPDATE FILE
-# =========================
-def update_file(path, content, message):
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{tamanna}/contents/{path}"
-    res = requests.get(url, headers=HEADERS)
-    if res.status_code != 200:
-        return
-
-    sha = res.json()['sha']
-
-    requests.put(url, headers=HEADERS, json={
-        "message": message,
-        "content": base64.b64encode(content.encode()).decode(),
-        "sha": sha
-    })
-
-
-# =========================
-# 🛡️ MAIN SYSTEM
-# =========================
-def ai_backup_network():
-    backup_db = load_json(BACKUP_FILE)
-    network_state = load_json(NETWORK_FILE)
-
-    files = get_repo_files()
-
-    for file in files:
-        if file['type'] != 'file':
+def inventory(root: Path) -> dict:
+    root = root.resolve()
+    files = []
+    for path in sorted(root.rglob("*")):
+        if not path.is_file():
             continue
-
-        path = file['path']
-        content = get_file_content(file)
-
-        if not content:
+        relative = path.relative_to(root)
+        if any(part in EXCLUDED_DIRS for part in relative.parts):
             continue
-
-        file_hash = get_hash(content)
-
-        # 📦 Create dual backup if not exists
-        if path not in backup_db:
-            create_dual_backup(path, content, backup_db)
-
-        # 🚨 Attack detection
-        if detect_attack(content):
-            print(f"🚨 Attack detected: {path}")
-
-            safe_content = restore_file(path, backup_db)
-
-            if safe_content:
-                update_file(path, safe_content, "🛡️ Restored from AI Backup")
-
-                broadcast_status(network_state, path, "restored")
-
+        if path.name.lower() in SENSITIVE_NAMES or path.suffix.lower() in {
+            ".pem", ".key", ".p12", ".pfx"
+        }:
+            classification = "sensitive-file-excluded"
+            size = None
         else:
-            broadcast_status(network_state, path, "healthy")
+            classification = "file"
+            try:
+                size = path.stat().st_size
+            except OSError:
+                size = None
+        files.append({
+            "path": relative.as_posix(),
+            "classification": classification,
+            "bytes": size,
+        })
+    return {
+        "mode": "read-only",
+        "root": str(root),
+        "files_scanned": len(files),
+        "files": files,
+        "network_access": False,
+        "repository_writes": False,
+        "note": "This is an inventory only, not a backup or restore operation.",
+    }
 
-    # 💾 Save system state
-    save_json(BACKUP_FILE, backup_db)
-    update_network_state(network_state)
 
-
-# =========================
-# 🔁 LOOP
-# =========================
-def main():
-    while True:
-        print("🌐 AI BACKUP NETWORK RUNNING...")
-        ai_backup_network()
-        time.sleep(10)
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--output", type=Path, default=None)
+    args = parser.parse_args()
+    if not args.root.is_dir():
+        parser.error(f"root is not a directory: {args.root}")
+    report = inventory(args.root)
+    rendered = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
+    if args.output:
+        output = args.output.resolve()
+        if output == args.root.resolve() or args.root.resolve() not in output.parents:
+            parser.error("output must be inside the selected root directory")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+    print(rendered, end="")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
