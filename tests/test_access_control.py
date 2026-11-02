@@ -4,11 +4,11 @@ import asyncio
 import tamanna_ai.authentication.access_control as access
 
 
-def invoke(middleware, path="/api/code-builder/propose", headers=None):
+def invoke(middleware, path="/api/code-builder/propose", headers=None, method="POST"):
     messages = []
     scope = {
         "type": "http",
-        "method": "POST",
+        "method": method,
         "path": path,
         "headers": headers or [],
     }
@@ -88,4 +88,26 @@ def test_chat_and_planning_routes_require_login(monkeypatch):
 
     for path in protected_paths:
         result = invoke(app, path=path, headers=[])
+        assert status(result) == 401, path
+
+
+def test_project_inventory_and_status_gets_require_login(monkeypatch):
+    monkeypatch.setattr(access, "current_user", lambda token: None)
+    app = access.TamannaAccessControl(lambda *args: None)
+
+    protected_paths = [
+        "/api/autonomous/files",
+        "/api/autonomous/think",
+        "/api/autonomous/startup",
+        "/api/linux/tools",
+        "/api/linux/status",
+        "/api/linux/shell/status",
+        "/api/self-healing/status",
+        "/api/code-builder/project",
+        "/api/unified/project",
+        "/api/security/tools",
+    ]
+
+    for path in protected_paths:
+        result = invoke(app, path=path, headers=[], method="GET")
         assert status(result) == 401, path
