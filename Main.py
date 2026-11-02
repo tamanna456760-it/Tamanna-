@@ -2819,7 +2819,8 @@ try:
 
     @app.post("/api/code-builder/build")
     async def code_builder_build(
-        payload: dict = Body(...)
+        payload: dict = Body(...),
+        _admin: bool = Depends(verify_admin_key),
     ):
 
         files = payload.get(
@@ -2853,7 +2854,9 @@ try:
         }
 
     @app.post("/api/code-builder/compile")
-    async def code_builder_compile():
+    async def code_builder_compile(
+        _admin: bool = Depends(verify_admin_key),
+    ):
 
         return tamanna_code_builder.python_compile_all()
 
