@@ -37,6 +37,12 @@ The following operations now require the `X-API-KEY` request header and a matchi
 - `POST /api/autonomous/build`
 - `POST /api/autonomous/repair`
 - `POST /api/command`
+- `POST /api/code-builder/build`
+- `POST /api/code-builder/compile`
+- `POST /api/skills/create`
+- `POST /api/skills/test`
+- `POST /api/skills/refine`
+- `POST /api/tamanna/echo`
 
 If the server key is not configured, these endpoints return HTTP 503 (disabled). Missing and incorrect request keys return HTTP 401 and HTTP 403 respectively. The CORS allow-list includes the `X-API-KEY` header; it does not make the key public or configure it in the browser automatically.
 
@@ -44,6 +50,12 @@ If the server key is not configured, these endpoints return HTTP 503 (disabled).
 
 The root Compose file binds the application port to `127.0.0.1:8000`, not every network interface. Put a trusted reverse proxy in front of it and expose only the required public HTTP/HTTPS ports.
 
-## 5. Remaining security work
+## 5. Runner service configuration
 
-This change is a targeted hardening pass, not a complete security certification. Review chat-driven action routing, all shell bridge implementations, token history, workflow permissions, dependency advisories, and the deployment origin before production use.
+- Set `TAMANNA_RUNNER_API_KEY` only in the runner server environment. The runner `POST /build` endpoint currently returns HTTP 501 until a real isolated build executor is implemented; it does not pretend that a directory listing is a build.
+- Set `TAMANNA_AGENT_AUTH_TOKEN` only when the automation agent must report to its HTTPS orchestration endpoint. Do not store it in the YAML agent configuration.
+- The automation agent no longer performs automatic `git reset --hard` or stages the entire repository. Configure only approved relative paths in `stage_paths`.
+
+## 6. Remaining security work
+
+This change is a targeted hardening pass, not a complete security certification. Rotate the exposed Gemini key before deployment, then coordinate Git history cleanup with all collaborators. Review chat-driven action routing, all shell bridge implementations, workflow permissions, dependency advisories, and the deployment origin before production use.
