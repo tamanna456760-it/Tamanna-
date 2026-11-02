@@ -37,6 +37,9 @@ USER_ROUTES = {
 
 # GET endpoints that disclose project inventory or internal operational state.
 READ_ROUTES = {
+    # Skill catalogue includes internal filesystem paths; keep it behind login.
+    "/api/skills",
+    "/api/skills/interview",
     "/api/autonomous/think",
     "/api/autonomous/files",
     "/api/autonomous/startup",
