@@ -5,14 +5,14 @@
 
 ## Inventory snapshot
 
-The GitHub Contents API returned 141 direct entries in `.github/workflows/` on the audited branch.
+The GitHub Contents API returned 139 direct entries in `.github/workflows/` on the audited branch.
 
 | Classification by filename | Count |
 |---|---:|
 | Valid `.yml` extension | 65 |
 | Valid `.yaml` extension | 1 |
-| Non-workflow or malformed extension | 75 |
-| **Total** | **141** |
+| Non-workflow or malformed extension | 73 |
+| **Total** | **139** |
 
 The 75 non-workflow entries include source files and assets with these extensions:
 
@@ -31,7 +31,7 @@ The 75 non-workflow entries include source files and assets with these extension
 | `.bad` | 1 |
 | `.text` | 1 |
 | no extension | 2 |
-| malformed `.yml`-like names | 2 |
+
 | **Total** | **75** |
 
 GitHub Actions only discovers workflow definitions with a `.yml` or `.yaml` extension directly in this directory. A valid extension alone does not prove that a file is a valid or safe workflow.
@@ -55,7 +55,7 @@ The following workflows were changed on this security branch to manual-only quar
 
 Quarantine is temporary. Reintroduce any capability only after a reviewed design with least-privilege permissions, explicit approval for mutations, bounded execution, and tests.
 
-The non-workflow Markdown notes formerly stored as `.github/workflows/tamanna_sync.yml` were copied to `docs/BD_KING_R7_SYNC_REFERENCE.md` and the misplaced workflow entry was removed after a repository reference search found no references.
+The non-workflow Markdown notes formerly stored as `.github/workflows/tamanna_sync.yml` were copied to `docs/BD_KING_R7_SYNC_REFERENCE.md` and removed from the workflow directory after a repository reference search found no references. A malformed-name legacy APK workflow was preserved at `docs/archive/build-tamanna-apk-legacy.yml`; a misplaced Dart path example was preserved at `examples/mobile/tamanna_workflow_path_example.dart`. Both malformed workflow-directory filenames were removed after their contents were reviewed.
 
 ## Remaining remediation
 
