@@ -14,10 +14,12 @@ bd-king-r7 powerhub agent
 import logging
 import os
 import signal
+import shlex
 import subprocess
 import sys
 import time
 import uuid
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -36,34 +38,33 @@ def now_iso():
 
 
 def run(cmd, cwd=None, timeout=None):
-    LOG.info("RUN: %s (cwd=%s)", cmd, cwd)
-    p = subprocess.Popen(
-        cmd,
-        shell=True,
-        cwd=cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
-        executable="/bin/bash",
-    )
-    out_lines = []
+    """Run a command as argv; never invoke a shell."""
+    argv = shlex.split(cmd) if isinstance(cmd, str) else list(cmd)
+    if not argv:
+        return 2, "empty command"
+    LOG.info("RUN: %s (cwd=%s)", argv[0], cwd)
     try:
-        for line in p.stdout:
-            out_lines.append(line.rstrip("\n"))
-            LOG.debug(line.rstrip("\n"))
-        p.wait(timeout=timeout)
+        result = subprocess.run(
+            argv, cwd=cwd, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True,
+            timeout=timeout or 300, shell=False, check=False,
+        )
+        return result.returncode, result.stdout
     except subprocess.TimeoutExpired:
-        p.kill()
-        raise
-    return p.returncode, "\n".join(out_lines)
+        return 124, "command timed out"
+    except OSError as exc:
+        return 127, type(exc).__name__
 
 
 class Agent:
     def __init__(self, cfg):
         self.repo_path = Path(cfg["repo_path"]).expanduser()
-        self.branch = cfg.get("branch", "powerhub-auto")
-        self.remote = cfg.get("remote", "origin")
+        self.branch = str(cfg.get("branch", "powerhub-auto"))
+        self.remote = str(cfg.get("remote", "origin"))
+        if not re.fullmatch(r"[A-Za-z0-9._/-]{1,120}", self.branch) or self.branch.startswith("-") or ".." in self.branch:
+            raise ValueError("Invalid automation branch name")
+        if not re.fullmatch(r"[A-Za-z0-9._-]{1,80}", self.remote) or self.remote.startswith("-"):
+            raise ValueError("Invalid git remote name")
         self.user = cfg.get("user") or os.environ.get("USER", "nobody")
         self.interval = int(cfg.get("interval_seconds", 60))
         self.push_changes = bool(cfg.get("push_changes", False))
@@ -77,7 +78,9 @@ class Agent:
             cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
         self.server_url = cfg.get("server_url", "").rstrip("/")
         self.agent_id = cfg.get("agent_id", str(uuid.uuid4()))
-        self.auth_token = cfg.get("auth_token", "")
+        self.auth_token = os.environ.get("TAMANNA_AGENT_AUTH_TOKEN", "")
+        if self.server_url and not (self.server_url.startswith("https://") or self.server_url.startswith("http://127.0.0.1") or self.server_url.startswith("http://localhost")):
+            raise ValueError("Agent report URL must use HTTPS except for localhost")
         # ensure repo exists
         if not (self.repo_path / ".git").exists():
             LOG.error("Repo path %s is not a git repository", self.repo_path)
@@ -117,7 +120,7 @@ class Agent:
             headers["Authorization"] = f"Bearer {self.auth_token}"
         url = f"{self.server_url}/api/report"
         try:
-            r = requests.post(url, json=payload, headers=headers, timeout=15)
+            r = requests.post(url, json=payload, headers=headers, timeout=15, allow_redirects=False)
             self._write_log(f"POST {url} => {r.status_code}")
             return r.status_code, r.text
         except Exception as e:
@@ -190,7 +193,7 @@ class Agent:
             self.repo_path.joinpath(self.powersync).write_text(
                 f"Last run: {now_iso()} BUILD_OK={build_ok}\n"
             )
-            self.git(f'add "{self.ficar}" "{self.powersync}" || true')
+            run(["git", "add", "--", self.ficar, self.powersync], cwd=str(self.repo_path), timeout=30)
 
             changes_rc, changes_out = self.git("status --porcelain")
             has_changes = bool(changes_out.strip())
@@ -199,20 +202,21 @@ class Agent:
             committed = False
             if has_changes and build_ok:
                 commit_msg = f"Automated sync/fix/build {now_iso()}"
-                self.git(f'commit -m "{commit_msg}" || true')
-                committed = True
-                # get last commit sha
+                commit_rc, commit_out = run(["git", "commit", "-m", commit_msg], cwd=str(self.repo_path), timeout=60)
+                committed = commit_rc == 0
+                if not committed:
+                    self._write_log(f"commit failed rc={commit_rc}")
+                # get last commit sha only after a successful commit
                 rc, out = self.git("rev-parse --short HEAD")
-                if rc == 0:
+                if committed and rc == 0:
                     commit_sha = out.strip()
-                if self.push_changes:
+                if committed and self.push_changes:
                     # push (create upstream if not exists)
-                    rc, out = self.git(
-                        f"push -u {self.remote} {self.branch} || true")
+                    rc, out = run(["git", "push", "-u", self.remote, self.branch], cwd=str(self.repo_path), timeout=300)
                     self._write_log(f"push rc={rc}")
             elif has_changes and not build_ok:
                 # reset staged changes so human can review
-                self.git("reset --mixed || true")
+                self.git("reset --mixed")
             # prepare report
             report = {
                 "agent_id": self.agent_id,
