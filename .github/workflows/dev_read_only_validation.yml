@@ -1,0 +1,80 @@
+name: Dev Read-Only Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dev-read-only-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Read-only repository validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check whitespace errors
+        run: git diff --check
+
+      - name: Compile Python sources without writing bytecode
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib
+          import sys
+
+          excluded = {".git", ".venv", "venv", "__pycache__", "node_modules"}
+          failures = []
+          checked = 0
+          for path in pathlib.Path(".").rglob("*.py"):
+              if any(part in excluded for part in path.parts):
+                  continue
+              checked += 1
+              try:
+                  compile(path.read_text(encoding="utf-8"), str(path), "exec")
+              except (SyntaxError, UnicodeError, OSError) as exc:
+                  failures.append(f"{path}: {exc}")
+          print(f"Python files checked: {checked}")
+          if failures:
+              print("\n".join(failures))
+              sys.exit(1)
+          PY
+
+      - name: Inventory .github/workflows directory
+        run: |
+          python scripts/audit_workflow_directory.py \
+            --root .github/workflows \
+            --output workflow-directory-inventory.json
+          cat workflow-directory-inventory.json
+
+      - name: Run tests when present
+        shell: bash
+        run: |
+          if find tests -type f -name 'test_*.py' -print -quit 2>/dev/null | grep -q .; then
+            python -m pip install --disable-pip-version-check pytest
+            python -m pytest -q tests/
+          else
+            echo "No tests/test_*.py files found; test execution skipped."
+          fi
+
+      - name: Upload inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-directory-inventory
+          path: workflow-directory-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
