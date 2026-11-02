@@ -86,7 +86,23 @@ The app container has a health check against `/health`. Nginx waits until the
 app reports healthy before starting. The app is not exposed publicly on port
 8000; only Nginx publishes ports 80 and 443.
 
-## 5. Verify the live website
+## 5. Run the guarded deployment
+
+After the private `.env` and TLS certificate are ready, run this on the Linux
+server from the repository checkout:
+
+```bash
+chmod +x deploy/deploy.sh
+./deploy/deploy.sh
+```
+
+The script refuses to continue if Docker is unavailable, `.env` is tracked or
+not ignored, required private settings are missing, or the TLS certificate is
+missing. It validates Compose, builds the image, starts services, waits for
+the backend health check, and performs HTTPS homepage/health requests. It does
+not change DNS, request certificates, or remove persistent volumes.
+
+## 6. Verify the live website
 
 Run from a machine outside the server network:
 
@@ -105,7 +121,7 @@ Also verify that:
 A successful static preflight or Docker build is not proof that DNS, TLS,
 the server firewall, or the public website is working.
 
-## 6. Renewal and rollback
+## 7. Renewal and rollback
 
 Test certificate renewal using the certificate tool's dry-run mode. After a
 successful certificate renewal, reload/restart Nginx:
@@ -132,7 +148,7 @@ docker run --rm \
 
 Protect the backup as private user data and store it outside the public web root.
 
-## 7. GitHub Actions
+## 8. GitHub Actions
 
 `.github/workflows/deploy.yml` performs read-only preflight validation,
 Docker Compose configuration validation, and a local image build. It does not
