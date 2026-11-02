@@ -1,7 +1,7 @@
 # .github/workflows Directory Audit
 
 **Audited ref:** `security/full-system-hardening`  
-**Audit mode:** read-only inventory; no source files moved or deleted.
+**Audit mode:** read-only inventory and reviewed, content-preserving relocation of three misplaced files; no application source was deleted.
 
 ## Inventory snapshot
 
@@ -14,7 +14,7 @@ The GitHub Contents API returned 139 direct entries in `.github/workflows/` on t
 | Non-workflow or malformed extension | 73 |
 | **Total** | **139** |
 
-The 75 non-workflow entries include source files and assets with these extensions:
+The 73 non-workflow entries include source files and assets with these extensions:
 
 | Extension | Count |
 |---|---:|
@@ -32,7 +32,7 @@ The 75 non-workflow entries include source files and assets with these extension
 | `.text` | 1 |
 | no extension | 2 |
 
-| **Total** | **75** |
+| **Total** | **73** |
 
 GitHub Actions only discovers workflow definitions with a `.yml` or `.yaml` extension directly in this directory. A valid extension alone does not prove that a file is a valid or safe workflow.
 
