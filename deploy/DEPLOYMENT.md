@@ -83,7 +83,7 @@ docker compose -f deploy/docker-compose.yml logs --tail=100 tamanna-ai nginx
 ```
 
 The app container has a health check against `/health`. Nginx waits until the
-app reports healthy before starting. The named Docker volume `tamanna-data`
+app reports healthy before starting. The named Docker volume `tamanna-ai-data`
 persists user accounts, chat history and app data across container recreation.
 The app is not exposed publicly on port 8000; only Nginx publishes ports 80 and
 443. Never remove this volume during a routine update.
