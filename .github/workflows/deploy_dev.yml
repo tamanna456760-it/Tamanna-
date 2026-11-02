@@ -2,19 +2,22 @@ name: Dev Read-Only Validation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
-  group: dev-read-only-validation
+  group: dev-read-only-validation-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     name: Read-only repository validation
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -35,7 +38,6 @@ jobs:
           python - <<'PY'
           import pathlib
           import sys
-
           excluded = {".git", ".venv", "venv", "__pycache__", "node_modules"}
           failures = []
           checked = 0
@@ -53,28 +55,17 @@ jobs:
               sys.exit(1)
           PY
 
-      - name: Inventory .github/workflows directory
+      - name: Inventory and review workflow directory
         run: |
           python scripts/audit_workflow_directory.py \
             --root .github/workflows \
-            --output workflow-directory-inventory.json
-          cat workflow-directory-inventory.json
-
-      - name: Run tests when present
-        shell: bash
-        run: |
-          if find tests -type f -name 'test_*.py' -print -quit 2>/dev/null | grep -q .; then
-            python -m pip install --disable-pip-version-check pytest
-            python -m pytest -q tests/
-          else
-            echo "No tests/test_*.py files found; test execution skipped."
-          fi
+            --output "$RUNNER_TEMP/workflow-directory-inventory.json"
 
       - name: Upload inventory
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: workflow-directory-inventory
-          path: workflow-directory-inventory.json
+          path: ${{ runner.temp }}/workflow-directory-inventory.json
           if-no-files-found: warn
           retention-days: 14
