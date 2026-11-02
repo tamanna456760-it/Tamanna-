@@ -262,7 +262,3 @@ def main():
 
 if __name__ == "__main__":
     raise SystemExit(main())
-PY
-
-python3 -m py_compile scripts/tamanna_safe_repair.py
-python3 scripts/tamanna_safe_repair.py
