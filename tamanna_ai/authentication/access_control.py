@@ -98,7 +98,7 @@ class TamannaAccessControl:
         path = scope.get("path", "")
         mutating = method in {"POST", "PUT", "PATCH", "DELETE"}
         protected_read = method in {"GET", "HEAD"} and path in READ_ROUTES
-        if path not in USER_ROUTES or not (mutating or protected_read):
+        if (path not in USER_ROUTES and path not in READ_ROUTES) or not (mutating or protected_read):
             await self.app(scope, receive, send)
             return
 
