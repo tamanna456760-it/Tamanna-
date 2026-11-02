@@ -266,7 +266,7 @@ jobs:
       # 8) Slack notification on failure (optional)
       # ------------------------------------------------------------------
       - name: 🚨 Slack alert on issues
-        if: (steps.scan.outputs.HEAL_NEEDED == 'true' || failure()) && github.ref == 'refs/heads/main' && secrets.SLACK_WEBHOOK_URL != ''
+        if: (steps.scan.outputs.HEAL_NEEDED == 'true' || failure()) && github.ref == 'refs/heads/main' && vars.SLACK_NOTIFICATIONS == 'true'
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
