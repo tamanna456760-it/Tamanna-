@@ -93,3 +93,15 @@ def test_public_chat_and_health_routes_remain_available():
     assert "verify_admin_key" not in _dependency_names(
         _route("/health", "GET")
     )
+
+
+def test_self_improvement_analysis_requires_admin_key():
+    assert "verify_admin_key" in _dependency_names(
+        _route("/api/self-improvement/analyze", "POST")
+    )
+
+
+def test_code_builder_plan_requires_admin_key():
+    assert "verify_admin_key" in _dependency_names(
+        _route("/api/code-builder/plan", "POST")
+    )
