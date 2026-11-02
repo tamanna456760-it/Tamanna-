@@ -1,139 +1,53 @@
-name: Run Full AI System
+name: Tamanna AI Integration Checks
 
 on:
   push:
+    branches: ["main"]
+  pull_request:
     branches: ["main"]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: tamanna-ai-integration-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  integration:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
-      - name: Checkout Repo
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-server.txt
 
-      - name: Show Python Version
-        run: |
-          python --version
-          python -m pip --version
-
-      - name: Upgrade pip
+      - name: Install runtime dependencies
         run: |
           python -m pip install --upgrade pip
+          python -m pip install -r requirements-server.txt
+          python -m pip install pytest
 
-      - name: Install Dependencies
+      - name: Compile application and supporting modules
         run: |
-          if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
-          else
-            echo "requirements.txt not found - skipping dependency installation"
-          fi
+          python -m compileall -q Main.py main.py tamanna_ai app_security data runner scripts tests
 
-      - name: Install Basic Test Tools
-        run: |
-          python -m pip install pytest pytest-cov flake8
-
-      - name: Python Syntax Check
-        run: |
-          mkdir -p reports
-
-          find . \
-            -type f \
-            -name "*.py" \
-            -not -path "./.git/*" \
-            -not -path "./.venv/*" \
-            -not -path "./venv/*" \
-            -print0 |
-          while IFS= read -r -d '' file; do
-            echo "Checking: $file"
-
-            if python -m py_compile "$file" 2>> reports/syntax_errors.log; then
-              echo "OK: $file"
-            else
-              echo "FAILED: $file"
-            fi
-          done
-
-      - name: Check Main Server
-        run: |
-          if [ -f main.py ]; then
-            echo "main.py found"
-            python -m py_compile main.py
-          else
-            echo "ERROR: main.py not found"
-            exit 1
-          fi
-
-      - name: Run AI System Import Check
+      - name: Import main application
         run: |
           python - <<'PY'
-          import main
-          print("Tamanna AI main.py import: OK")
+          from Main import app
+          assert app.title == "Tamanna AI"
+          print("PASS: Main FastAPI application imported.")
           PY
 
-      - name: Run Tests
-        run: |
-          if find . -type f -name "test_*.py" -not -path "./.git/*" | grep -q .; then
-            python -m pytest -q
-          else
-            echo "No pytest test files found - skipping"
-          fi
-
-      - name: Run Flake8 Basic Check
-        continue-on-error: true
-        run: |
-          flake8 . \
-            --count \
-            --select=E9,F63,F7,F82 \
-            --show-source \
-            --statistics \
-            --exclude=.git,.venv,venv,__pycache__
-
-      - name: Generate Final Report
-        if: always()
-        run: |
-          mkdir -p reports
-
-          {
-            echo "======================================"
-            echo "Tamanna AI - Full System Report"
-            echo "======================================"
-            echo ""
-            echo "Python:"
-            python --version
-            echo ""
-            echo "Main Server:"
-            if [ -f main.py ]; then
-              echo "main.py FOUND"
-            else
-              echo "main.py NOT FOUND"
-            fi
-            echo ""
-            echo "Project:"
-            pwd
-            echo ""
-            echo "Python Files:"
-            find . \
-              -type f \
-              -name "*.py" \
-              -not -path "./.git/*" \
-              | wc -l
-            echo ""
-            echo "Report generated successfully."
-          } | tee reports/tamanna-ai-report.txt
-
-      - name: Upload Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tamanna-ai-report
-          path: reports/
+      - name: Run test suite
+        run: python -m pytest -q
