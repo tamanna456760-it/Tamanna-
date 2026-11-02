@@ -1,34 +1,17 @@
-name: Run Tamanna AI HEAD
-
+name: Tamanna HEAD Safety Check
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
-
 permissions:
-  contents: write
-
+  contents: read
 jobs:
-  run-head:
+  inspect:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 5
     steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v3
-
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-
-    - name: Run Tamanna HEAD
-      run: |
-        python3 tamanna_head.py
-
-    - name: Commit Manifest
-      run: |
-        git config --global user.name "Tamanna HEAD"
-        git config --global user.email "auto@tamanna.ai"
-        git add tamanna_meta/manifest.json
-        git commit -m "Updated Tamanna HEAD manifest" || true
-        git push || true
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm safe mode
+        run: |
+          echo "Legacy tamanna_head.py execution and manifest auto-push are disabled."
+          echo "No project script is executed and no repository file is modified."
