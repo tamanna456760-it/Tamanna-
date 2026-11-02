@@ -51,6 +51,9 @@ def main() -> None:
         "proxy_pass http://tamanna-ai:8000",
         "ssl_certificate",
         "ssl_certificate_key",
+        "limit_req_zone $binary_remote_addr zone=tamanna_api:10m rate=20r/s;",
+        "limit_req zone=tamanna_api burst=40 nodelay;",
+        'add_header Strict-Transport-Security "max-age=15552000" always;',
     ):
         if required not in nginx_text:
             fail(f"Nginx configuration is missing: {required}")
@@ -68,6 +71,7 @@ def main() -> None:
     print("PASS: Docker Compose defines the app and Nginx services.")
     print("PASS: App port 8000 is bound to localhost only.")
     print("PASS: Nginx proxies to the Docker app and configures TLS paths.")
+    print("PASS: Nginx applies API rate limits and HTTPS security headers.")
     print("PASS: Dockerfile starts Main:app.")
     print("PASS: Secret placeholders are documented without real credentials.")
     print("NOTE: DNS, certificate issuance, host firewall and live service health")
