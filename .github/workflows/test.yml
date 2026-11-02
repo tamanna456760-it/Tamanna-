@@ -2,36 +2,49 @@ name: Full Code Test System
 
 on:
   push:
+    branches:
+      - main
+      - "fix/**"
   pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test-all-files:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
-      - name: Code Download
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          python-version: "3.10"
+          submodules: false
 
-      - name: Install Packages
-        run: |
-          pip install -r requirements.txt
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-server.txt
+            runner/python/requirements.txt
 
-      - name: Lint Check (Error detect)
+      - name: Install application and runner dependencies
         run: |
-          flake8 . || true
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-server.txt
+          python -m pip install -r runner/python/requirements.txt
+          python -m pip install pytest
 
-      - name: Run Tests
+      - name: Compile project Python files
         run: |
-          pytest || true
+          python -m compileall -q tamanna_ai app_security api core data runner scripts tests
 
-      - name: Try Run Python Files
-        run: |
-          for file in $(find . -name "*.py"); do
-            echo "Running $file"
-            python $file || echo "Error in $file"
-          done
+      - name: Validate workflow inventory
+        run: python scripts/audit_workflows.py
+
+      - name: Run automated tests
+        run: python -m pytest -q
