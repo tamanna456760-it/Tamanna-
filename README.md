@@ -65,10 +65,14 @@ Email verification and email-based password reset are not enabled; they require 
 
 The access-control middleware protects state-changing skill, repair, automation, and code-builder endpoints. Server/code execution endpoints additionally require the signed-in user's email to match `TAMANNA_ADMIN_EMAIL`. If the admin email is not configured, those privileged endpoints return HTTP 503 (fail closed); a non-admin account receives HTTP 403, and an unauthenticated request receives HTTP 401.
 
-Set the following only in the private server `.env` (never commit personal account configuration):
+Configure the private server without putting personal settings or secrets in Git:
 
-```dotenv
-TAMANNA_ADMIN_EMAIL=the-admin-account-email@example.com
-```
+1. On the server, from the repository root, run `python scripts/configure_private_auth.py`.
+2. Enter the admin account email when prompted. The script writes it only to the server's ignored `.env`, generates a strong session secret if one is not already set, preserves unrelated existing settings, and applies file mode `0600`.
+3. Confirm `.env` is ignored with `git check-ignore .env`.
+4. Restart the application (for Docker Compose: `docker compose up -d --build tamanna-ai`).
+5. Create/sign in to the account using the same admin email. Use HTTPS in production.
+
+Never paste the real `.env`, session secret, or API keys into GitHub, issues, logs, or chat. The setup script itself contains no personal credentials.
 
 Use the same email address as the account created through `/api/auth/signup`. Keep `TAMANNA_SESSION_SECRET` unique and private. This middleware is an additional API boundary; it does not replace OS-level isolation, a reverse-proxy firewall, rate limiting, backups, or review of each feature's own file/path validation.
