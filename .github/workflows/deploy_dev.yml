@@ -92,8 +92,8 @@ jobs:
 
       - name: Audit automatic Git mutation commands
         run: |
-          python scripts/audit_git_mutations.py \\
-            --root . \\
+          python scripts/audit_git_mutations.py \
+            --root . \
             --output "$RUNNER_TEMP/git-mutation-audit.json"
 
       - name: Inventory and review workflow directory
