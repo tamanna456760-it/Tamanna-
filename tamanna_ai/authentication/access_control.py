@@ -10,6 +10,12 @@ from tamanna_ai.authentication.router import COOKIE, current_user
 # ADMIN_ROUTES are also members of USER_ROUTES and require the configured
 # TAMANNA_ADMIN_EMAIL account.
 USER_ROUTES = {
+    # Chat endpoints can reach action/tool orchestration and require a session.
+    "/api/chat",
+    "/api/chat/master",
+    "/api/tamanna/echo",
+    "/api/autonomous/plan",
+    "/api/code-builder/plan",
     "/api/skills/create",
     "/api/skills/test",
     "/api/skills/refine",
