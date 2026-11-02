@@ -2800,7 +2800,8 @@ try:
 
     @app.post("/api/code-builder/plan")
     async def code_builder_plan(
-        payload: dict = Body(...)
+        payload: dict = Body(...),
+        _admin: bool = Depends(verify_admin_key),
     ):
 
         request = str(
