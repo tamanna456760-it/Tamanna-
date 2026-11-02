@@ -50,3 +50,7 @@ The scanner reports file paths, line numbers, and rule identifiers only; it does
 
 The access-control middleware protects sensitive write and execution routes. Admin-only routes require the signed session belonging to `TAMANNA_ADMIN_EMAIL`. State-changing requests with a browser Origin header are accepted only from `TAMANNA_CORS_ORIGINS`. Keep this allowlist limited to trusted frontend origins.
 The CI validation also rejects tracked private environment files other than the explicitly allowed `.env.example`. The local pattern scanner excludes `.env` files to avoid reading local environment files; check tracked environment-file names separately with `git ls-files` when running the scanner outside CI.
+
+## Audit finding requiring owner action
+
+The audit found a GitHub personal access token embedded in the historical version of `runner/python/ai_backup_network.py`. The active file on this security branch has been replaced with a local, read-only inventory utility, but this commit does not revoke the exposed credential or erase it from existing Git history. The repository owner must revoke that token immediately, review its access logs, and only then create a least-privilege replacement if needed.
