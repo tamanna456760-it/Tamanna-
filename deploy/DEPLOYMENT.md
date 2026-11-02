@@ -115,8 +115,22 @@ docker compose -f deploy/docker-compose.yml restart nginx
 ```
 
 Before updating production, keep a known-good image/revision and a protected
-backup of the `data/` volume and private `.env`. Do not delete or overwrite
-the live database during a deployment.
+backup of the persistent Docker volume and private `.env`. The named volume
+`tamanna-ai-data` stores `/app/data` (including the account database and chat
+history) across container recreation. Back it up before migrations or release
+changes; do not run `docker compose down -v` because that deletes the volume.
+
+Example backup (run on the server):
+
+```bash
+docker run --rm \
+  -v tamanna-ai-data:/source:ro \
+  -v "$PWD:/backup" \
+  alpine:3.20 \
+  tar -czf /backup/tamanna-ai-data-backup.tgz -C /source .
+```
+
+Protect the backup as private user data and store it outside the public web root.
 
 ## 7. GitHub Actions
 
