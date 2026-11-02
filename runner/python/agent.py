@@ -170,6 +170,13 @@ class Agent:
                 rc, out = run(cmd, cwd=str(self.repo_path))
                 fixer_out.append({"cmd": cmd, "rc": rc, "out": out})
 
+            # Refuse to proceed if the operator already has staged changes.
+            # This prevents the automation commit from accidentally including them.
+            staged_rc, staged_out = self.git("diff --cached --quiet")
+            if staged_rc != 0:
+                self._write_log("pre-existing staged changes detected; refusing automated commit")
+                return
+
             # Stage only operator-approved paths; never stage the entire repository.
             for item in self.stage_paths:
                 self.git(["add", "--", item])
