@@ -55,6 +55,32 @@ jobs:
               sys.exit(1)
           PY
 
+      - name: Reject tracked private environment files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+          from pathlib import PurePosixPath
+
+          tracked = subprocess.run(
+              ["git", "ls-files", "-z"], check=True, capture_output=True
+          ).stdout.decode("utf-8", "replace").split("\\0")
+          unsafe = []
+          for name in tracked:
+              if not name:
+                  continue
+              base = PurePosixPath(name).name
+              if (base == ".env" or base.startswith(".env.")) and base != ".env.example":
+                  unsafe.append(name)
+          if unsafe:
+              print("Tracked private environment files detected:")
+              for name in unsafe:
+                  print(f" - {name}")
+              sys.exit(1)
+          print("PASS: no tracked private environment files found.")
+          PY
+
       - name: Scan tracked files for exposed credentials
         run: python scripts/security_secret_scan.py --root .
 
