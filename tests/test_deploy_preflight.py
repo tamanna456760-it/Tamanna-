@@ -21,3 +21,4 @@ def test_deployment_preflight_matches_current_compose_architecture():
     assert result.returncode == 0, result.stdout + result.stderr
     assert "PASS: Docker Compose defines" in result.stdout
     assert "DNS, certificate issuance" in result.stdout
+    assert "API rate limits" in result.stdout
