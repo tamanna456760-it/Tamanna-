@@ -14,6 +14,8 @@ class ModelProvider(Protocol):
     async def generate(self, prompt: str) -> str: ...
 
 class GeminiProvider:
+    name = "gemini"
+
     def __init__(self, api_key: str, model: str | None = None):
         self.client = GeminiClient(api_key=api_key, model=model)
 
@@ -25,6 +27,7 @@ class GeminiProvider:
 
 class MockProvider:
     """Deterministic provider allowed only in an explicit test environment."""
+    name = "mock"
     async def generate(self, prompt: str) -> str:
         return f"Mock response: {prompt.strip()}"
 

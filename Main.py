@@ -618,7 +618,11 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=502, detail="AI model provider failed.") from exc
 
     save_chat(message, reply, request.conversation_id or "default")
-    return {"reply": reply}
+    return {
+        "reply": reply,
+        "handled": True,
+        "source": getattr(provider, "name", "model"),
+    }
 
 
 @app.post("/api/tools/execute")

@@ -30,7 +30,11 @@ def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch):
     from Main import app
     response = TestClient(app).post("/api/chat", json={"message": "hello"})
     assert response.status_code == 200
-    assert response.json() == {"reply": "Mock response: hello"}
+    assert response.json() == {
+        "reply": "Mock response: hello",
+        "handled": True,
+        "source": "mock",
+    }
 
 
 def test_chat_api_returns_503_without_model_key(monkeypatch):
