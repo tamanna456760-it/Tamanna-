@@ -118,3 +118,12 @@ jobs:
             [[ "$result" == "success" ]] || failed=1
           done
           exit "$failed"
+
+      - name: Validate Docker Compose configuration
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+      - name: Build Tamanna AI and Tor images
+        run: |
+          docker build --pull -t tamanna-ai-ci -f Dockerfile .
+          docker build --pull -t tamanna-ai-tor-ci -f deploy/tor/Dockerfile .
