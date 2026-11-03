@@ -52,3 +52,29 @@ The chat endpoint is intended to call the configured model provider. The tool re
 
 - [ROADMAP](ROADMAP.md): work that remains unverified or incomplete.
 - [CI workflow review](docs/CI_WORKFLOWS_REVIEW.md): overlapping workflows retained for your review.
+
+## Run Tamanna AI independently
+
+This repository is the **Tamanna AI application**. It runs independently from the separate `Tamanna-server` repository. It does not start or depend on that Compose project.
+
+Requirements: Docker Engine or Docker Desktop with Docker Compose.
+
+1. Copy `.env.example` to `.env`.
+2. Set a unique `TAMANNA_SESSION_SECRET` and your private `GEMINI_API_KEY` in `.env` if you want Gemini chat. Never commit `.env`.
+3. From this repository folder, run:
+
+```sh
+docker compose up --build -d
+docker compose ps
+```
+
+Tamanna AI application/API: http://127.0.0.1:8001
+Health check: http://127.0.0.1:8001/health
+
+To stop only Tamanna AI:
+
+```sh
+docker compose down
+```
+
+The container listens on port 8000 internally and is published on localhost port 8001 so it can run alongside the separate Tamanna Central Server, which uses localhost port 8000. Each repository has its own Compose project and data volume.
