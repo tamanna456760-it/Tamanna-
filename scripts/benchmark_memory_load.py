@@ -56,8 +56,8 @@ def main() -> int:
     parser.add_argument("--records", type=int, default=10_000)
     parser.add_argument("--batch-size", type=int, default=1_000)
     args = parser.parse_args()
-    if not 1 <= args.records <= 100_000:
-        parser.error("--records must be between 1 and 100000")
+    if args.records < 1:
+        parser.error("--records must be at least 1")
     if not 1 <= args.batch_size <= 2_000:
         parser.error("--batch-size must be between 1 and 2000")
 
