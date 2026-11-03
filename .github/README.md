@@ -134,7 +134,9 @@ HOST	Server bind address; the launcher defaults to 127.0.0.1
 PORT	HTTP port; defaults to 8000
 RELOAD	Development auto-reload toggle
 GEMINI_API_KEY	Placeholder for a Gemini credential if the integration is configured
-TAMANNA_MEMORY_FILE	Optional memory-file path
+TAMANNA_DATABASE_URL	SQLite URL for chat and persistent memories
+TAMANNA_AUTH_DB	SQLite path for account authentication
+TAMANNA_MAX_REQUEST_BYTES	Maximum HTTP request body size in bytes
 DEBUG	Debug-mode setting; keep disabled in production
 
 Never commit API keys, passwords, private keys, or production credentials. Use local environment variables or your hosting provider’s secret-management facility. If a secret is committed accidentally, revoke or rotate it; removing it from the latest file does not remove it from Git history.

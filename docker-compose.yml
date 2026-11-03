@@ -12,7 +12,9 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: "8000"
-      TAMANNA_MEMORY_FILE: /app/data/tamanna_memory.json
+      TAMANNA_DATABASE_URL: sqlite:////app/data/tamanna.sqlite3
+      TAMANNA_AUTH_DB: /app/data/accounts.sqlite3
+      TAMANNA_MAX_REQUEST_BYTES: "1048576"
     volumes:
       - tamanna_data:/app/data
     init: true
