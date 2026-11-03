@@ -7,13 +7,13 @@ info:
   version: 2.0.0
   contact:
     name: AI Tamanna Support
-    email: support@aitamanna.com
+    email: support@aibd-king-r7.com
   license:
     name: Proprietary
 servers:
-  - url: https://api.aitamanna.com/v1
+  - url: https://api.aibd-king-r7.com/v1
     description: Production
-  - url: https://staging-api.aitamanna.com/v1
+  - url: https://staging-api.aibd-king-r7.com/v1
     description: Staging
 tags:
   - name: health
