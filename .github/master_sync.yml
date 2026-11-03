@@ -30,10 +30,17 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install autopep8 pyyaml
 
-      # 4️⃣ Run Problem Fixer
-      - name: Run Problem Fixer
+      # 4) Run the existing safe, review-only fix planner when findings exist.
+      # The planner never edits source files and requires an analyzer report.
+      - name: Run Problem Fix Planner
+        shell: bash
         run: |
-          python problem_fixer.py
+          set -euo pipefail
+          if [ -f "$RUNNER_TEMP/tamanna_analyzer_report.json" ]; then
+            python scripts/fixer.py
+          else
+            echo "SKIP: no analyzer report was produced; no source files changed."
+          fi
 
       # 5️⃣ Save all file names
       - name: Save File Names
