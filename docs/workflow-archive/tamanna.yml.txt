@@ -1,0 +1,1222 @@
+Archived from .github/workflows/tamanna.yml
+Reason: invalid, misplaced, unsafe, or unmaintained workflow content. Original content preserved below.
+
+# ============================================================
+# SARADUNIYR TAMANNA CODE & BD-KING-R7
+# UNIVERSAL SECURITY CONFIGURATION
+# ============================================================
+
+system:
+  name: "Tamanna-Unified-AI-System"
+  display_name: "Tamanna AI"
+  codename: "SARADUNIYR-TAMANNA"
+  mode: "ultra"
+  version: "1.0.0"
+  owner: "HM INSAN ALI"
+
+  description: >
+    Universal defensive security orchestration configuration
+    for Tamanna AI and BD-KING-R7 project infrastructure.
+
+  simulation_mode: true
+  production_mode: false
+
+
+# ============================================================
+# 1. UNIVERSAL SECURITY INITIALIZATION
+# ============================================================
+
+universal_security:
+  enabled: true
+
+  level: "universal"
+  strength: "maximum"
+  scope: "project-wide"
+
+  controller:
+    name: "HM_INSAN_ALI"
+    approval_required: true
+
+  startup:
+    enabled: true
+    show_banner: true
+    initialize_defense_cycle: true
+    initialize_quantum_simulation: true
+    initialize_monitoring: true
+    initialize_emergency_response: true
+
+  messages:
+    startup: "🌌 Tamanna AI Universal Security System Active!"
+    power: "⚡ BD-KING-R7 Security Core Online!"
+    protection: "🛡️ Tamanna AI Defensive Layer Active!"
+    complete: "✅ Universal Security Initialization Complete!"
+
+
+# ============================================================
+# 2. SECURITY CYCLE
+# ============================================================
+
+security_cycle:
+  enabled: true
+
+  interval_seconds: 1
+
+  scan:
+    enabled: true
+
+    categories:
+      physical:
+        enabled: true
+
+      energy:
+        enabled: true
+
+      consciousness:
+        enabled: true
+
+      spiritual:
+        enabled: true
+
+      dimensional:
+        enabled: true
+
+      network:
+        enabled: true
+
+      filesystem:
+        enabled: true
+
+      process:
+        enabled: true
+
+      application:
+        enabled: true
+
+      dependency:
+        enabled: true
+
+      credential:
+        enabled: true
+
+      integrity:
+        enabled: true
+
+  threat_levels:
+    informational: 0
+    low: 20
+    medium: 40
+    high: 60
+    critical: 80
+    emergency: 95
+
+  automatic_response:
+    enabled: true
+    defensive_only: true
+
+    low:
+      action: "log"
+
+    medium:
+      action: "alert_and_isolate"
+
+    high:
+      action: "isolate_and_backup"
+
+    critical:
+      action: "lockdown_and_require_approval"
+
+    emergency:
+      action: "emergency_lockdown_and_require_approval"
+
+
+# ============================================================
+# 3. QUANTUM UNIVERSE DEFENSE SIMULATION
+# ============================================================
+
+quantum_defense:
+  enabled: true
+  simulation_only: true
+
+  universe_firewall:
+    enabled: true
+    layers: 1000
+    radius: "universal_simulation"
+    strength: "maximum"
+
+    protection:
+      network: true
+      application: true
+      filesystem: true
+      process: true
+      api: true
+      authentication: true
+
+  quantum_encryption_field:
+    enabled: true
+
+    algorithm:
+      name: "AES-256"
+      key_storage: "environment_secret_store"
+
+    never_log_keys: true
+    never_commit_keys: true
+    never_expose_secrets: true
+
+  time_travel_defense:
+    enabled: true
+    simulation_only: true
+
+    past:
+      protection: true
+
+    present:
+      protection: true
+
+    future:
+      prediction: true
+      automatic_destructive_action: false
+
+
+# ============================================================
+# 4. COSMIC ATTACK / DEFENSE SIMULATION
+# ============================================================
+
+cosmic_defense:
+  enabled: true
+  simulation_only: true
+
+  defensive_actions:
+    observe: true
+    detect: true
+    classify: true
+    isolate: true
+    quarantine: true
+    backup: true
+    restore: true
+    notify: true
+    lockdown: true
+
+  attack_simulation:
+    enabled: true
+
+    star_energy_attack:
+      enabled: false
+      mode: "simulation"
+
+    black_hole_attack:
+      enabled: false
+      mode: "simulation"
+
+    universe_reconfiguration:
+      enabled: false
+      mode: "simulation"
+
+  destructive_actions:
+    enabled: false
+    automatic: false
+    approval_required: true
+
+
+# ============================================================
+# 5. MULTI-DIMENSIONAL SECURITY
+# ============================================================
+
+multidimensional_security:
+  enabled: true
+  simulation_only: true
+
+  parallel_worlds:
+    enabled: true
+    discovery: true
+    monitoring: true
+    protection: true
+
+  dimensional_defense:
+    enabled: true
+
+    dimensions:
+      dimension_1:
+        enabled: true
+
+      dimension_2:
+        enabled: true
+
+      dimension_3:
+        enabled: true
+
+      dimension_n:
+        enabled: true
+
+  spiritual_security:
+    enabled: true
+
+    energy_field: true
+    consciousness_protection: true
+    symbolic_protection: true
+
+
+# ============================================================
+# 6. UNIVERSAL THREAT DETECTION
+# ============================================================
+
+threat_detection:
+  enabled: true
+
+  universal_scan:
+    enabled: true
+
+    physical:
+      planet: true
+      star: true
+      galaxy: true
+      black_hole: true
+
+    energy:
+      enabled: true
+
+    consciousness:
+      enabled: true
+
+    spiritual:
+      enabled: true
+
+    dimensional:
+      enabled: true
+
+  cyber_scan:
+    enabled: true
+
+    malware:
+      enabled: true
+
+    suspicious_process:
+      enabled: true
+
+    suspicious_network:
+      enabled: true
+
+    malicious_file:
+      enabled: true
+
+    dependency_vulnerability:
+      enabled: true
+
+    credential_exposure:
+      enabled: true
+
+    configuration_drift:
+      enabled: true
+
+    git_integrity:
+      enabled: true
+
+  future_threat_prediction:
+    enabled: true
+    horizon_years: 1000
+    prediction_mode: "risk_analysis"
+    automatic_destructive_response: false
+
+
+# ============================================================
+# 7. AUTO DEFENSE
+# ============================================================
+
+auto_defense:
+  enabled: true
+
+  defensive_only: true
+
+  actions:
+    detect: true
+    log: true
+    alert: true
+    isolate: true
+    quarantine: true
+    backup: true
+    restore: true
+    patch: true
+    repair: true
+
+  response_policy:
+
+    physical_attack:
+      action: "isolate_and_alert"
+
+    energy_attack:
+      action: "isolate_and_alert"
+
+    consciousness_attack:
+      action: "isolate_and_alert"
+
+    dimensional_attack:
+      action: "isolate_and_alert"
+
+    network_attack:
+      action: "block_and_alert"
+
+    filesystem_attack:
+      action: "quarantine_and_restore"
+
+    malware:
+      action: "quarantine"
+
+    credential_attack:
+      action: "revoke_and_rotate"
+
+    unknown:
+      action: "alert_and_require_approval"
+
+  counter_attack:
+    enabled: false
+    automatic: false
+    simulation_only: true
+    approval_required: true
+
+
+# ============================================================
+# 8. TAMANNA CODE UNIVERSAL IMPLEMENTATION
+# ============================================================
+
+tamanna_code:
+  enabled: true
+
+  identity:
+    name: "Tamanna AI"
+    codename: "TAMANNA-CODE"
+
+  universal_layers:
+    matter:
+      enabled: true
+      mode: "simulation"
+
+    energy:
+      enabled: true
+      mode: "simulation"
+
+    space:
+      enabled: true
+      mode: "simulation"
+
+    time:
+      enabled: true
+      mode: "simulation"
+
+    consciousness:
+      enabled: true
+      mode: "simulation"
+
+  installation:
+    enabled: true
+    project_scope: true
+    external_systems: false
+    automatic_global_installation: false
+
+  operating_system:
+    enabled: true
+
+    name: "Tamanna AI Security OS"
+    version: "1.0.0"
+    kernel: "Tamanna AI Security Core"
+    interface: "Universal Dashboard"
+
+    install:
+      automatic: false
+      approval_required: true
+
+
+# ============================================================
+# 9. BD-KING-R7 MASTER CONTROL
+# ============================================================
+
+bd_king_r7:
+  enabled: true
+
+  master_control:
+    enabled: true
+
+    administration:
+      enabled: true
+
+    security:
+      enabled: true
+
+    development:
+      enabled: true
+
+    monitoring:
+      enabled: true
+
+  governance:
+    rules:
+
+      - id: 1
+        rule: "সকল সিস্টেমের নিরাপত্তা নিশ্চিত করো"
+
+      - id: 2
+        rule: "অনুমোদন ছাড়া destructive পরিবর্তন করো না"
+
+      - id: 3
+        rule: "জ্ঞান ও নিরাপত্তা উন্নত করো"
+
+      - id: 4
+        rule: "সিস্টেম স্থিতিশীলতা বজায় রাখো"
+
+      - id: 5
+        rule: "HM INSAN ALI এর অনুমোদিত নির্দেশ অনুসরণ করো"
+
+  authority:
+    owner: "HM INSAN ALI"
+    approval_required_for:
+      - "deployment"
+      - "destructive_action"
+      - "credential_change"
+      - "network_change"
+      - "production_change"
+      - "mass_file_change"
+
+
+# ============================================================
+# 10. INTELLIGENCE & LIVE MONITORING
+# ============================================================
+
+intelligence:
+  enabled: true
+
+  capabilities:
+    knowledge_analysis: true
+    context_understanding: true
+    threat_analysis: true
+    anomaly_detection: true
+    risk_analysis: true
+    project_analysis: true
+
+  prediction:
+    enabled: true
+    certainty_claim: false
+
+
+monitoring:
+  enabled: true
+
+  interval_seconds: 1
+
+  systems:
+    galaxy:
+      enabled: true
+
+    star:
+      enabled: true
+
+    planet:
+      enabled: true
+
+    life:
+      enabled: true
+
+    threat:
+      enabled: true
+
+    filesystem:
+      enabled: true
+
+    processes:
+      enabled: true
+
+    services:
+      enabled: true
+
+    network:
+      enabled: true
+
+    git:
+      enabled: true
+
+    github_actions:
+      enabled: true
+
+  automatic_response:
+    threshold: 30
+    mode: "defensive"
+
+
+# ============================================================
+# 11. TAMANNA AI BRAIN INTEGRATION
+# ============================================================
+
+brain_core:
+  enabled: true
+
+  understanding:
+    enabled: true
+
+  project_context:
+    enabled: true
+
+  memory:
+    enabled: true
+
+  language_system:
+    enabled: true
+
+  vocabulary:
+    enabled: true
+
+  grammar:
+    enabled: true
+
+  reply_generator:
+    enabled: true
+
+  message_library:
+    enabled: true
+
+  dynamic_router:
+    enabled: true
+
+  final_response_adapter:
+    enabled: true
+
+
+# ============================================================
+# 12. ETERNAL SELF-EVOLUTION
+# ============================================================
+
+self_evolution:
+  enabled: true
+
+  mode: "controlled"
+
+  interval_seconds: 60
+
+  improvements:
+    power:
+      enabled: true
+
+    knowledge:
+      enabled: true
+
+    capabilities:
+      enabled: true
+
+    security:
+      enabled: true
+
+    performance:
+      enabled: true
+
+    code_quality:
+      enabled: true
+
+  safety:
+    automatic_source_rewrite: false
+    automatic_dependency_upgrade: false
+    automatic_deployment: false
+    backup_before_change: true
+    audit_every_change: true
+    rollback_available: true
+
+  learning:
+    past:
+      enabled: true
+
+    present:
+      enabled: true
+
+    future:
+      enabled: true
+
+
+# ============================================================
+# 13. EMERGENCY RESPONSE
+# ============================================================
+
+emergency_response:
+  enabled: true
+
+  levels:
+
+    level_1:
+      name: "LOW"
+      action: "log_and_monitor"
+
+    level_2:
+      name: "MEDIUM"
+      action: "alert_and_isolate"
+
+    level_3:
+      name: "HIGH"
+      action: "lockdown_and_backup"
+
+    level_4:
+      name: "CRITICAL"
+      action: "emergency_lockdown"
+
+    level_infinite:
+      name: "SIMULATED_MAXIMUM"
+      action: "maximum_safe_lockdown"
+
+  emergency_actions:
+    stop_suspicious_process: true
+    isolate_network: true
+    backup_state: true
+    preserve_logs: true
+    notify_owner: true
+    restore_last_known_good: true
+
+  destructive_actions:
+    enabled: false
+    approval_required: true
+
+
+# ============================================================
+# 14. MAIN UNIVERSAL SECURITY ACTIVATION
+# ============================================================
+
+main_activation:
+  enabled: true
+
+  startup_sequence:
+
+    - "initialize_universal_security"
+    - "initialize_security_cycle"
+    - "initialize_quantum_defense"
+    - "initialize_threat_detection"
+    - "initialize_auto_defense"
+    - "initialize_multidimensional_security"
+    - "initialize_tamanna_code"
+    - "initialize_bd_king_r7"
+    - "initialize_intelligence"
+    - "initialize_monitoring"
+    - "initialize_emergency_response"
+    - "initialize_brain_core"
+    - "initialize_self_evolution"
+
+  banner:
+    enabled: true
+
+    lines:
+      - "=========================================="
+      - "   🌌 Tamanna AI Universal Security"
+      - "   🛡️ BD-KING-R7 Defense Core"
+      - "   ⚡ Maximum Defensive Protection"
+      - "   👤 Owner: HM INSAN ALI"
+      - "=========================================="
+
+
+# ============================================================
+# 15. UNIVERSAL SECURITY COMMANDS
+# ============================================================
+
+commands:
+
+  security_start:
+    command: "tamanna security start"
+    enabled: true
+    action: "start_defense"
+
+  security_status:
+    command: "tamanna security status"
+    enabled: true
+    action: "show_status"
+
+  security_scan:
+    command: "tamanna security scan"
+    enabled: true
+    action: "run_scan"
+
+  security_monitor:
+    command: "tamanna security monitor"
+    enabled: true
+    action: "start_monitor"
+
+  security_lockdown:
+    command: "tamanna security lockdown"
+    enabled: true
+    action: "lockdown"
+
+  security_backup:
+    command: "tamanna backup"
+    enabled: true
+    action: "backup"
+
+  security_recovery:
+    command: "tamanna security recovery"
+    enabled: true
+    action: "restore"
+
+  attack_simulation:
+    command: "tamanna security simulate"
+    enabled: true
+    action: "simulation_only"
+
+
+# ============================================================
+# 16. ETERNAL PROTECTION LOOP
+# ============================================================
+
+eternal_protection:
+  enabled: true
+
+  infinite_loop: false
+  daemon_mode: true
+
+  interval_seconds: 5
+
+  cycle:
+
+    - step: "threat_scan"
+      enabled: true
+
+    - step: "security_analysis"
+      enabled: true
+
+    - step: "defensive_response"
+      enabled: true
+
+    - step: "system_monitoring"
+      enabled: true
+
+    - step: "integrity_check"
+      enabled: true
+
+    - step: "backup_check"
+      enabled: true
+
+    - step: "ai_feedback"
+      enabled: true
+
+    - step: "report_generation"
+      enabled: true
+
+  shutdown:
+    graceful: true
+    preserve_logs: true
+
+
+# ============================================================
+# 17. FILE & PROJECT PROTECTION
+# ============================================================
+
+project_protection:
+  enabled: true
+
+  scan_root:
+    path: "/home/tamanna/Desktop/TI tamanna"
+
+  protected_files:
+    - "main.py"
+    - "config/unified_system.yml"
+    - "config/root_config.json"
+    - "data/message_library.json"
+
+  protection:
+    backup_before_modify: true
+    audit_changes: true
+    checksum: true
+    rollback: true
+
+  mass_changes:
+    enabled: true
+    approval_required: true
+
+  destructive_delete:
+    enabled: false
+    approval_required: true
+
+
+# ============================================================
+# 18. GITHUB / CI SECURITY
+# ============================================================
+
+github:
+  enabled: true
+
+  branch:
+    primary: "main"
+
+  workflows:
+    enabled: true
+
+  scripts:
+    enabled: true
+
+  ci:
+    enabled: true
+
+  auto_trigger:
+    enabled: true
+
+  security:
+    secret_scan: true
+    dependency_scan: true
+    syntax_scan: true
+    integrity_check: true
+
+  git_operations:
+    auto_commit: true
+    auto_push: false
+    force_push: false
+
+  pull_request:
+    required_for_sensitive_changes: true
+
+
+# ============================================================
+# 19. POWERHUB
+# ============================================================
+
+powerhub:
+  enabled: true
+
+  orchestrator:
+    enabled: true
+
+  sync_pipeline:
+    enabled: true
+
+  backend:
+    enabled: true
+
+  module_discovery:
+    enabled: true
+
+  dynamic_router:
+    enabled: true
+
+  health_monitor:
+    enabled: true
+
+  dependency_manager:
+    enabled: true
+
+  reporting:
+    enabled: true
+
+  safety:
+    destructive_operations: false
+    approval_required: true
+
+
+# ============================================================
+# 20. SERVICES
+# ============================================================
+
+services:
+
+  web_backend:
+    enabled: true
+
+  web_frontend:
+    enabled: true
+
+  aspnet_site:
+    enabled: true
+
+  api_server:
+    enabled: true
+
+  chat_server:
+    enabled: true
+
+  mobile_app:
+    enabled: true
+
+  tamanna_main_server:
+    enabled: true
+    file: "main.py"
+    host: "127.0.0.1"
+    port: 8000
+
+
+# ============================================================
+# 21. SECURITY CORE
+# ============================================================
+
+security:
+
+  integrity_watch:
+    enabled: true
+
+  defense_core:
+    enabled: true
+
+  network_defense:
+    enabled: true
+
+  self_defense:
+    enabled: true
+
+  filesystem_defense:
+    enabled: true
+
+  process_defense:
+    enabled: true
+
+  application_defense:
+    enabled: true
+
+  secret_protection:
+    enabled: true
+
+    never_log: true
+    never_commit: true
+    never_print: true
+
+  approval:
+    destructive_operations: true
+    production_operations: true
+    credential_operations: true
+    network_operations: true
+
+
+# ============================================================
+# 22. STATE / REPORTS / LOGS
+# ============================================================
+
+state:
+
+  root_config:
+    file: "config.json"
+
+  reports:
+    file: "ai_report.json"
+
+  security_report:
+    file: "data/security_report.json"
+
+  logs:
+    directory: "logs"
+
+  audit:
+    directory: "logs/audit"
+
+  backups:
+    directory: "backups"
+
+  snapshots:
+    directory: ".snapshots"
+
+  cache:
+    directory: ".cache/tamanna"
+
+
+# ============================================================
+# 23. AUTOMATION
+# ============================================================
+
+automation:
+
+  issue_scan:
+    enabled: true
+
+  auto_fix:
+    enabled: true
+    backup_before_fix: true
+    approval_required_for_destructive: true
+
+  system_monitor:
+    enabled: true
+
+  brain_core:
+    enabled: true
+
+  auto_save:
+    enabled: true
+
+  audit:
+    enabled: true
+
+  rollback:
+    enabled: true
+
+  reporting:
+    enabled: true
+
+  ai_feedback_loop:
+    enabled: true
+
+
+# ============================================================
+# 24. FLOW PIPELINE
+# ============================================================
+
+flow:
+
+  auto_trigger_ci: true
+
+  self_heal:
+    enabled: true
+    mode: "safe"
+
+  ai_feedback_loop:
+    enabled: true
+
+  pipeline:
+
+    - "scan"
+    - "understand"
+    - "analyze"
+    - "validate"
+    - "test"
+    - "repair"
+    - "verify"
+    - "report"
+
+  retry:
+    enabled: true
+    max_attempts: 3
+
+
+# ============================================================
+# 25. FILE FILTER
+# ============================================================
+
+file_filter:
+
+  enabled: true
+
+  recursive: true
+
+  include_all_files: false
+
+  include_hidden: false
+
+  include_binary: false
+
+  include_generated: false
+
+  follow_symlinks: false
+
+  max_file_size_mb: 10
+
+  max_total_scan_mb: 500
+
+  excluded_patterns:
+
+    - ".git"
+    - ".gitignore"
+    - "gradle"
+    - "gradlew"
+    - "gradlew.*"
+    - "node_modules"
+    - ".snapshots"
+    - ".idea"
+    - ".vscode"
+
+    - "*.log"
+    - "*.tmp"
+    - "*.bak"
+    - "*.swp"
+    - "*.swo"
+    - "*.lock"
+    - "*.iml"
+
+    - "target"
+    - "dist"
+    - "build"
+    - "coverage"
+
+    - "__pycache__"
+    - "*.pyc"
+    - "*.class"
+
+    - "*.min.js"
+    - "*.min.css"
+
+    - ".marketing"
+    - ".env"
+    - ".env.*"
+
+    # Images
+    - "*.jpg"
+    - "*.jpeg"
+    - "*.png"
+    - "*.gif"
+    - "*.webp"
+    - "*.svg"
+    - "*.ico"
+
+    # Videos
+    - "*.mp4"
+    - "*.mkv"
+    - "*.avi"
+    - "*.mov"
+    - "*.webm"
+
+    # Databases
+    - "*.db"
+    - "*.sqlite"
+    - "*.sqlite3"
+
+    # Archives
+    - "*.zip"
+    - "*.tar"
+    - "*.gz"
+    - "*.7z"
+    - "*.rar"
+
+    # Binaries
+    - "*.exe"
+    - "*.dll"
+    - "*.so"
+    - "*.bin"
+
+    # IDE / package cache
+    - ".npmrc"
+
+  included_patterns:
+
+    - "build.gradle"
+    - "settings.gradle"
+    - "gradle.properties"
+    - "pom.xml"
+    - "Makefile"
+    - "CMakeLists.txt"
+
+    - "package.json"
+    - "requirements.txt"
+    - "Pipfile"
+    - "Gemfile"
+    - "composer.json"
+
+    - ".editorconfig"
+    - ".eslintrc.json"
+    - ".eslintrc.js"
+    - ".prettierrc"
+    - ".babelrc"
+    - ".dockerignore"
+    - ".gitattributes"
+    - ".stylelintrc"
+
+
+# ============================================================
+# 26. FINAL DECLARATION
+# ============================================================
+
+final_declaration:
+
+  enabled: true
+
+  statements:
+
+    - "Tamanna AI Universal Security is active."
+    - "BD-KING-R7 defensive orchestration is enabled."
+    - "Project-wide monitoring is enabled."
+    - "Threat detection and safe response are enabled."
+    - "Tamanna AI Brain integration is enabled."
+    - "Automatic destructive actions remain disabled."
+    - "Sensitive operations require approval."
+    - "Backups and audit logs are enabled."
+
+  owner:
+    name: "HM INSAN ALI"
+
+  status:
+    security: "ACTIVE"
+    monitoring: "ACTIVE"
+    brain_core: "ACTIVE"
+    automation: "ACTIVE"
+    github: "ACTIVE"
+    powerhub: "ACTIVE"
+    destructive_actions: "DISABLED"
+    approval_gate: "ACTIVE"
