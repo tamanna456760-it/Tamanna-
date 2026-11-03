@@ -6,6 +6,7 @@ import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_HOST = "www.tamanna.com"
 
 REQUIRED_FILES = (
     "index.html",
@@ -25,7 +26,6 @@ def fail(message: str) -> None:
 def main() -> None:
     for relative in REQUIRED_FILES:
         path = ROOT / relative
-
         if not path.is_file():
             fail(f"Required file missing: {relative}")
 
@@ -33,31 +33,21 @@ def main() -> None:
         encoding="utf-8"
     ).strip().lower()
 
-    if cname != "www.bd-king-r7.com":
-        fail(
-            "CNAME must contain exactly "
-            "www.bd-king-r7.com"
-        )
+    if cname != EXPECTED_HOST:
+        fail(f"CNAME must contain exactly {EXPECTED_HOST}")
 
     package_json = ROOT / "package.json"
-
     if package_json.is_file():
         try:
-            json.loads(
-                package_json.read_text(
-                    encoding="utf-8"
-                )
-            )
+            json.loads(package_json.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
             fail(f"Invalid package.json: {exc}")
 
     print("PASS: Required files exist.")
-    print("PASS: CNAME configuration is correct.")
+    print(f"PASS: CNAME targets {EXPECTED_HOST}.")
     print("PASS: Deployment preflight completed.")
-
     print(
-        "NOTE: DNS, domain ownership, "
-        "GitHub Pages settings and TLS "
+        "NOTE: DNS, domain ownership, GitHub Pages settings and TLS "
         "must be verified separately."
     )
 
