@@ -26,7 +26,7 @@ that the static website has been published.
 
 The CNAME file must contain:
 
-    www.tamanna.com
+    www.bd-king-r7.com
 
 Before modifying DNS records, verify domain ownership
 and access to the domain's DNS settings.
@@ -40,7 +40,7 @@ Do not overwrite existing records without checking them.
 2. Check the custom domain status.
 3. Wait for certificate provisioning if necessary.
 4. Enable Enforce HTTPS when available.
-5. Visit https://www.tamanna.com and verify the
+5. Visit https://www.bd-king-r7.com and verify the
    browser reports a valid certificate.
 
 ## FastAPI Backend
