@@ -55,4 +55,4 @@ jobs:
       - name: Validate production configuration
         run: python deploy/validate_deployment.py
       - name: Safety boundary
-        run: echo "Preflight only: no server deployment, restart, auto-format, source rewrite, commit, or push."
+        run: 'echo "Preflight only: no server deployment, restart, auto-format, source rewrite, commit, or push."'
