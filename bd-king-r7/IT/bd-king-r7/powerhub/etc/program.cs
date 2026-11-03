@@ -77,7 +77,7 @@ app.MapGet("/", () =>
             <div class="tag">BD-KING-R7</div>
             <div class="tag">VAIRAJ-PROTOCOL</div>
             <h1>Sovereign System Online</h1>
-            <h2>Primary node for bd-king-r7.com · .net · .org</h2>
+            <h2>Primary node for www.bd-king-r7.com</h2>
 
             <div class="state">
                 <div><span class="label">Status:</span> <span class="value">ONLINE · LISTENING</span></div>
@@ -87,7 +87,7 @@ app.MapGet("/", () =>
 
             <div class="domains">
                 Configure your DNS to point:<br/>
-                <code>bd-king-r7.com</code><br/>
+                <code>www.bd-king-r7.com</code><br/>
                 <code>bd-king-r7.net</code><br/>
                 <code>bd-king-r7.org</code><br/>
                 to this server IP.
