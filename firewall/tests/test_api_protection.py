@@ -83,6 +83,7 @@ class TestRequestBody(unittest.TestCase):
         result = validate_api_request(
             method="POST",
             path="/api/chat",
+            authenticated=True,
             content_type="application/json",
             content_length=100,
         )
@@ -118,6 +119,7 @@ class TestRequestBody(unittest.TestCase):
         result = validate_api_request(
             method="POST",
             path="/api/chat",
+            authenticated=True,
             content_type="application/json; charset=utf-8",
             content_length=10,
         )

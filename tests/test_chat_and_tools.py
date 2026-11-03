@@ -51,11 +51,12 @@ def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch, tmp_path):
         _create_chat_test_user(client)
         response = client.post("/api/chat", json={"message": "hello"})
         assert response.status_code == 200, response.text
-        assert response.json() == {
-            "reply": "Mock response: hello",
-            "handled": True,
-            "source": "mock",
-        }
+        payload = response.json()
+        assert payload["reply"] == "Mock response: hello"
+        assert payload["response"] == payload["reply"]
+        assert payload["handled"] is True
+        assert payload["source"] == "mock"
+        assert payload["conversationId"].startswith("user-")
         history = client.get("/api/history")
         assert history.status_code == 200
         assert history.json()["history"][-1]["user"] == "hello"
