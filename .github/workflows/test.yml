@@ -45,7 +45,7 @@ jobs:
           python -m compileall -q Main.py main.py api app_security core runner tamanna_ai modules
 
       - name: Run Core, Agent Manager and Access-Control Tests
-        run: python -m pytest -q tests/test_tamanna_controller.py tests/test_agent_manager.py tests/test_planner_agent.py tests/test_coder_agent.py tests/test_access_control.py
+        run: python -m pytest -q tests/test_tamanna_controller.py tests/test_agent_manager.py tests/test_planner_agent.py tests/test_coder_agent.py tests/test_reviewer_agent.py tests/test_access_control.py
 
       - name: Audit Repository Structure
         run: |
