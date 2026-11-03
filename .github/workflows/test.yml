@@ -1,37 +1,43 @@
-name: Full Code Test System
+name: Tamanna Python CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-python-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test-all-files:
+  python-tests:
+    name: Python syntax and tests
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
-      - name: Code Download
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-server.txt
 
-      - name: Install Packages
+      - name: Install server and test dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-server.txt pytest
 
-      - name: Lint Check (Error detect)
+      - name: Compile application and test modules
         run: |
-          flake8 . || true
+          python -m compileall -q Main.py main.py tamanna_ai tests
 
-      - name: Run Tests
-        run: |
-          pytest || true
-
-      - name: Try Run Python Files
-        run: |
-          for file in $(find . -name "*.py"); do
-            echo "Running $file"
-            python $file || echo "Error in $file"
-          done
+      - name: Run focused test suite
+        run: python -m pytest -q
