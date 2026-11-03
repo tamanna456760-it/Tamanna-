@@ -33,10 +33,10 @@ def main() -> None:
         encoding="utf-8"
     ).strip().lower()
 
-    if cname != "www.tamanna.com":
+    if cname != "www.bd-king-r7.com":
         fail(
             "CNAME must contain exactly "
-            "www.tamanna.com"
+            "www.bd-king-r7.com"
         )
 
     package_json = ROOT / "package.json"
