@@ -61,7 +61,7 @@ def validate_deployment(compose_path, nginx_path, require_env=False):
 
     if nginx_text:
         required_nginx = {
-            "www domain": "server_name www.tamanna.com",
+            "www domain": "server_name www.bd-king-r7.com",
             "TLS certificate": "ssl_certificate",
             "TLS private key": "ssl_certificate_key",
             "TLS 1.2/1.3 policy": "ssl_protocols TLSv1.2 TLSv1.3",
