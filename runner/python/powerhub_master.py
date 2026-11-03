@@ -1,112 +1,37 @@
-#!/bd-king-r7/it//bd-king-r7/powerhub/powerhub_helper
-# -*- coding: utf-8 -*-
+"""PowerHub safety controller.
 
+Automatic file rewriting, arbitrary .bad script execution, dependency installation,
+and git add/commit/push are disabled. This module only audits a project tree.
 """
-BD-KING-R7 POWERHUB MASTER HELPER
----------------------------------
-
-GPT-Driven Auto Build / Auto Fix / Auto Sync Engine
-Author: Tamanna System (AI-Integrated)
-Version: 7.0 Ultra Master
-
-Functions:
-  ✔ Auto file scan
-  ✔ Auto code repair
-  ✔ Auto sync to repo
-  ✔ Auto builder
-  ✔ Auto dependency installer
-  ✔ Auto log + status engine
-"""
-
+from pathlib import Path
+import json
 import os
-import subprocess
 
-ROOT = "bd-king-r7/it"
-LOG_FILE = f"{ROOT}/powerhub_log.txt"
-
-
-def log(msg):
-    """Write log entries."""
-    with open(LOG_FILE, "a") as f:
-        f.write(f"[POWERHUB] {msg}\n")
-    print(f"[POWERHUB] {msg}")
+ROOT = Path(os.getenv("TAMANNA_POWERHUB_ROOT", "bd-king-r7/it")).resolve()
+EXCLUDED = {".git", ".venv", "venv", "node_modules", "__pycache__"}
 
 
-def run_cmd(cmd):
-    """Run commands safely."""
-    log(f"Running command: {cmd}")
-    try:
-        subprocess.run(cmd, shell=True, check=False)
-    except Exception as e:
-        log(f"Error: {e}")
-
-
-def install_dependencies():
-    """Install pip dependencies automatically."""
-    if os.path.exists("requirements.txt"):
-        log("Installing dependencies...")
-        run_cmd("pip install -r requirements.txt")
-    else:
-        log("requirements.txt not found — skipping.")
-
-
-def auto_fix_files():
-    """Automatically repair missing/empty/broken files."""
-    for root, dirs, files in os.walk(ROOT):
-        for file in files:
-            path = os.path.join(root, file)
-
-            # Fix empty files
-            if os.path.getsize(path) == 0:
-                log(f"Fixing empty file: {path}")
-                with open(path, "w") as f:
-                    f.write("# AUTO-FIXED BY POWERHUB\n")
-
-            # Ensure .bad scripts are executable
-            if file.endswith(".bad"):
-                run_cmd(f"chmod +x '{path}'")
-                log(f"Executable set: {path}")
-
-
-def auto_run_scripts():
-    """Run all BD-KING-R7 .bad scripts."""
-    log("Running all BD-KING-R7 scripts...")
-
-    for root, dirs, files in os.walk(ROOT):
-        for file in files:
-            if file.endswith(".bad"):
-                script = os.path.join(root, file)
-                log(f"Executing script: {script}")
-
-                # Try Python → Bash fallback
-                run_cmd(f"python '{script}' || bash '{script}' || true")
-
-
-def auto_sync_repo():
-    """Auto commit + push changes."""
-    log("Auto-syncing repo...")
-
-    run_cmd("git config user.email 'powerhub@system.ai'")
-    run_cmd("git config user.name 'POWERHUB-AI'")
-
-    run_cmd("git add .")
-    run_cmd('git commit -m "BD-KING-R7 PowerHub Auto Sync" || true')
-    run_cmd("git push || true")
-
-    log("Auto-sync complete.")
+def audit_files():
+    findings = []
+    if not ROOT.is_dir():
+        return {"status": "unavailable", "reason": "project root does not exist", "findings": []}
+    for current, dirs, files in os.walk(ROOT):
+        dirs[:] = [name for name in dirs if name not in EXCLUDED]
+        for name in files:
+            path = Path(current) / name
+            try:
+                if path.stat().st_size == 0:
+                    findings.append({"path": str(path.relative_to(ROOT)), "finding": "empty_file", "action": "manual_review"})
+                elif path.suffix == ".bad":
+                    findings.append({"path": str(path.relative_to(ROOT)), "finding": "executable_script_requires_review", "action": "manual_review"})
+            except OSError:
+                findings.append({"path": str(path), "finding": "stat_failed", "action": "manual_review"})
+    return {"status": "completed", "files_requiring_review": len(findings), "findings": findings, "automatic_repair": False, "automatic_script_execution": False, "automatic_git_sync": False}
 
 
 def powerhub_master():
-    """Full master automation pipeline."""
-    log("=== BD-KING-R7 POWERHUB MASTER START ===")
-
-    install_dependencies()
-    auto_fix_files()
-    auto_run_scripts()
-    auto_sync_repo()
-
-    log("=== POWERHUB MASTER COMPLETE ===")
+    return audit_files()
 
 
 if __name__ == "__main__":
-    powerhub_master()
+    print(json.dumps(powerhub_master(), ensure_ascii=False, indent=2))
