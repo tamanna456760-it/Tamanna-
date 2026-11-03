@@ -1,81 +1,58 @@
-name: Platform Backend CI/CD
-
+name: Tamanna Platform Backend Validation
 on:
-  push:
-    branches:
-      - main
-      - dev
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:    # allows manual trigger
-
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tamanna-platform-backend-validation
+  cancel-in-progress: true
 jobs:
-  backend_ci:
+  validate:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # 2️⃣ Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
         with:
-          python-version: "3.11"
-
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-server.txt
+      - name: Install declared dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install autopep8 pyyaml
-
-      # 4️⃣ Run Problem Fixer (auto code fix)
-      - name: Run Problem Fixer
+          python -m pip install -r requirements-server.txt pytest
+      - name: Validate Python source
         run: |
-          python problem_fixer.py
-
-      # 5️⃣ Save all file names
-      - name: Save File Names
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          excluded = {".git", ".venv", "venv", "node_modules", "__pycache__"}
+          errors = []
+          count = 0
+          for path in Path(".").rglob("*.py"):
+              if any(part in excluded for part in path.parts):
+                  continue
+              count += 1
+              try:
+                  ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+              except (OSError, UnicodeError, SyntaxError) as exc:
+                  errors.append(f"{path}: {exc}")
+          print(f"Python files checked: {count}")
+          if errors:
+              print("\n".join(errors))
+              raise SystemExit(1)
+          PY
+      - name: Run tests if available
         run: |
-          python - <<EOF
-          import os
-          file_names = []
-          for root, dirs, files in os.walk("."):
-              for file in files:
-                  if file.endswith(".py"):
-                      file_names.append(os.path.join(root, file))
-          with open("all_file_names.txt", "w") as f:
-              for name in file_names:
-                  f.write(name + "\\n")
-          EOF
-
-      # 6️⃣ Run Main Runner
-      - name: Run Main Runner
-        run: |
-          python main.py
-
-      # 7️⃣ Run Backend Tests (if you have pytest)
-      - name: Run Backend Tests
-        run: |
-          if [ -f "tests" ]; then
-            pip install pytest
-            pytest tests/ --maxfail=1 --disable-warnings -q
+          if [ -d tests ]; then
+            python -m pytest -q tests
+          else
+            echo "No tests directory; skipped."
           fi
-
-      # 8️⃣ Commit auto changes (fixes, file names)
-      - name: Commit auto changes
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add -A
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto sync & fix"
-          git push || echo "No changes to push"
-
-      # 9️⃣ Optional Deployment Step
-      - name: Deploy Backend
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "Add your deployment commands here, e.g., SSH deploy or Docker push"
+      - name: Validate release configuration
+        run: python deploy/validate_release.py
+      - name: Safety boundary
+        run: echo "No problem fixer, source rewrite, application launch, git commit, or push was run."
