@@ -69,7 +69,7 @@ Still required:
 
 ## Deployment status
 
-No production server was provisioned, no DNS record was changed, no TLS certificate was issued, and no production service was restarted by this audit. A successful GitHub commit is not proof that `https://www.tamanna.com` is live.
+No production server was provisioned, no DNS record was changed, no TLS certificate was issued, and no production service was restarted by this audit. A successful GitHub commit is not proof that `https://www.bd-king-r7.com` is live.
 
 ## Safe next sequence
 
