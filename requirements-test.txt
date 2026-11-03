@@ -1,0 +1,4 @@
+# Test dependencies for Tamanna AI CI workflows.
+# Runtime dependencies are shared with the server requirements.
+-r requirements-server.txt
+pytest>=8.3.0,<9.0.0
