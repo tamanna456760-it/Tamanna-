@@ -24,12 +24,16 @@ def test_mock_provider_is_restricted_to_test_environment(monkeypatch):
     assert asyncio.run(get_model_provider().generate("hello")) == "Mock response: hello"
 
 
-def _create_chat_test_user(client, monkeypatch, tmp_path):
+def _configure_chat_test_auth(monkeypatch, tmp_path):
     from tamanna_ai.authentication import router as auth_router
     import secrets
     monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
     monkeypatch.setattr(auth_router, "COOKIE_SECURE", False)
     monkeypatch.setattr(auth_router, "DB", tmp_path / ("auth-" + secrets.token_hex(4) + ".sqlite3"))
+
+
+def _create_chat_test_user(client):
+    import secrets
     response = client.post("/api/auth/signup", json={
         "email": "chat-" + secrets.token_hex(4) + "@example.test",
         "name": "Chat Test",
@@ -42,8 +46,9 @@ def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch, tmp_path):
     monkeypatch.setenv("TAMANNA_ENV", "test")
     monkeypatch.setenv("TAMANNA_MODEL_PROVIDER", "mock")
     from Main import app
+    _configure_chat_test_auth(monkeypatch, tmp_path)
     with TestClient(app) as client:
-        _create_chat_test_user(client, monkeypatch, tmp_path)
+        _create_chat_test_user(client)
         response = client.post("/api/chat", json={"message": "hello"})
         assert response.status_code == 200, response.text
         assert response.json() == {
