@@ -2,3 +2,4 @@
 # Runtime dependencies are shared with the server requirements.
 -r requirements-server.txt
 pytest>=8.3.0,<9.0.0
+PyYAML>=6.0.2,<7.0.0

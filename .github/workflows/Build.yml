@@ -41,8 +41,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements-test.txt
 
-      - name: Check Python syntax
-        run: python -m compileall -q Main.py main.py scripts tamanna_ai data modules tests
+      - name: Validate all Python, Bash, JSON, and YAML files
+        run: python scripts/validate_repository.py
 
       - name: Run Python test suite
         run: python -m pytest -q
