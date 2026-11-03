@@ -17,6 +17,8 @@ node_modules/
 **/node_modules/
 
 # Secrets and local credentials
+.ven
+**/.ven
 .env
 .env.*
 **/.env
