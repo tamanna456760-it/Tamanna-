@@ -1,92 +1,55 @@
-const chokidar = require("chokidar");
-const { exec } = require("child_process");
+"use strict";
 
-console.log("🚀 Tamanna Ultimate Auto Dev System Running...");
+const { execFile } = require("node:child_process");
+const { promisify } = require("node:util");
 
-const watcher = chokidar.watch(".", {
-  ignored: /node_modules|\.git/,
-  persistent: true
-});
+const execFileAsync = promisify(execFile);
+const SECRET_PATH = /(^|\/)(\.env(?:\..*)?|\.ven|credentials\.json|token\.txt)$/i;
 
-watcher.on("change", (path) => {
-  console.log(`\n📂 File changed: ${path}`);
-
-  exec("npm run lint", () => {
-    console.log("🛠 Code Auto Fixed");
-  });
-
-  exec("npm run format", () => {
-    console.log("🎨 Code Formatted");
-  });
-
-  exec("npm run build", () => {
-    console.log("🏗 Build Complete");
-  });
-
-  exec("git add . && git commit -m 'auto update' && git push", () => {
-    console.log("🔁 Git Auto Synced");
-  });
-});
-const { exec } = require("child_process");
-const util = require("util");
-const chalk = require("chalk");
-
-const execPromise = util.promisify(exec);
-
+/**
+ * Explicit, path-scoped Git helper.
+ * It never watches files, stages the whole repository, or pushes automatically.
+ */
 class AutoCommitter {
-  constructor() {
-    this.branch = "main";
-  }
-
-  async commit(message = "chore: auto-commit changes") {
-    try {
-      console.log(chalk.blue("🤖 Starting auto-commit process..."));
-
-      // Check if there are changes
-      const { stdout: status } = await execPromise("git status --porcelain");
-      if (!status.trim()) {
-        console.log(chalk.yellow("⚠️ No changes to commit"));
-        return;
-      }
-
-      // Add all changes
-      console.log(chalk.blue("📦 Staging changes..."));
-      await execPromise("git add .");
-
-      // Commit
-      console.log(chalk.blue("💾 Committing changes..."));
-      await execPromise(`git commit -m "${message}"`);
-
-      // Get current branch
-      const { stdout: branch } = await execPromise("git branch --show-current");
-      this.branch = branch.trim();
-
-      // Push
-      console.log(chalk.blue("🚀 Pushing to remote..."));
-      await execPromise(`git push origin ${this.branch}`);
-
-      console.log(
-        chalk.green(`✅ Successfully committed and pushed: "${message}"`),
-      );
-    } catch (error) {
-      console.log(chalk.red(`❌ Auto-commit failed: ${error.message}`));
-    }
-  }
-
   async getGitInfo() {
     try {
-      const [branch, remote] = await Promise.all([
-        execPromise("git branch --show-current"),
-        execPromise("git remote get-url origin"),
+      const [{ stdout: branch }, { stdout: remote }] = await Promise.all([
+        execFileAsync("git", ["branch", "--show-current"]),
+        execFileAsync("git", ["remote", "get-url", "origin"])
       ]);
-
-      return {
-        branch: branch.stdout.trim(),
-        remote: remote.stdout.trim(),
-      };
-    } catch (error) {
+      return { branch: branch.trim(), remote: remote.trim() };
+    } catch {
       return { branch: "unknown", remote: "none" };
     }
+  }
+
+  async commit(message, paths) {
+    if (typeof message !== "string" || !message.trim()) {
+      throw new TypeError("A non-empty commit message is required.");
+    }
+    if (!Array.isArray(paths) || paths.length === 0) {
+      throw new TypeError("Pass an explicit list of files to stage.");
+    }
+    if (paths.some((path) => typeof path !== "string" || !path.trim() || SECRET_PATH.test(path))) {
+      throw new Error("Refusing to stage an invalid path or a private credential file.");
+    }
+
+    await execFileAsync("git", ["add", "--", ...paths]);
+    const { stdout: staged } = await execFileAsync(
+      "git",
+      ["diff", "--cached", "--name-only"]
+    );
+    const stagedPaths = staged.split("\n").filter(Boolean);
+    if (stagedPaths.some((path) => SECRET_PATH.test(path))) {
+      throw new Error("Refusing to commit staged private credentials.");
+    }
+    if (stagedPaths.length === 0) {
+      return { committed: false, reason: "No staged changes." };
+    }
+
+    await execFileAsync("git", ["commit", "-m", message.trim()]);
+    const { stdout: sha } = await execFileAsync("git", ["rev-parse", "HEAD"]);
+    return { committed: true, commit: sha.trim(), pushed: false };
   }
 }
 
