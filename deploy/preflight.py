@@ -6,7 +6,7 @@ import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_HOST = "www.tamanna.com"
+EXPECTED_HOST = "www.bd-king-r7.com"
 
 REQUIRED_FILES = (
     "index.html",
