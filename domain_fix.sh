@@ -22,7 +22,7 @@ git push origin main
 
 echo "[6] DNS Check"
 dig www.bd-king-r7.com CNAME
-dig bd-king-r7.com A
+dig www.bd-king-r7.com A
 
 echo "[7] GitHub Pages Check"
 curl -IL https://tamanna456760-it.github.io/Tamanna-/
