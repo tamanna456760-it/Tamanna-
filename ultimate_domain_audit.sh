@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-DOMAIN="tamanna.com"
-WWW="www.tamanna.com"
+DOMAIN="bd-king-r7.com"
+WWW="www.bd-king-r7.com"
 GITHUB="tamanna456760-it.github.io"
 
 echo "========== DOMAIN AUDIT =========="
