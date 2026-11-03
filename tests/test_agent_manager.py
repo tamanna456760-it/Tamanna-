@@ -1,14 +1,48 @@
-"""Regression tests for AgentManager."""
+"""Regression tests for AgentManager and the built-in agent facade."""
 import pytest
 
 from tamanna_ai.agents import AgentManager as ExportedAgentManager
-from tamanna_ai.agents import agent_manager as shared_agent_manager
+from tamanna_ai.agents import TamannaAgents, agent_manager as shared_agent_manager
 from tamanna_ai.agents.agent_manager import AgentManager
 
 
 def test_public_package_exports_manager():
     assert ExportedAgentManager is AgentManager
     assert isinstance(shared_agent_manager, AgentManager)
+
+
+def test_builtin_facade_registers_only_safe_operations(tmp_path):
+    agents = TamannaAgents(project_root=str(tmp_path))
+    registered = agents.manager.list_agents()
+    assert registered == [
+        "coder.validate",
+        "deployer.preflight",
+        "monitor.disk",
+        "planner",
+        "reviewer.review",
+        "tester.syntax",
+    ]
+    plan = agents.run_agent("planner", {"goal": "test project"})
+    assert plan["status"] == "ok"
+    assert plan["result"]["success"] is True
+    assert agents.run_agent("builder")["status"] == "not_found"
+    assert agents.run_agent("tester.run_unittest")["status"] == "not_found"
+
+
+def test_facade_rejects_paths_outside_project_root(tmp_path):
+    agents = TamannaAgents(project_root=str(tmp_path))
+    result = agents.validate_python("../outside.py")
+    assert result["success"] is False
+    assert "outside the project" in result["error"]
+
+
+def test_tester_syntax_agent_is_project_scoped(tmp_path):
+    source = tmp_path / "sample.py"
+    source.write_text("value = 42\n", encoding="utf-8")
+    agents = TamannaAgents(project_root=str(tmp_path))
+    result = agents.run_agent("tester.syntax", {"file_path": "sample.py"})
+    assert result["status"] == "ok"
+    assert result["result"]["success"] is True
 
 
 def test_register_and_run_callable():
