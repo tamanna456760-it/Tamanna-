@@ -23,19 +23,23 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Compile every tracked Python file separately
+      - name: Compile every tracked Python file safely
         id: pycompile
         continue-on-error: true
         shell: bash
         run: |
+          set -uo pipefail
           failed=0
-          for f in $(git ls-files '*.py'); do
-            if ! python -m py_compile "$f"; then
-              echo "FAIL $f"
+          count=0
+          while IFS= read -r -d '' file; do
+            count=$((count + 1))
+            if ! python -m py_compile "$file"; then
+              echo "FAIL: $file"
               failed=1
             fi
-          done
-          exit "$failed"
+          done < <(git ls-files -z '*.py')
+          echo "Python files checked: $count"
+          test "$failed" -eq 0
 
       - name: Check every tracked shell script
         id: bashcheck
@@ -89,8 +93,10 @@ jobs:
       - name: Install server and test requirements
         id: install
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install -r requirements-test.txt
+          python -c "import fastapi, httpx, pytest; print('PASS: fastapi, httpx, pytest are installed')"
 
       - name: Run pytest
         id: pytest
