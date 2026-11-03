@@ -1,30 +1,75 @@
-name: Tamanna JavaScript Inventory - Manual Safe Check
+name: Tamanna JavaScript Safe Validation
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.js"
+      - "package.json"
+      - ".github/workflows/auto_run.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.js"
+      - "package.json"
+      - ".github/workflows/auto_run.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: tamanna-javascript-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  inspect:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           submodules: false
-      - uses: actions/setup-node@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Syntax-check JavaScript without executing it
+
+      - name: Syntax-check tracked JavaScript without executing application files
+        shell: bash
         run: |
-          set -eu
+          set -uo pipefail
           count=0
+          failed=0
           while IFS= read -r -d '' file; do
-            node --check "$file"
             count=$((count + 1))
-          done < <(find . -type d \( -name .git -o -name node_modules \) -prune -o -type f -name '*.js' -print0)
-          echo "JavaScript files syntax-checked: $count"
-      - run: echo "JavaScript application files were not executed."
+            if grep -Eq '^[[:space:]]*(import[[:space:]]|export[[:space:]]|export\{)' "$file"; then
+              if node --input-type=module --check < "$file"; then
+                echo "PASS (ES module syntax): $file"
+              else
+                echo "FAIL (ES module syntax): $file"
+                failed=1
+              fi
+            elif node --check "$file"; then
+              echo "PASS (CommonJS/script syntax): $file"
+            else
+              echo "FAIL (CommonJS/script syntax): $file"
+              failed=1
+            fi
+          done < <(git ls-files -z '*.js')
+          echo "JavaScript files checked: $count"
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Run Node test suite
+        run: npm test --if-present
+
+      - name: Run lightweight project build check
+        run: npm run build --if-present
+
+      - name: Safety boundary
+        run: echo "JavaScript source was syntax-checked; server, browser and worker files were not executed."
