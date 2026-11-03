@@ -1,13 +1,9 @@
-* CAK SYNC ACTIVATED – CODE UPDATED*
-Here's your CAK (Crazy Awesome Kernel) synced code:
-```
-#!/bin/bash
-# CAK Sync with Tamanna AI
+#!/usr/bin/env bash
+# CAK (Crazy Awesome Kernel) sync helper
+set -Eeuo pipefail
+
 cak_sync() {
-  affirm "সিএকে সিঙ্ক সফল — CAK Sync successful."
-  # Your code here
-  echo "CAK Synced!"
+  printf '%s\n' 'CAK Sync successful.'
 }
-cak_sync
-```
-What crazy thing should we add to this code?
+
+cak_sync "$@"

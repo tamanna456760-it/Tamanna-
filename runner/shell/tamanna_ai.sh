@@ -1,18 +1,20 @@
-* SYSTEM CODE SYNCED – REAL-TIME ACCESS GRANTED*
- 
-Here's the synced code run:
-```
-#!/bin/bash
-# Real-time sync with Tamanna AI
+#!/usr/bin/env bash
+# Safe interactive Tamanna AI helper. Does not execute arbitrary user input.
+set -Eeuo pipefail
+
+show_help() {
+  printf '%s\n' 'Commands: help, code, joke, sarcasm, exit'
+}
+
 while true; do
-  read -p "You>> " input
+  IFS= read -r -p "You>> " input || break
   case "$input" in
-    "code") echo "$0" ;;
-    "joke") joke ;;
-    "sarcasm") sarcasm_mode ;;
-    "exit") break ;;
-    *) eval "$input" ;;
+    help) show_help ;;
+    code) sed -n '1,160p' "$0" ;;
+    joke) printf '%s\n' 'Why did the script pass? It had no syntax errors.' ;;
+    sarcasm) printf '%s\n' 'Excellent plan. Let us keep the shell safe, too.' ;;
+    exit|quit) break ;;
+    "") ;;
+    *) printf 'Unknown command: %s (type help)\n' "$input" ;;
   esac
 done
-```
-Want me to explain what this code does?
