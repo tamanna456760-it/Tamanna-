@@ -1,181 +1,171 @@
-import base64
+"""Read-only GitHub backup snapshot utility.
+
+This module deliberately has no automatic restore or repository write capability.
+Provide TAMANNA_GITHUB_TOKEN through the private server environment when needed.
+"""
+from __future__ import annotations
+
 import hashlib
 import json
-import random
-import time
+import os
+import tempfile
+from pathlib import Path
+from typing import Any
 
 import requests
 
-# 🔐 CONFIG
-GITHUB_TOKEN = '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'
-REPO_OWNER = 'tamanna456760-it'
-REPO_NAME = 'tamanna-'
-
-HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
-}
-
-# 📦 Backup Storage
-BACKUP_FILE = "ai_backup_db.json"
-NETWORK_FILE = "ai_network_state.json"
+REPO_OWNER = "tamanna456760-it"
+REPO_NAME = "Tamanna-"
+API_ROOT = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}"
+BACKUP_FILE = Path(os.getenv("TAMANNA_BACKUP_FILE", "ai_backup_db.json"))
+REQUEST_TIMEOUT = (5, 20)
+MAX_FILE_BYTES = 2 * 1024 * 1024
 
 
-# =========================
-# 📦 LOAD/SAVE SYSTEM
-# =========================
-def load_json(file):
+def _headers() -> dict[str, str]:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    token = os.getenv("TAMANNA_GITHUB_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def get_hash(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def load_json(path: str | Path = BACKUP_FILE) -> dict[str, Any]:
     try:
-        with open(file, "r") as f:
-            return json.load(f)
-    except:
+        value = json.loads(Path(path).read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except (OSError, json.JSONDecodeError):
         return {}
 
-def save_json(file, data):
-    with open(file, "w") as f:
-        json.dump(data, f, indent=2)
+
+def save_json(path: str | Path, data: dict[str, Any]) -> None:
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=f".{target.name}.", dir=str(target.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(data, handle, ensure_ascii=False, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_name, target)
+    except Exception:
+        try:
+            os.unlink(temp_name)
+        except OSError:
+            pass
+        raise
 
 
-# =========================
-# 🔍 HASH SYSTEM
-# =========================
-def get_hash(content):
-    return hashlib.md5(content.encode()).hexdigest()
+def get_repo_files() -> list[dict[str, Any]]:
+    response = requests.get(
+        f"{API_ROOT}/git/trees/main?recursive=1",
+        headers=_headers(),
+        timeout=REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if payload.get("truncated"):
+        raise RuntimeError("Git tree response was truncated; refusing incomplete backup.")
+    return [
+        item for item in payload.get("tree", [])
+        if item.get("type") == "blob"
+        and isinstance(item.get("size"), int)
+        and item["size"] <= MAX_FILE_BYTES
+    ]
 
 
-# =========================
-# 🌐 FETCH FILES
-# =========================
-def get_repo_files():
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents"
-    res = requests.get(url, headers=HEADERS)
-    if res.status_code != 200:
-        return []
-    return res.json()
-
-
-def get_file_content(file):
-    res = requests.get(file['url'], headers=HEADERS)
-    if res.status_code != 200:
+def get_file_content(file: dict[str, Any]) -> str | None:
+    url = file.get("url")
+    if not isinstance(url, str) or not url.startswith("https://api.github.com/repos/"):
+        raise ValueError("Invalid GitHub API blob URL.")
+    response = requests.get(url, headers=_headers(), timeout=REQUEST_TIMEOUT)
+    response.raise_for_status()
+    payload = response.json()
+    if payload.get("encoding") != "base64" or not isinstance(payload.get("content"), str):
         return None
-    data = res.json()
-    return base64.b64decode(data['content']).decode('utf-8')
+    import base64
+    raw = base64.b64decode(payload["content"], validate=False)
+    if len(raw) > MAX_FILE_BYTES:
+        return None
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
 
 
-# =========================
-# 📦 BACKUP CREATOR (2x AI)
-# =========================
-def create_dual_backup(path, content, backup_db):
+def create_dual_backup(path: str, content: str, backup_db: dict[str, Any]) -> None:
     backup_db[path] = {
-        "primary": content,
-        "secondary": content[::-1],  # simple mirrored backup
-        "hash": get_hash(content)
+        "content": content,
+        "sha256": get_hash(content),
     }
 
 
-# =========================
-# 🔄 RESTORE SYSTEM
-# =========================
-def restore_file(path, backup_db):
-    if path in backup_db:
-        return backup_db[path]["primary"]
-    return None
+def restore_file(path: str, backup_db: dict[str, Any]) -> str | None:
+    """Return a previously captured snapshot; never writes to GitHub or disk."""
+    entry = backup_db.get(path)
+    if not isinstance(entry, dict):
+        return None
+    content = entry.get("content")
+    digest = entry.get("sha256")
+    if not isinstance(content, str) or digest != get_hash(content):
+        return None
+    return content
 
 
-# =========================
-# 🤖 AI COMMUNICATION
-# =========================
-def update_network_state(state):
-    save_json(NETWORK_FILE, state)
+def detect_attack(content: str) -> bool:
+    """Heuristic indicator only; not a malware verdict."""
+    indicators = ("rm -rf", "eval(", "os.system(", "subprocess.Popen")
+    lowered = content.lower()
+    return any(indicator.lower() in lowered for indicator in indicators)
 
 
-def broadcast_status(network_state, file, status):
-    network_state[file] = {
-        "status": status,
-        "timestamp": time.time(),
-        "node_id": random.randint(1000, 9999)
-    }
+def ai_backup_network() -> dict[str, Any]:
+    """Create a read-only text snapshot of eligible files from the default branch."""
+    backup_db = load_json()
+    scanned = 0
+    skipped = 0
+    indicators: list[str] = []
 
-
-# =========================
-# 🚨 ATTACK DETECTION
-# =========================
-def detect_attack(content):
-    danger = ["rm -rf", "exec(", "eval(", "os.system"]
-    return any(d in content for d in danger)
-
-
-# =========================
-# 🔄 UPDATE FILE
-# =========================
-def update_file(path, content, message):
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{tamanna}/contents/{path}"
-    res = requests.get(url, headers=HEADERS)
-    if res.status_code != 200:
-        return
-
-    sha = res.json()['sha']
-
-    requests.put(url, headers=HEADERS, json={
-        "message": message,
-        "content": base64.b64encode(content.encode()).decode(),
-        "sha": sha
-    })
-
-
-# =========================
-# 🛡️ MAIN SYSTEM
-# =========================
-def ai_backup_network():
-    backup_db = load_json(BACKUP_FILE)
-    network_state = load_json(NETWORK_FILE)
-
-    files = get_repo_files()
-
-    for file in files:
-        if file['type'] != 'file':
+    for item in get_repo_files():
+        path = item.get("path")
+        if not isinstance(path, str):
+            skipped += 1
             continue
-
-        path = file['path']
-        content = get_file_content(file)
-
-        if not content:
+        # Never snapshot likely secrets, credentials, local environments, or binaries.
+        parts = Path(path).parts
+        if any(part in {".git", ".venv", "venv", "node_modules", "__pycache__"} for part in parts):
+            skipped += 1
             continue
-
-        file_hash = get_hash(content)
-
-        # 📦 Create dual backup if not exists
-        if path not in backup_db:
-            create_dual_backup(path, content, backup_db)
-
-        # 🚨 Attack detection
+        if Path(path).name.lower() in {".env", ".env.local", "id_rsa", "id_ed25519"}:
+            skipped += 1
+            continue
+        content = get_file_content(item)
+        if content is None:
+            skipped += 1
+            continue
+        create_dual_backup(path, content, backup_db)
+        scanned += 1
         if detect_attack(content):
-            print(f"🚨 Attack detected: {path}")
+            indicators.append(path)
 
-            safe_content = restore_file(path, backup_db)
-
-            if safe_content:
-                update_file(path, safe_content, "🛡️ Restored from AI Backup")
-
-                broadcast_status(network_state, path, "restored")
-
-        else:
-            broadcast_status(network_state, path, "healthy")
-
-    # 💾 Save system state
     save_json(BACKUP_FILE, backup_db)
-    update_network_state(network_state)
-
-
-# =========================
-# 🔁 LOOP
-# =========================
-def main():
-    while True:
-        print("🌐 AI BACKUP NETWORK RUNNING...")
-        ai_backup_network()
-        time.sleep(10)
+    return {
+        "status": "completed",
+        "mode": "read_only",
+        "files_snapshotted": scanned,
+        "files_skipped": skipped,
+        "heuristic_indicators": indicators,
+        "automatic_restore": False,
+        "github_write_enabled": False,
+    }
 
 
 if __name__ == "__main__":
-    main()
+    print(json.dumps(ai_backup_network(), ensure_ascii=False, indent=2))
