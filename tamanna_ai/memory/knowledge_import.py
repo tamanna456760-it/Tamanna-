@@ -12,8 +12,9 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
-from tamanna_ai.persistence.database import Database, Memory
+from tamanna_ai.persistence.database import Database, KnowledgeFingerprint, Memory
 
 MAX_FILE_BYTES = 20 * 1024 * 1024
 MAX_TEXT_CHARS = 100_000
@@ -120,8 +121,13 @@ def import_knowledge_file(
                 skipped += 1
                 continue
             digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            scope = "anonymous" if user_id is None else str(user_id)
+            fingerprint = hashlib.sha256(f"{scope}:{digest}".encode("utf-8")).hexdigest()
             duplicate = session.scalar(
-                select(Memory.id).where(Memory.user_id == user_id, Memory.metadata_json.like(f'%"sha256": "{digest}"%')).limit(1)
+                select(Memory.id).where(
+                    Memory.user_id == user_id,
+                    Memory.metadata_json.like(f'%"sha256": "{digest}"%'),
+                ).limit(1)
             )
             if duplicate is not None:
                 skipped += 1
@@ -133,12 +139,19 @@ def import_knowledge_file(
                 "sha256": digest,
                 "trust": "user_supplied_unverified",
             }
-            session.add(Memory(
-                user_id=user_id,
-                content=text,
-                metadata_json=json.dumps(metadata, ensure_ascii=False, sort_keys=True),
-            ))
-            imported += 1
+            try:
+                # The primary key prevents duplicate writes even if two imports race.
+                with session.begin_nested():
+                    session.add(KnowledgeFingerprint(fingerprint=fingerprint))
+                    session.flush()
+                    session.add(Memory(
+                        user_id=user_id,
+                        content=text,
+                        metadata_json=json.dumps(metadata, ensure_ascii=False, sort_keys=True),
+                    ))
+                imported += 1
+            except IntegrityError:
+                skipped += 1
     return {"status": "ok", "imported": imported, "skipped": skipped, "source": source}
 
 
