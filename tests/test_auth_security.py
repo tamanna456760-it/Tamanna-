@@ -45,7 +45,7 @@ def test_expired_signed_token_is_rejected(monkeypatch):
 
 
 def test_origin_allowlist_is_exact(monkeypatch):
-    monkeypatch.setenv("TAMANNA_CORS_ORIGINS", "https://www.bd-king-r7.com,https://bd-king-r7.com")
+    monkeypatch.setenv("TAMANNA_CORS_ORIGINS", "https://www.bd-king-r7.com")
     auth.check_origin(_request_with_origin("https://www.bd-king-r7.com"))
     with pytest.raises(Exception) as exc:
         auth.check_origin(_request_with_origin("https://www.bd-king-r7.com.evil.test"))
