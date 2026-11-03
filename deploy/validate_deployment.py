@@ -8,56 +8,71 @@ Does not deploy, restart, or modify services.
 import argparse
 import json
 from pathlib import Path
+
 PROJECT = "Tamanna AI"
 OWNER = "HM INSAN ALI"
+
+
 def validate_deployment(compose_path, nginx_path):
     findings = []
     compose_file = Path(compose_path)
     nginx_file = Path(nginx_path)
     compose_text = ""
     nginx_text = ""
-    if not compose_file.is_file():
-        findings.append(f"Compose file not found: {compose_file}")
-    else:
+
+    for file_path, label in (
+        (compose_file, "Compose"),
+        (nginx_file, "Nginx"),
+    ):
+        if not file_path.is_file():
+            findings.append(f"{label} config not found: {file_path}")
+            continue
         try:
-            compose_text = compose_file.read_text(encoding="utf-8")
+            content = file_path.read_text(encoding="utf-8")
         except (OSError, UnicodeError) as exc:
-            findings.append(f"Cannot read Compose file: {exc}")
-    if not nginx_file.is_file():
-        findings.append(f"Nginx config not found: {nginx_file}")
-    else:
-        try:
-            nginx_text = nginx_file.read_text(encoding="utf-8")
-        except (OSError, UnicodeError) as exc:
-            findings.append(f"Cannot read Nginx config: {exc}")
+            findings.append(f"Cannot read {label} config: {exc}")
+            continue
+        if label == "Compose":
+            compose_text = content
+        else:
+            nginx_text = content
+
     if compose_text:
-        if "127.0.0.1:8000:8000" not in compose_text:
+        required_compose = {
+            "localhost-only app binding": "127.0.0.1:8000:8000",
+            "no-new-privileges": "no-new-privileges:true",
+            "persistent data volume": "tamanna_data:/app/data",
+            "app healthcheck": "http://127.0.0.1:8000/health",
+            "HTTP public listener": '"80:80"',
+            "HTTPS public listener": '"443:443"',
+        }
+        for label, marker in required_compose.items():
+            if marker not in compose_text:
+                findings.append(f"Compose is missing {label}.")
+
+        if "condition: service_healthy" not in compose_text:
             findings.append(
-                "App port 8000 is not explicitly bound to localhost."
+                "Nginx must wait until the app healthcheck succeeds."
             )
-        if "no-new-privileges:true" not in compose_text:
-            findings.append("no-new-privileges security option is missing.")
-        if "443:443" not in compose_text:
-            findings.append("HTTPS port 443 mapping is missing.")
-        if "80:80" not in compose_text:
-            findings.append("HTTP port 80 mapping is missing.")
         if "../.env" in compose_text:
             env_path = compose_file.parent / "../.env"
             if not env_path.resolve().is_file():
-                findings.append("Referenced .env file does not exist.")
+                findings.append(
+                    "Referenced .env file does not exist (expected on server)."
+                )
+
     if nginx_text:
-        if "server_name www.tamanna.com" not in nginx_text:
-            findings.append("Expected www.tamanna.com server_name is missing.")
-        if "ssl_certificate" not in nginx_text:
-            findings.append("TLS certificate directive is missing.")
-        if "ssl_certificate_key" not in nginx_text:
-            findings.append("TLS private-key directive is missing.")
-        if "ssl_protocols TLSv1.2 TLSv1.3" not in nginx_text:
-            findings.append("Expected TLS protocol policy is missing.")
-        if "proxy_pass http://tamanna-ai:8000" not in nginx_text:
-            findings.append(
-                "Docker Nginx upstream should target tamanna-ai:8000."
-            )
+        required_nginx = {
+            "www domain": "server_name www.tamanna.com",
+            "TLS certificate": "ssl_certificate",
+            "TLS private key": "ssl_certificate_key",
+            "TLS 1.2/1.3 policy": "ssl_protocols TLSv1.2 TLSv1.3",
+            "Docker app upstream": "proxy_pass http://tamanna-ai:8000",
+        }
+        for label, marker in required_nginx.items():
+            if marker not in nginx_text:
+                findings.append(f"Nginx config is missing {label}.")
+
     return {
         "project": PROJECT,
         "owner": OWNER,
@@ -66,9 +81,12 @@ def validate_deployment(compose_path, nginx_path):
         "read_only": True,
         "note": (
             "Text-based checks only. This does not parse Compose or Nginx "
-            "syntax, validate certificates, or test network connectivity."
+            "syntax, verify domain ownership/DNS, validate certificates, "
+            "or test network connectivity."
         ),
     }
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Validate Tamanna AI deployment configuration."
@@ -87,5 +105,7 @@ def main():
     report = validate_deployment(args.compose, args.nginx)
     print(json.dumps(report, indent=2, ensure_ascii=False))
     raise SystemExit(0 if report["status"] == "PASS" else 1)
+
+
 if __name__ == "__main__":
     main()
