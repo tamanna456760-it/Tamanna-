@@ -1,0 +1,76 @@
+name: Master Sync
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-master-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-report:
+    name: Read-only validation and review report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify analyzer and planner
+        run: |
+          test -f scripts/analyzer.py
+          test -f scripts/fixer.py
+          python -m py_compile scripts/analyzer.py scripts/fixer.py
+
+      - name: Run read-only analyzer
+        shell: bash
+        env:
+          TAMANNA_ANALYZER_REPORT: ${{ runner.temp }}/tamanna_analyzer_report.json
+        run: |
+          set +e
+          python scripts/analyzer.py
+          status=$?
+          set -e
+          if [ "$status" -gt 1 ]; then
+            echo "ERROR: analyzer execution failed (exit $status)."
+            exit "$status"
+          fi
+          echo "Analyzer completed; findings are recorded in the report."
+
+      - name: Create review-only fix plan
+        env:
+          TAMANNA_ANALYZER_REPORT: ${{ runner.temp }}/tamanna_analyzer_report.json
+          TAMANNA_FIXER_REPORT: ${{ runner.temp }}/tamanna_fix_plan.json
+        run: python scripts/fixer.py
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-master-sync-reports
+          path: |
+            ${{ runner.temp }}/tamanna_analyzer_report.json
+            ${{ runner.temp }}/tamanna_fix_plan.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Confirm safe execution boundary
+        run: |
+          echo "PASS: no production server was started."
+          echo "PASS: no source files were automatically edited."
+          echo "PASS: no git commit or push was attempted."
