@@ -115,6 +115,18 @@ def import_knowledge_file(
     imported = skipped = 0
     source = (source_label or path.name)[:255]
     with database.Session.begin() as session:
+        # Read legacy hashes once, rather than issuing one full-table query per record.
+        existing_hashes: set[str] = set()
+        legacy_rows = session.scalars(
+            select(Memory.metadata_json).where(Memory.user_id == user_id)
+        )
+        for metadata_json in legacy_rows:
+            try:
+                legacy_hash = json.loads(metadata_json or "{}").get("sha256")
+                if isinstance(legacy_hash, str):
+                    existing_hashes.add(legacy_hash)
+            except (TypeError, json.JSONDecodeError):
+                continue
         for title, raw_text in records:
             text = _redact_secrets(raw_text).strip()[:MAX_TEXT_CHARS]
             if not text:
@@ -123,13 +135,7 @@ def import_knowledge_file(
             digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
             scope = "anonymous" if user_id is None else str(user_id)
             fingerprint = hashlib.sha256(f"{scope}:{digest}".encode("utf-8")).hexdigest()
-            duplicate = session.scalar(
-                select(Memory.id).where(
-                    Memory.user_id == user_id,
-                    Memory.metadata_json.like(f'%"sha256": "{digest}"%'),
-                ).limit(1)
-            )
-            if duplicate is not None:
+            if digest in existing_hashes:
                 skipped += 1
                 continue
             metadata = {
@@ -150,6 +156,7 @@ def import_knowledge_file(
                         metadata_json=json.dumps(metadata, ensure_ascii=False, sort_keys=True),
                     ))
                 imported += 1
+                existing_hashes.add(digest)
             except IntegrityError:
                 skipped += 1
     return {"status": "ok", "imported": imported, "skipped": skipped, "source": source}
