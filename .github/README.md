@@ -218,7 +218,7 @@ Deployment examples and validation scripts are available under deploy/.
 
 Before using them, verify:
 
-* DNS for tamanna.com and www.tamanna.com points to the intended server.
+* DNS for bd-king-r7.com and www.bd-king-r7.com points to the intended server.
 * TLS certificate paths match the installed certificate.
 * Nginx forwards requests to the correct reachable application address.
 * In a shared Docker Compose network, the upstream may need to use the service name instead of host loopback.
