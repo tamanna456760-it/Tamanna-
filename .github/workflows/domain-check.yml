@@ -1,15 +1,31 @@
-name: Tamanna Domain Monitor
+name: Tamanna Domain Health Monitor
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "23 */6 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-domain-health
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Check Domain
+      - name: Check production health endpoint
+        shell: bash
         run: |
-          curl -I https://www.tamanna.com || true
-          curl -I https://tamanna456760-it.github.io/Tamanna-/ || true
+          set -Eeuo pipefail
+          echo "Checking https://www.tamanna.com/health"
+          curl --fail --show-error --silent --location --max-time 20 \
+            --output /tmp/tamanna-health.json \
+            --write-out "HTTP %{http_code}; total %{time_total}s\n" \
+            https://www.tamanna.com/health
+          cat /tmp/tamanna-health.json
+          echo
+          echo "PASS: production health endpoint responded successfully."
