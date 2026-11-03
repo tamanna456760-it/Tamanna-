@@ -1,0 +1,88 @@
+system:
+  name: Tamanna-Global-Defense-System
+  mode: real_time
+  cluster_mode: enabled
+
+# 🌐 ALL SERVERS CONNECTION LAYER
+servers:
+  primary_master:
+    url: "http://localhost:8000"
+    role: brain_core
+
+  node_server_1:
+    url: "http://localhost:3000"
+    role: firewall_node
+
+  node_server_2:
+    url: "http://localhost:3001"
+    role: api_node
+
+  node_server_3:
+    url: "http://localhost:3002"
+    role: monitor_node
+
+  node_server_4:
+    url: "http://localhost:3003"
+    role: backup_node
+
+# 🔁 REAL TIME SYNC ENGINE
+sync:
+  enabled: true
+  interval_ms: 1000
+  heartbeat: true
+  auto_reconnect: true
+  failover: true
+
+# 🛡️ DEFENSE CORE
+defense:
+  real_time_protection: true
+  ddos_protection: true
+  ip_block_sync: true
+  threat_sharing: true
+  auto_quarantine: true
+
+# 🧠 AI BRAIN CONTROL
+ai_brain:
+  enabled: true
+  decision_mode: distributed
+  learn_from_all_nodes: true
+  adaptive_security: true
+
+# ⚡ ATTACK RESPONSE SYSTEM
+response:
+  on_attack:
+    - detect
+    - analyze
+    - share_across_nodes
+    - block_global
+  on_suspicious:
+    - limit
+    - monitor
+  on_safe:
+    - allow
+
+# 📡 NETWORK MONITORING
+network:
+  packet_inspection: deep
+  traffic_analysis: true
+  anomaly_detection: true
+  latency_watch: true
+
+# 🔥 AUTO DEFENSE BEHAVIOR
+automation:
+  auto_block: true
+  auto_heal_nodes: true
+  restart_failed_nodes: true
+  self_upgrade: true
+
+# 📊 LOG SYSTEM (ALL SERVERS)
+logging:
+  centralized: true
+  store_all_nodes: true
+  file: "logs/global_defense.log"
+
+# 🧬 PLUGIN SYSTEM (ADD NEW SERVERS OR FEATURES)
+plugins:
+  enabled: true
+  hot_reload: true
+  allow_new_nodes: true
