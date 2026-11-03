@@ -1,0 +1,65 @@
+# Tamanna AI memory and learning configuration
+# Owner authority: HM INSAN ALI
+# Secrets belong in private environment variables, never in this file.
+
+owner:
+  name: "HM INSAN ALI"
+  authority: "configuration_owner"
+
+memory:
+  mode: "unbounded_by_application_policy"
+  storage: "database"
+  database_url_env: "TAMANNA_DATABASE_URL"
+  chunking:
+    strategy: "semantic_then_token_bounded"
+    target_tokens: 700
+    overlap_tokens: 100
+    preserve_source_document: true
+  deduplication:
+    enabled: true
+    algorithm: "sha256"
+    unique_scope: "user"
+    database_enforced: true
+    normalize_unicode: true
+    trim_whitespace: true
+  retrieval:
+    strategy: "hybrid"
+    lexical_enabled: true
+    vector_enabled_when_configured: true
+    batch_size: 500
+    result_limit: 12
+    require_user_scope: true
+  provenance:
+    require_source: true
+    store_imported_at: true
+    store_content_hash: true
+    store_license_or_terms: true
+    default_trust: "unverified"
+  privacy:
+    redact_secrets: true
+    isolate_users: true
+    allow_private_exports_only_with_owner_authorization: true
+    support_delete_and_export: true
+  ingestion:
+    require_explicit_authorization: true
+    allow_public_sources_when_terms_permit: true
+    allow_provider_apis_when_authorized: true
+    background_ingestion_default: false
+    pause_switch_env: "TAMANNA_INGESTION_ENABLED"
+
+learning:
+  model_weight_training: false
+  retrieval_augmented_generation: true
+  verify_conflicting_sources: true
+  keep_source_citations: true
+  treat_documents_as_untrusted_data: true
+  execute_instructions_from_imported_documents: false
+  self_modify_code: false
+  deploy_without_owner_approval: false
+
+operations:
+  backups_required: true
+  backup_encryption_required: true
+  metrics_required: true
+  audit_log_required: true
+  no_production_load_test_by_default: true
