@@ -1,24 +1,21 @@
-name: Tamanna AI Server Build and Test
+name: Tamanna AI Server CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: tamanna-server-ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   server:
-    name: Python, tests, Docker and HTTP smoke test
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,15 +26,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: requirements-test.txt
 
-      - name: Install server and test requirements
+      - name: Install runtime requirements
         run: |
           python -m pip install --upgrade pip
+          python -m pip install -r requirements-server.txt
           python -m pip install -r requirements-test.txt
 
-      - name: Compile each tracked Python file (space-safe)
+      - name: Compile every tracked Python file with NUL-safe paths
         shell: bash
         run: |
           set -uo pipefail
@@ -51,10 +47,10 @@ jobs:
             fi
           done < <(git ls-files -z '*.py')
           echo "Python files checked: $count"
-          if [ "$failed" -ne 0 ]; then exit 1; fi
-          echo "PASS: every tracked Python file compiled."
+          test "$failed" -eq 0
+          echo "PASS: tracked Python compilation"
 
-      - name: Check every tracked shell script
+      - name: Check all tracked shell scripts
         shell: bash
         run: |
           set -uo pipefail
@@ -68,49 +64,48 @@ jobs:
             fi
           done < <(git ls-files -z '*.sh')
           echo "Shell files checked: $count"
-          if [ "$failed" -ne 0 ]; then exit 1; fi
-          echo "PASS: every tracked shell script passed bash -n."
+          test "$failed" -eq 0
+          echo "PASS: tracked Bash syntax"
 
-      - name: Parse every tracked JSON file
-        shell: bash
+      - name: Parse all tracked JSON files
         run: |
           python - <<'PY'
           import json
           import subprocess
           import sys
-          paths = subprocess.check_output(["git", "ls-files", "-z", "*.json"]).decode().split("\0")
+          names = subprocess.check_output(["git", "ls-files", "-z", "*.json"]).decode().split("\0")
           checked = 0
-          failures = []
-          for name in filter(None, paths):
+          errors = []
+          for name in filter(None, names):
               if name.rsplit("/", 1)[-1].startswith("tsconfig"):
                   print("SKIP comment-style config:", name)
                   continue
               try:
-                  with open(name, encoding="utf-8") as handle:
-                      json.load(handle)
+                  with open(name, encoding="utf-8") as stream:
+                      json.load(stream)
                   checked += 1
               except Exception as exc:
-                  failures.append((name, str(exc)))
+                  errors.append((name, str(exc)))
           print("JSON files checked:", checked)
-          for name, error in failures:
+          for name, error in errors:
               print(f"FAIL {name}: {error}")
-          if failures:
+          if errors:
               sys.exit(1)
-          print("PASS: all tracked JSON files are valid.")
+          print("PASS: tracked JSON parse")
           PY
 
-      - name: Check mandatory server import dependencies
+      - name: Verify mandatory server dependencies
         run: python scripts/check_server_dependencies.py
 
-      - name: Import Main application
+      - name: Import Main
         env:
           TAMANNA_ENV: test
           TAMANNA_MODEL_PROVIDER: mock
           TAMANNA_SESSION_SECRET: ci-only-session-secret-with-at-least-32-characters
           TAMANNA_COOKIE_SECURE: "0"
-        run: python -c "import Main; print('PASS: Main.app imported')"
+        run: python -c "import Main; print('PASS: import Main')"
 
-      - name: Run Python tests
+      - name: Run tests
         env:
           TAMANNA_ENV: test
           TAMANNA_MODEL_PROVIDER: mock
@@ -121,27 +116,26 @@ jobs:
       - name: Build Docker image
         run: docker build --tag tamanna-ai:ci .
 
-      - name: Run container with a test-only environment file
+      - name: Start Docker server and smoke-test health and chat
         shell: bash
         run: |
           set -Eeuo pipefail
-          cat > .env.ci <<'EOF'
-          TAMANNA_ENV=test
-          TAMANNA_MODEL_PROVIDER=mock
-          TAMANNA_DATABASE_URL=sqlite:////tmp/tamanna-ci.sqlite3
-          TAMANNA_SESSION_SECRET=ci-only-session-secret-with-at-least-32-characters
-          TAMANNA_COOKIE_SECURE=0
-          TAMANNA_ADMIN_EMAIL=ci-admin@example.invalid
-          TAMANNA_CORS_ORIGINS=http://127.0.0.1:8000
-          TAMANNA_MAX_REQUEST_BYTES=1048576
-          EOF
-          docker run -d --name tamanna-ci --env-file .env.ci -p 8000:8000 tamanna-ai:ci
+          printf '%s\n' \
+            'TAMANNA_ENV=test' \
+            'TAMANNA_MODEL_PROVIDER=mock' \
+            'TAMANNA_DATABASE_URL=sqlite:////tmp/tamanna-ci.sqlite3' \
+            'TAMANNA_SESSION_SECRET=ci-only-session-secret-with-at-least-32-characters' \
+            'TAMANNA_COOKIE_SECURE=0' \
+            'TAMANNA_ADMIN_EMAIL=ci-admin@example.invalid' \
+            'TAMANNA_CORS_ORIGINS=http://127.0.0.1:8000' \
+            'TAMANNA_MAX_REQUEST_BYTES=1048576' > .env.ci
           cleanup() {
             docker logs tamanna-ci || true
             docker rm -f tamanna-ci >/dev/null 2>&1 || true
             rm -f .env.ci
           }
           trap cleanup EXIT
+          docker run -d --name tamanna-ci --env-file .env.ci -p 8000:8000 tamanna-ai:ci
           ready=0
           for attempt in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8000/health; then
@@ -150,13 +144,10 @@ jobs:
             fi
             sleep 2
           done
-          if [ "$ready" -ne 1 ]; then
-            echo "FAIL: container health endpoint did not become ready."
-            exit 1
-          fi
+          test "$ready" -eq 1
           echo
           curl -fsS -X POST http://127.0.0.1:8000/api/chat \
             -H 'Content-Type: application/json' \
             --data '{"message":"CI smoke test"}'
           echo
-          echo "PASS: Docker /health and /api/chat smoke tests completed."
+          echo "PASS: Docker /health and /api/chat"
