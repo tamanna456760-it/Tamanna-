@@ -1,88 +1,54 @@
 <p align="center">
-  <img src="assets/tamanna-logo.svg"
-       alt="TI Tamanna AI Logo"
-       width="280">
+  <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="280">
 </p>
 
-# Project Documentation
+# Tamanna AI
 
-## Overview
-This repository contains code for a variety of features including AI learning capabilities, a chat bot, system automation, and other new functionalities.
+Owner: HM INSAN ALI
 
-## Run Tamanna AI
+## Verification status
 
-Install the server dependencies, create a private local environment file, then start the API:
+**Development state: verification pending.** The repository now contains a FastAPI server entry point, a model-provider interface, SQLAlchemy persistence, authentication controls, and an allow-listed tool module. These components must not be treated as production-ready until the current GitHub Actions run completes successfully.
+
+Latest server CI: [Tamanna AI Server CI](https://github.com/tamanna456760-it/Tamanna-/actions/workflows/Build.yml)
+
+No successful end-to-end result is claimed in this README while that run is queued or failing.
+
+## Repository entry points
+
+- `Main.py` defines the FastAPI application.
+- `run_server.py` is the launcher.
+- `requirements-server.txt` lists the intended server runtime dependencies.
+- `requirements-test.txt` adds the test dependencies.
+- `.env.example` is a template only. It contains no real credentials.
+
+## Local verification commands
+
+Use Python 3.12 or newer in a clean virtual environment:
 
 ```bash
+python3 -m venv .venv
+. .venv/bin/activate
 python -m pip install -r requirements-server.txt
-bash scripts/setup_env.sh
-python run_server.py
+python -m pip install -r requirements-test.txt
+python -c "import Main"
+python -m pytest -q
+docker build -t tamanna-ai:local .
 ```
 
-The FastAPI application remains in `Main.py`; `run_server.py` is the portable launcher. Never commit `.env` or real API keys.
+These are verification commands, not a statement that the current repository has passed them. Review the output before deployment.
 
-## AI Learning Features
-This section describes the AI learning aspects of the project.
-- **Machine Learning Models**: Details about the models used, training data, and evaluation metrics.
-- **Training Process**: Steps on how to train the models from scratch, including preprocessing and hyperparameter tuning.
+## Private configuration
 
-## Chat Bot
-The chat bot is implemented using [Technology/Framework].
-- **Core Features**: Highlight key features like natural language understanding, conversation context management, etc.
-- **How to Use**: Instructions on how to interact with the chat bot.
+Copy `.env.example` to a local `.env` and set the values required by your environment. Generate a unique session secret locally. Put the Gemini API key in the private `.env` file only.
 
-## System Automation
-This part covers the automation scripts present in the repository.
-- **Automation Tools**: List of tools and frameworks used.
-- **Setup Instructions**: Steps required to set up the automation environment.
+Never commit `.env`, API keys, session secrets, account databases, chat-history backups, or tool logs.
 
-## New Features
-Recent updates and features added to the project:
-- **Feature 1**: Brief description of the feature.
-- **Feature 2**: Brief description of the feature.
+## Safety boundary
 
-## Contribution
-Instructions for contributing to the project.
+The chat endpoint is intended to call the configured model provider. The tool registry is limited to web search and read-only files under `data/docs/`. Command-execution endpoints are disabled by the access-control middleware. Do not re-enable them without a separate security review.
 
-## License
-Details about the licensing of the code.
+## Documentation
 
-## Contact
-For any questions or support, please reach out to the project maintainer.
-
-## Tamanna AI account authentication
-
-The account API is integrated under `/api/auth` and uses SQLite, PBKDF2-HMAC-SHA256 password hashing, signed HttpOnly session cookies, and server-side session revocation.
-
-### Required server configuration
-
-1. Generate a unique session secret on the server: `python -c "import secrets; print(secrets.token_urlsafe(48))"`
-2. Put it in the private server `.env` as `TAMANNA_SESSION_SECRET=...`. Never commit the real `.env` or secret.
-3. For HTTPS production, set `TAMANNA_COOKIE_SECURE=1`. For local HTTP development, set it to `0` and include the local frontend origin in `TAMANNA_CORS_ORIGINS`.
-4. Restart FastAPI. SQLite is created at `data/accounts.sqlite3` by default; back it up securely.
-
-### Authentication endpoints
-
-- `POST /api/auth/signup` — create account (password minimum 12 characters)
-- `POST /api/auth/login` — sign in
-- `GET /api/auth/me` — current session
-- `POST /api/auth/logout` — revoke current session
-- `PATCH /api/auth/profile` — update display name
-- `POST /api/auth/change-password` — change password and revoke sessions
-- `GET/PUT /api/auth/preferences` — read/save account preferences
-
-Email verification and email-based password reset are not enabled; they require a configured mail provider. The access-control middleware currently protects a defined set of state-changing and privileged routes; it does not mean every legacy API route requires login. Review the route allowlist whenever new APIs are added.
-
-### Sensitive API access control
-
-The access-control middleware protects state-changing skill, repair, automation, and code-builder endpoints. Server/code execution endpoints additionally require the signed-in user's email to match `TAMANNA_ADMIN_EMAIL`. If the admin email is not configured, those privileged endpoints return HTTP 503 (fail closed); a non-admin account receives HTTP 403, and an unauthenticated request receives HTTP 401.
-
-Configure the private server without putting personal settings or secrets in Git:
-
-1. On the server, from the repository root, run `python scripts/configure_private_auth.py`.
-2. Enter the admin account email when prompted. The script writes it only to the server's ignored `.env`, generates a strong session secret if one is not already set, preserves unrelated existing settings, and applies file mode `0600`.
-3. Confirm `.env` is ignored with `git check-ignore .env`.
-4. Restart the application (for Docker Compose: `docker compose up -d --build tamanna-ai`).
-5. Create/sign in to the account using the same admin email. Use HTTPS in production.
-
-Never paste the real `.env`, session secret, or API keys into GitHub, issues, logs, or chat. The setup script itself contains no personal email or secret. The current authentication API does not verify email ownership; configure the admin account on a private server before exposing public signup, and treat email verification as a required production-hardening item. This middleware is an additional API boundary; it does not replace OS-level isolation, a reverse-proxy firewall, rate limiting, backups, or review of each feature's own file/path validation.
+- [ROADMAP](ROADMAP.md): work that remains unverified or incomplete.
+- [CI workflow review](docs/CI_WORKFLOWS_REVIEW.md): overlapping workflows retained for your review.
