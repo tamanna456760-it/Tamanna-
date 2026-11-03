@@ -1,25 +1,37 @@
-import OpenAI from "openai"
-import dotenv from "dotenv"
+"use strict";
 
-dotenv.config()
+require("dotenv").config();
 
-const client=new OpenAI({
-apiKey:process.env.https://docs.github.com/github-models/quickstart#step-2-make-an-api-call
-})
+const OpenAI = require("openai");
 
-export async function askAI(msg){
+let client;
 
-const res=await client.chat.completions.create({
+function getClient() {
+  if (client) return client;
 
-model:"gpt-4o-mini",
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured.");
+  }
 
-messages:[
-{role:"system",content:"You are Tamanna AI assistant"},
-{role:"user",content:msg}
-]
-
-})
-
-return res.choices[0].message.content
-
+  client = new OpenAI({ apiKey });
+  return client;
 }
+
+async function askAI(message) {
+  if (typeof message !== "string" || !message.trim()) {
+    throw new TypeError("message must be a non-empty string.");
+  }
+
+  const response = await getClient().chat.completions.create({
+    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    messages: [
+      { role: "system", content: "You are Tamanna AI assistant." },
+      { role: "user", content: message.trim() },
+    ],
+  });
+
+  return response.choices?.[0]?.message?.content || "";
+}
+
+exports.askAI = askAI;

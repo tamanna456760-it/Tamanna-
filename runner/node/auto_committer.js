@@ -1,92 +1,40 @@
-const chokidar = require("chokidar");
-const { exec } = require("child_process");
+"use strict";
 
-console.log("🚀 Tamanna Ultimate Auto Dev System Running...");
+/*
+ * Automatic Git writes are deliberately disabled.
+ * Use reviewed pull requests for repository changes; this module only reads
+ * Git metadata and never stages, commits, or pushes files.
+ */
+const { execFile } = require("node:child_process");
+const { promisify } = require("node:util");
 
-const watcher = chokidar.watch(".", {
-  ignored: /node_modules|\.git/,
-  persistent: true
-});
-
-watcher.on("change", (path) => {
-  console.log(`\n📂 File changed: ${path}`);
-
-  exec("npm run lint", () => {
-    console.log("🛠 Code Auto Fixed");
-  });
-
-  exec("npm run format", () => {
-    console.log("🎨 Code Formatted");
-  });
-
-  exec("npm run build", () => {
-    console.log("🏗 Build Complete");
-  });
-
-  exec("git add . && git commit -m 'auto update' && git push", () => {
-    console.log("🔁 Git Auto Synced");
-  });
-});
-const { exec } = require("child_process");
-const util = require("util");
-const chalk = require("chalk");
-
-const execPromise = util.promisify(exec);
+const execFileAsync = promisify(execFile);
 
 class AutoCommitter {
-  constructor() {
-    this.branch = "main";
-  }
-
-  async commit(message = "chore: auto-commit changes") {
-    try {
-      console.log(chalk.blue("🤖 Starting auto-commit process..."));
-
-      // Check if there are changes
-      const { stdout: status } = await execPromise("git status --porcelain");
-      if (!status.trim()) {
-        console.log(chalk.yellow("⚠️ No changes to commit"));
-        return;
-      }
-
-      // Add all changes
-      console.log(chalk.blue("📦 Staging changes..."));
-      await execPromise("git add .");
-
-      // Commit
-      console.log(chalk.blue("💾 Committing changes..."));
-      await execPromise(`git commit -m "${message}"`);
-
-      // Get current branch
-      const { stdout: branch } = await execPromise("git branch --show-current");
-      this.branch = branch.trim();
-
-      // Push
-      console.log(chalk.blue("🚀 Pushing to remote..."));
-      await execPromise(`git push origin ${this.branch}`);
-
-      console.log(
-        chalk.green(`✅ Successfully committed and pushed: "${message}"`),
-      );
-    } catch (error) {
-      console.log(chalk.red(`❌ Auto-commit failed: ${error.message}`));
-    }
+  constructor(options = {}) {
+    this.cwd = options.cwd || process.cwd();
   }
 
   async getGitInfo() {
     try {
       const [branch, remote] = await Promise.all([
-        execPromise("git branch --show-current"),
-        execPromise("git remote get-url origin"),
+        execFileAsync("git", ["branch", "--show-current"], { cwd: this.cwd }),
+        execFileAsync("git", ["remote", "get-url", "origin"], { cwd: this.cwd }),
       ]);
 
       return {
-        branch: branch.stdout.trim(),
-        remote: remote.stdout.trim(),
+        branch: branch.stdout.trim() || "detached",
+        remote: remote.stdout.trim() || "none",
       };
-    } catch (error) {
+    } catch {
       return { branch: "unknown", remote: "none" };
     }
+  }
+
+  async commit() {
+    throw new Error(
+      "Automatic Git commit/push is disabled. Review changes and use an approved pull request."
+    );
   }
 }
 
