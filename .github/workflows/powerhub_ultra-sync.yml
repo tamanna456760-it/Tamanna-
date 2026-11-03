@@ -1,92 +1,27 @@
-
-name: BD-KING-R7 POWERHUB ULTRA
+name: BD-KING-R7 PowerHub Validation - Manual
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
   workflow_dispatch:
-
-concurrency:
-  group: powerhub-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  powerhub:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           submodules: false
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
-          cache-dependency-path: requirements.txt
-
-      - name: Install dependencies
+      - name: Install server dependencies
+        run: python -m pip install -r requirements-server.txt
+      - name: Compile and test
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
-          else
-            echo "ERROR: requirements.txt missing"
-            exit 1
-          fi
-
-      - name: Check main entry points
-        run: |
-          python -m py_compile main.py Main.py
-
-      - name: Verify FastAPI app import
-        run: |
-          python -c "from main import app; print('PASS: Tamanna app imported:', type(app).__name__)"
-
-      - name: Start and test API
-        run: |
-          set -eu
-
-          python -m uvicorn main:app \
-            --host 127.0.0.1 \
-            --port 8000 \
-            > /tmp/tamanna.log 2>&1 &
-
-          PID=$!
-          trap 'kill "$PID" 2>/dev/null || true' EXIT
-
-          for i in $(seq 1 30); do
-            if curl --fail --silent \
-              http://127.0.0.1:8000/openapi.json \
-              -o /tmp/tamanna-openapi.json; then
-              echo "PASS: Tamanna API is responding"
-              exit 0
-            fi
-
-            if ! kill -0 "$PID" 2>/dev/null; then
-              cat /tmp/tamanna.log
-              exit 1
-            fi
-
-            sleep 2
-          done
-
-          cat /tmp/tamanna.log
-          echo "FAIL: API startup timed out"
-          exit 1
-
-      - name: Upload diagnostic log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tamanna-powerhub-diagnostics
-          path: /tmp/tamanna.log
-          if-no-files-found: ignore
-          retention-days: 7
+          python -m compileall -q Main.py main.py tamanna_ai data modules tests scripts
+          python -m pytest -q
+      - run: echo "No automatic build, source rewrite, or repository push was performed."

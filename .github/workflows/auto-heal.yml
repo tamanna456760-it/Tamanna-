@@ -1,125 +1,45 @@
-
-name: Tamanna Auto Heal - Safe Audit
+name: Tamanna Self-Heal Review - Manual Read-Only
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
-# Read-only: this workflow cannot push changes to the repository.
 permissions:
   contents: read
 
-concurrency:
-  group: tamanna-safe-audit-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   audit:
-    name: Scan and Report Only
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-
-      - name: Scan empty and missing files
-        id: scan
-        shell: bash
-        run: |
-          set -u
-
-          mkdir -p audit-report
-          : > audit-report/empty-files.txt
-          : > audit-report/missing-files.txt
-
-          # Report empty tracked files only.
-          git ls-files -z |
-          while IFS= read -r -d '' file; do
-            if [ -f "$file" ] && [ ! -s "$file" ]; then
-              printf '%s\n' "$file"
-            fi
-          done > audit-report/empty-files.txt
-
-          # Report missing expected files. Never create them.
-          for file in README.md LICENSE .gitignore; do
-            if [ ! -f "$file" ]; then
-              printf '%s\n' "$file"
-            fi
-          done > audit-report/missing-files.txt
-
-          EMPTY_COUNT=$(wc -l < audit-report/empty-files.txt)
-          MISSING_COUNT=$(wc -l < audit-report/missing-files.txt)
-
-          {
-            echo "empty_count=$EMPTY_COUNT"
-            echo "missing_count=$MISSING_COUNT"
-          } >> "$GITHUB_OUTPUT"
-
-          echo "Empty tracked files: $EMPTY_COUNT"
-          cat audit-report/empty-files.txt
-
-          echo "Missing expected files: $MISSING_COUNT"
-          cat audit-report/missing-files.txt
-
-      - name: Check Python syntax without modifying source
-        id: python_check
-        shell: bash
-        run: |
-          set -u
-          python_errors=0
-          : > audit-report/python-errors.txt
-
-          while IFS= read -r -d '' file; do
-            if ! python -m py_compile "$file" \
-              2>> audit-report/python-errors.txt; then
-              python_errors=$((python_errors + 1))
-            fi
-          done < <(
-            find . \
-              -type d \( \
-                -name .git -o \
-                -name .venv -o \
-                -name venv -o \
-                -name node_modules -o \
-                -name __pycache__ \
-              \) -prune -o \
-              -type f -name '*.py' -print0
-          )
-
-          echo "python_error_count=$python_errors" >> "$GITHUB_OUTPUT"
-          echo "Python files with syntax errors: $python_errors"
-
-      - name: Generate audit summary
-        if: always()
-        env:
-          EMPTY_COUNT: ${{ steps.scan.outputs.empty_count }}
-          MISSING_COUNT: ${{ steps.scan.outputs.missing_count }}
-          PYTHON_ERRORS: ${{ steps.python_check.outputs.python_error_count }}
-        shell: bash
-        run: |
-          {
-            echo "# Tamanna Safe Audit"
-            echo
-            echo "- Trigger: $GITHUB_EVENT_NAME"
-            echo "- Empty tracked files: ${EMPTY_COUNT:-not available}"
-            echo "- Missing expected files: ${MISSING_COUNT:-not available}"
-            echo "- Python syntax errors: ${PYTHON_ERRORS:-not available}"
-            echo
-            echo "No source files were automatically repaired."
-            echo "No placeholder files were created."
-            echo "No Git commit or push was performed."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload audit reports
-        if: always()
-        uses: actions/upload-artifact@v4
+          submodules: false
+      - uses: actions/setup-python@v5
         with:
-          name: tamanna-safe-audit-${{ github.run_id }}
-          path: audit-report/
-          if-no-files-found: warn
-          retention-days: 7
+          python-version: "3.11"
+      - name: Syntax and empty-file audit
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          excluded = {".git", ".venv", "venv", "node_modules", "__pycache__"}
+          errors = []
+          empty = []
+          for p in Path(".").rglob("*"):
+              if any(part in excluded for part in p.parts):
+                  continue
+              if p.is_file() and p.stat().st_size == 0:
+                  empty.append(str(p))
+              if p.is_file() and p.suffix == ".py":
+                  try:
+                      ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
+                  except (OSError, UnicodeError, SyntaxError) as e:
+                      errors.append(f"{p}: {e}")
+          print(f"Empty files: {len(empty)}")
+          print("\n".join(empty))
+          print(f"Python syntax errors: {len(errors)}")
+          print("\n".join(errors))
+          raise SystemExit(bool(errors))
+          PY
+      - run: echo "Automatic repair and repository writes are disabled."

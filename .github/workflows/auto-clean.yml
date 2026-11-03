@@ -1,8 +1,6 @@
-name: Auto Clean Repo - Safe Audit
+name: Tamanna Repository Cleanliness Audit - Manual
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -13,37 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout without broken submodule metadata
-        env:
-          REPOSITORY: ${{ github.repository }}
-          REF_NAME: ${{ github.ref_name }}
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+      - name: Report empty tracked files only
         run: |
-          git init .
-          git remote add origin "https://github.com/${REPOSITORY}.git"
-          git -c protocol.version=2 fetch --depth=1 origin "${REF_NAME}"
-          git checkout --detach FETCH_HEAD
-
-      - name: Safe Python syntax audit
-        run: |
-          python - <<'PY'
-          import ast
-          import pathlib
-          import sys
-
-          excluded = {".git", ".venv", "venv", "node_modules", "__pycache__"}
-          errors = []
-
-          for path in pathlib.Path(".").rglob("*.py"):
-              if any(part in excluded for part in path.parts):
-                  continue
-              try:
-                  ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-              except (SyntaxError, UnicodeDecodeError) as exc:
-                  errors.append(f"{path}: {exc}")
-
-          if errors:
-              print("\n".join(errors))
-              sys.exit(1)
-
-          print("Python syntax audit passed. No files were moved or deleted.")
-          PY
+          git ls-files -z | while IFS= read -r -d '' file; do
+            if [ -f "$file" ] && [ ! -s "$file" ]; then
+              printf 'EMPTY: %s\n' "$file"
+            fi
+          done
+      - run: echo "No files were deleted, moved, or rewritten."

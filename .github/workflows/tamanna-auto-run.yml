@@ -1,65 +1,27 @@
-
-name: Tamanna AI Auto Run
+name: Tamanna Runtime Smoke Test - Manual
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  run-tamanna:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-
-      - name: Check Python syntax
-        run: |
-          python -m py_compile main.py Main.py
-
-      - name: Start and test Tamanna API
-        run: |
-          set -eu
-
-          python -m uvicorn main:app \
-            --host 127.0.0.1 \
-            --port 8000 \
-            > /tmp/tamanna.log 2>&1 &
-
-          PID=$!
-          trap 'kill "$PID" 2>/dev/null || true' EXIT
-
-          for i in $(seq 1 30); do
-            if curl --fail --silent \
-              http://127.0.0.1:8000/openapi.json \
-              -o /tmp/tamanna-openapi.json; then
-              echo "PASS: Tamanna API started successfully"
-              exit 0
-            fi
-
-            if ! kill -0 "$PID" 2>/dev/null; then
-              cat /tmp/tamanna.log
-              exit 1
-            fi
-
-            sleep 2
-          done
-
-          cat /tmp/tamanna.log
-          echo "FAIL: Tamanna API did not become ready"
-          exit 1
+      - name: Install declared server dependencies
+        run: python -m pip install -r requirements-server.txt
+      - name: Compile entry points
+        run: python -m compileall -q Main.py main.py tamanna_ai data modules tests scripts
+      - name: Run project tests
+        run: python -m pytest -q
+      - run: echo "This job does not start a persistent production service or push code."

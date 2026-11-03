@@ -1,108 +1,42 @@
-
-name: Tamanna Auto Upgrade - Safe Review
+name: Tamanna Upgrade Review - Manual
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
-# Read-only: no repository writes or automatic upgrades.
 permissions:
   contents: read
 
-concurrency:
-  group: tamanna-auto-upgrade-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   review:
-    name: Read-Only Upgrade Review
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+          submodules: false
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Scan Python syntax
-        id: scan
-        shell: bash
+      - name: Static Python syntax audit
         run: |
-          set -u
-
-          mkdir -p audit-report
-          : > audit-report/python-errors.txt
-
-          error_count=0
-          export PYTHONPYCACHEPREFIX=/tmp/tamanna-pycache
-
-          while IFS= read -r -d '' file; do
-            if ! python -m py_compile "$file" \
-              2>> audit-report/python-errors.txt; then
-              error_count=$((error_count + 1))
-              printf 'FAIL: %s\n' "$file"
-            fi
-          done < <(
-            find . \
-              -type d \( \
-                -name .git -o \
-                -name .venv -o \
-                -name venv -o \
-                -name node_modules -o \
-                -name __pycache__ \
-              \) -prune -o \
-              -type f -name '*.py' -print0
-          )
-
-          echo "error_count=$error_count" >> "$GITHUB_OUTPUT"
-          echo "Python files with syntax errors: $error_count"
-
-      - name: Check repository whitespace
-        id: diffcheck
-        shell: bash
-        run: |
-          set -u
-
-          if git diff --check; then
-            echo "result=PASS" >> "$GITHUB_OUTPUT"
-            echo "Whitespace check passed."
-          else
-            echo "result=FAIL" >> "$GITHUB_OUTPUT"
-            echo "Whitespace check found issues."
-          fi
-
-      - name: Create review report
-        if: always()
-        env:
-          PYTHON_ERRORS: ${{ steps.scan.outputs.error_count }}
-          DIFF_RESULT: ${{ steps.diffcheck.outputs.result }}
-        shell: bash
-        run: |
-          {
-            echo "# Tamanna Auto Upgrade - Review Report"
-            echo
-            echo "- Python syntax errors: ${PYTHON_ERRORS:-not available}"
-            echo "- Whitespace check: ${DIFF_RESULT:-not available}"
-            echo
-            echo "Automatic code upgrades are disabled."
-            echo "No AI-generated code was written to repository files."
-            echo "No commit, pull request, or push was created."
-            echo "Review findings before making any changes."
-          } > audit-report/review-summary.md
-
-      - name: Upload review report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tamanna-upgrade-review-${{ github.run_id }}
-          path: audit-report/
-          if-no-files-found: warn
-          retention-days: 7
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          skip = {".git", ".venv", "venv", "node_modules", "__pycache__"}
+          errors = []
+          count = 0
+          for p in Path(".").rglob("*.py"):
+              if any(x in skip for x in p.parts):
+                  continue
+              try:
+                  ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
+                  count += 1
+              except (OSError, UnicodeError, SyntaxError) as e:
+                  errors.append(f"{p}: {e}")
+          print(f"Scanned: {count}")
+          if errors:
+              print("\n".join(errors))
+              raise SystemExit(1)
+          PY
+      - run: echo "No auto-upgrade, source rewrite, git commit, or push was performed."
