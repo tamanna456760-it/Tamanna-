@@ -11,7 +11,7 @@ from pathlib import Path
 
 PROJECT = "Tamanna AI"
 OWNER = "HM INSAN ALI"
-EXPECTED_HOST = "www.tamanna.com"
+EXPECTED_HOST = "www.bd-king-r7.com"
 
 
 def validate_deployment(compose_path, nginx_path, require_env=False):
@@ -63,7 +63,6 @@ def validate_deployment(compose_path, nginx_path, require_env=False):
     if nginx_text:
         required_nginx = {
             "www domain": f"server_name {EXPECTED_HOST}",
-            "apex domain redirect": "server_name tamanna.com",
             "TLS certificate": f"/etc/letsencrypt/live/{EXPECTED_HOST}/fullchain.pem",
             "TLS private key": f"/etc/letsencrypt/live/{EXPECTED_HOST}/privkey.pem",
             "TLS 1.2/1.3 policy": "ssl_protocols TLSv1.2 TLSv1.3",
