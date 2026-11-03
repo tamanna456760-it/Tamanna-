@@ -2,8 +2,6 @@
 name: "Tamanna AI Real AI Debugger"
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
