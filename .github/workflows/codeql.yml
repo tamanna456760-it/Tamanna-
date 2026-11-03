@@ -49,8 +49,9 @@ jobs:
           build-mode: none
         - language: csharp
           build-mode: none
-        - language: java-kotlin
-          build-mode: autobuild
+        # Java/Kotlin is temporarily excluded: the repository currently has
+        # incomplete Android directories without a Gradle root build or wrapper.
+        # Re-enable after a valid, buildable Android project is committed.
         - language: javascript-typescript
           build-mode: none
         - language: python
