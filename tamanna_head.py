@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-"""Root compatibility entry point for the Tamanna HEAD scanner."""
+"""Stable root entry point for the Tamanna repository scanner."""
 from pathlib import Path
 import runpy
+import sys
 
-script = Path(__file__).resolve().parent / "runner" / "python" / "tamanna_head.py"
-if not script.is_file():
-    raise SystemExit(f"Tamanna HEAD scanner not found: {script}")
-runpy.run_path(str(script), run_name="__main__")
+REPO_ROOT = Path(__file__).resolve().parent
+SCANNER = REPO_ROOT / "runner" / "python" / "tamanna_head.py"
+
+if not SCANNER.is_file():
+    print(f"ERROR: Tamanna scanner file is missing: {SCANNER}", file=sys.stderr)
+    raise SystemExit(2)
+
+# Use the repository root as the scanner's working directory.
+import os
+os.chdir(REPO_ROOT)
+runpy.run_path(str(SCANNER), run_name="__main__")
