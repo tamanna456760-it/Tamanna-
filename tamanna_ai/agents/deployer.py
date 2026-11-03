@@ -13,7 +13,7 @@ class DeployerAgent:
         required_files: Optional[Iterable[str]] = None,
         required_commands: Optional[Iterable[str]] = None,
     ) -> dict:
-        files = list(required_files or ["Main.py", "main.py"])
+        files = list(required_files or ["Main.py", "run_server.py"])
         commands = list(required_commands or [])
         missing_files = []
         unsafe_paths = []

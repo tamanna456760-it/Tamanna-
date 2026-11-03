@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "main.py"
+      - "run_server.py"
       - "Main.py"
       - "requirements.txt"
       - "scripts/tamanna_health_check.py"

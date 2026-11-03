@@ -4,7 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const requiredFiles = ['Main.py', 'main.py'];
+const requiredFiles = ['Main.py', 'run_server.py'];
 
 const missing = requiredFiles.filter((file) => {
   return !fs.existsSync(path.resolve(process.cwd(), file));

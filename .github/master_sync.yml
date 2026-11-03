@@ -53,7 +53,7 @@ jobs:
       # 6️⃣ Run main runner
       - name: Run Main Runner
         run: |
-          python main.py
+          python run_server.py
 
       # 7️⃣ Commit auto changes (like fixer or new file names)
       - name: Commit auto changes

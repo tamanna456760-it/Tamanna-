@@ -108,11 +108,11 @@ jobs:
           python -m pip install pytest uvicorn
 
       - name: Compile entry points
-        run: python -m py_compile main.py Main.py
+        run: python -m py_compile run_server.py Main.py
 
       - name: Import FastAPI application
         run: |
-          python -c "from main import app; print('PASS:', type(app).__name__)"
+          python -c "from run_server import app; print('PASS:', type(app).__name__)"
 
       - name: Run tests if present
         run: |
@@ -128,7 +128,7 @@ jobs:
         run: |
           set -eu
 
-          python -m uvicorn main:app \
+          python -m uvicorn run_server:app \
             --host 127.0.0.1 \
             --port 8000 \
             > tamanna-api.log 2>&1 &

@@ -1,7 +1,7 @@
 """Compatibility entry point for the Tamanna AI FastAPI app.
 
 This file keeps the existing `Main.py` implementation intact while providing the
-expected `python3 main.py` launch path requested by the project workflow.
+portable `python3 run_server.py` launch path requested by the project workflow.
 """
 
 import os

@@ -69,7 +69,7 @@ jobs:
       - name: Verify server entry points
         run: |
           test -f Main.py
-          test -f main.py
+          test -f run_server.py
           test -f requirements-server.txt
           test -f requirements-test.txt
           echo "PASS: Tamanna AI entry-point and dependency files found."

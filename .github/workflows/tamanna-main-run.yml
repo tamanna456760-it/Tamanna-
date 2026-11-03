@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - "main.py"
+      - "run_server.py"
       - "Main.py"
       - "requirements.txt"
       - ".github/workflows/tamanna-main-run.yml"
@@ -36,14 +36,14 @@ jobs:
 
       - name: Check Python syntax
         run: |
-          python -m py_compile main.py Main.py
+          python -m py_compile run_server.py Main.py
 
       - name: Start Tamanna AI
         env:
           HOST: 127.0.0.1
           PORT: "8000"
         run: |
-          python main.py > tamanna.log 2>&1 &
+          python run_server.py > tamanna.log 2>&1 &
           echo $! > tamanna.pid
 
       - name: Test HTTP server

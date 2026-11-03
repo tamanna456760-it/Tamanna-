@@ -33,7 +33,7 @@ echo "[6] Install dependencies"
 [ -f package.json ] && npm install
 
 echo "[7] Run main files"
-[ -f main.py ] && python3 main.py
+[ -f run_server.py ] && python3 run_server.py
 [ -f app.py ] && python3 app.py
 [ -f index.js ] && node index.js
 [ -f main.sh ] && sh main.sh

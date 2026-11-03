@@ -427,7 +427,7 @@ async def status():
 
     return {
         "status": "online",
-        "server": "main.py",
+        "server": "run_server.py",
         "assistant": "Tamanna AI",
         "chat_storage": str(CHAT_FILE)
     }
@@ -570,7 +570,7 @@ def generate_reply(message):
         return (
             "হাই! 🥰\n"
             "আমি Tamanna AI।\n"
-            "আপনার মেসেজ main.py থেকে পেয়েছি।"
+            "আপনার মেসেজ run_server.py থেকে পেয়েছি।"
         )
 
 
@@ -794,7 +794,7 @@ if __name__ == "__main__":
 
 
     uvicorn.run(
-        "main:app",
+        "run_server:app",
         host="127.0.0.1",
         port=8000,
         reload=True
@@ -811,7 +811,7 @@ try:
     )
 
     # Dynamic module response engine.
-    # Existing main.py code is preserved.
+    # Existing Main.py application code is preserved.
     generate_reply = generate_tamanna_reply
 
     print("[TAMANNA AI] Dynamic Module Router: ONLINE")
@@ -825,7 +825,7 @@ except Exception as exc:
 # TAMANNA AI DYNAMIC MODULE BRIDGE
 # ============================================================
 #
-# Existing main.py code is preserved.
+# Existing Main.py application code is preserved.
 # New modules are automatically discovered from:
 # modules/tamanna/modules/
 #

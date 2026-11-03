@@ -27,7 +27,7 @@ jobs:
 
       - name: Check Python Syntax
         run: |
-          python -m compileall -q Main.py main.py scripts tamanna_ai
+          python -m compileall -q Main.py run_server.py scripts tamanna_ai
 
       - name: Validate Deployment Configuration
         run: |

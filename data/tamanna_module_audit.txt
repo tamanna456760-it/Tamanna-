@@ -3,7 +3,7 @@ Owner: HM INSAN ALI
 Root: /root/GitHub/Tamanna-
 
 === EXPECTED PATHS ===
-PRESENT  main.py
+PRESENT  run_server.py
 PRESENT  Main.py
 PRESENT  requirements.txt
 PRESENT  tamanna_ai/core/controller.py

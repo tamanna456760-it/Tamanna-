@@ -18,6 +18,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Validate Python entry points
-        run: python -m compileall -q Main.py main.py runner/python tamanna_ai data modules
+        run: python -m compileall -q Main.py run_server.py runner/python tamanna_ai data modules
       - name: Report
         run: echo "No automatic git add, commit, or push is permitted."

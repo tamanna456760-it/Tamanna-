@@ -22,6 +22,6 @@ jobs:
         run: python -m pip install -r requirements-server.txt
       - name: Compile and test
         run: |
-          python -m compileall -q Main.py main.py tamanna_ai data modules tests scripts
+          python -m compileall -q Main.py run_server.py tamanna_ai data modules tests scripts
           python -m pytest -q
       - run: echo "No automatic build, source rewrite, or repository push was performed."

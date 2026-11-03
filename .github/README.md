@@ -36,7 +36,7 @@ Overview
 
 Tamanna AI is an evolving software project that brings together assistant APIs, project utilities, memory and knowledge components, automation, and defensive security tools.
 
-The primary FastAPI application is implemented in Main.py. The lowercase main.py file is a compatibility launcher that imports the existing application.
+The primary FastAPI application is implemented in Main.py. The run_server.py file is the portable launcher that imports the existing application.
 
 Project status: Active development. The repository contains many modules and workflows, but the presence of a file does not guarantee that its functionality is integrated, production-ready, or successfully tested.
 
@@ -113,7 +113,7 @@ Edit .env locally and enter only the configuration required by your setup.
 
 Start the application:
 
-python main.py
+python run_server.py
 
 The launcher defaults to 127.0.0.1:8000.
 
@@ -198,7 +198,7 @@ Testing
 
 Security-related test suites exist in several modules. From the repository root, run:
 
-python -m compileall -q Main.py main.py tamanna_ai app_security
+python -m compileall -q Main.py run_server.py tamanna_ai app_security
 
 If the relevant test dependencies are installed, run:
 

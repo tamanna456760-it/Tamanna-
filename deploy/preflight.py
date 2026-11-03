@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = (
     "index.html",
     "Main.py",
-    "main.py",
+    "run_server.py",
     "CNAME",
     ".github/workflows/deploy.yml",
     ".github/workflows/pages.yml",

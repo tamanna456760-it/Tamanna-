@@ -55,7 +55,7 @@ jobs:
       - name: Verify project entry points
         run: |
           test -f Main.py
-          test -f main.py
+          test -f run_server.py
           test -f requirements-server.txt
           echo "PASS: Server entry points and server requirements exist."
 

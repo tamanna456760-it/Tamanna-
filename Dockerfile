@@ -28,4 +28,4 @@ USER tamanna
 
 EXPOSE 8000
 
-CMD ["python", "-m", "uvicorn", "Main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "run_server:app", "--host", "0.0.0.0", "--port", "8000"]

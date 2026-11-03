@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "reports"
 
 REQUIRED = [
-    "main.py",
+    "run_server.py",
     "Main.py",
     "requirements.txt",
     ".env.example",

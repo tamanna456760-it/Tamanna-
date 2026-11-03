@@ -9,6 +9,18 @@
 ## Overview
 This repository contains code for a variety of features including AI learning capabilities, a chat bot, system automation, and other new functionalities.
 
+## Run Tamanna AI
+
+Install the server dependencies, create a private local environment file, then start the API:
+
+```bash
+python -m pip install -r requirements-server.txt
+bash scripts/setup_env.sh
+python run_server.py
+```
+
+The FastAPI application remains in `Main.py`; `run_server.py` is the portable launcher. Never commit `.env` or real API keys.
+
 ## AI Learning Features
 This section describes the AI learning aspects of the project.
 - **Machine Learning Models**: Details about the models used, training data, and evaluation metrics.

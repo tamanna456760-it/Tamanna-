@@ -17,7 +17,7 @@ def main() -> None:
     required = (
         "index.html",
         "Main.py",
-        "main.py",
+        "run_server.py",
     )
 
     for relative in required:

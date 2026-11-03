@@ -63,7 +63,7 @@ For Gemini chat, add your own key to `GEMINI_API_KEY`. Without it, the app attem
 ## 5. Start the API
 
 ```bash
-HOST=127.0.0.1 PORT=8000 RELOAD=1 python main.py
+HOST=127.0.0.1 PORT=8000 RELOAD=1 python run_server.py
 ```
 
 Keep that terminal open. The API should listen at `http://127.0.0.1:8000`.
@@ -87,7 +87,7 @@ A successful health response confirms the API process is responding; it does not
 ## 7. Run the automated tests
 
 ```bash
-python -m compileall -q Main.py main.py tamanna_ai data modules tests scripts
+python -m compileall -q Main.py run_server.py tamanna_ai data modules tests scripts
 python -m pytest -q
 ```
 

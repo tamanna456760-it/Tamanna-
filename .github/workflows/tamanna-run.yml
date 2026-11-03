@@ -20,7 +20,7 @@ jobs:
       - name: Install runtime and test dependencies
         run: python -m pip install -r requirements-test.txt
       - name: Compile application
-        run: python -m compileall -q Main.py main.py tamanna_ai data modules
+        run: python -m compileall -q Main.py run_server.py tamanna_ai data modules
       - name: Run tests
         run: python -m pytest -q
       - name: Explain runtime boundary

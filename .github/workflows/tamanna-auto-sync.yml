@@ -31,7 +31,7 @@ jobs:
         run: |
           set -eu
 
-          for file in main.py Main.py requirements.txt; do
+          for file in run_server.py Main.py requirements.txt; do
             if [ ! -f "$file" ]; then
               echo "ERROR: Required file missing: $file"
               exit 1
@@ -40,7 +40,7 @@ jobs:
           done
 
       - name: Check Python syntax
-        run: python -m py_compile main.py Main.py
+        run: python -m py_compile run_server.py Main.py
 
       - name: Report current commit
         run: |

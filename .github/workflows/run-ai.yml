@@ -63,19 +63,19 @@ jobs:
 
       - name: Check Main Server
         run: |
-          if [ -f main.py ]; then
-            echo "main.py found"
-            python -m py_compile main.py
+          if [ -f run_server.py ]; then
+            echo "run_server.py found"
+            python -m py_compile run_server.py
           else
-            echo "ERROR: main.py not found"
+            echo "ERROR: run_server.py not found"
             exit 1
           fi
 
       - name: Run AI System Import Check
         run: |
           python - <<'PY'
-          import main
-          print("Tamanna AI main.py import: OK")
+          import run_server
+          print("Tamanna AI run_server.py import: OK")
           PY
 
       - name: Run Tests
@@ -110,10 +110,10 @@ jobs:
             python --version
             echo ""
             echo "Main Server:"
-            if [ -f main.py ]; then
-              echo "main.py FOUND"
+            if [ -f run_server.py ]; then
+              echo "run_server.py FOUND"
             else
-              echo "main.py NOT FOUND"
+              echo "run_server.py NOT FOUND"
             fi
             echo ""
             echo "Project:"

@@ -21,7 +21,7 @@ jobs:
       - name: Install runtime and test dependencies
         run: python -m pip install -r requirements-test.txt
       - name: Compile entry points
-        run: python -m compileall -q Main.py main.py tamanna_ai data modules tests scripts
+        run: python -m compileall -q Main.py run_server.py tamanna_ai data modules tests scripts
       - name: Run project tests
         run: python -m pytest -q
       - run: echo "This job does not start a persistent production service or push code."

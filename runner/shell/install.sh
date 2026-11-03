@@ -59,9 +59,9 @@ if [ -f "start.sh" ]; then
     exit
 fi
 
-if [ -f "main.py" ]; then
-    echo "➡️ Running python3 main.py"
-    python3 main.py
+if [ -f "run_server.py" ]; then
+    echo "➡️ Running python3 run_server.py"
+    python3 run_server.py
     exit
 fi
 
