@@ -100,3 +100,13 @@ def test_admin_only_routes_reject_regular_authenticated_user(monkeypatch):
     for path in sorted(access_control.ADMIN_ROUTES - access_control.BLOCKED_EXECUTION_ROUTES):
         response = client.post(path, json={})
         assert response.status_code == 403, (path, response.status_code)
+
+
+
+def test_auth_rate_limit_fails_with_clear_503_when_session_secret_missing(monkeypatch, tmp_path):
+    monkeypatch.delenv("TAMANNA_SESSION_SECRET", raising=False)
+    monkeypatch.setattr(auth, "DB", tmp_path / "auth.sqlite3")
+    request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.44"))
+    with pytest.raises(Exception) as exc:
+        auth.rate_limit_auth(request, "login")
+    assert getattr(exc.value, "status_code", None) == 503

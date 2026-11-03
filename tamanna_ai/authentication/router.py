@@ -104,7 +104,14 @@ def require_user(token):
 def rate_limit_auth(request, action):
     """Persistent per-IP throttle for signup/login attempts (10 per 15 minutes)."""
     host = request.client.host if request.client else "unknown"
-    ip_hash = hmac.new(secret(), host.encode("utf-8"), hashlib.sha256).hexdigest()
+    try:
+        session_secret = secret()
+    except RuntimeError as exc:
+        raise HTTPException(
+            503,
+            "Authentication is not configured. Set TAMANNA_SESSION_SECRET in the private .env file.",
+        ) from exc
+    ip_hash = hmac.new(session_secret, host.encode("utf-8"), hashlib.sha256).hexdigest()
     current = int(time.time())
     window_start = current - 900
     with db() as c:

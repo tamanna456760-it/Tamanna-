@@ -79,9 +79,9 @@ class Database:
     """Small SQLAlchemy unit-of-work wrapper; safe for SQLite web workers."""
 
     def __init__(self, url: str | None = None):
-        self.url = url or os.getenv(
-            "TAMANNA_DATABASE_URL",
-            "sqlite:///" + (DATA_DIR / "tamanna.sqlite3").as_posix(),
+        configured_url = (url or os.getenv("TAMANNA_DATABASE_URL") or "").strip()
+        self.url = configured_url or (
+            "sqlite:///" + (DATA_DIR / "tamanna.sqlite3").as_posix()
         )
         options = {"future": True, "pool_pre_ping": True}
         if self.url.startswith("sqlite"):
