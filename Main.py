@@ -2603,9 +2603,8 @@ try:
                 return await call_next(request)
 
 
-    app.add_middleware(
-        TamannaChatControlMiddleware
-    )
+    # Disabled: chat input must never dispatch system/control commands.
+    print("[TAMANNA SECURITY] Chat command interception: DISABLED")
 
     print(
         "[TAMANNA AI] Chat → Control Center Bridge: ONLINE"

@@ -1,5 +1,6 @@
 """Tests for SQLAlchemy chat persistence and safe legacy migration."""
 import json
+import pytest
 from pathlib import Path
 from sqlalchemy import inspect
 
@@ -57,3 +58,17 @@ def test_database_memory_api_persists_and_lists_memories(tmp_path):
     memory_id = db.add_memory("keep this", metadata={"source": "test"})
     assert memory_id > 0
     assert db.list_memories() == ["keep this"]
+
+
+
+def test_conversation_history_is_scoped_to_user_and_rejects_cross_user_write(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "user-history.sqlite3").as_posix())
+    first = db.ensure_user("first@example.test", "First")
+    second = db.ensure_user("second@example.test", "Second")
+    db.save_chat_pair("first question", "first answer", f"user-{first}", first)
+    db.save_chat_pair("second question", "second answer", f"user-{second}", second)
+
+    assert [row["user"] for row in db.load_history(user_id=first)] == ["first question"]
+    assert [row["user"] for row in db.load_history(user_id=second)] == ["second question"]
+    with pytest.raises(PermissionError):
+        db.save_chat_pair("intrusion", "no", f"user-{first}", second)
