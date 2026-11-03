@@ -10,16 +10,14 @@ certificates.
 ## Before deployment
 
 1. Confirm that you control the registration and authoritative DNS for
-   `bd-king-r7.com`.
+   `www.bd-king-r7.com`.
 2. Provision an Ubuntu/Debian server with a public static IPv4 address.
 3. Allow inbound TCP ports 80 and 443 in the server firewall and hosting
    firewall. Keep port 8000 private.
 4. Install Docker Engine and the Docker Compose plugin.
 5. Create DNS records at the authoritative DNS provider:
-   - `A` record: `@` -> the server public IPv4 address.
-   - `A` record: `www` -> the server public IPv4 address.
-   - Remove stale conflicting `A`/ `AAAA` records. Only publish an `AAAA`
-     record if the server has working public IPv6.
+   - Configure only the `www` hostname: use the hosting provider's required `CNAME` target, or an `A` record to the server IPv4 if required.
+   - Publish an `AAAA` record for `www` only if the server has working public IPv6.
    If a CDN/proxy is enabled, configure it so the origin can complete the
    HTTP-01 certificate challenge. DNS changes may take time to propagate.
 
