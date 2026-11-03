@@ -3,9 +3,6 @@ name: Tamanna Setup
 on:
   workflow_dispatch:
 
-  push:
-    branches:
-      - main
 
 jobs:
   setup:
