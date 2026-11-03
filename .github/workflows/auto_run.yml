@@ -46,7 +46,7 @@ jobs:
           failed=0
           while IFS= read -r -d '' file; do
             count=$((count + 1))
-            if grep -Eq '^[[:space:]]*(import[[:space:]]|export[[:space:]]|export\{)' "$file"; then
+            if grep -Eq '^[[:space:]]*(import[[:space:]]|export[[:space:]]|export[{])' "$file"; then
               if node --input-type=module --check < "$file"; then
                 echo "PASS (ES module syntax): $file"
               else
