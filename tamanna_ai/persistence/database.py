@@ -69,6 +69,13 @@ class Memory(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+class KnowledgeFingerprint(Base):
+    """Database-enforced idempotency key for imported knowledge records."""
+    __tablename__ = "knowledge_fingerprints"
+    fingerprint: Mapped[str] = mapped_column(String(64), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Migration(Base):
     __tablename__ = "schema_migrations"
     name: Mapped[str] = mapped_column(String(120), primary_key=True)
@@ -267,6 +274,6 @@ def load_history(
 
 __all__ = [
     "Base", "User", "Conversation", "Message", "Memory", "Migration",
-    "Database", "database", "init_database", "migrate_legacy_json",
+    "KnowledgeFingerprint", "Database", "database", "init_database", "migrate_legacy_json",
     "save_chat", "load_history",
 ]
