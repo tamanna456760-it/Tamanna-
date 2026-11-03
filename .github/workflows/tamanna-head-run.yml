@@ -25,6 +25,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Verify and Run Tamanna HEAD
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$GITHUB_WORKSPACE/tamanna_head.py"
+          test -f "$GITHUB_WORKSPACE/runner/python/tamanna_head.py"
+          python3 -m py_compile "$GITHUB_WORKSPACE/tamanna_head.py" "$GITHUB_WORKSPACE/runner/python/tamanna_head.py"
+          python3 "$GITHUB_WORKSPACE/tamanna_head.py"
+
       - name: Check Python Syntax
         run: |
           python -m compileall -q Main.py run_server.py scripts tamanna_ai
