@@ -21,7 +21,7 @@ def audit_repository(root: Path) -> dict[str, Any]:
     empty_files = sorted(p.relative_to(root).as_posix() for p in files if p.stat().st_size == 0)
     suspicious = sorted(p.relative_to(root).as_posix() for p in files
                         if p.suffix.lower() in {".ymal", ".ymls", ".jaon", ".jason"})
-    pyc = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.pyc") if p.is_file())
+    pyc = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.pyc")\n                  if p.is_file() and not any(part in IGNORED_DIRS for part in p.relative_to(root).parts))
     dirs_without_init = set()
     for p in files:
         if p.suffix == ".py" and p.parent != root:
