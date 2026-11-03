@@ -61,3 +61,6 @@ Main.py.backup-*
 **/Main.py.backup-*
 *.pyc
 **/*.pyc
+
+# Installed Python environments must not be committed
+**/site-packages/
