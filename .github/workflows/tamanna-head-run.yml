@@ -1,34 +1,38 @@
-name: Run Tamanna AI HEAD
+name: Tamanna AI Manual Read-Only Validation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: tamanna-manual-validation
+  cancel-in-progress: true
 
 jobs:
-  run-head:
+  validate:
+    name: Validate Python and Deployment Configuration
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: Run Tamanna HEAD
-      run: |
-        python3 tamanna_head.py
+      - name: Check Python Syntax
+        run: |
+          python -m compileall -q Main.py main.py scripts tamanna_ai
 
-    - name: Commit Manifest
-      run: |
-        git config --global user.name "Tamanna HEAD"
-        git config --global user.email "auto@tamanna.ai"
-        git add tamanna_meta/manifest.json
-        git commit -m "Updated Tamanna HEAD manifest" || true
-        git push || true
+      - name: Validate Deployment Configuration
+        run: |
+          python deploy/validate_deployment.py
+
+      - name: Validate Release Files
+        run: |
+          python deploy/validate_release.py
