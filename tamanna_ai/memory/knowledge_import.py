@@ -16,8 +16,6 @@ from sqlalchemy.exc import IntegrityError
 
 from tamanna_ai.persistence.database import Database, KnowledgeFingerprint, Memory
 
-MAX_FILE_BYTES = 20 * 1024 * 1024
-MAX_TEXT_CHARS = 100_000
 _SECRET_PATTERNS = (
     re.compile(r"(?i)\b(api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]\s*[^\s,;]+"),
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b"),
@@ -99,9 +97,6 @@ def import_knowledge_file(
         raise ValueError("Supported formats are .json, .txt, and .md")
     if not path.is_file():
         raise FileNotFoundError(path)
-    if path.stat().st_size > MAX_FILE_BYTES:
-        raise ValueError("Import file exceeds the 20 MiB limit")
-
     if path.suffix.lower() == ".json":
         data = json.loads(path.read_text(encoding="utf-8"))
         records = _chatgpt_export_records(data)
@@ -128,7 +123,7 @@ def import_knowledge_file(
             except (TypeError, json.JSONDecodeError):
                 continue
         for title, raw_text in records:
-            text = _redact_secrets(raw_text).strip()[:MAX_TEXT_CHARS]
+            text = _redact_secrets(raw_text).strip()
             if not text:
                 skipped += 1
                 continue
@@ -174,24 +169,26 @@ def search_knowledge(
     if not terms:
         return []
     limit = max(1, min(int(limit), 20))
+    # Scan in bounded database batches so retrieval has no fixed 1,000-row ceiling.
+    ranked = []
     with database.Session() as session:
-        statement = select(Memory)
+        statement = select(Memory).order_by(Memory.id)
         if user_id is not None:
             statement = statement.where(Memory.user_id == user_id)
-        rows = list(session.scalars(statement.order_by(Memory.created_at.desc()).limit(1000)))
-    ranked = []
-    for row in rows:
-        metadata = json.loads(row.metadata_json or "{}")
-        if metadata.get("kind") != "imported_knowledge":
-            continue
-        haystack = row.content.lower()
-        score = sum(1 for term in terms if term in haystack)
-        if score:
-            ranked.append((score, row, metadata))
-    ranked.sort(key=lambda item: (item[0], item[1].created_at), reverse=True)
+        for row in session.scalars(statement).yield_per(500):
+            metadata = json.loads(row.metadata_json or "{}")
+            if metadata.get("kind") != "imported_knowledge":
+                continue
+            haystack = row.content.lower()
+            score = sum(1 for term in terms if term in haystack)
+            if score:
+                ranked.append((score, row.created_at, row.content, metadata))
+                ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+                if len(ranked) > limit:
+                    ranked.pop()
     return [
-        {"content": row.content, "source": str(metadata.get("source", "unknown")), "title": str(metadata.get("title", ""))}
-        for _, row, metadata in ranked[:limit]
+        {"content": content, "source": str(metadata.get("source", "unknown")), "title": str(metadata.get("title", ""))}
+        for _, _, content, metadata in ranked
     ]
 
 
