@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-DOMAIN="tamanna.com"
+DOMAIN="bd-king-r7.com"
 REPORT="tamanna_ai/modules/domain_monitor/domain_report.txt"
 
 mkdir -p "$(dirname $REPORT)"
