@@ -1,0 +1,113 @@
+name: Tamanna Repository Verification
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Compile every tracked Python file separately
+        id: pycompile
+        continue-on-error: true
+        shell: bash
+        run: |
+          failed=0
+          for f in $(git ls-files '*.py'); do
+            if ! python -m py_compile "$f"; then
+              echo "FAIL $f"
+              failed=1
+            fi
+          done
+          exit "$failed"
+
+      - name: Check every tracked shell script
+        id: bashcheck
+        continue-on-error: true
+        shell: bash
+        run: |
+          failed=0
+          while IFS= read -r f; do
+            if ! bash -n "$f"; then
+              echo "FAIL $f"
+              failed=1
+            fi
+          done < <(git ls-files '*.sh')
+          exit "$failed"
+
+      - name: Parse every tracked JSON file
+        id: jsoncheck
+        continue-on-error: true
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          paths = subprocess.check_output(
+              ["git", "ls-files", "*.json"], text=True
+          ).splitlines()
+          failures = []
+          skipped = []
+          for name in paths:
+              path = Path(name)
+              if path.name.startswith("tsconfig"):
+                  skipped.append(name)
+                  continue
+              try:
+                  with path.open(encoding="utf-8") as handle:
+                      json.load(handle)
+              except Exception as exc:
+                  failures.append((name, str(exc)))
+          print(f"JSON files checked: {len(paths) - len(skipped)}")
+          print(f"Comment-style config files skipped: {len(skipped)}")
+          for name in skipped:
+              print(f"SKIP {name}")
+          for name, error in failures:
+              print(f"FAIL {name}: {error}")
+          sys.exit(bool(failures))
+          PY
+
+      - name: Install project requirements
+        id: install
+        continue-on-error: true
+        run: python -m pip install -r requirements.txt
+
+      - name: Run pytest
+        id: pytest
+        continue-on-error: true
+        run: python -m pytest -q
+
+      - name: Import FastAPI application
+        id: importmain
+        continue-on-error: true
+        run: python -c "import Main"
+
+      - name: Final verification summary
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          for result in ${{ steps.pycompile.outcome }} ${{ steps.bashcheck.outcome }} ${{ steps.jsoncheck.outcome }} ${{ steps.install.outcome }} ${{ steps.pytest.outcome }} ${{ steps.importmain.outcome }}; do
+            echo "$result"
+            [[ "$result" == "success" ]] || failed=1
+          done
+          exit "$failed"
