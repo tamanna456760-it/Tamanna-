@@ -86,7 +86,7 @@ def main():
     )
     parser.add_argument(
         "--url",
-        default="https://www.tamanna.com/",
+        default="https://www.bd-king-r7.com/",
         help="HTTPS endpoint to test",
     )
     parser.add_argument("--timeout", type=int, default=10)
