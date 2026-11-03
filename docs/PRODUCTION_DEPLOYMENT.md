@@ -1,4 +1,4 @@
-# Put Tamanna AI online at www.tamanna.com
+# Put Tamanna AI online at www.bd-king-r7.com
 
 Owner: HM INSAN ALI
 
@@ -10,7 +10,7 @@ certificates.
 ## Before deployment
 
 1. Confirm that you control the registration and authoritative DNS for
-   `tamanna.com`.
+   `bd-king-r7.com`.
 2. Provision an Ubuntu/Debian server with a public static IPv4 address.
 3. Allow inbound TCP ports 80 and 443 in the server firewall and hosting
    firewall. Keep port 8000 private.
@@ -40,7 +40,7 @@ Edit `.env` on the server only. Set a newly generated
 your Gemini API key if required, and the production values:
 
 ```dotenv
-TAMANNA_CORS_ORIGINS=https://www.tamanna.com,https://tamanna.com
+TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com
 TAMANNA_COOKIE_SECURE=1
 TAMANNA_SESSION_SECRET=REPLACE_WITH_GENERATED_RANDOM_SECRET
 TAMANNA_ADMIN_EMAIL=YOUR_VERIFIED_ADMIN_EMAIL
@@ -55,7 +55,7 @@ independently reviewed.
 ## Issue the first TLS certificate
 
 The HTTPS Nginx configuration expects certificate files at
-`/etc/letsencrypt/live/www.tamanna.com/`. Obtain that certificate before
+`/etc/letsencrypt/live/www.bd-king-r7.com/`. Obtain that certificate before
 starting the production Compose stack.
 
 On Ubuntu/Debian, install Certbot using the official package instructions,
@@ -63,8 +63,8 @@ then run standalone issuance while ports 80 and 443 are free:
 
 ```bash
 sudo certbot certonly --standalone \
-  --cert-name www.tamanna.com \
-  -d www.tamanna.com -d tamanna.com \
+  --cert-name www.bd-king-r7.com \
+  -d www.bd-king-r7.com -d bd-king-r7.com \
   --agree-tos --no-eff-email
 ```
 
@@ -90,11 +90,11 @@ Application data is stored in the named Docker volume `tamanna_data`.
 ## Verify from outside the server
 
 ```bash
-curl -fsS https://www.tamanna.com/health
-curl -I https://www.tamanna.com/
+curl -fsS https://www.bd-king-r7.com/health
+curl -I https://www.bd-king-r7.com/
 ```
 
-Then open `https://www.tamanna.com` in a browser and test the chat and account
+Then open `https://www.bd-king-r7.com` in a browser and test the chat and account
 flows. A successful `/health` response proves only that the health endpoint
 responds; it does not prove Gemini credentials, every feature, or account
 security is correct.
