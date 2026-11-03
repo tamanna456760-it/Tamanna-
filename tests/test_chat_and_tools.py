@@ -66,8 +66,9 @@ def test_chat_api_returns_503_without_model_key(monkeypatch, tmp_path):
     monkeypatch.delenv("TAMANNA_MODEL_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     from Main import app
+    _configure_chat_test_auth(monkeypatch, tmp_path)
     with TestClient(app) as client:
-        _create_chat_test_user(client, monkeypatch, tmp_path)
+        _create_chat_test_user(client)
         response = client.post("/api/chat", json={"message": "hello"})
         assert response.status_code == 503
         assert "not configured" in response.json()["detail"]
