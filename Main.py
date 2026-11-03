@@ -620,8 +620,10 @@ async def chat(request: ChatRequest, http_request: Request):
     save_chat(message, reply, conversation_id, user_id)
     return {
         "reply": reply,
+        "response": reply,
         "handled": True,
         "source": getattr(provider, "name", "model"),
+        "conversationId": conversation_id,
     }
 
 
@@ -631,7 +633,10 @@ async def chat_history(http_request: Request):
     if not auth_user:
         raise HTTPException(status_code=401, detail="Sign in required.")
     user_id = database.ensure_user(auth_user["email"], auth_user.get("name", ""))
-    return {"history": load_history(user_id=user_id)}
+    return {
+        "history": load_history(user_id=user_id),
+        "conversationId": f"user-{user_id}",
+    }
 
 
 @app.post("/api/tools/execute")

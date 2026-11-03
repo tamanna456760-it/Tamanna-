@@ -21,7 +21,7 @@ def test_tamanna_echo_requires_login(monkeypatch):
     assert response.json()["detail"] == "Sign in required."
 
 
-def test_public_routes_are_not_blocked_by_admin_middleware():
+def test_chat_route_requires_login():
     app = FastAPI()
     app.add_middleware(TamannaAccessControl)
 
@@ -31,5 +31,5 @@ def test_public_routes_are_not_blocked_by_admin_middleware():
 
     response = TestClient(app).post("/api/chat", json={"message": "hello"})
 
-    assert response.status_code == 200
-    assert response.json()["ok"] is True
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Sign in required."

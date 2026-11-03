@@ -18,18 +18,21 @@ class TestRequestMethods(unittest.TestCase):
         result = validate_api_request(
             method="GET",
             path="/api/chat",
+            authenticated=True,
         )
         self.assertTrue(result.allowed)
     def test_method_is_case_insensitive(self):
         result = validate_api_request(
             method="get",
             path="/api/chat",
+            authenticated=True,
         )
         self.assertTrue(result.allowed)
     def test_trace_method_is_rejected(self):
         result = validate_api_request(
             method="TRACE",
             path="/api/chat",
+            authenticated=True,
         )
         self.assertFalse(result.allowed)
         self.assertEqual(result.status_code, 405)
@@ -38,6 +41,7 @@ class TestRequestPaths(unittest.TestCase):
         result = validate_api_request(
             method="GET",
             path="/api/chat",
+            authenticated=True,
         )
         self.assertTrue(result.allowed)
     def test_path_traversal_is_rejected(self):
@@ -146,6 +150,7 @@ class TestResultFormat(unittest.TestCase):
         result = validate_api_request(
             method="GET",
             path="/api/chat",
+            authenticated=True,
         ).to_dict()
         self.assertEqual(
             set(result.keys()),

@@ -53,6 +53,7 @@ class TestAPIProtection(unittest.TestCase):
         result = validate_api_request(
             method="GET",
             path="/api/chat",
+            authenticated=True,
         )
         self.assertTrue(result.allowed)
     def test_unsupported_method_is_rejected(self):

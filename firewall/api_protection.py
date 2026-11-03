@@ -29,6 +29,8 @@ DEFAULT_PROTECTED_PREFIXES = (
     "/api/admin",
     "/api/security",
     "/api/firewall",
+    "/api/chat",
+    "/api/history",
 )
 _SAFE_PATH_RE = re.compile(r"^/[A-Za-z0-9._~!$&'()*+,;=:@%/\-]*$")
 @dataclass(frozen=True)
