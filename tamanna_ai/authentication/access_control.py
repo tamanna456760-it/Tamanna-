@@ -12,6 +12,7 @@ USER_ROUTES = {
     "/api/autonomous/repair", "/api/code-builder/apply",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
+    "/api/tamanna/echo",
 }
 ADMIN_ROUTES = {
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
@@ -19,6 +20,7 @@ ADMIN_ROUTES = {
     "/api/autonomous/repair", "/api/code-builder/apply",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
+    "/api/tamanna/echo",
 }
 
 class TamannaAccessControl:
