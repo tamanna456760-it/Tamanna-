@@ -1,8 +1,7 @@
-# =====================================================
-# Tamanna AI — Deployment Configuration
-# Owner: HM INSAN ALI
-# Domain: www.tamanna.com
-# =====================================================
+# Tamanna AI production deployment
+# Run from the repository root:
+# docker compose -f deploy/docker-compose.yml --env-file .env up -d --build
+
 services:
   tamanna-ai:
     build:
@@ -10,7 +9,6 @@ services:
       dockerfile: Dockerfile
     container_name: tamanna-ai
     restart: unless-stopped
-    # App is accessible only through the local host.
     ports:
       - "127.0.0.1:8000:8000"
     env_file:
@@ -20,11 +18,28 @@ services:
       PORT: "8000"
       TAMANNA_ENV: "production"
       PYTHONUNBUFFERED: "1"
+      TAMANNA_MEMORY_FILE: /app/data/tamanna_memory.json
+    volumes:
+      - tamanna_data:/app/data
     init: true
     security_opt:
       - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 30s
     networks:
       - tamanna-network
+
   nginx:
     image: nginx:stable
     container_name: tamanna-nginx
@@ -36,9 +51,14 @@ services:
       - ./nginx:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-      - tamanna-ai
+      tamanna-ai:
+        condition: service_healthy
     networks:
       - tamanna-network
+
 networks:
   tamanna-network:
     driver: bridge
+
+volumes:
+  tamanna_data:
