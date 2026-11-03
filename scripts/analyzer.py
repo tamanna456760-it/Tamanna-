@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Tamanna AI - Safe Code Analyzer
@@ -305,7 +304,10 @@ def main() -> int:
         return 0
 
     print()
-    print("Review findings manually; these checks are not a full security audit.")
+    print(
+        "Review findings manually; these checks are not a full "
+        "security audit."
+    )
 
     # Exit 1 means findings exist; exit 2 means analyzer execution failed.
     return 1
