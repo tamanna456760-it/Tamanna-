@@ -112,4 +112,4 @@ docker compose down
 
 ## Production deployment is a separate task
 
-Do not change the local `TAMANNA_COOKIE_SECURE=0` setting on an HTTPS production server. Production needs HTTPS, `TAMANNA_COOKIE_SECURE=1`, a strong unique session secret, correct trusted CORS origins, a private database backup plan, restricted admin access, and a reviewed reverse proxy/firewall. The repository push does not start a server or deploy `www.tamanna.com`.
+Do not change the local `TAMANNA_COOKIE_SECURE=0` setting on an HTTPS production server. Production needs HTTPS, `TAMANNA_COOKIE_SECURE=1`, a strong unique session secret, correct trusted CORS origins, a private database backup plan, restricted admin access, and a reviewed reverse proxy/firewall. The repository push does not start a server or deploy `www.bd-king-r7.com`.
