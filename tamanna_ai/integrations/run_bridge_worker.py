@@ -2,6 +2,13 @@
 import asyncio
 import os
 import time
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# The worker is a separate process from Main.py, so load the same private env file.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env", override=False)
 
 from tamanna_ai.integrations.bridge_worker import TamannaBridgeWorker
 
