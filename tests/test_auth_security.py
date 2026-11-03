@@ -45,10 +45,10 @@ def test_expired_signed_token_is_rejected(monkeypatch):
 
 
 def test_origin_allowlist_is_exact(monkeypatch):
-    monkeypatch.setenv("TAMANNA_CORS_ORIGINS", "https://www.tamanna.com,https://tamanna.com")
-    auth.check_origin(_request_with_origin("https://www.tamanna.com"))
+    monkeypatch.setenv("TAMANNA_CORS_ORIGINS", "https://www.bd-king-r7.com,https://bd-king-r7.com")
+    auth.check_origin(_request_with_origin("https://www.bd-king-r7.com"))
     with pytest.raises(Exception) as exc:
-        auth.check_origin(_request_with_origin("https://www.tamanna.com.evil.test"))
+        auth.check_origin(_request_with_origin("https://www.bd-king-r7.com.evil.test"))
     assert getattr(exc.value, "status_code", None) == 403
 
 
@@ -119,17 +119,17 @@ def test_cors_allows_only_exact_configured_origin(monkeypatch):
     allowed = client.options(
         "/api/chat",
         headers={
-            "Origin": "https://www.tamanna.com",
+            "Origin": "https://www.bd-king-r7.com",
             "Access-Control-Request-Method": "POST",
         },
     )
     assert allowed.status_code == 200
-    assert allowed.headers.get("access-control-allow-origin") == "https://www.tamanna.com"
+    assert allowed.headers.get("access-control-allow-origin") == "https://www.bd-king-r7.com"
 
     denied = client.options(
         "/api/chat",
         headers={
-            "Origin": "https://www.tamanna.com.attacker.invalid",
+            "Origin": "https://www.bd-king-r7.com.attacker.invalid",
             "Access-Control-Request-Method": "POST",
         },
     )
