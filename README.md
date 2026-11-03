@@ -78,3 +78,26 @@ docker compose down
 ```
 
 The container listens on port 8000 internally and is published on localhost port 8001 so it can run alongside the separate Tamanna Central Server, which uses localhost port 8000. Each repository has its own Compose project and data volume.
+
+## Optional Tor v3 onion access
+
+An optional Tor hidden-service container is included for the Tamanna AI application. It is separate from the Central Server repository and is started with this repository's Compose project.
+
+Start both the AI app and Tor service:
+
+```sh
+docker compose up --build -d
+docker compose ps
+```
+
+After the Tor container becomes healthy, read the **Tor-generated v3 hostname**:
+
+```sh
+docker compose exec -T tor cat /var/lib/tor/hidden_service/hostname
+```
+
+Tor creates and persists its private key in the `tamanna_tor_data` Docker volume. Back up that volume securely; losing the key changes the onion address. Do not publish or commit the private key.
+
+**Important about the requested name:** `bd-king-r7.onion` cannot be assigned like a normal DNS domain. A v3 onion address is derived from its cryptographic key. The service therefore generates its own valid `.onion` hostname. Getting the exact vanity name `bd-king-r7.onion` would require a matching vanity key-generation search and cannot be guaranteed by configuration alone. The generated hostname is the working address until such a key exists.
+
+The onion service forwards HTTP port 80 internally to the Tamanna AI app container. It does not expose a Tor SOCKS proxy or publish a public host port. Use Tor Browser to access the generated address.
