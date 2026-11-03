@@ -16,7 +16,6 @@ REQUIRED_FILES = (
     ".dockerignore",
     "CNAME",
     ".github/workflows/deploy.yml",
-    ".github/workflows/pages.yml",
     "deploy/docker-compose.yml",
     "deploy/nginx/tamanna-https.conf",
     "deploy/deploy.sh",
