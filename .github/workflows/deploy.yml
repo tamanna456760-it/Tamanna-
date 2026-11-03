@@ -35,3 +35,6 @@ jobs:
 
       - name: Validate Release Files
         run: python deploy/validate_release.py
+
+      - name: Validate Production Compose and Nginx Configuration
+        run: python deploy/validate_deployment.py
