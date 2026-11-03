@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-DOMAIN="bd-king-r7.com"
-WWW="www.bd-king-r7.com"
+DOMAIN="www.bd-king-r7.com"
 GITHUB="tamanna456760-it.github.io"
 
 echo "========== DOMAIN AUDIT =========="
@@ -13,14 +12,14 @@ echo "[2] Network"
 ping -c 2 1.1.1.1
 
 echo "[3] Nameserver"
-dig NS $DOMAIN +short
+dig NS bd-king-r7.com +short
 
 echo "[4] Root DNS"
 dig $DOMAIN A +short
 
 echo "[5] WWW DNS"
-dig $WWW A +short
-dig $WWW CNAME +short
+dig $DOMAIN A +short
+dig $DOMAIN CNAME +short
 
 echo "[6] DNSSEC"
 dig $DOMAIN DNSKEY +short
@@ -29,7 +28,7 @@ echo "[7] GitHub Pages"
 curl -IL --max-time 20 https://$GITHUB/Tamanna-/
 
 echo "[8] Custom Domain HTTPS"
-curl -vkI --max-time 20 https://$WWW
+curl -vkI --max-time 20 https://$DOMAIN
 
 echo "[9] Certificate"
 echo | openssl s_client \
