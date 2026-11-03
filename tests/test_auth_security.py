@@ -86,3 +86,17 @@ def test_command_execution_routes_are_disabled_even_for_admin(monkeypatch):
     client = TestClient(app)
     for path in access_control.BLOCKED_EXECUTION_ROUTES:
         assert client.post(path, json={}).status_code == 410
+
+
+
+def test_admin_only_routes_reject_regular_authenticated_user(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "regular@example.com", "id": 2,
+    })
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.com")
+    client = TestClient(app)
+    for path in sorted(access_control.ADMIN_ROUTES - access_control.BLOCKED_EXECUTION_ROUTES):
+        response = client.post(path, json={})
+        assert response.status_code == 403, (path, response.status_code)

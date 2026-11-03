@@ -62,3 +62,27 @@ def test_tool_registry_rejects_unlisted_tools_and_logs(tmp_path, monkeypatch):
     records = [json.loads(x) for x in (tmp_path / "tool_calls.jsonl").read_text().splitlines()]
     assert records[-1]["tool"] == "shell"
     assert records[-1]["status"] == "error"
+
+
+
+def test_allowlisted_read_doc_call_is_logged_as_success(tmp_path, monkeypatch):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "readme.md").write_text("read-only", encoding="utf-8")
+    monkeypatch.setattr(safe_tools, "DOCS_DIR", docs)
+    monkeypatch.setattr(safe_tools, "LOG_PATH", tmp_path / "tool_calls.jsonl")
+    result = asyncio.run(safe_tools.execute_tool("read_doc", {"path": "readme.md"}))
+    assert result["result"]["content"] == "read-only"
+    record = json.loads((tmp_path / "tool_calls.jsonl").read_text().splitlines()[0])
+    assert record["tool"] == "read_doc"
+    assert record["status"] == "success"
+
+
+def test_web_search_without_provider_is_logged_and_returns_configuration_error(tmp_path, monkeypatch):
+    monkeypatch.delenv("TAMANNA_SEARCH_PROVIDER", raising=False)
+    monkeypatch.setattr(safe_tools, "LOG_PATH", tmp_path / "tool_calls.jsonl")
+    with pytest.raises(safe_tools.ToolConfigurationError):
+        asyncio.run(safe_tools.execute_tool("web_search", {"query": "Tamanna AI"}))
+    record = json.loads((tmp_path / "tool_calls.jsonl").read_text().splitlines()[0])
+    assert record["tool"] == "web_search"
+    assert record["status"] == "error"

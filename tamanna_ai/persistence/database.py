@@ -177,6 +177,10 @@ class Database:
                 return {"imported": 0, "backup": None, "status": "already_migrated"}
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         backup = path.with_name(path.name + ".bak." + stamp)
+        suffix = 1
+        while backup.exists():
+            backup = path.with_name(path.name + ".bak." + stamp + "." + str(suffix))
+            suffix += 1
         shutil.copy2(path, backup)
         try:
             raw = json.loads(path.read_text(encoding="utf-8"))
