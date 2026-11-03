@@ -12,7 +12,7 @@ echo "[2] Network"
 ping -c 2 1.1.1.1
 
 echo "[3] Nameserver"
-dig NS bd-king-r7.com +short
+dig NS $DOMAIN +short
 
 echo "[4] Root DNS"
 dig $DOMAIN A +short
