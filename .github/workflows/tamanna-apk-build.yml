@@ -1,4 +1,3 @@
-
 name: "Build Tamanna APK"
 
 on:
@@ -26,89 +25,115 @@ concurrency:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Android APK (when project is complete)
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Verify Android project
+      - name: Detect a complete Android Gradle project
+        id: android
+        shell: bash
         run: |
-          if [ ! -f gradlew ]; then
-            echo "ERROR: gradlew not found at repository root."
-            exit 1
+          set -euo pipefail
+          project_root=""
+
+          for candidate in "." "device" "tamanna-ai-app"; do
+            if [ -f "$candidate/gradlew" ] &&
+               { [ -f "$candidate/settings.gradle" ] || [ -f "$candidate/settings.gradle.kts" ]; } &&
+               { [ -f "$candidate/build.gradle" ] || [ -f "$candidate/build.gradle.kts" ]; } &&
+               { [ -f "$candidate/app/build.gradle" ] || [ -f "$candidate/app/build.gradle.kts" ]; }; then
+              project_root="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$project_root" ]; then
+            echo "project_root=" >> "$GITHUB_OUTPUT"
+            echo "::warning::APK build skipped: no complete Android Gradle project was found. Add gradlew, settings.gradle(.kts), root build.gradle(.kts), and app/build.gradle(.kts) before enabling APK builds."
+            {
+              echo "## Tamanna APK Build"
+              echo "- Result: SKIPPED (Android project is incomplete)"
+              echo "- Checked: repository root, device/, tamanna-ai-app/"
+              echo "- No APK was produced."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
 
-          if [ ! -d app ]; then
-            echo "ERROR: app/ directory not found at repository root."
-            exit 1
-          fi
-
-          chmod +x gradlew
+          echo "project_root=$project_root" >> "$GITHUB_OUTPUT"
+          echo "Detected Android project at: $project_root"
 
       - name: Set up Java
+        if: steps.android.outputs.project_root != ''
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
+          cache-dependency-path: ${{ steps.android.outputs.project_root }}/**/*.gradle*
 
       - name: Set up Android SDK
+        if: steps.android.outputs.project_root != ''
         uses: android-actions/setup-android@v3
 
       - name: Determine build type
+        if: steps.android.outputs.project_root != ''
         id: build_type
         env:
           INPUT_BUILD_TYPE: ${{ inputs.build_type }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           BUILD_TYPE="${INPUT_BUILD_TYPE:-debug}"
-
           if [ "$EVENT_NAME" != "workflow_dispatch" ]; then
             BUILD_TYPE="debug"
           fi
-
           if [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
             echo "ERROR: Unsupported build type."
             exit 1
           fi
-
           echo "value=$BUILD_TYPE" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK
-        if: steps.build_type.outputs.value == 'debug'
-        run: ./gradlew --no-daemon assembleDebug
+        if: steps.android.outputs.project_root != '' && steps.build_type.outputs.value == 'debug'
+        working-directory: ${{ steps.android.outputs.project_root }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
 
       - name: Build release APK
-        if: steps.build_type.outputs.value == 'release'
-        run: ./gradlew --no-daemon assembleRelease
+        if: steps.android.outputs.project_root != '' && steps.build_type.outputs.value == 'release'
+        working-directory: ${{ steps.android.outputs.project_root }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleRelease
 
       - name: Locate APK files
+        if: steps.android.outputs.project_root != ''
         id: apk
         env:
           BUILD_TYPE: ${{ steps.build_type.outputs.value }}
+          PROJECT_ROOT: ${{ steps.android.outputs.project_root }}
         run: |
-          APK_DIR="app/build/outputs/apk/$BUILD_TYPE"
-
+          set -euo pipefail
+          APK_DIR="$PROJECT_ROOT/app/build/outputs/apk/$BUILD_TYPE"
           if [ ! -d "$APK_DIR" ]; then
             echo "ERROR: Expected APK directory not found: $APK_DIR"
             exit 1
           fi
-
           mkdir -p packaged-apk
           find "$APK_DIR" -maxdepth 1 -type f -name '*.apk' -exec cp {} packaged-apk/ \;
-
           if [ -z "$(find packaged-apk -type f -name '*.apk' -print -quit)" ]; then
             echo "ERROR: Gradle did not produce an APK."
             exit 1
           fi
-
-          echo "APK files produced:"
           find packaged-apk -type f -name '*.apk' -print
 
       - name: Upload APK artifact
+        if: steps.android.outputs.project_root != ''
         uses: actions/upload-artifact@v4
         with:
           name: tamanna-apk-${{ steps.build_type.outputs.value }}-${{ github.run_id }}
@@ -117,13 +142,15 @@ jobs:
           retention-days: 14
 
       - name: Build summary
-        if: always()
+        if: always() && steps.android.outputs.project_root != ''
         env:
           BUILD_TYPE: ${{ steps.build_type.outputs.value }}
           JOB_STATUS: ${{ job.status }}
+          PROJECT_ROOT: ${{ steps.android.outputs.project_root }}
         run: |
           {
             echo "## Tamanna APK Build"
+            echo "- Project: $PROJECT_ROOT"
             echo "- Build type: ${BUILD_TYPE:-unknown}"
             echo "- Branch: $GITHUB_REF_NAME"
             echo "- Commit: $GITHUB_SHA"
