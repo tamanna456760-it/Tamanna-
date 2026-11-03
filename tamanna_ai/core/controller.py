@@ -1,7 +1,7 @@
 """Tamanna AI Core Controller: Echo + Brain + Memory."""
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from tamanna_ai.brain.brain import knowledge_brain
 from tamanna_ai.tools.echo_power import tamanna_echo, power_status
@@ -10,19 +10,26 @@ from tamanna_ai.tools.echo_power import tamanna_echo, power_status
 class TamannaController:
     """Coordinate basic responses, knowledge and system status."""
 
-    def __init__(self):
-        self.brain = knowledge_brain
+    def __init__(self, brain: Optional[Any] = None):
+        # Dependency injection keeps tests and future per-user sessions isolated.
+        self.brain = brain if brain is not None else knowledge_brain
 
     def respond(self, message: str) -> Dict[str, Any]:
-        message = message.strip()
+        """Handle a text command and return a stable response dictionary."""
+        if not isinstance(message, str):
+            return {
+                "ok": False,
+                "reply": "Message must be text.",
+            }
 
+        message = message.strip()
         if not message:
             return {
                 "ok": False,
                 "reply": "Please enter a message.",
             }
 
-        lowered = message.lower()
+        lowered = message.casefold()
 
         if lowered in {"status", "power", "system status"}:
             return {
@@ -33,7 +40,6 @@ class TamannaController:
 
         if lowered.startswith("remember "):
             item = message[len("remember "):].strip()
-
             if not item:
                 return {
                     "ok": False,
@@ -56,7 +62,6 @@ class TamannaController:
             }
 
         thought = self.brain.think(message)
-
         return {
             "ok": True,
             "reply": tamanna_echo(
