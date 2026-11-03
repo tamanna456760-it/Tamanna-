@@ -1,5 +1,3 @@
-File: ids/run_tests.py
-
 """
 Tamanna AI IDS Test Runner.
 Project: Tamanna AI

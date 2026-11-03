@@ -1,5 +1,3 @@
-File: ids/ids_manager.py
-
 """
 Tamanna AI Intrusion Detection System Manager.
 Coordinates event collection, intrusion detection, and alert management.

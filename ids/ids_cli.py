@@ -1,5 +1,3 @@
-File: ids/ids_cli.py
-
 """
 Tamanna AI IDS Command-Line Interface.
 Project: Tamanna AI

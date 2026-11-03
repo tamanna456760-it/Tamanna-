@@ -1,5 +1,3 @@
-File: ids/config_loader.py
-
 """
 Tamanna AI IDS Configuration Loader.
 Project: Tamanna AI
