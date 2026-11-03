@@ -1,8 +1,6 @@
 name: Run Full AI System
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:
