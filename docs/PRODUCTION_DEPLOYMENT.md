@@ -38,7 +38,7 @@ Edit `.env` on the server only. Set a newly generated
 your Gemini API key if required, and the production values:
 
 ```dotenv
-TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com,https://bd-king-r7.com
+TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com
 TAMANNA_COOKIE_SECURE=1
 TAMANNA_SESSION_SECRET=REPLACE_WITH_GENERATED_RANDOM_SECRET
 TAMANNA_ADMIN_EMAIL=YOUR_VERIFIED_ADMIN_EMAIL
@@ -62,7 +62,7 @@ then run standalone issuance while ports 80 and 443 are free:
 ```bash
 sudo certbot certonly --standalone \
   --cert-name www.bd-king-r7.com \
-  -d www.bd-king-r7.com -d bd-king-r7.com \
+  -d www.bd-king-r7.com \
   --agree-tos --no-eff-email
 ```
 
