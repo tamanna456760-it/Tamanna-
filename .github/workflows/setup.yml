@@ -141,44 +141,44 @@ jobs:
 
 
       # ==========================================================
-      # RESTORE .NET
+      # RESTORE AND BUILD EACH .NET PROJECT
       # ==========================================================
-      - name: Restore .NET
+      - name: Restore and Build .NET Projects
         if: env.DOTNET_PROJECT_FOUND == 'true'
         shell: bash
         run: |
-          set -e
-
-          dotnet restore
+          set -Eeuo pipefail
+          count=0
+          while IFS= read -r -d '' project; do
+            count=$((count + 1))
+            echo "===== RESTORE: $project ====="
+            dotnet restore "$project"
+            echo "===== BUILD: $project ====="
+            dotnet build "$project" --configuration Release --no-restore
+          done < <(find . -type f -name '*.csproj' \
+            -not -path '*/obj/*' -not -path '*/bin/*' -print0)
+          test "$count" -gt 0
+          echo "PASS: restored and built $count .NET project(s)"
 
 
       # ==========================================================
-      # BUILD .NET
+      # TEST .NET TEST PROJECTS WHEN PRESENT
       # ==========================================================
-      - name: Build .NET
+      - name: Test .NET Projects
         if: env.DOTNET_PROJECT_FOUND == 'true'
         shell: bash
         run: |
-          set -e
-
-          dotnet build \
-            --configuration Release \
-            --no-restore
-
-
-      # ==========================================================
-      # TEST .NET
-      # ==========================================================
-      - name: Test .NET
-        if: env.DOTNET_PROJECT_FOUND == 'true'
-        shell: bash
-        run: |
-          set -e
-
-          dotnet test \
-            --configuration Release \
-            --no-build \
-            --verbosity normal
+          set -Eeuo pipefail
+          tested=0
+          while IFS= read -r -d '' project; do
+            if grep -qE 'Microsoft.NET.Test.Sdk|<IsTestProject>true</IsTestProject>' "$project"; then
+              echo "===== TEST: $project ====="
+              dotnet test "$project" --configuration Release --no-build --verbosity normal
+              tested=$((tested + 1))
+            fi
+          done < <(find . -type f -name '*.csproj' \
+            -not -path '*/obj/*' -not -path '*/bin/*' -print0)
+          echo "Test projects executed: $tested"
 
 
       # ==========================================================
