@@ -86,10 +86,11 @@ jobs:
           sys.exit(bool(failures))
           PY
 
-      - name: Install project requirements
+      - name: Install server and test requirements
         id: install
-        continue-on-error: true
-        run: python -m pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-test.txt
 
       - name: Run pytest
         id: pytest
