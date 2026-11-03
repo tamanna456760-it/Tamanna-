@@ -110,3 +110,28 @@ def test_auth_rate_limit_fails_with_clear_503_when_session_secret_missing(monkey
     with pytest.raises(Exception) as exc:
         auth.rate_limit_auth(request, "login")
     assert getattr(exc.value, "status_code", None) == 503
+
+
+
+def test_cors_allows_only_exact_configured_origin(monkeypatch):
+    from Main import app
+    client = TestClient(app)
+    allowed = client.options(
+        "/api/chat",
+        headers={
+            "Origin": "https://www.tamanna.com",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert allowed.status_code == 200
+    assert allowed.headers.get("access-control-allow-origin") == "https://www.tamanna.com"
+
+    denied = client.options(
+        "/api/chat",
+        headers={
+            "Origin": "https://www.tamanna.com.attacker.invalid",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert denied.status_code == 400
+    assert "access-control-allow-origin" not in denied.headers

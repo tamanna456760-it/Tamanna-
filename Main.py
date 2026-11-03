@@ -361,13 +361,7 @@ for _origin in _raw_cors_origins.split(","):
 if not CORS_ORIGINS:
     raise RuntimeError("No valid TAMANNA_CORS_ORIGINS configured; refusing unsafe CORS configuration.")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
-)
+# CORS middleware is installed last (outermost) after security middleware below.
 
 
 
@@ -2893,3 +2887,12 @@ except Exception as tamanna_access_error:
 # Request body limit is applied outside authentication and route handlers.
 from tamanna_ai.security.request_limits import RequestSizeLimitMiddleware
 app.add_middleware(RequestSizeLimitMiddleware)
+
+# CORS is outermost so even auth and request-limit errors receive the correct headers.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
