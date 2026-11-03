@@ -47,5 +47,10 @@ jobs:
       - name: Run Core Controller and Access-Control Regression Tests
         run: python -m pytest -q tests/test_tamanna_controller.py tests/test_access_control.py
 
+      - name: Audit Repository Structure
+        run: |
+          python scripts/repository_structure_audit.py --format json --output repository-structure-audit.json
+          python -m pytest -q tests/test_repository_structure_audit.py
+
       - name: Check Patch Whitespace
         run: git diff --check
