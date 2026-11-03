@@ -21,11 +21,11 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          echo "Checking https://www.tamanna.com/health"
+          echo "Checking https://www.bd-king-r7.com/health"
           curl --fail --show-error --silent --location --max-time 20 \
             --output /tmp/tamanna-health.json \
             --write-out "HTTP %{http_code}; total %{time_total}s\n" \
-            https://www.tamanna.com/health
+            https://www.bd-king-r7.com/health
           cat /tmp/tamanna-health.json
           echo
           echo "PASS: production health endpoint responded successfully."
