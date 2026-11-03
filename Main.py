@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,6 +18,8 @@ import uvicorn
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=False)
+
+from tamanna_ai.authentication.router import COOKIE, current_user
 
 from tamanna_ai.persistence.database import (
     database,
@@ -375,7 +377,6 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     message: str
-    conversation_id: str | None = None
 
 
 class ToolRequest(BaseModel):
@@ -453,18 +454,18 @@ async def status():
 # LOAD CHAT HISTORY
 # ============================================================
 
-def load_history():
+def load_history(user_id=None):
     """Return the legacy-compatible chat-history representation from SQLite."""
-    return database_load_history()
+    return database_load_history(user_id=user_id)
 
 
 # ============================================================
 # SAVE CHAT
 # ============================================================
 
-def save_chat(user_message, ai_reply, conversation_id="default"):
-    """Persist a user/assistant pair in SQLite."""
-    database_save_chat(user_message, ai_reply, conversation_id)
+def save_chat(user_message, ai_reply, conversation_id="default", user_id=None):
+    """Persist a user/assistant pair in the authenticated user's SQLite conversation."""
+    database_save_chat(user_message, ai_reply, conversation_id, user_id)
     print("[DATABASE] Saved chat pair to SQLite")
 
 
@@ -599,7 +600,7 @@ def generate_reply(message):
 # ============================================================
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, http_request: Request):
     message = request.message.strip()
     if not message:
         return {"reply": "দয়া করে একটি মেসেজ লিখুন।"}
@@ -617,12 +618,26 @@ async def chat(request: ChatRequest):
         print("[TAMANNA AI] Model request failed:", type(exc).__name__)
         raise HTTPException(status_code=502, detail="AI model provider failed.") from exc
 
-    save_chat(message, reply, request.conversation_id or "default")
+    auth_user = current_user(http_request.cookies.get(COOKIE))
+    if not auth_user:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    user_id = database.ensure_user(auth_user["email"], auth_user.get("name", ""))
+    conversation_id = f"user-{user_id}"
+    save_chat(message, reply, conversation_id, user_id)
     return {
         "reply": reply,
         "handled": True,
         "source": getattr(provider, "name", "model"),
     }
+
+
+@app.get("/api/history")
+async def chat_history(http_request: Request):
+    auth_user = current_user(http_request.cookies.get(COOKIE))
+    if not auth_user:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    user_id = database.ensure_user(auth_user["email"], auth_user.get("name", ""))
+    return {"history": load_history(user_id=user_id)}
 
 
 @app.post("/api/tools/execute")

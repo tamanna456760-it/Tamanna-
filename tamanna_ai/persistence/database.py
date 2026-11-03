@@ -103,7 +103,26 @@ class Database:
             connection.exec_driver_sql("SELECT 1")
         return True
 
-    def save_chat_pair(self, user_message: str, assistant_reply: str, conversation_id: str = "default") -> str:
+    def ensure_user(self, email: str, name: str = "") -> int:
+        if not isinstance(email, str) or "@" not in email:
+            raise ValueError("A valid user email is required")
+        self.init()
+        normalized_email = email.strip().lower()
+        with self.Session.begin() as session:
+            user = session.scalar(select(User).where(User.email == normalized_email))
+            if user is None:
+                user = User(email=normalized_email, name=(name or "").strip()[:80] or None)
+                session.add(user)
+                session.flush()
+            elif name and user.name != name.strip()[:80]:
+                user.name = name.strip()[:80]
+            user_id = user.id
+        return user_id
+
+    def save_chat_pair(
+        self, user_message: str, assistant_reply: str,
+        conversation_id: str = "default", user_id: int | None = None,
+    ) -> str:
         if not isinstance(user_message, str) or not isinstance(assistant_reply, str):
             raise TypeError("Chat messages must be strings")
         conversation_id = (conversation_id or "default")[:64]
@@ -111,8 +130,10 @@ class Database:
             conversation = session.get(Conversation, conversation_id)
             if conversation is None:
                 title = user_message[:197] + "..." if len(user_message) > 200 else user_message or "New conversation"
-                conversation = Conversation(id=conversation_id, title=title)
+                conversation = Conversation(id=conversation_id, user_id=user_id, title=title)
                 session.add(conversation)
+            elif conversation.user_id != user_id:
+                raise PermissionError("Conversation does not belong to this user")
             conversation.updated_at = utcnow()
             session.add_all([
                 Message(conversation_id=conversation_id, role="user", content=user_message),
@@ -120,11 +141,15 @@ class Database:
             ])
         return conversation_id
 
-    def load_history(self, conversation_id: str | None = None) -> list[dict[str, str]]:
+    def load_history(
+        self, conversation_id: str | None = None, user_id: int | None = None
+    ) -> list[dict[str, str]]:
         with self.Session() as session:
-            statement = select(Message).order_by(Message.created_at, Message.id)
+            statement = select(Message).join(Conversation).order_by(Message.created_at, Message.id)
             if conversation_id:
                 statement = statement.where(Message.conversation_id == conversation_id)
+            if user_id is not None:
+                statement = statement.where(Conversation.user_id == user_id)
             messages = list(session.scalars(statement))
         history: list[dict[str, str]] = []
         pending_user: Message | None = None
@@ -227,12 +252,17 @@ def migrate_legacy_json(json_path: str | Path) -> dict[str, object]:
     return database.migrate_legacy_json(json_path)
 
 
-def save_chat(user_message: str, assistant_reply: str, conversation_id: str = "default") -> str:
-    return database.save_chat_pair(user_message, assistant_reply, conversation_id)
+def save_chat(
+    user_message: str, assistant_reply: str, conversation_id: str = "default",
+    user_id: int | None = None,
+) -> str:
+    return database.save_chat_pair(user_message, assistant_reply, conversation_id, user_id)
 
 
-def load_history(conversation_id: str | None = None) -> list[dict[str, str]]:
-    return database.load_history(conversation_id)
+def load_history(
+    conversation_id: str | None = None, user_id: int | None = None
+) -> list[dict[str, str]]:
+    return database.load_history(conversation_id, user_id)
 
 
 __all__ = [

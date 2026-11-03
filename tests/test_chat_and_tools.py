@@ -24,27 +24,48 @@ def test_mock_provider_is_restricted_to_test_environment(monkeypatch):
     assert asyncio.run(get_model_provider().generate("hello")) == "Mock response: hello"
 
 
-def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch):
+def _create_chat_test_user(client, monkeypatch, tmp_path):
+    from tamanna_ai.authentication import router as auth_router
+    import secrets
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
+    monkeypatch.setattr(auth_router, "COOKIE_SECURE", False)
+    monkeypatch.setattr(auth_router, "DB", tmp_path / ("auth-" + secrets.token_hex(4) + ".sqlite3"))
+    response = client.post("/api/auth/signup", json={
+        "email": "chat-" + secrets.token_hex(4) + "@example.test",
+        "name": "Chat Test",
+        "password": "a-long-test-password-123",
+    })
+    assert response.status_code == 201, response.text
+
+
+def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch, tmp_path):
     monkeypatch.setenv("TAMANNA_ENV", "test")
     monkeypatch.setenv("TAMANNA_MODEL_PROVIDER", "mock")
     from Main import app
-    response = TestClient(app).post("/api/chat", json={"message": "hello"})
-    assert response.status_code == 200
-    assert response.json() == {
-        "reply": "Mock response: hello",
-        "handled": True,
-        "source": "mock",
-    }
+    with TestClient(app) as client:
+        _create_chat_test_user(client, monkeypatch, tmp_path)
+        response = client.post("/api/chat", json={"message": "hello"})
+        assert response.status_code == 200, response.text
+        assert response.json() == {
+            "reply": "Mock response: hello",
+            "handled": True,
+            "source": "mock",
+        }
+        history = client.get("/api/history")
+        assert history.status_code == 200
+        assert history.json()["history"][-1]["user"] == "hello"
 
 
-def test_chat_api_returns_503_without_model_key(monkeypatch):
+def test_chat_api_returns_503_without_model_key(monkeypatch, tmp_path):
     monkeypatch.setenv("TAMANNA_MODEL_PROVIDER", "gemini")
     monkeypatch.delenv("TAMANNA_MODEL_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     from Main import app
-    response = TestClient(app).post("/api/chat", json={"message": "hello"})
-    assert response.status_code == 503
-    assert "not configured" in response.json()["detail"]
+    with TestClient(app) as client:
+        _create_chat_test_user(client, monkeypatch, tmp_path)
+        response = client.post("/api/chat", json={"message": "hello"})
+        assert response.status_code == 503
+        assert "not configured" in response.json()["detail"]
 
 
 def test_read_doc_is_confined_to_docs_and_logs_calls(tmp_path, monkeypatch):
@@ -90,3 +111,10 @@ def test_web_search_without_provider_is_logged_and_returns_configuration_error(t
     record = json.loads((tmp_path / "tool_calls.jsonl").read_text().splitlines()[0])
     assert record["tool"] == "web_search"
     assert record["status"] == "error"
+
+
+
+def test_history_endpoint_requires_authentication():
+    from Main import app
+    response = TestClient(app).get("/api/history")
+    assert response.status_code == 401

@@ -5,6 +5,7 @@ from starlette.responses import JSONResponse
 from tamanna_ai.authentication.router import COOKIE, current_user
 
 USER_ROUTES = {
+    "/api/chat", "/api/history",
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
     "/api/code-builder/propose",
     "/api/self-improvement/analyze", "/api/self-healing/diagnose",
@@ -14,6 +15,8 @@ USER_ROUTES = {
     "/api/linux/run", "/api/linux/shell", "/api/command",
     "/api/tamanna/echo", "/api/tools/execute",
 }
+READ_ROUTES = {"/api/history"}
+
 BLOCKED_EXECUTION_ROUTES = {
     "/api/linux/run",
     "/api/linux/shell",
@@ -39,10 +42,16 @@ class TamannaAccessControl:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scope.get("type") != "http" or scope.get("method") not in {"POST", "PUT", "PATCH", "DELETE"}:
+        if scope.get("type") != "http":
             await self.app(scope, receive, send)
             return
+        method = scope.get("method", "")
         path = scope.get("path", "")
+        is_write = method in {"POST", "PUT", "PATCH", "DELETE"} and path in USER_ROUTES
+        is_protected_read = method == "GET" and path in READ_ROUTES
+        if not (is_write or is_protected_read):
+            await self.app(scope, receive, send)
+            return
         if path in BLOCKED_EXECUTION_ROUTES:
             response = JSONResponse(
                 {"detail": "This command-execution endpoint is disabled for safety."},
