@@ -2,10 +2,6 @@
 name: Tamanna AI Debug
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
