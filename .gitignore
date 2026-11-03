@@ -44,3 +44,14 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Nested language/build outputs
+**/bin/
+**/obj/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/*.egg-info/
+**/.next/
+**/.turbo/
+**/coverage/
