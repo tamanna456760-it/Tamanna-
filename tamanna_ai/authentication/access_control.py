@@ -20,6 +20,9 @@ BLOCKED_EXECUTION_ROUTES = {
     "/api/command",
     "/api/code-builder/build",
     "/api/code-builder/compile",
+    "/api/autonomous/build",
+    "/api/autonomous/repair",
+    "/api/self-healing/cycle",
 }
 
 ADMIN_ROUTES = {

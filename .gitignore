@@ -64,3 +64,7 @@ Main.py.backup-*
 
 # Installed Python environments must not be committed
 **/site-packages/
+
+# Private chat-history backups created during the JSON-to-SQLite migration
+data/chat_history.json
+data/chat_history.json.bak.*

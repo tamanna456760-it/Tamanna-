@@ -592,25 +592,7 @@ def generate_reply(message):
     )
 
 
-# ============================================================
-# CHAT ACTION LAYER
-# ============================================================
-
-try:
-    from data.chat_action.natural_action_router import (
-        route_chat_action,
-    )
-
-    print("[TAMANNA AI] Natural Chat Action Layer: ONLINE")
-
-except Exception as exc:
-    route_chat_action = None
-
-    print(
-        "[TAMANNA AI] Natural Chat Action Layer ERROR:",
-        exc,
-    )
-
+# Chat requests are handled only by the configured model provider.
 
 # ============================================================
 # CHAT API

@@ -49,3 +49,11 @@ def test_memory_table_accepts_persistent_records(tmp_path):
     with db.Session() as session:
         assert session.query(Memory).one().content == "remember this"
         assert session.query(User).one().email == "test@example.com"
+
+
+
+def test_database_memory_api_persists_and_lists_memories(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "persistent-memory.sqlite3").as_posix())
+    memory_id = db.add_memory("keep this", metadata={"source": "test"})
+    assert memory_id > 0
+    assert db.list_memories() == ["keep this"]
