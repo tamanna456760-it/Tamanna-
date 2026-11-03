@@ -14,13 +14,13 @@ cat CNAME 2>/dev/null
 
 
 echo "--- DNS Google ---"
-dig www.tamanna.com @8.8.8.8
+dig www.bd-king-r7.com @8.8.8.8
 echo "--- DNS Cloudflare ---"
-dig www.tamanna.com @1.1.1.1
+dig www.bd-king-r7.com @1.1.1.1
 
 
 echo "--- HTTPS Headers ---"
-curl -vkI --connect-timeout 15 https://www.tamanna.com
+curl -vkI --connect-timeout 15 https://www.bd-king-r7.com
 
 
 echo "--- GitHub Pages Origin ---"
@@ -29,8 +29,8 @@ curl -I --connect-timeout 15 https://tamanna456760-it.github.io/Tamanna-/
 
 echo "--- SSL Certificate ---"
 echo | openssl s_client \
--connect www.tamanna.com:443 \
--servername www.tamanna.com 2>/dev/null \
+-connect www.bd-king-r7.com:443 \
+-servername www.bd-king-r7.com 2>/dev/null \
 | openssl x509 -noout -subject -issuer -dates
 
 
