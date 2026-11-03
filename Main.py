@@ -10,13 +10,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
 
-from tamanna_ai.persistence.database import (
-    database,
-    init_database,
-    load_history as database_load_history,
-    migrate_legacy_json,
-    save_chat as database_save_chat,
-)
 
 
 # ============================================================
@@ -25,6 +18,14 @@ from tamanna_ai.persistence.database import (
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=False)
+
+from tamanna_ai.persistence.database import (
+    database,
+    init_database,
+    load_history as database_load_history,
+    migrate_legacy_json,
+    save_chat as database_save_chat,
+)
 
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -2892,3 +2893,8 @@ except Exception as tamanna_access_error:
 # ============================================================
 # END TAMANNA PRIVILEGED API ACCESS CONTROL
 # ============================================================
+
+
+# Request body limit is applied outside authentication and route handlers.
+from tamanna_ai.security.request_limits import RequestSizeLimitMiddleware
+app.add_middleware(RequestSizeLimitMiddleware)

@@ -14,6 +14,14 @@ USER_ROUTES = {
     "/api/linux/run", "/api/linux/shell", "/api/command",
     "/api/tamanna/echo", "/api/tools/execute",
 }
+BLOCKED_EXECUTION_ROUTES = {
+    "/api/linux/run",
+    "/api/linux/shell",
+    "/api/command",
+    "/api/code-builder/build",
+    "/api/code-builder/compile",
+}
+
 ADMIN_ROUTES = {
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
     "/api/code-builder/propose", "/api/self-healing/cycle", "/api/autonomous/build",
@@ -32,6 +40,13 @@ class TamannaAccessControl:
             await self.app(scope, receive, send)
             return
         path = scope.get("path", "")
+        if path in BLOCKED_EXECUTION_ROUTES:
+            response = JSONResponse(
+                {"detail": "This command-execution endpoint is disabled for safety."},
+                status_code=410,
+            )
+            await response(scope, receive, send)
+            return
         if path not in USER_ROUTES:
             await self.app(scope, receive, send)
             return

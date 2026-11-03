@@ -59,7 +59,13 @@ def password_ok(password, stored):
     try:
         algo, rounds, salt, digest = stored.split("$", 3)
         if algo != "pbkdf2": return False
-        actual = hashlib.pbkdf2_hmac("sha256", password.encode(), base64.urlsafe_b64decode(salt), int(rounds))
+        iterations = int(rounds)
+        if not 100000 <= iterations <= 1000000:
+            return False
+        decoded_salt = base64.urlsafe_b64decode(salt)
+        if len(decoded_salt) != 16:
+            return False
+        actual = hashlib.pbkdf2_hmac("sha256", password.encode(), decoded_salt, iterations)
         return hmac.compare_digest(actual, base64.urlsafe_b64decode(digest))
     except (ValueError, TypeError): return False
 
