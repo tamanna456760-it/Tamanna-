@@ -6,9 +6,8 @@ Backend: FastAPI + Docker Compose + Nginx
 
 ## Hosting model
 
-The production target is the user's own server. GitHub Pages is optional and its
-workflow is manual-only; do not enable it as the production publisher while the
-same domain is routed to the self-hosted Nginx server.
+The production target is the user's own server. GitHub Pages is not part of the
+production deployment path; the self-hosted Nginx server owns the website domain.
 
 The FastAPI application serves the chat UI and API from the same origin.
 Nginx is the public entry point on ports 80 and 443. The application port 8000
@@ -156,8 +155,8 @@ Protect the backup as private user data and store it outside the public web root
 Docker Compose configuration validation, and a local image build. It does not
 publish an image, connect to the server, restart services, or deploy changes.
 
-`.github/workflows/pages.yml` is manual-only and optional. It must not be
-used as the production publisher while the self-hosted server owns the domain.
+GitHub Pages is intentionally not required or deployed by this self-hosted
+workflow. Keep the production domain routed to the user's own Nginx server.
 
 ## Troubleshooting
 
