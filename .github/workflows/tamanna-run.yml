@@ -17,11 +17,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install server dependencies
-        run: python -m pip install -r requirements-server.txt
+      - name: Install runtime and test dependencies
+        run: python -m pip install -r requirements-test.txt
       - name: Compile application
         run: python -m compileall -q Main.py main.py tamanna_ai data modules
       - name: Run tests
         run: python -m pytest -q
       - name: Explain runtime boundary
-        run: echo "CI validates code; it does not start a persistent production server or push logs."
+        run: echo "CI validates code; it does not start a persistent production server or push code."
