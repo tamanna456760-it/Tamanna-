@@ -1,4 +1,4 @@
-$domain = "bd-king-r7.com"
+$domain = "www.bd-king-r7.com"
 
 Write-Host "==============================================" 
 Write-Host "   BD-KING-R7 DOMAIN DIAGNOSTIC"
