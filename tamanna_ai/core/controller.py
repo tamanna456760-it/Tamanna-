@@ -38,7 +38,7 @@ class TamannaController:
                 "power": power_status(),
             }
 
-        if lowered.startswith("remember "):
+        if lowered == "remember" or lowered.startswith("remember "):
             item = message[len("remember "):].strip()
             if not item:
                 return {
