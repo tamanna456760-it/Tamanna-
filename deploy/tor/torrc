@@ -1,0 +1,8 @@
+# Optional Tor v3 onion service for the independent Tamanna AI application.
+# Tor generates the hostname and private key on first startup.
+DataDirectory /var/lib/tor
+HiddenServiceDir /var/lib/tor/hidden_service
+HiddenServiceVersion 3
+HiddenServicePort 80 tamanna-ai:8000
+SocksPort 0
+Log notice stdout
