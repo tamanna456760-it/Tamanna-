@@ -1,7 +1,14 @@
 """Regression tests for AgentManager."""
 import pytest
 
+from tamanna_ai.agents import AgentManager as ExportedAgentManager
+from tamanna_ai.agents import agent_manager as shared_agent_manager
 from tamanna_ai.agents.agent_manager import AgentManager
+
+
+def test_public_package_exports_manager():
+    assert ExportedAgentManager is AgentManager
+    assert isinstance(shared_agent_manager, AgentManager)
 
 
 def test_register_and_run_callable():
