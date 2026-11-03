@@ -21,7 +21,11 @@ class CoderAgent:
             return self._failure("Python source must be text.")
         if not source.strip():
             return self._failure("Python source is empty.")
-        if len(source.encode("utf-8")) > self.MAX_SOURCE_BYTES:
+        try:
+            source_size = len(source.encode("utf-8"))
+        except UnicodeEncodeError:
+            return self._failure("Python source must contain valid Unicode text.")
+        if source_size > self.MAX_SOURCE_BYTES:
             return self._failure(
                 f"Python source exceeds the {self.MAX_SOURCE_BYTES}-byte limit."
             )
