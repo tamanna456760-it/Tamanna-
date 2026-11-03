@@ -335,7 +335,7 @@ from urllib.parse import urlsplit
 
 _raw_cors_origins = os.getenv(
     "TAMANNA_CORS_ORIGINS",
-    "https://www.bd-king-r7.com,https://bd-king-r7.com",
+    "https://www.bd-king-r7.com",
 )
 CORS_ORIGINS = []
 for _origin in _raw_cors_origins.split(","):
