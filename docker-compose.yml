@@ -1,4 +1,3 @@
-
 services:
   tamanna-ai:
     build:
@@ -7,7 +6,7 @@ services:
     container_name: tamanna-ai
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
     environment:
@@ -16,6 +15,12 @@ services:
       TAMANNA_MEMORY_FILE: /app/data/tamanna_memory.json
     volumes:
       - tamanna_data:/app/data
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
     healthcheck:
       test:
         - CMD
