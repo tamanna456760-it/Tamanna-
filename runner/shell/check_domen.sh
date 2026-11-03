@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOMAIN="bd-king-r7.com"
+DOMAIN="www.bd-king-r7.com"
 
 echo "=============================================="
 echo "   BD-KING-R7 DOMAIN DIAGNOSTIC"
