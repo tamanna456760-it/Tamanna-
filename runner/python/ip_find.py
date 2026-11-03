@@ -1,6 +1,8 @@
 import json
 import logging
 import subprocess
+import ipaddress
+import shlex
 import threading
 import time
 
@@ -27,13 +29,22 @@ MAC_MAP = config.get("mac_map", {})  # optional: expected MAC per IP
 
 def run_cmd(cmd):
     try:
-        return subprocess.check_output(cmd, shell=True, text=True)
+        args = shlex.split(cmd)
+        if not args or args[0] != "sudo" or args[1:3] != ["ufw", "deny"]:
+            raise ValueError("command not allowed")
+        result = subprocess.run(args, shell=False, capture_output=True, text=True, timeout=10, check=False)
+        return result.stdout if result.returncode == 0 else result.stderr
     except Exception as e:
-        logging.error(f"Command failed: {cmd} | {e}")
+        logging.error("Firewall command failed: %s", type(e).__name__)
         return ""
 
 
 def block_ip(ip):
+    try:
+        ip = str(ipaddress.ip_address(ip))
+    except ValueError:
+        logging.error("Refusing invalid IP address")
+        return
     now = time.time()
 
     # rate-limit blocking
