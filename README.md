@@ -101,3 +101,10 @@ Tor creates and persists its private key in the `tamanna_tor_data` Docker volume
 **Important about the requested name:** `bd-king-r7.onion` cannot be assigned like a normal DNS domain. A v3 onion address is derived from its cryptographic key. The service therefore generates its own valid `.onion` hostname. Getting the exact vanity name `bd-king-r7.onion` would require a matching vanity key-generation search and cannot be guaranteed by configuration alone. The generated hostname is the working address until such a key exists.
 
 The onion service forwards HTTP port 80 internally to the Tamanna AI app container. It does not expose a Tor SOCKS proxy or publish a public host port. Use Tor Browser to access the generated address.
+
+
+## Central Server service protocol
+
+Tamanna AI includes a small internal client at `tamanna_ai/integrations/central_server.py` for the signed `tamanna-service/1` report protocol. Configure `TAMANNA_SERVER_URL`, `TAMANNA_SERVER_KEY_ID`, and `TAMANNA_SERVER_SHARED_SECRET` in the private `.env` file. The shared secret must exactly match `TAMANNA_SERVICE_SHARED_SECRET` in the separate Tamanna-server repository. Generate it locally with `openssl rand -hex 32`; never commit it.
+
+The client sends only the report payload you explicitly pass to `send_report(report)`. It does not run automatically, does not forward chat messages, and does not grant shell or remote code execution. Protocol specification: [Tamanna Central Server protocol v1](https://github.com/tamanna456760-it/Tamanna-server/blob/main/docs/TAMANNA_SERVICE_PROTOCOL_V1.md).
