@@ -72,13 +72,13 @@ def save_original_names(folder: Path, files: List[Path], prefix: str = "") -> No
     with open(csv_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["original_name", "size_bytes", "modified_date", "will_be_renamed_to"])
-        for fpath in files:
+        for serial, fpath in enumerate(files, start=1):
             stat = fpath.stat()
             writer.writerow([
                 fpath.name,
                 stat.st_size,
                 datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                f"{prefix}_{?}"  # placeholder, actual new name unknown yet
+                f"{prefix}_{serial:04d}{fpath.suffix}"
             ])
     print(f"💾 Saved original names (CSV): {csv_path}")
 

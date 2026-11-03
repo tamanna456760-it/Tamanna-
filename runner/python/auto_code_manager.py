@@ -33,14 +33,14 @@ class AutoCodeManager:
         name = input("আপনার গিটহাব ইউজারনেম: ")
         email = input("আপনার গিটহাব ইমেইল: ")
         
-        subprocess.run(["git", "config", "--global", "user.name", tamanna456760-it])
-        subprocess.run(["git", "config", "--global", "user.email", tamanna456760@gmail.com])
+        subprocess.run(["git", "config", "--global", "user.name", name], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", email], check=True)
         
         repo_name = input("রিপোজিটরির নাম (enter = my_ai_codes): ")
         if not repo_name:
             repo_name = "my_ai_codes"
             
-        self.github_url = f"https://github.com/{tamanna456760-it}/{tamanna-}.git"
+        self.github_url = "https://github.com/tamanna456760-it/tamanna-.git"
         
         # রিপোজিটরি তৈরি
         if not os.path.exists(self.repo_path):

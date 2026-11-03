@@ -118,6 +118,7 @@ def ai_network_manager():
 # SELF DECISION MONITOR
 # =========================
 def self_decision_monitor():
+    global MAX_UNITS
     while True:
         units = load(AI_UNITS_FILE)
         nodes = load(NODES_FILE)
@@ -128,7 +129,6 @@ def self_decision_monitor():
 
         # increase max units dynamically if system strong
         if total_power > 2000 and MAX_UNITS < 50000:
-            global MAX_UNITS
             MAX_UNITS += 100
             print(f"⚡ SYSTEM STRONG → MAX UNITS INCREASED: {MAX_UNITS}")
         time.sleep(3)

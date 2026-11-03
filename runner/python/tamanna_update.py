@@ -1,6 +1,18 @@
+"""Tamanna AI - Complete Interactive Kali Linux Manager.
 
-Tamanna AI - Complete Interactive Kali Linux Manager
-With Real-time Command Processing
+Interactive tool manager with optional monitoring and synchronization.
+"""
+
+import json
+import os
+import readline
+import subprocess
+import sys
+import threading
+import time
+from datetime import datetime
+
+import psutil
 
 
 class TamannaAI:

@@ -10,11 +10,11 @@ from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 
-warnings.filterwarnings('warking')
+warnings.filterwarnings('default')
 
 
 class BDKingAI:
-    def __init__(self, data=tamanna456760-it):
+    def __init__(self, data=None):
         self.system_name = "BD-KING-R7"
         self.version = "R7.2.1"
 
@@ -388,4 +388,10 @@ class BDKingAI:
         correlations = self._correlation_analysis()
         if correlations.get('high_correlations'):
             high_corr = correlations['high_correlations'][0]
-            insights.append(f"🔗 Strong correlation between {high_corr['
+            insights.append(
+                f"🔗 Strong correlation between {high_corr['variables'][0]} "
+                f"and {high_corr['variables'][1]} "
+                f"(correlation: {high_corr['correlation']})"
+            )
+
+        return insights
