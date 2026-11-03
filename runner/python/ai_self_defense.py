@@ -1,125 +1,49 @@
-import base64
+"""Read-only security scanner; automatic GitHub restoration is intentionally disabled."""
 import hashlib
-import time
-
+import os
 import requests
 
-GITHUB_TOKEN = 'তোমার_গিটহাব_টোকেন'
-REPO_OWNER = 'tamanna456760-it'
-REPO_NAME = 'tamanna-'
+OWNER = "tamanna456760-it"
+REPO = "Tamanna-"
+API = f"https://api.github.com/repos/{OWNER}/{REPO}"
+TIMEOUT = (5, 20)
+MAX_BYTES = 2 * 1024 * 1024
+DANGEROUS_KEYWORDS = ("os.system", "rm -rf", "eval(", "exec(", "chmod 777", "shell=True")
 
-HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
-}
 
-# 🚨 Suspicious keywords (danger detection)
-DANGEROUS_KEYWORDS = [
-    "os.system",
-    "rm -rf",
-    "subprocess",
-    "eval(",
-    "exec(",
-    "chmod 777",
-    "requests.post(",
-]
+def _headers():
+    headers = {"Accept": "application/vnd.github+json"}
+    token = os.getenv("TAMANNA_GITHUB_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
 
-# 📦 Backup storage
-backup_store = {}
 
 def generate_hash(content):
-    return hashlib.sha256(content.encode()).hexdigest()
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
 
 def is_dangerous(code):
-    for keyword in DANGEROUS_KEYWORDS:
-        if keyword in code:
-            return True
-    return False
+    return any(term in code for term in DANGEROUS_KEYWORDS)
 
-def backup_file(path, content):
-    backup_store[path] = content
-
-def restore_file(path):
-    return backup_store.get(path, None)
-
-def report_to_ai_master(data):
-    ai_master_url = "https://example.com/ai/security_report"
-    try:
-        requests.post(ai_master_url, json=data)
-    except:
-        print("AI Master communication failed")
 
 def scan_and_protect():
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents'
-    response = requests.get(url, headers=HEADERS)
-
-    if response.status_code != 200:
-        print("❌ Repo access failed")
-        return
-
-    files = response.json()
+    """Return a read-only report for the default branch; never modifies repository files."""
+    response = requests.get(f"{API}/git/trees/main?recursive=1", headers=_headers(), timeout=TIMEOUT)
+    response.raise_for_status()
+    tree = response.json()
+    if tree.get("truncated"):
+        raise RuntimeError("Git tree is truncated; scan is incomplete.")
     report = []
+    for item in tree.get("tree", []):
+        if item.get("type") != "blob" or item.get("size", MAX_BYTES + 1) > MAX_BYTES:
+            continue
+        path = item.get("path", "")
+        if any(part in {".git", ".venv", "venv", "node_modules", "__pycache__"} for part in path.split("/")):
+            continue
+        report.append({"file": path, "status": "review_required" if is_dangerous(path) else "not_scanned", "sha": item.get("sha")})
+    return {"mode": "read_only", "files_listed": len(report), "report": report, "automatic_restore": False, "github_write_enabled": False}
 
-    for file in files:
-        if file['type'] == 'file':
-            file_url = file['url']
-            res = requests.get(file_url, headers=HEADERS)
-
-            if res.status_code != 200:
-                continue
-
-            data = res.json()
-            content = base64.b64decode(data['content']).decode('utf-8')
-
-            file_hash = generate_hash(content)
-
-            # 📦 Backup first time
-            if file['path'] not in backup_store:
-                backup_file(file['path'], content)
-
-            # 🚨 Detect dangerous code
-            if is_dangerous(content):
-                print(f"⚠️ Dangerous code detected in {file['path']}")
-
-                safe_content = restore_file(file['path'])
-
-                if safe_content:
-                    update_file(file['path'], safe_content, "Restore safe version")
-
-                    report.append({
-                        "file": file['path'],
-                        "status": "restored (danger detected)"
-                    })
-                else:
-                    report.append({
-                        "file": file['path'],
-                        "status": "danger detected (no backup)"
-                    })
-            else:
-                report.append({
-                    "file": file['path'],
-                    "status": "safe"
-                })
-
-    report_to_ai_master(report)
-
-def update_file(path, new_content, message):
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}'
-
-    get_res = requests.get(url, headers=HEADERS)
-    if get_res.status_code != 200:
-        return
-
-    sha = get_res.json()['sha']
-
-    requests.put(url, headers=HEADERS, json={
-        "message": message,
-        "content": base64.b64encode(new_content.encode()).decode(),
-        "sha": sha
-    })
 
 if __name__ == "__main__":
-    while True:
-        print("🛡️ AI Self Defense Running...")
-        scan_and_protect()
-        time.sleep(10)
+    print(scan_and_protect())
