@@ -5,6 +5,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs" / "host.toml"
+ENV_EXAMPLE_PATH = ROOT / ".env.example"
 
 
 class TamannaHostConfigTests(unittest.TestCase):
@@ -36,6 +37,15 @@ class TamannaHostConfigTests(unittest.TestCase):
         security = self.config["security"]
         self.assertFalse(security["secrets_in_repository"])
         self.assertEqual(security["environment_file"], ".env")
+
+    def test_admin_email_is_configured_without_committing_secrets(self):
+        env_example = ENV_EXAMPLE_PATH.read_text(encoding="utf-8")
+        self.assertIn("TAMANNA_ADMIN_EMAIL=Tamanna456760@Gmail.com", env_example)
+        self.assertIn("TAMANNA_ADMIN_SIGNUP_TOKEN=", env_example)
+        self.assertIn(
+            "TAMANNA_SESSION_SECRET=CHANGE_ME_TO_A_RANDOM_SECRET_AT_LEAST_32_CHARACTERS",
+            env_example,
+        )
 
 
 if __name__ == "__main__":
