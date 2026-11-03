@@ -1,0 +1,28 @@
+# Tamanna AI self-hosted host profile.
+# Display name is preserved exactly as requested.
+# The lowercase hostname is suitable for Linux and DNS conventions.
+
+[host]
+name = "Tamanna"
+hostname = "tamanna"
+environment = "production"
+
+[application]
+name = "Tamanna AI"
+domain = "www.tamanna.com"
+backend = "FastAPI"
+bind_host = "127.0.0.1"
+port = 8000
+health_path = "/health"
+
+[deployment]
+provider = "self-hosted"
+container_runtime = "docker"
+compose_file = "deploy/docker-compose.yml"
+reverse_proxy = "nginx"
+tls_required = true
+
+[security]
+secrets_in_repository = false
+environment_file = ".env"
+persistent_data_path = "./data"
