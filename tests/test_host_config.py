@@ -3,6 +3,8 @@ from pathlib import Path
 import tomllib
 import unittest
 
+from deploy.preflight import REQUIRED_FILES
+
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs" / "host.toml"
 ENV_EXAMPLE_PATH = ROOT / ".env.example"
@@ -37,6 +39,10 @@ class TamannaHostConfigTests(unittest.TestCase):
         security = self.config["security"]
         self.assertFalse(security["secrets_in_repository"])
         self.assertEqual(security["environment_file"], ".env")
+
+    def test_self_hosted_preflight_does_not_require_github_pages(self):
+        self.assertIn(".github/workflows/deploy.yml", REQUIRED_FILES)
+        self.assertNotIn(".github/workflows/pages.yml", REQUIRED_FILES)
 
     def test_admin_email_is_configured_without_committing_secrets(self):
         env_example = ENV_EXAMPLE_PATH.read_text(encoding="utf-8")
