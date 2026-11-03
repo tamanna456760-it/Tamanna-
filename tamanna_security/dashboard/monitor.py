@@ -28,7 +28,7 @@ report["checks"]["project_files"]=count
 
 # Domain check (নিজের domain)
 try:
-    domain=subprocess.getoutput("curl -I -L --max-time 10 https://www.tamanna.com")
+    domain=subprocess.getoutput("curl -I -L --max-time 10 https://www.bd-king-r7.com")
     report["checks"]["domain_status"]=domain[:500]
 except:
     report["checks"]["domain_status"]="failed"
