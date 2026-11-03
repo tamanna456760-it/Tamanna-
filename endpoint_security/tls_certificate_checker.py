@@ -71,8 +71,8 @@ def main():
     )
     parser.add_argument(
         "--host",
-        default="www.tamanna.com",
-        help="Hostname to check (default: www.tamanna.com)",
+        default="www.bd-king-r7.com",
+        help="Hostname to check (default: www.bd-king-r7.com)",
     )
     parser.add_argument(
         "--port",
