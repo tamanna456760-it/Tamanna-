@@ -3,12 +3,20 @@ import json
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
+
+from tamanna_ai.persistence.database import (
+    database,
+    init_database,
+    load_history as database_load_history,
+    migrate_legacy_json,
+    save_chat as database_save_chat,
+)
 
 
 # ============================================================
@@ -30,19 +38,8 @@ except Exception as exc:
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
+# Legacy JSON is retained only as a migration source; active chat history uses SQLite.
 CHAT_FILE = DATA_DIR / "chat_history.json"
-
-
-# ============================================================
-# CREATE JSON FILE
-# ============================================================
-
-if not CHAT_FILE.exists():
-
-    CHAT_FILE.write_text(
-        "[]",
-        encoding="utf-8"
-    )
 
 
 # ============================================================
@@ -53,6 +50,15 @@ app = FastAPI(
     title="Tamanna AI",
     version="1.0.0"
 )
+
+
+@app.on_event("startup")
+def initialize_persistence():
+    init_database()
+    migration = migrate_legacy_json(CHAT_FILE)
+    if migration.get("status") == "migrated":
+        print("[DATABASE] Imported legacy chat history:", migration.get("imported"))
+    print("[DATABASE] SQLAlchemy SQLite storage: ready")
 
 # ============================================================
 # TAMANNA SKILL SYSTEM V1
@@ -438,53 +444,23 @@ async def status():
 # ============================================================
 
 def load_history():
-
-    try:
-
-        data = json.loads(
-            CHAT_FILE.read_text(
-                encoding="utf-8"
-            )
-        )
-
-        if isinstance(data, list):
-            return data
-
-    except Exception as error:
-
-        print(
-            f"[JSON] Read error: {error}"
-        )
-
-    return []
+    """Return the legacy-compatible chat-history representation from SQLite."""
+    return database_load_history()
 
 
 # ============================================================
 # SAVE CHAT
 # ============================================================
 
-def save_chat(user_message, ai_reply):
+def save_chat(user_message, ai_reply, conversation_id="default"):
+    """Persist a user/assistant pair in SQLite."""
+    database_save_chat(user_message, ai_reply, conversation_id)
+    print("[DATABASE] Saved chat pair to SQLite")
 
-    history = load_history()
 
-    history.append({
-        "time": datetime.now().isoformat(),
-        "user": user_message,
-        "assistant": ai_reply
-    })
-
-    CHAT_FILE.write_text(
-        json.dumps(
-            history,
-            ensure_ascii=False,
-            indent=2
-        ),
-        encoding="utf-8"
-    )
-
-    print(
-        f"[JSON] Saved -> {CHAT_FILE}"
-    )
+@app.get("/api/history")
+async def chat_history():
+    return {"history": load_history()}
 
 
 
@@ -2767,7 +2743,11 @@ except Exception as exc:
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    try:
+        database.ping()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Database is unavailable") from exc
+    return {"status": "ok", "service": "Tamanna AI", "storage": "sqlite"}
 
 # ============================================================
 # TAMANNA AI — ADVANCED CODE BUILDER V1
