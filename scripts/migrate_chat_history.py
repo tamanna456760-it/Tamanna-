@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Back up and import legacy data/chat_history.json into SQLAlchemy SQLite storage."""
 from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from tamanna_ai.persistence.database import database, migrate_legacy_json
 
