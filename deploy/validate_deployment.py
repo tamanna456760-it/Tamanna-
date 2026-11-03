@@ -13,7 +13,7 @@ PROJECT = "Tamanna AI"
 OWNER = "HM INSAN ALI"
 
 
-def validate_deployment(compose_path, nginx_path):
+def validate_deployment(compose_path, nginx_path, require_env=False):
     findings = []
     compose_file = Path(compose_path)
     nginx_file = Path(nginx_path)
@@ -54,12 +54,10 @@ def validate_deployment(compose_path, nginx_path):
             findings.append(
                 "Nginx must wait until the app healthcheck succeeds."
             )
-        if "../.env" in compose_text:
+        if require_env and "../.env" in compose_text:
             env_path = compose_file.parent / "../.env"
             if not env_path.resolve().is_file():
-                findings.append(
-                    "Referenced .env file does not exist (expected on server)."
-                )
+                findings.append("Required server .env file does not exist.")
 
     if nginx_text:
         required_nginx = {
@@ -97,12 +95,17 @@ def main():
         help="Path to Docker Compose YAML",
     )
     parser.add_argument(
+        "--require-env",
+        action="store_true",
+        help="Require the private server .env file to exist.",
+    )
+    parser.add_argument(
         "--nginx",
         default="deploy/nginx/tamanna-https.conf",
         help="Path to Nginx HTTPS configuration",
     )
     args = parser.parse_args()
-    report = validate_deployment(args.compose, args.nginx)
+    report = validate_deployment(args.compose, args.nginx, args.require_env)
     print(json.dumps(report, indent=2, ensure_ascii=False))
     raise SystemExit(0 if report["status"] == "PASS" else 1)
 
