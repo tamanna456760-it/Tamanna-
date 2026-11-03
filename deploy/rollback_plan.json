@@ -5,7 +5,7 @@
   "purpose": "Document a safe manual deployment rollback procedure",
   "mode": "manual_only",
   "automatic_rollback": false,
-  "production_domain": "www.tamanna.com",
+  "production_domain": "www.bd-king-r7.com",
   "rollback_policy": {
     "require_known_good_image": true,
     "require_predeployment_backup": true,
