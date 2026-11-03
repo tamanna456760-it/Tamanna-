@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 from tamanna_ai.brain.brain import knowledge_brain
 from tamanna_ai.tools.echo_power import tamanna_echo, power_status
+from tamanna_ai.persistence.database import database
 
 
 class TamannaController:
@@ -40,18 +41,18 @@ class TamannaController:
                     "reply": "Tell me what to remember.",
                 }
 
-            self.brain.learn(item)
+            database.add_memory(item, metadata={"source": "chat_command"})
             return {
                 "ok": True,
-                "reply": tamanna_echo("I stored this in the current session."),
-                "memory_count": len(self.brain.recall()),
+                "reply": tamanna_echo("I stored this in persistent memory."),
+                "memory_count": len(database.list_memories()),
             }
 
         if lowered in {"recall", "memory"}:
-            items = self.brain.recall()
+            items = database.list_memories()
             return {
                 "ok": True,
-                "reply": "\n".join(items) if items else "No session memories yet.",
+                "reply": "\n".join(items) if items else "No saved memories yet.",
                 "memory_count": len(items),
             }
 

@@ -140,6 +140,33 @@ class Database:
                 pending_user = None
         return history
 
+    def add_memory(
+        self, content: str, *, user_id: int | None = None,
+        metadata: dict[str, object] | None = None,
+    ) -> int:
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("Memory content must be non-empty text")
+        self.init()
+        with self.Session.begin() as session:
+            record = Memory(
+                user_id=user_id,
+                content=content.strip(),
+                metadata_json=json.dumps(metadata or {}, ensure_ascii=False),
+            )
+            session.add(record)
+            session.flush()
+            memory_id = record.id
+        return memory_id
+
+    def list_memories(self, *, user_id: int | None = None, limit: int = 100) -> list[str]:
+        self.init()
+        limit = max(1, min(int(limit), 500))
+        with self.Session() as session:
+            statement = select(Memory).order_by(Memory.created_at.desc(), Memory.id.desc()).limit(limit)
+            if user_id is not None:
+                statement = statement.where(Memory.user_id == user_id)
+            return [item.content for item in session.scalars(statement)]
+
     def migrate_legacy_json(self, json_path: str | Path) -> dict[str, object]:
         path = Path(json_path)
         if not path.is_file():

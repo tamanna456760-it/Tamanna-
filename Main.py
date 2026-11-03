@@ -445,7 +445,7 @@ async def status():
         "status": "online",
         "server": "run_server.py",
         "assistant": "Tamanna AI",
-        "chat_storage": str(CHAT_FILE)
+        "chat_storage": "sqlite"
     }
 
 
@@ -466,11 +466,6 @@ def save_chat(user_message, ai_reply, conversation_id="default"):
     """Persist a user/assistant pair in SQLite."""
     database_save_chat(user_message, ai_reply, conversation_id)
     print("[DATABASE] Saved chat pair to SQLite")
-
-
-@app.get("/api/history")
-async def chat_history():
-    return {"history": load_history()}
 
 
 
@@ -672,7 +667,7 @@ if __name__ == "__main__":
     )
 
     print(
-        f"Chat JSON: {CHAT_FILE}"
+        "Chat storage: SQLite"
     )
 
     print(
