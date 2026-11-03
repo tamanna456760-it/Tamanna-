@@ -132,7 +132,7 @@ jobs:
           cleanup() {
             docker logs tamanna-ci || true
             docker rm -f tamanna-ci >/dev/null 2>&1 || true
-            rm -f .env.ci
+            rm -f .env.ci .ci-cookies.txt
           }
           trap cleanup EXIT
           docker run -d --name tamanna-ci --env-file .env.ci -p 8000:8000 tamanna-ai:ci
@@ -146,8 +146,14 @@ jobs:
           done
           test "$ready" -eq 1
           echo
-          curl -fsS -X POST http://127.0.0.1:8000/api/chat \
+          curl -fsS -c .ci-cookies.txt -X POST http://127.0.0.1:8000/api/auth/signup \
+            -H 'Content-Type: application/json' \
+            --data '{"email":"ci-user@example.invalid","name":"CI User","password":"ci-test-password-123"}'
+          echo
+          curl -fsS -b .ci-cookies.txt -c .ci-cookies.txt -X POST http://127.0.0.1:8000/api/chat \
             -H 'Content-Type: application/json' \
             --data '{"message":"CI smoke test"}'
           echo
-          echo "PASS: Docker /health and /api/chat"
+          curl -fsS -b .ci-cookies.txt http://127.0.0.1:8000/api/history
+          echo
+          echo "PASS: Docker /health, authenticated /api/chat, and /api/history"
