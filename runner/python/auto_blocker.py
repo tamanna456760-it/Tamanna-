@@ -1,5 +1,7 @@
 import json
 import subprocess
+import ipaddress
+import shlex
 import threading
 import time
 from datetime import datetime
@@ -37,12 +39,20 @@ def log(msg, level="INFO"):
 
 def run_cmd(cmd):
     try:
-        subprocess.run(cmd, shell=True, check=True)
+        args = shlex.split(cmd)
+        if not args or args[0] != "sudo" or args[1:3] != ["ufw", "deny"]:
+            raise ValueError("command not allowed")
+        subprocess.run(args, shell=False, check=True, timeout=10)
     except Exception as e:
-        log(f"Command failed: {cmd} | {e}", "ERROR")
+        log(f"Firewall command failed: {type(e).__name__}", "ERROR")
 
 
 def block_ip(ip):
+    try:
+        ip = str(ipaddress.ip_address(ip))
+    except ValueError:
+        log("Refusing invalid IP address", "ERROR")
+        return
     now = time.time()
 
     # rate limit
