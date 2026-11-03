@@ -22,7 +22,7 @@ class GeminiClient:
     ):
         self.api_key = (
             api_key if api_key is not None
-            else os.getenv("GEMINI_API_KEY", "")
+            else (os.getenv("TAMANNA_MODEL_API_KEY", "") or os.getenv("GEMINI_API_KEY", ""))
         ).strip()
         self.model = (
             model or os.getenv("GEMINI_MODEL", DEFAULT_MODEL)

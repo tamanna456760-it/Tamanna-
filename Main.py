@@ -26,14 +26,17 @@ from tamanna_ai.persistence.database import (
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=False)
 
-try:
-    from tamanna_ai.integrations.gemini import GeminiClient
-except Exception as exc:
-    GeminiClient = None
-    print(
-        "[TAMANNA AI] Gemini integration unavailable:",
-        type(exc).__name__,
-    )
+from tamanna_ai.integrations.provider import (
+    ModelConfigurationError,
+    ModelProviderError,
+    get_model_provider,
+)
+from tamanna_ai.tools.safe_tools import (
+    ToolConfigurationError,
+    ToolExecutionError,
+    ToolInputError,
+    execute_tool,
+)
 
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
@@ -371,6 +374,12 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     message: str
+    conversation_id: str | None = None
+
+
+class ToolRequest(BaseModel):
+    name: str
+    arguments: dict | None = None
 
 
 # ============================================================
@@ -613,134 +622,37 @@ except Exception as exc:
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
-
     message = request.message.strip()
-
-
     if not message:
+        return {"reply": "দয়া করে একটি মেসেজ লিখুন।"}
 
-        return {
-            "reply": "দয়া করে একটি মেসেজ লিখুন।"
-        }
-
-
-    print(
-        f"[CHAT] User -> {message}"
-    )
-
-
-    # ========================================================
-    # NATURAL CHAT ACTION EXECUTION
-    # ========================================================
     try:
-        if route_chat_action is not None:
+        provider = get_model_provider()
+    except ModelConfigurationError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-            action_result = await route_chat_action(
-                message
-            )
-
-            if action_result is not None:
-                print(
-                    "[CHAT ACTION] "
-                    f"{action_result.get('intent', 'unknown')} "
-                    "-> "
-                    f"{action_result.get('reply', '')[:200]}"
-                )
-
-                action_reply = str(
-                    action_result.get(
-                        "reply",
-                        "Action completed."
-                    )
-                )
-
-                save_chat(
-                    message,
-                    action_reply
-                )
-
-                return {
-                    "reply": action_reply,
-                    "handled": True,
-                    "source": "action_router",
-                    "intent": action_result.get(
-                        "intent",
-                        "unknown"
-                    ),
-                    "action_result": action_result,
-                }
-
-    except Exception as exc:
-
-        print(
-            "[TAMANNA AI] Natural Chat Action failed: "
-            f"{type(exc).__name__}: {exc}"
-        )
-
-        # Normal Master Response continues below.
-
-    # ========================================================
-    # GEMINI CHAT
-    # ========================================================
-    gemini_enabled = os.getenv(
-        "TAMANNA_GEMINI_CHAT", "1"
-    ).strip().lower() in {"1", "true", "yes", "on"}
-
-    if (
-        gemini_enabled
-        and os.getenv("GEMINI_API_KEY", "").strip()
-        and GeminiClient is not None
-    ):
-        try:
-            gemini_reply = await GeminiClient().generate(message)
-
-            if gemini_reply and gemini_reply.strip():
-                save_chat(message, gemini_reply)
-                return {
-                    "reply": gemini_reply,
-                    "handled": True,
-                    "source": "gemini",
-                }
-
-        except Exception as exc:
-            print(
-                "[TAMANNA AI] Gemini failed; "
-                "using existing pipeline:",
-                type(exc).__name__,
-            )
-    # ========================================================
-    # MASTER RESPONSE PIPELINE
-    # ========================================================
     try:
-        master_result = await tamanna_master_response(message)
-
-        reply = _tamanna_extract_reply(master_result)
-
-        if not reply.strip():
-            reply = "দুঃখিত, Tamanna AI কোনো উত্তর তৈরি করতে পারেনি।"
-
+        reply = await provider.generate(message)
+    except ModelProviderError as exc:
+        raise HTTPException(status_code=502, detail="AI model provider failed.") from exc
     except Exception as exc:
-        print(
-            "[TAMANNA AI] Master response failed: "
-            f"{type(exc).__name__}: {exc}"
-        )
+        print("[TAMANNA AI] Model request failed:", type(exc).__name__)
+        raise HTTPException(status_code=502, detail="AI model provider failed.") from exc
 
-        # Existing response engine remains as fallback.
-        reply = generate_reply(message)
+    save_chat(message, reply, request.conversation_id or "default")
+    return {"reply": reply}
 
-    print(
-        f"[CHAT] AI -> {reply}"
-    )
 
-    # Auto save JSON
-    save_chat(
-        message,
-        reply
-    )
-
-    return {
-        "reply": reply
-    }
+@app.post("/api/tools/execute")
+async def execute_safe_tool(payload: ToolRequest):
+    try:
+        return await execute_tool(payload.name, payload.arguments or {})
+    except ToolInputError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except ToolConfigurationError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ToolExecutionError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 # ============================================================
