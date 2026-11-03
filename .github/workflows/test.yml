@@ -37,7 +37,7 @@ jobs:
 
       - name: Compile application and test modules
         run: |
-          python -m compileall -q Main.py main.py tamanna_ai tests
+          python -m compileall -q Main.py main.py tamanna_ai data modules tests scripts
 
       - name: Run focused test suite
         run: python -m pytest -q
