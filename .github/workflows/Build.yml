@@ -103,7 +103,7 @@ jobs:
           TAMANNA_MODEL_PROVIDER: mock
           TAMANNA_SESSION_SECRET: ci-only-session-secret-with-at-least-32-characters
           TAMANNA_COOKIE_SECURE: "0"
-        run: python -c "import Main; print('PASS: import Main')"
+        run: python -c "import Main; print('Main import passed')"
 
       - name: Run tests
         env:
