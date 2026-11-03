@@ -39,6 +39,10 @@ def init_db():
           token_hash TEXT PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           expires INTEGER NOT NULL,created_at TEXT NOT NULL)""")
         c.execute("CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id)")
+        c.execute("""CREATE TABLE IF NOT EXISTS auth_attempts(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ip_hash TEXT NOT NULL, action TEXT NOT NULL, attempted_at INTEGER NOT NULL)""")
+        c.execute("CREATE INDEX IF NOT EXISTS auth_attempts_lookup_idx ON auth_attempts(ip_hash,action,attempted_at)")
 
 def secret():
     value = os.getenv("TAMANNA_SESSION_SECRET", "").strip()
@@ -91,6 +95,27 @@ def require_user(token):
     if not user: raise HTTPException(401, "Please sign in.")
     return user
 
+def rate_limit_auth(request, action):
+    """Persistent per-IP throttle for signup/login attempts (10 per 15 minutes)."""
+    host = request.client.host if request.client else "unknown"
+    ip_hash = hmac.new(secret(), host.encode("utf-8"), hashlib.sha256).hexdigest()
+    current = int(time.time())
+    window_start = current - 900
+    with db() as c:
+        c.execute("BEGIN IMMEDIATE")
+        c.execute("DELETE FROM auth_attempts WHERE attempted_at < ?", (current - 3600,))
+        count = c.execute(
+            "SELECT COUNT(*) FROM auth_attempts WHERE ip_hash=? AND action=? AND attempted_at>=?",
+            (ip_hash, action, window_start),
+        ).fetchone()[0]
+        if count >= 10:
+            raise HTTPException(429, "Too many authentication attempts. Try again in 15 minutes.")
+        c.execute(
+            "INSERT INTO auth_attempts(ip_hash,action,attempted_at) VALUES(?,?,?)",
+            (ip_hash, action, current),
+        )
+
+
 def check_origin(request):
     origin = request.headers.get("origin")
     if origin:
@@ -124,6 +149,7 @@ def startup():
 @router.post("/signup", status_code=201)
 def signup(data: Signup, request: Request, response: Response):
     check_origin(request)
+    rate_limit_auth(request, "signup")
     email, name = data.email.strip().lower(), data.name.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(422, "Enter a valid email address.")
     try:
@@ -139,6 +165,7 @@ def signup(data: Signup, request: Request, response: Response):
 @router.post("/login")
 def login(data: Login, request: Request, response: Response):
     check_origin(request)
+    rate_limit_auth(request, "login")
     with db() as c:
         row = c.execute("SELECT * FROM users WHERE email=? COLLATE NOCASE", (data.email.strip().lower(),)).fetchone()
     if not row or not password_ok(data.password, row["password_hash"]):
