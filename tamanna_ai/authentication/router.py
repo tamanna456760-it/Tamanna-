@@ -133,7 +133,7 @@ def check_origin(request):
     origin = request.headers.get("origin")
     if origin:
         allowed = [x.strip().rstrip("/") for x in os.getenv("TAMANNA_CORS_ORIGINS",
-          "https://www.tamanna.com,https://tamanna.com").split(",") if x.strip()]
+          "https://www.bd-king-r7.com,https://bd-king-r7.com").split(",") if x.strip()]
         if origin.rstrip("/") not in allowed: raise HTTPException(403, "Untrusted request origin.")
 
 def set_cookie(response, token):
