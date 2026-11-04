@@ -316,7 +316,7 @@ def build_project_documentation_prompt(
     if include_architecture:
         sections.append("- Generate an architecture overview with actual entry points, modules, data flow, persistence, integrations, and trust boundaries.")
     sections.append("- Do not claim repository files were written or tests passed without confirmed tool results.")
-    return "\\n\\n".join(sections)
+    return "\n\n".join(sections)
 
 
 def build_database_backend_prompt(
@@ -361,7 +361,7 @@ def build_database_backend_prompt(
     ]
     if clean_requirements:
         sections.extend(["ADDITIONAL REQUIREMENTS:", *[f"- {item}" for item in clean_requirements]])
-    return "\\n\\n".join(sections)
+    return "\n\n".join(sections)
 
 
 __all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples", "build_debugging_prompt", "build_refactoring_prompt", "build_documentation_prompt", "build_project_documentation_prompt", "build_database_backend_prompt"]
