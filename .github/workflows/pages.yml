@@ -1,9 +1,9 @@
-name: Tamanna AI GitHub Pages
-
-# Self-hosted deployment is the primary hosting method.
-# GitHub Pages remains available for manual use only.
+name: Deploy Tamanna AI to GitHub Pages
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -19,22 +19,24 @@ jobs:
   build:
     name: Prepare Static Website
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare Website Files
+      - name: Prepare website files
         shell: bash
         run: |
           set -Eeuo pipefail
 
           test -f index.html
+          test -f CNAME
+          test "$(tr -d '\r\n' < CNAME)" = "www.bd-king-r7.com"
 
           rm -rf _site
           mkdir -p _site
 
           cp index.html _site/index.html
+          cp CNAME _site/CNAME
 
           for item in css js assets static; do
             if [ -d "$item" ]; then
@@ -44,23 +46,26 @@ jobs:
 
           touch _site/.nojekyll
 
+          test -f _site/index.html
+          test -f _site/CNAME
+          test -f _site/.nojekyll
+          echo "PASS: Static site artifact prepared."
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload Pages Artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
-    name: Publish Website
+    name: Publish website
     runs-on: ubuntu-latest
     needs: build
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
