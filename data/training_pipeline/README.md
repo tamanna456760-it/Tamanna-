@@ -11,6 +11,7 @@ python -m data.training_pipeline.cli ./my_dataset ./private_dataset_output
 The output directory must be outside the source directory. The pipeline writes:
 
 - `cleaned.jsonl`: accepted text records with source filename and redaction flags.
+- `images_manifest.jsonl`: validated local image file metadata (format, size and SHA-256); image bytes are not copied or uploaded.
 - `quality_report.json`: counts for accepted/rejected records, duplicates, short/empty records and redactions.
 - `skipped_files.json`: files/JSONL rows that could not be processed and reasons.
 
