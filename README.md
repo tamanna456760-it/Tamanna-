@@ -40,7 +40,25 @@ These are verification commands, not a statement that the current repository has
 
 ## Private configuration
 
-Copy `.env.example` to a local `.env` and set the values required by your environment. Generate a unique session secret locally. Put the Gemini API key in the private `.env` file only.
+Copy `.env.example` to a local `.env`, then set both required credentials:
+
+- `TAMANNA_SESSION_SECRET`: generate a unique value with `python -c "import secrets; print(secrets.token_urlsafe(48))"` (at least 32 characters).
+- `GEMINI_API_KEY` (or `TAMANNA_MODEL_API_KEY`): your Gemini API key, required for AI chat.
+- `TAMANNA_DATABASE_URL`: optional; the built-in SQLite database is used when this is blank or unset.
+- `TAMANNA_CORS_ORIGINS`: exact trusted frontend origins, including `https://www.bd-king-r7.com`.
+
+The server loads the repository-root `.env` before importing its application modules. Missing credentials are reported as readiness warnings without printing secret values: the website and health endpoint can start, while login or Gemini chat returns a clear configuration error until its setting is supplied.
+
+Validate configuration locally (the report never prints credential values):
+
+```sh
+cp .env.example .env
+# Edit .env and fill in the private credentials.
+python scripts/validate_env.py
+python scripts/validate_env.py --strict
+``
+
+The strict check fails until both authentication and Gemini credentials are configured. The normal check reports missing settings as warnings.
 
 Never commit `.env`, API keys, session secrets, account databases, chat-history backups, or tool logs.
 
