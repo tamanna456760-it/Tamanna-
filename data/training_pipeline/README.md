@@ -30,11 +30,11 @@ The current dataset pipeline validates file signatures and writes metadata manif
 ## Privacy, quality and licensing
 
 - Raw source files are never modified.
-- Common email addresses, phone-like strings and credential assignments are redacted from text output.
+- Detectable PII is redacted: email addresses, phone-like strings, labelled names/addresses, common government-ID formats (including UAE Emirates ID and US SSN), and payment-card candidates passing the Luhn checksum. API keys, tokens, passwords and private-key assignments are also redacted. Only category flags, not matched values, are recorded.
 - Empty, short and duplicate records are excluded.
 - Chat histories may contain sensitive personal data. Use only data with a valid legal basis and appropriate user consent; minimize, anonymize, review and restrict access before training.
 - Use books, articles, Wikipedia, GitHub repositories and websites only where the source license and terms permit the intended training use. Keep provenance and license records.
-- This heuristic cleaning is not a complete privacy, safety, copyright or factuality review. Human review is required before any training run.
+- Detection is heuristic, not a guarantee: unlabelled names, free-form addresses, unfamiliar passport/ID formats, indirect identifiers, and PII inside images/audio/video may remain. Add a reviewed NER/DLP stage and human review for high-risk data. This local pipeline does not crawl websites or authenticate to sources; never supply private/password-protected material. Provenance approval does not prove a source is public or licensed. It does not automatically identify piracy/copyright infringement or classify hate, sexual, violent, or other harmful content; apply a separately evaluated moderation policy and quarantine uncertain records before training. Human review is required.
 - Keep private datasets and generated output out of GitHub. Never include API keys, passwords, session tokens or private user conversations in a public repository.
 
 ## SFT and preference data
