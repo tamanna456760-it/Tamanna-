@@ -236,3 +236,41 @@ def test_refactoring_prompt_rejects_empty_source():
 
     with pytest.raises(ValueError):
         build_refactoring_prompt(" ")
+
+
+from tamanna_ai.capabilities.prompt_engineering import build_documentation_prompt
+
+
+def test_documentation_prompt_requests_useful_comments_and_docstrings():
+    prompt = build_documentation_prompt(
+        "def calculate_total(items): return sum(items)",
+        language="Python",
+        include_readme=True,
+        include_api_reference=True,
+    )
+    assert "CODE DOCUMENTATION AND INLINE COMMENT GENERATION" in prompt
+    assert "concise inline comments only for non-obvious logic" in prompt
+    assert "function docstrings" in prompt
+    assert "README" in prompt
+    assert "API documentation" in prompt
+    assert "Preserve behavior" in prompt
+
+
+def test_documentation_prompt_can_disable_inline_comments():
+    prompt = build_documentation_prompt(
+        "function sum(a, b) { return a + b; }",
+        language="JavaScript",
+        include_inline_comments=False,
+        include_docstrings=False,
+    )
+    assert "Do not insert inline comments" in prompt
+    assert "Add or improve module" not in prompt
+
+
+def test_documentation_prompt_rejects_invalid_flags():
+    import pytest
+
+    with pytest.raises(TypeError):
+        build_documentation_prompt("x = 1", include_readme="yes")
+    with pytest.raises(ValueError):
+        build_documentation_prompt(" ")
