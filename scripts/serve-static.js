@@ -53,6 +53,22 @@ const server = http.createServer((request, response) => {
     });
     response.end(body);
   } catch {
+    // SPA deep links (for example /chat or /settings) must serve the app shell.
+    // Missing asset files still return 404 instead of receiving HTML.
+    if (!path.extname(pathname)) {
+      try {
+        const body = fs.readFileSync(path.join(root, 'index.html'));
+        response.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'X-Content-Type-Options': 'nosniff',
+          'Cache-Control': 'no-cache',
+        });
+        response.end(body);
+        return;
+      } catch {
+        // Fall through to the ordinary 404 response if the app shell is absent.
+      }
+    }
     response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     response.end('Not found');
   }
