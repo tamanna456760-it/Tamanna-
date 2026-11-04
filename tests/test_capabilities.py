@@ -140,3 +140,39 @@ def test_structured_prompt_validates_required_fields_and_limits():
         build_structured_prompt("x" * 12001)
 
 
+
+
+from tamanna_ai.capabilities.prompt_engineering import (
+    build_code_generation_prompt,
+    supported_language_examples,
+)
+
+
+def test_code_generation_prompt_requests_complete_project_deliverables():
+    prompt = build_code_generation_prompt(
+        "Create a login form",
+        language="JavaScript",
+        framework="React",
+        requirements=["Validate email", "Add accessible labels"],
+    )
+    assert "SOFTWARE IMPLEMENTATION TASK" in prompt
+    assert "LANGUAGE: JavaScript" in prompt
+    assert "FRAMEWORK: React" in prompt
+    assert "complete contents for every new or modified file" in prompt
+    assert "automated tests" in prompt
+    assert "Validate email" in prompt
+
+
+def test_language_examples_exceed_fifty_without_claiming_equal_support():
+    languages = supported_language_examples()
+    assert len(languages) > 50
+    assert "Python" in languages
+    assert "C++" in languages
+    assert "Rust" in languages
+
+
+def test_code_generation_prompt_rejects_empty_feature():
+    import pytest
+
+    with pytest.raises(ValueError):
+        build_code_generation_prompt(" ")
