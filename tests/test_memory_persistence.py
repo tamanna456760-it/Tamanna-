@@ -34,6 +34,39 @@ class PersistentMemoryTests(unittest.TestCase):
         self.assertTrue(self.db.delete_memory(memory_id, user_id=self.user_a))
         self.assertEqual(self.db.list_memories(user_id=self.user_a), [])
 
+    def test_profile_and_custom_settings_are_persisted_per_user(self):
+        self.db.update_user_profile(
+            user_id=self.user_a, name="Alice Updated", email="alice@example.test"
+        )
+        self.db.update_user_settings(
+            user_id=self.user_a, language="bn",
+            usage_pattern="Uses Tamanna for coding and study",
+            custom_instructions="বাংলায় উত্তর দেবে; প্রয়োজন হলে উদাহরণ দেবে।",
+            preferences={"tone": "concise", "theme": "dark"},
+        )
+        profile = self.db.get_user_settings(user_id=self.user_a)
+        self.assertEqual(profile["name"], "Alice Updated")
+        self.assertEqual(profile["email"], "alice@example.test")
+        self.assertEqual(profile["language"], "bn")
+        self.assertEqual(profile["usage_pattern"], "Uses Tamanna for coding and study")
+        self.assertIn("বাংলায় উত্তর", profile["custom_instructions"])
+        self.assertEqual(profile["preferences"]["theme"], "dark")
+        other = self.db.get_user_settings(user_id=self.user_b)
+        self.assertEqual(other["language"], "auto")
+        self.assertEqual(other["custom_instructions"], "")
+
+    def test_custom_settings_validate_language_and_length(self):
+        with self.assertRaises(ValueError):
+            self.db.update_user_settings(user_id=self.user_a, language="xx")
+        with self.assertRaises(ValueError):
+            self.db.update_user_settings(user_id=self.user_a, custom_instructions="x" * 4001)
+
+    def test_profile_email_must_be_unique(self):
+        with self.assertRaises(ValueError):
+            self.db.update_user_profile(
+                user_id=self.user_a, name="Alice", email="b@example.test"
+            )
+
     def test_history_is_scoped_and_bounded(self):
         self.db.save_chat_pair("first question", "first answer", "chat-a", self.user_a)
         self.db.save_chat_pair("second question", "second answer", "chat-a", self.user_a)
