@@ -152,7 +152,16 @@ def import_knowledge_file(
                     ))
                 imported += 1
                 existing_hashes.add(digest)
-            except IntegrityError:
+            except IntegrityError as exc:
+                # Only treat a duplicate idempotency key as a harmless repeat.
+                # Foreign-key and other integrity failures must surface to the caller.
+                error_text = str(exc.orig).lower()
+                duplicate_fingerprint = (
+                    "knowledge_fingerprints" in error_text
+                    and ("unique constraint" in error_text or "duplicate key" in error_text)
+                )
+                if not duplicate_fingerprint:
+                    raise
                 skipped += 1
     return {"status": "ok", "imported": imported, "skipped": skipped, "source": source}
 
