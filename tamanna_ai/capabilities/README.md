@@ -90,3 +90,20 @@ docstrings, README, and API reference requests. It supports audience and
 documentation-style settings, and avoids comments that merely restate code.
 Generated documentation must be checked against the actual implementation;
 the helper does not itself edit repository files.
+
+
+## Whole-project README and API documentation
+
+`build_project_documentation_prompt()` accepts a repository tree and optional
+verified source/configuration excerpts. It can request a root README, API
+reference, and architecture overview. Accurate output depends on supplying the
+actual relevant files; a tree alone is not sufficient evidence for endpoint
+behavior or setup commands.
+
+## Database and backend service development
+
+`build_database_backend_prompt()` prepares tasks for parameterized SQL,
+MongoDB collection schemas, REST endpoints, and GraphQL schemas/resolvers.
+It emphasizes authorization, owner isolation, validation, migrations,
+pagination, error handling, and tests. It generates a structured task prompt;
+it does not connect to or mutate a live database.
