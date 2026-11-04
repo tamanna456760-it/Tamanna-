@@ -51,5 +51,23 @@ class CapabilityAssistant:
         self.database.save_chat_pair(message.strip(), reply.strip(), conversation_id, user_id)
         return {"ok": True, "reply": reply.strip(), "conversation_id": conversation_id, "provider": getattr(self.provider, "name", "custom")}
 
+    async def chat_with_files(
+        self, message: str, file_paths: list[str], conversation_id: str = "default",
+        user_id: int | None = None,
+    ) -> dict[str, Any]:
+        """Chat with supported image/audio/video/PDF files through a multimodal provider."""
+        prompt = self.build_prompt(message, conversation_id, user_id)
+        generate_files = getattr(self.provider, "generate_with_files", None)
+        if not callable(generate_files):
+            raise RuntimeError("The configured model provider does not support multimodal file input")
+        reply = await generate_files(prompt, file_paths)
+        if not isinstance(reply, str) or not reply.strip():
+            raise RuntimeError("Model provider returned an empty response")
+        self.database.save_chat_pair(message.strip(), reply.strip(), conversation_id, user_id)
+        return {
+            "ok": True, "reply": reply.strip(), "conversation_id": conversation_id,
+            "provider": getattr(self.provider, "name", "custom"), "files_attached": len(file_paths),
+        }
+
 
 __all__ = ["CapabilityAssistant", "SYSTEM_GUIDANCE"]
