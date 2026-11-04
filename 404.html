@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <title>Tamanna AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/settings.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Tamanna AI application route fallback">
+</head>
+<body>
+  <div class="chat-app">
+    <header class="chat-header">
+      <div>
+        <h1>🤖 Tamanna AI</h1>
+        <span>AI Assistant</span>
+      </div>
+      <div class="header-actions"><button id="openAuth" class="header-action" type="button">লগইন</button><button id="openSettings" class="settings-trigger" type="button" aria-haspopup="dialog" aria-controls="settingsPanel">⚙ সেটিংস</button></div>
+    </header>
+
+    <main id="chatBox" class="chat-box" aria-live="polite">
+      <div class="message ai-message">
+        <div class="message-name">Tamanna AI</div>
+        <div class="message-text">আমি Tamanna AI। কীভাবে সাহায্য করতে পারি?</div>
+      </div>
+    </main>
+
+    <div class="typing-area">
+      <input id="messageInput" type="text" placeholder="আপনার মেসেজ লিখুন..." autocomplete="off" aria-label="আপনার মেসেজ">
+      <button id="sendButton" type="button">Send</button>
+    </div>
+  </div>
+
+  <div id="settingsBackdrop" class="settings-backdrop" hidden></div>
+  <aside id="settingsPanel" class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+    <div class="settings-heading">
+      <h2 id="settingsTitle">অ্যাপ সেটিংস</h2>
+      <button id="closeSettings" class="settings-close" type="button" aria-label="সেটিংস বন্ধ করুন">✕</button>
+    </div>
+
+    <section class="settings-group">
+      <h3>Appearance / থিম</h3>
+      <div class="setting-row"><label for="themeSetting">Theme</label><select id="themeSetting" data-setting="theme"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+      <div class="setting-row"><label for="accentSetting">Accent color</label><select id="accentSetting" data-setting="accent"><option value="purple">Purple</option><option value="blue">Blue</option><option value="teal">Teal</option></select></div>
+      <div class="setting-row"><label for="fontSetting">Font size</label><select id="fontSetting" data-setting="fontSize"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></div>
+      <div class="setting-row"><label for="compactSetting">Compact chat</label><input id="compactSetting" type="checkbox" data-setting="compactMode"></div>
+    </section>
+
+    <section class="settings-group">
+      <h3>General / সাধারণ</h3>
+      <div class="setting-row"><label for="languageSetting">Language</label><select id="languageSetting" data-setting="language"><option value="bn">বাংলা</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="ar">العربية</option></select></div>
+    </section>
+
+    <section class="settings-group">
+      <h3>Chat & Notifications</h3>
+      <div class="setting-row"><label for="historySetting">Chat history preference</label><input id="historySetting" type="checkbox" data-setting="chatHistory"></div>
+      <div class="setting-row"><label for="notificationsSetting">Notifications preference</label><input id="notificationsSetting" type="checkbox" data-setting="notifications"></div>
+      <p class="settings-note">এই দুটি অপশন আপাতত UI preference হিসেবে সংরক্ষিত হয়; সার্ভারের chat history বা push notification behavior পরিবর্তন করে না।</p>
+      <div class="settings-actions"><button id="clearLocalChat" class="settings-secondary" type="button">স্ক্রিনের চ্যাট পরিষ্কার</button></div>
+    </section>
+
+    <section class="settings-group">
+      <h3>Account & Security</h3>
+      <p class="settings-note">Login, signup, profile update এবং secure account sessions backend authentication service-এর সঙ্গে যুক্ত। Password reset ও email verification এখনো চালু নয়। নিরাপত্তার জন্য password browser storage-এ রাখা হয় না।</p>
+    </section>
+
+    <div class="settings-actions">
+      <button id="resetSettings" class="settings-secondary" type="button">Reset settings</button>
+    </div>
+    <p id="settingsSaveStatus" role="status" aria-live="polite"></p>
+  </aside>
+
+
+  <div id="authBackdrop" class="settings-backdrop" hidden></div>
+  <section id="authPanel" class="settings-panel auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
+    <div class="settings-heading"><h2 id="authTitle">Tamanna AI Account</h2><button id="closeAuth" class="settings-close" type="button" aria-label="বন্ধ করুন">✕</button></div>
+    <p id="authStatus" class="settings-note" role="status" aria-live="polite">অ্যাকাউন্টে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+    <div class="auth-tabs"><button id="showLogin" type="button" class="settings-secondary">লগইন</button><button id="showSignup" type="button" class="settings-secondary">সাইন আপ</button></div>
+    <form id="loginForm" class="auth-form">
+      <label for="loginEmail">ইমেইল</label><input id="loginEmail" type="email" autocomplete="email" required maxlength="254">
+      <label for="loginPassword">পাসওয়ার্ড</label><input id="loginPassword" type="password" autocomplete="current-password" required maxlength="128">
+      <button type="submit">লগইন</button>
+    </form>
+    <form id="signupForm" class="auth-form" hidden>
+      <label for="signupName">আপনার নাম</label><input id="signupName" type="text" autocomplete="name" required minlength="2" maxlength="80">
+      <label for="signupEmail">ইমেইল</label><input id="signupEmail" type="email" autocomplete="email" required maxlength="254">
+      <label for="signupPassword">পাসওয়ার্ড (কমপক্ষে ১২ অক্ষর)</label><input id="signupPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="128">
+      <button type="submit">অ্যাকাউন্ট তৈরি করুন</button>
+    </form>
+    <div id="accountDetails" hidden>
+      <p id="accountIdentity"></p>
+      <form id="profileForm" class="auth-form"><label for="profileName">নাম পরিবর্তন</label><input id="profileName" type="text" minlength="2" maxlength="80" required><button type="submit">প্রোফাইল সংরক্ষণ</button></form>
+      <button id="logoutButton" class="settings-secondary" type="button">লগআউট</button>
+    </div>
+    <p class="settings-note">পাসওয়ার্ড নিরাপদভাবে হ্যাশ করে সার্ভারে রাখা হয়। পাসওয়ার্ড ব্রাউজারে সংরক্ষণ করা হয় না।</p>
+  </section>
+
+  <script src="/js/auth.js?v=20261102_auth"></script>
+  <script src="/js/chat.js?v=20261102_settings"></script>
+  <script src="/js/settings.js?v=20261102_settings"></script>
+</body>
+</html>
