@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+import asyncio
 
 from tamanna_ai.persistence.database import Database
 from tamanna_ai.integrations.provider import get_model_provider
@@ -18,13 +19,14 @@ Never reveal secrets or private data from context. Ask before taking consequenti
 class CapabilityAssistant:
     """Adds bounded chat history and memory context to the configured model provider."""
 
-    def __init__(self, provider=None, database: Database | None = None, history_pairs: int = 8, memory_items: int = 12):
+    def __init__(self, provider=None, database: Database | None = None, history_pairs: int = 8, memory_items: int = 12, knowledge_store=None):
         self.provider = provider or get_model_provider()
         self.database = database or Database()
         self.history_pairs = max(0, min(int(history_pairs), 20))
         self.memory_items = max(0, min(int(memory_items), 30))
+        self.knowledge_store = knowledge_store
 
-    def build_prompt(self, message: str, conversation_id: str = "default", user_id: int | None = None) -> str:
+    def build_prompt(self, message: str, conversation_id: str = "default", user_id: int | None = None, retrieved_knowledge: list[dict[str, object]] | None = None) -> str:
         if not isinstance(message, str) or not message.strip():
             raise ValueError("Message cannot be empty")
         # Bound context by both item count and character count to avoid unbounded prompts.
@@ -46,7 +48,12 @@ class CapabilityAssistant:
         return "\n\n".join(sections)
 
     async def chat(self, message: str, conversation_id: str = "default", user_id: int | None = None) -> dict[str, Any]:
-        prompt = self.build_prompt(message, conversation_id, user_id)
+        retrieved = []
+        if self.knowledge_store is not None and user_id is not None:
+            retrieved = await asyncio.to_thread(
+                self.knowledge_store.search, message, owner_id=str(user_id), limit=5
+            )
+        prompt = self.build_prompt(message, conversation_id, user_id, retrieved)
         reply = await self.provider.generate(prompt)
         if not isinstance(reply, str) or not reply.strip():
             raise RuntimeError("Model provider returned an empty response")
