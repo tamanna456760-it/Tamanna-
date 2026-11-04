@@ -1,5 +1,3 @@
-File: ids/ids_cli.py
-
 """
 Tamanna AI IDS Command-Line Interface.
 Project: Tamanna AI
@@ -10,7 +8,6 @@ Commands:
     report  - Display IDS status report
 This CLI does not modify operating-system firewall rules.
 """
-from __future__ import annotations
 import argparse
 import json
 import sys
