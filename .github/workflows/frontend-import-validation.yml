@@ -1,16 +1,26 @@
-name: Frontend Import Path Validation
+name: Repository Import Path Case Validation
 
 on:
   push:
     branches: [main]
     paths:
-      - "bd-king-r7/website/frontend/src/**"
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.mjs"
+      - "**/*.cjs"
       - "scripts/check-import-case.js"
       - ".github/workflows/frontend-import-validation.yml"
   pull_request:
     branches: [main]
     paths:
-      - "bd-king-r7/website/frontend/src/**"
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.mjs"
+      - "**/*.cjs"
       - "scripts/check-import-case.js"
       - ".github/workflows/frontend-import-validation.yml"
   workflow_dispatch:
@@ -28,5 +38,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Check relative import paths and case
+      - name: Check relative import paths and exact case across repository
         run: node scripts/check-import-case.js
