@@ -98,5 +98,25 @@ class CleaningTests(unittest.TestCase):
             self.assertEqual(result["accepted"], 0)
             self.assertEqual(result["files_skipped"], 1)
 
+    def test_redacts_government_ids_and_labelled_personal_fields(self):
+        from data.training_pipeline.privacy import redact_sensitive_data
+        emirates_id = "784-" + "1990" + "-" + "1234567" + "-" + "1"
+        sample = (
+            "Emirates ID: " + emirates_id + "\\n"
+            "Passport Number: " + "AB" + "12345678" + "\\n"
+            "Name: " + "Jane Example" + "\\n"
+            "Address: " + "12 Example Street, Sample City"
+        )
+        cleaned, flags = redact_sensitive_data(sample)
+        for secret in (emirates_id, "AB12345678", "Jane Example", "12 Example Street"):
+            self.assertNotIn(secret, cleaned)
+        self.assertIn("government_id_redacted", flags)
+        self.assertIn("labelled_name_redacted", flags)
+        self.assertIn("labelled_address_redacted", flags)
+
+    def test_luhn_checker_rejects_invalid_card_candidate(self):
+        from data.training_pipeline.privacy import _luhn_valid
+        self.assertFalse(_luhn_valid("1234567890123456"))
+
 if __name__ == "__main__":
     unittest.main()
