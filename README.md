@@ -126,3 +126,21 @@ The onion service forwards HTTP port 80 internally to the Tamanna AI app contain
 Tamanna AI includes a small internal client at `tamanna_ai/integrations/central_server.py` for the signed `tamanna-service/1` report protocol. Configure `TAMANNA_SERVER_URL`, `TAMANNA_SERVER_KEY_ID`, and `TAMANNA_SERVER_SHARED_SECRET` in the private `.env` file. The shared secret must exactly match `TAMANNA_SERVICE_SHARED_SECRET` in the separate Tamanna-server repository. Generate it locally with `openssl rand -hex 32`; never commit it.
 
 The client sends only the report payload you explicitly pass to `send_report(report)`. It does not run automatically, does not forward chat messages, and does not grant shell or remote code execution. Protocol specification: [Tamanna Central Server protocol v1](https://github.com/tamanna456760-it/Tamanna-server/blob/main/docs/TAMANNA_SERVICE_PROTOCOL_V1.md).
+
+
+## Project-wide documentation and backend development
+
+Tamanna AI includes prompt helpers for producing source-grounded project
+documentation and database/backend implementation plans:
+
+- `build_project_documentation_prompt()`: prepare a complete root README,
+  verified API reference, and architecture overview from the repository tree
+  plus relevant source/configuration excerpts.
+- `build_database_backend_prompt()`: prepare SQL, MongoDB, REST, and GraphQL
+  implementation requests with validation, authorization, owner isolation,
+  safe migrations, error handling, and tests.
+
+These helpers structure requests for the configured AI provider. They do not
+automatically crawl the repository, write files, connect to a live database,
+or deploy endpoints. Supply actual source files as context and verify generated
+code and documentation before use.
