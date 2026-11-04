@@ -6,9 +6,9 @@
   "author": "HM INSAN ALI",
   "type": "commonjs",
   "scripts": {
-    "dev": "node scripts/npm-dev-server.js",
+    "dev": "node scripts/serve-static.js .",
     "build": "node scripts/build-static.js",
-    "start": "node scripts/npm-preview-server.js",
+    "start": "node scripts/serve-static.js dist",
     "check": "node scripts/npm-build-check.js",
     "test": "node --test"
   },
