@@ -1,11 +1,8 @@
-File: ids/ids_manager.py
-
 """
 Tamanna AI Intrusion Detection System Manager.
 Coordinates event collection, intrusion detection, and alert management.
 Default operation is monitor-only. No automatic blocking or firewall changes.
 """
-from __future__ import annotations
 from typing import Any
 from ids.alert_manager import AlertManager
 from ids.detection_engine import DetectionEngine
