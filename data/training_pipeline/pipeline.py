@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 from .cleaning import clean_text
-from .quality import inspect_records
+from .quality import inspect_records\nfrom .provenance import load_provenance
 
 SUPPORTED = {
     ".txt", ".md", ".rst", ".py", ".js", ".jsx", ".ts", ".tsx",
@@ -64,7 +64,7 @@ def _iter_sources(source: Path):
                 yield path
 
 
-def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: int = 20, max_bytes: int = DEFAULT_MAX_BYTES) -> dict:
+def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: int = 20, max_bytes: int = DEFAULT_MAX_BYTES, provenance_path: str | Path | None = None) -> dict:
     """Process local text/code and index media metadata; never modifies or uploads inputs."""
     source = Path(source_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
@@ -97,7 +97,7 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
                     relative_name = path.name
                 media_kind, mime_type = MEDIA_TYPES[suffix]
                 media_records.append({
-                    "file": relative_name, "kind": media_kind, "format": suffix.lstrip("."),
+                    "file": relative_name, "kind": media_kind, "format": suffix.lstrip("."),\n                    **source_metadata,
                     "mime_type": mime_type, "bytes": size, "sha256": digest.hexdigest(),
                 })
             except OSError as exc:
@@ -142,7 +142,7 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
             source_texts = [content]
         for source_text in source_texts:
             cleaned, flags = clean_text(source_text)
-            records.append({"text": cleaned, "source": path.name, "redactions": flags})
+            records.append({"text": cleaned, "source": path.name, "redactions": flags, **source_metadata})
 
     seen, accepted = set(), []
     for record in records:
@@ -156,7 +156,7 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
     report = inspect_records([{"text": r["text"]} for r in records], min_chars=min_chars)
     report["accepted"] = len(accepted)
     report["rejected"] = len(records) - len(accepted)
-    report["files_skipped"] = len(skipped)
+    report["files_skipped"] = len(skipped)\n    report["provenance_required"] = provenance_path is not None\n    report["provenance_entries"] = len(provenance)
     report["media_indexed"] = len(media_records)
     report["images_indexed"] = sum(item["kind"] == "image" for item in media_records)
     report["audio_indexed"] = sum(item["kind"] == "audio" for item in media_records)
