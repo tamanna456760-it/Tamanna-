@@ -1,14 +1,16 @@
-
 {
   "name": "tamanna-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "Tamanna AI project tools and validation",
+  "description": "Tamanna AI project tools and static web frontend",
   "author": "HM INSAN ALI",
   "type": "commonjs",
   "scripts": {
-    "test": "node --test",
-    "build": "node scripts/npm-build-check.js"
+    "dev": "node scripts/npm-dev-server.js",
+    "build": "node scripts/build-static.js",
+    "start": "node scripts/npm-preview-server.js",
+    "check": "node scripts/npm-build-check.js",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20"
