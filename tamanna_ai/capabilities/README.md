@@ -72,3 +72,12 @@ regression tests, common application security risks, and performance bottlenecks
 code/runtime/expected-vs-actual context. It does not execute supplied commands,
 run a scanner, or prove a fix; confirmed results require an actual test,
 profiler, scanner, or runtime reproduction.
+
+
+## Code refactoring and optimization
+
+`build_refactoring_prompt()` structures a request around source code, language,
+framework/runtime version, user priorities, behavior preservation, deprecated
+API migration, performance analysis, regression tests, and verification.
+Performance improvements and compatibility claims require actual profiling
+or test results; the prompt helper itself does not modify or execute project files.
