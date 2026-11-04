@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import os
+import base64
+import mimetypes
+from pathlib import Path
+
 import httpx
 
 DEFAULT_MODEL = "gemini-2.5-flash"
@@ -106,6 +110,78 @@ class GeminiClient:
         if not answer.strip():
             raise GeminiError("Gemini returned an empty response.")
 
+        return answer.strip()
+
+
+    async def generate_with_files(
+        self,
+        prompt: str,
+        file_paths: list[str | Path],
+        *,
+        temperature: float = 0.2,
+        max_output_tokens: int = 2048,
+        max_total_bytes: int = 15 * 1024 * 1024,
+    ) -> str:
+        """Send text plus bounded local image/audio/video/PDF files to Gemini."""
+        if not self.api_key:
+            raise GeminiError("GEMINI_API_KEY is not configured.")
+        prompt = prompt.strip()
+        if not prompt:
+            raise ValueError("Prompt cannot be empty")
+        if not 0 <= temperature <= 2:
+            raise ValueError("temperature must be between 0 and 2")
+        if not 1 <= max_output_tokens <= 65536:
+            raise ValueError("Invalid max_output_tokens")
+
+        allowed = {
+            ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+            ".webp": "image/webp", ".gif": "image/gif",
+            ".mp3": "audio/mpeg", ".wav": "audio/wav", ".ogg": "audio/ogg",
+            ".mp4": "video/mp4", ".webm": "video/webm", ".pdf": "application/pdf",
+        }
+        parts = [{"text": prompt}]
+        total = 0
+        for raw_path in file_paths:
+            path = Path(raw_path).expanduser()
+            suffix = path.suffix.lower()
+            mime_type = allowed.get(suffix)
+            if not mime_type:
+                raise ValueError(f"Unsupported multimodal file type: {suffix or 'unknown'}")
+            if not path.is_file() or path.is_symlink():
+                raise ValueError("Each multimodal input must be an existing regular file")
+            size = path.stat().st_size
+            total += size
+            if size <= 0 or total > max_total_bytes:
+                raise ValueError("Multimodal files exceed the total size limit or are empty")
+            data = path.read_bytes()
+            parts.append({"inline_data": {"mime_type": mime_type, "data": base64.b64encode(data).decode("ascii")}})
+
+        url = f"{API_BASE}/{self.model}:generateContent"
+        payload = {
+            "contents": [{"role": "user", "parts": parts}],
+            "generationConfig": {"temperature": temperature, "maxOutputTokens": max_output_tokens},
+        }
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(url, headers={"x-goog-api-key": self.api_key}, json=payload)
+        except httpx.HTTPError as exc:
+            raise GeminiError(f"Gemini network request failed: {type(exc).__name__}") from exc
+        if response.is_error:
+            try:
+                detail = response.json().get("error", {}).get("message", "Request rejected")
+            except (ValueError, AttributeError):
+                detail = "Request rejected"
+            raise GeminiError(f"Gemini HTTP {response.status_code}: {detail}")
+        try:
+            data = response.json()
+            answer = "\\n".join(
+                part["text"] for part in data["candidates"][0]["content"]["parts"]
+                if isinstance(part.get("text"), str)
+            )
+        except (ValueError, KeyError, IndexError, TypeError) as exc:
+            raise GeminiError("Gemini returned an unexpected response format.") from exc
+        if not answer.strip():
+            raise GeminiError("Gemini returned an empty response.")
         return answer.strip()
 
 
