@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/((?!css/|js/|assets/|static/|favicon\\.ico$).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
