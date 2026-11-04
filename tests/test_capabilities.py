@@ -72,6 +72,14 @@ class SafeToolTests(unittest.TestCase):
         self.assertIn("Translate faithfully", prompt)
         self.assertIn("never invent citations", prompt)
 
+    def test_prompt_includes_multimodal_generation_and_consent_guidance(self):
+        assistant = CapabilityAssistant(provider=FakeProvider(), database=FakeDatabase())
+        prompt = assistant.build_prompt("Analyze this clip and create a voiceover")
+        self.assertIn("MULTIMODAL IMAGE, AUDIO, VIDEO", prompt)
+        self.assertIn("Do not claim a file or media asset was generated", prompt)
+        self.assertIn("explicit consent", prompt)
+        self.assertIn("create original melodies", prompt)
+
     def test_calculator(self):
         self.assertEqual(calculate("(12 + 8) * 3"), 60)
         self.assertEqual(calculate("2 ** 3"), 8)
