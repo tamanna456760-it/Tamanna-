@@ -46,13 +46,14 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          set -uo pipefail
           failed=0
-          while IFS= read -r f; do
+          while IFS= read -r -d '' f; do
             if ! bash -n "$f"; then
-              echo "FAIL $f"
+              printf 'FAIL: %q\\n' "$f"
               failed=1
             fi
-          done < <(git ls-files '*.sh')
+          done < <(git ls-files -z -- '*.sh')
           exit "$failed"
 
       - name: Parse every tracked JSON file
