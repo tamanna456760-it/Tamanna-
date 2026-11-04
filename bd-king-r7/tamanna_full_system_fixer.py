@@ -796,7 +796,7 @@ git add . || true
 
 # Commit
 echo "💾 Committing changes..."
-git commit -m "🤖 Tamanna AI: Auto-fix & sync $(date +%Y-%m-%d\ %H:%M:%S)" || true
+git commit -m "🤖 Tamanna AI: Auto-fix & sync $(date '+%Y-%m-%d %H:%M:%S')" || true
 
 # Push
 echo "📤 Pushing to remote..."
