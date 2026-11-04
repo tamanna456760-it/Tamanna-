@@ -107,3 +107,19 @@ MongoDB collection schemas, REST endpoints, and GraphQL schemas/resolvers.
 It emphasizes authorization, owner isolation, validation, migrations,
 pagination, error handling, and tests. It generates a structured task prompt;
 it does not connect to or mutate a live database.
+
+
+## Context window and memory layers
+
+The assistant assembles system instructions, owner-scoped profile settings,
+saved memories, recent conversation history, retrieved RAG excerpts, and the
+current message within a configurable context budget
+(`context_window_tokens`, default 24,000). Lower-priority context is trimmed
+before the current request and system instructions. `estimate_tokens()` uses a
+conservative UTF-8 byte estimate, not the provider's exact tokenizer.
+
+The SQLite conversation/memory persistence and optional `VectorKnowledgeStore`
+provide external long-term memory and RAG. The vector store must be explicitly
+supplied to `CapabilityAssistant`; it is not silently enabled or populated.
+Parametric memory belongs to the model provider's trained weights and cannot
+be directly edited through ordinary provider API calls.
