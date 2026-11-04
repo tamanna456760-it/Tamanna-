@@ -165,7 +165,8 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
     report["accepted"] = len(accepted)
     report["rejected"] = len(records) - len(accepted)
     report["files_skipped"] = len(skipped)
-    report["provenance_required"] = provenance_path is not None\n    report["provenance_entries"] = len(provenance)
+    report["provenance_required"] = provenance_path is not None
+    report["provenance_entries"] = len(provenance)
     report["media_indexed"] = len(media_records)
     report["images_indexed"] = sum(item["kind"] == "image" for item in media_records)
     report["audio_indexed"] = sum(item["kind"] == "audio" for item in media_records)
