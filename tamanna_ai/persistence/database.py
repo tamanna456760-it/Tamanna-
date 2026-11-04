@@ -69,6 +69,19 @@ class Memory(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+class UserSettings(Base):
+    """One private profile/settings record per user."""
+    __tablename__ = "user_settings"
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    language: Mapped[str] = mapped_column(String(16), default="auto")
+    usage_pattern: Mapped[str] = mapped_column(String(500), default="")
+    custom_instructions: Mapped[str] = mapped_column(Text, default="")
+    preferences_json: Mapped[str] = mapped_column(Text, default="{}")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
 class KnowledgeFingerprint(Base):
     """Database-enforced idempotency key for imported knowledge records."""
     __tablename__ = "knowledge_fingerprints"
@@ -125,6 +138,57 @@ class Database:
                 user.name = name.strip()[:80]
             user_id = user.id
         return user_id
+
+    def get_user_settings(self, *, user_id: int) -> dict[str, object]:
+        """Return profile customization for this authenticated user only."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        self.init()
+        with self.Session() as session:
+            user = session.get(User, user_id)
+            if user is None:
+                raise LookupError("User not found")
+            settings = session.get(UserSettings, user_id)
+            return {
+                "user_id": user.id,
+                "name": user.name or "",
+                "email": user.email or "",
+                "language": settings.language if settings else "auto",
+                "usage_pattern": settings.usage_pattern if settings else "",
+                "custom_instructions": settings.custom_instructions if settings else "",
+                "preferences": json.loads(settings.preferences_json) if settings else {},
+            }
+
+    def update_user_settings(
+        self, *, user_id: int, language: str = "auto",
+        usage_pattern: str = "", custom_instructions: str = "",
+        preferences: dict[str, object] | None = None,
+    ) -> bool:
+        """Update only the authenticated user's language and customization settings."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        language = str(language).strip().lower()
+        if language not in {"auto", "en", "bn", "hi", "ar"}:
+            raise ValueError("language must be auto, en, bn, hi, or ar")
+        if len(str(usage_pattern)) > 500 or len(str(custom_instructions)) > 4000:
+            raise ValueError("User settings exceed the allowed length")
+        if preferences is not None and not isinstance(preferences, dict):
+            raise ValueError("preferences must be an object")
+        self.init()
+        with self.Session.begin() as session:
+            if session.get(User, user_id) is None:
+                raise LookupError("User not found")
+            settings = session.get(UserSettings, user_id)
+            if settings is None:
+                settings = UserSettings(user_id=user_id)
+                session.add(settings)
+            settings.language = language
+            settings.usage_pattern = str(usage_pattern).strip()
+            settings.custom_instructions = str(custom_instructions).strip()
+            settings.preferences_json = json.dumps(
+                preferences or {}, ensure_ascii=False
+            )[:10000]
+        return True
 
     def save_chat_pair(
         self, user_message: str, assistant_reply: str,
