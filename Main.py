@@ -60,11 +60,26 @@ app = FastAPI(
 
 @app.on_event("startup")
 def initialize_persistence():
+    # Report configuration readiness without ever logging credential values.
+    session_secret_ready = len(os.getenv("TAMANNA_SESSION_SECRET", "").strip()) >= 32
+    model_provider = os.getenv("TAMANNA_MODEL_PROVIDER", "gemini").strip().lower()
+    model_key_ready = bool(
+        os.getenv("TAMANNA_MODEL_API_KEY", "").strip()
+        or os.getenv("GEMINI_API_KEY", "").strip()
+    )
+    if not session_secret_ready:
+        print("[CONFIG] WARNING: TAMANNA_SESSION_SECRET is missing or shorter than 32 characters; signup/login will return 503.")
+    if model_provider == "gemini" and not model_key_ready:
+        print("[CONFIG] WARNING: Gemini API key is missing; chat requests will return 503 until configured.")
+    if model_provider not in {"gemini", "mock"}:
+        print("[CONFIG] WARNING: Unsupported TAMANNA_MODEL_PROVIDER; chat requests will be unavailable.")
+    print("[CONFIG] Environment values loaded from process environment / private .env; secret values are never logged.")
+
     init_database()
     migration = migrate_legacy_json(CHAT_FILE)
     if migration.get("status") == "migrated":
         print("[DATABASE] Imported legacy chat history:", migration.get("imported"))
-    print("[DATABASE] SQLAlchemy SQLite storage: ready")
+    print("[DATABASE] SQLAlchemy storage: ready")
 
 # ============================================================
 # TAMANNA SKILL SYSTEM V1
