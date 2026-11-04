@@ -1,12 +1,9 @@
-File: ids/health_check.py
-
 """
 Tamanna AI IDS Health Check.
 Project: Tamanna AI
 Owner: HM INSAN ALI
 Checks IDS component availability without modifying system settings.
 """
-from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 from ids.ids_manager import IDSManager
