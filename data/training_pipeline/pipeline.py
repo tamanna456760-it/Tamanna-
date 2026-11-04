@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 
 from .cleaning import clean_text
-from .quality import inspect_records\nfrom .provenance import load_provenance
+from .quality import inspect_records
+from .provenance import load_provenance
 
 SUPPORTED = {
     ".txt", ".md", ".rst", ".py", ".js", ".jsx", ".ts", ".tsx",
@@ -73,9 +74,15 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
     if source.is_dir() and (source == output or source in output.parents):
         raise ValueError("Output directory must not be inside the source directory")
     output.mkdir(parents=True, exist_ok=True)
+    provenance = load_provenance(provenance_path) if provenance_path is not None else {}
     records, media_records, skipped = [], [], []
     for path in _iter_sources(source):
         suffix = path.suffix.lower()
+        relative_name = path.name if source.is_file() else str(path.relative_to(source))
+        if provenance_path is not None and relative_name not in provenance:
+            skipped.append({"file": relative_name, "reason": "missing_or_unapproved_provenance"})
+            continue
+        source_metadata = provenance.get(relative_name, {})
         if suffix in MEDIA_TYPES:
             try:
                 size = path.stat().st_size
@@ -97,7 +104,8 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
                     relative_name = path.name
                 media_kind, mime_type = MEDIA_TYPES[suffix]
                 media_records.append({
-                    "file": relative_name, "kind": media_kind, "format": suffix.lstrip("."),\n                    **source_metadata,
+                    "file": relative_name, "kind": media_kind, "format": suffix.lstrip("."),
+                    **source_metadata,
                     "mime_type": mime_type, "bytes": size, "sha256": digest.hexdigest(),
                 })
             except OSError as exc:
@@ -156,7 +164,8 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
     report = inspect_records([{"text": r["text"]} for r in records], min_chars=min_chars)
     report["accepted"] = len(accepted)
     report["rejected"] = len(records) - len(accepted)
-    report["files_skipped"] = len(skipped)\n    report["provenance_required"] = provenance_path is not None\n    report["provenance_entries"] = len(provenance)
+    report["files_skipped"] = len(skipped)
+    report["provenance_required"] = provenance_path is not None\n    report["provenance_entries"] = len(provenance)
     report["media_indexed"] = len(media_records)
     report["images_indexed"] = sum(item["kind"] == "image" for item in media_records)
     report["audio_indexed"] = sum(item["kind"] == "audio" for item in media_records)
