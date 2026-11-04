@@ -35,6 +35,21 @@ class CleaningTests(unittest.TestCase):
             self.assertEqual(image_row["format"], "png")
             self.assertEqual(len(image_row["sha256"]), 64)
 
+    def test_pipeline_indexes_audio_video_and_pdf_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source, output = root / "source", root / "output"
+            source.mkdir()
+            (source / "sample.wav").write_bytes(b"RIFF" + b"\\x00\\x00\\x00\\x00" + b"WAVE" + b"data")
+            (source / "sample.mp4").write_bytes(b"\\x00\\x00\\x00\\x18ftypisom")
+            (source / "sample.pdf").write_bytes(b"%PDF-1.7 sample")
+            result = run_pipeline(source, output)
+            self.assertEqual(result["audio_indexed"], 1)
+            self.assertEqual(result["video_indexed"], 1)
+            self.assertEqual(result["documents_indexed"], 1)
+            rows = [json.loads(line) for line in (output / "media_manifest.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual({row["kind"] for row in rows}, {"audio", "video", "document"})
+
     def test_pipeline_writes_clean_dataset_and_report(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
