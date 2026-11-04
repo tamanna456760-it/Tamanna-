@@ -5,7 +5,7 @@ from tamanna_ai.capabilities.assistant import CapabilityAssistant
 
 
 class FakeDatabase:
-    def load_history(self, conversation_id=None, user_id=None):
+    def load_history(self, conversation_id=None, user_id=None, limit_pairs=None):
         return [{"user": "Earlier question", "assistant": "Earlier answer"}]
 
     def list_memories(self, user_id=None, limit=100):
