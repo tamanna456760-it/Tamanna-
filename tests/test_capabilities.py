@@ -80,7 +80,14 @@ class SafeToolTests(unittest.TestCase):
         self.assertIn("explicit consent", prompt)
         self.assertIn("create original melodies", prompt)
 
-    def test_calculator(self):
+
+    def test_data_analysis_guidance(self):
+        assistant = CapabilityAssistant(provider=FakeProvider(), database=FakeDatabase())
+        prompt = assistant.build_prompt("Analyze this sales spreadsheet")
+        self.assertIn("DATA ANALYSIS AND RESEARCH", prompt)
+        self.assertIn("Never invent missing values", prompt)
+        self.assertIn("Never execute macros", prompt)
+\n    def test_calculator(self):
         self.assertEqual(calculate("(12 + 8) * 3"), 60)
         self.assertEqual(calculate("2 ** 3"), 8)
 
