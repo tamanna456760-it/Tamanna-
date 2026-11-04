@@ -149,15 +149,21 @@ class Database:
         return conversation_id
 
     def load_history(
-        self, conversation_id: str | None = None, user_id: int | None = None
+        self, conversation_id: str | None = None, user_id: int | None = None,
+        limit_pairs: int | None = None,
     ) -> list[dict[str, str]]:
+        """Load recent complete user/assistant pairs, scoped to the owner when supplied."""
         with self.Session() as session:
-            statement = select(Message).join(Conversation).order_by(Message.created_at, Message.id)
+            statement = select(Message).join(Conversation).order_by(Message.created_at.desc(), Message.id.desc())
             if conversation_id:
                 statement = statement.where(Message.conversation_id == conversation_id)
             if user_id is not None:
                 statement = statement.where(Conversation.user_id == user_id)
+            if limit_pairs is not None:
+                limit_pairs = max(1, min(int(limit_pairs), 100))
+                statement = statement.limit(limit_pairs * 2)
             messages = list(session.scalars(statement))
+        messages.reverse()
         history: list[dict[str, str]] = []
         pending_user: Message | None = None
         for message in messages:
@@ -198,6 +204,32 @@ class Database:
             if user_id is not None:
                 statement = statement.where(Memory.user_id == user_id)
             return [item.content for item in session.scalars(statement)]
+
+    def update_memory(self, memory_id: int, content: str, *, user_id: int) -> bool:
+        """Update only a memory owned by the authenticated user."""
+        if user_id is None:
+            raise ValueError("user_id is required for persistent memory updates")
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("Memory content must be non-empty text")
+        self.init()
+        with self.Session.begin() as session:
+            record = session.scalar(select(Memory).where(Memory.id == int(memory_id), Memory.user_id == user_id))
+            if record is None:
+                return False
+            record.content = content.strip()[:10000]
+        return True
+
+    def delete_memory(self, memory_id: int, *, user_id: int) -> bool:
+        """Delete only a memory owned by the authenticated user."""
+        if user_id is None:
+            raise ValueError("user_id is required for persistent memory deletion")
+        self.init()
+        with self.Session.begin() as session:
+            record = session.scalar(select(Memory).where(Memory.id == int(memory_id), Memory.user_id == user_id))
+            if record is None:
+                return False
+            session.delete(record)
+        return True
 
     def migrate_legacy_json(self, json_path: str | Path) -> dict[str, object]:
         path = Path(json_path)
