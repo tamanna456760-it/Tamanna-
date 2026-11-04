@@ -12,6 +12,8 @@ import os
 import re
 import sqlite3
 from pathlib import Path
+from contextlib import contextmanager
+from typing import Iterator
 from typing import Callable, Sequence
 
 import httpx
@@ -133,10 +135,18 @@ class VectorKnowledgeStore:
                 "CREATE INDEX IF NOT EXISTS idx_knowledge_owner ON knowledge_chunks(owner_id)"
             )
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.db_path, timeout=15)
-        connection.execute("PRAGMA foreign_keys=ON")
-        return connection
+        try:
+            connection.execute("PRAGMA foreign_keys=ON")
+            yield connection
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
 
     def index_text(self, text: str, *, owner_id: str, source: str, title: str = "") -> int:
         owner = str(owner_id).strip()
