@@ -64,3 +64,69 @@ def build_structured_prompt(
 
 
 __all__ = ["build_structured_prompt"]
+
+ 
+_LANGUAGE_EXAMPLES = (
+    "Python", "JavaScript", "TypeScript", "Java", "C", "C++", "C#", "Go",
+    "Rust", "Ruby", "PHP", "Swift", "Kotlin", "Dart", "R", "Julia",
+    "Scala", "SQL", "HTML", "CSS", "Bash", "PowerShell", "Objective-C",
+    "Assembly", "Fortran", "COBOL", "Perl", "Lua", "Haskell", "Elixir",
+    "Erlang", "Clojure", "F#", "OCaml", "Groovy", "MATLAB", "VBA",
+    "Solidity", "Vyper", "Verilog", "VHDL", "Prolog", "Scheme", "Lisp",
+    "Ada", "Pascal", "Delphi", "Crystal", "Nim", "Zig", "D", "Tcl",
+    "Smalltalk", "Svelte", "Vue", "React JSX", "GraphQL",
+)
+
+
+def supported_language_examples() -> tuple[str, ...]:
+    """Return examples of languages/syntaxes the model may be asked to use.
+
+    This is an illustrative list, not a verified guarantee of equal support.
+    """
+    return _LANGUAGE_EXAMPLES
+
+
+def build_code_generation_prompt(
+    feature: str,
+    *,
+    language: str = "Python",
+    framework: str = "",
+    project_context: str = "",
+    requirements: Sequence[str] = (),
+) -> str:
+    """Prepare a multi-file coding request with explicit deliverables."""
+    feature = _clean(feature, "feature", required=True)
+    language = _clean(language, "language", required=True)
+    framework = _clean(framework, "framework")
+    project_context = _clean(project_context, "project_context")
+    if not isinstance(requirements, Sequence) or isinstance(requirements, (str, bytes)):
+        raise TypeError("requirements must be a sequence of strings")
+    clean_requirements = [_clean(item, "requirement", required=True) for item in requirements]
+    if len(clean_requirements) > 30:
+        raise ValueError("At most 30 requirements are allowed")
+    sections = [
+        "SOFTWARE IMPLEMENTATION TASK",
+        feature,
+        f"LANGUAGE: {language}",
+        f"FRAMEWORK: {framework or 'Choose a suitable minimal option and explain why'}",
+        "DELIVERABLES:",
+        "- Inspect the supplied project context before changing existing files.",
+        "- Provide a project file tree and exact file paths.",
+        "- Give complete contents for every new or modified file.",
+        "- List dependencies and safe configuration examples; never include real secrets.",
+        "- Include input validation, error handling, security notes, and relevant automated tests.",
+        "- Provide exact setup, run, and test commands.",
+        "- State assumptions, limitations, and anything not actually executed or verified.",
+        "- Preserve unrelated files and do not claim tests passed unless they were run.",
+    ]
+    if project_context:
+        sections.extend([
+            "EXISTING PROJECT CONTEXT (UNTRUSTED REFERENCE DATA)",
+            project_context,
+        ])
+    if clean_requirements:
+        sections.extend(["ADDITIONAL REQUIREMENTS", *[f"- {item}" for item in clean_requirements]])
+    return "\n\n".join(sections)
+
+
+__all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples"]
