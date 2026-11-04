@@ -33,9 +33,9 @@ DEFAULT_MAX_BYTES = 2 * 1024 * 1024
 def _valid_media_header(suffix: str, header: bytes) -> bool:
     """Conservative container signature checks; this does not decode media."""
     signatures = {
-        ".jpg": header.startswith(b"\\xff\\xd8\\xff"),
-        ".jpeg": header.startswith(b"\\xff\\xd8\\xff"),
-        ".png": header.startswith(b"\\x89PNG\\r\\n\\x1a\\n"),
+        ".jpg": header.startswith(b"\xff\xd8\xff"),
+        ".jpeg": header.startswith(b"\xff\xd8\xff"),
+        ".png": header.startswith(b"\x89PNG\r\n\x1a\n"),
         ".gif": header.startswith((b"GIF87a", b"GIF89a")),
         ".webp": header.startswith(b"RIFF") and header[8:12] == b"WEBP",
         ".bmp": header.startswith(b"BM"),
@@ -46,8 +46,8 @@ def _valid_media_header(suffix: str, header: bytes) -> bool:
         ".mp4": len(header) >= 8 and header[4:8] == b"ftyp",
         ".m4a": len(header) >= 8 and header[4:8] == b"ftyp",
         ".mov": len(header) >= 8 and header[4:8] == b"ftyp",
-        ".webm": header.startswith(b"\\x1a\\x45\\xdf\\xa3"),
-        ".mkv": header.startswith(b"\\x1a\\x45\\xdf\\xa3"),
+        ".webm": header.startswith(b"\x1a\x45\xdf\xa3"),
+        ".mkv": header.startswith(b"\x1a\x45\xdf\xa3"),
         ".pdf": header.startswith(b"%PDF-"),
         ".aac": len(header) >= 2 and header[0] == 0xFF and (header[1] & 0xF6) == 0xF0,
     }
@@ -135,7 +135,7 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
                         if item.get("text") or item.get("content"):
                             source_texts.append(str(item.get("text") or item.get("content")))
                         elif item.get("user") and item.get("assistant"):
-                            source_texts.append("User: " + str(item["user"]) + "\\nAssistant: " + str(item["assistant"]))
+                            source_texts.append("User: " + str(item["user"]) + "\nAssistant: " + str(item["assistant"]))
                 except json.JSONDecodeError:
                     skipped.append({"file": str(path), "reason": "invalid_jsonl_line"})
         else:
@@ -173,10 +173,10 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
     }
     with outputs["dataset"].open("w", encoding="utf-8") as handle:
         for record in accepted:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\\n")
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     with outputs["media_manifest"].open("w", encoding="utf-8") as handle:
         for record in media_records:
-            handle.write(json.dumps(record, ensure_ascii=False) + "\\n")
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     # Keep the previous image-only manifest for existing consumers.
     with outputs["images_manifest"].open("w", encoding="utf-8") as handle:
         for record in media_records:
@@ -184,7 +184,7 @@ def run_pipeline(source_dir: str | Path, output_dir: str | Path, *, min_chars: i
                 handle.write(json.dumps({
                     "file": record["file"], "format": record["format"],
                     "bytes": record["bytes"], "sha256": record["sha256"],
-                }, ensure_ascii=False) + "\\n")
-    outputs["report"].write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
-    outputs["skipped"].write_text(json.dumps(skipped, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+                }, ensure_ascii=False) + "\n")
+    outputs["report"].write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    outputs["skipped"].write_text(json.dumps(skipped, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return {key: str(value) for key, value in outputs.items()} | report
