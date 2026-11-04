@@ -61,3 +61,14 @@ and syntax examples; this is an illustrative list, not a benchmark or a
 guarantee that every provider supports every language equally. The helper
 prepares prompts; actual code generation still requires the configured model
 provider, and execution/testing requires a separate approved runtime.
+
+
+## Debugging, security review, and performance analysis
+
+The assistant guidance covers pasted terminal errors, tracebacks, browser
+console messages, API/build/CI logs, root-cause hypotheses, minimal fixes,
+regression tests, common application security risks, and performance bottlenecks.
+`build_debugging_prompt()` structures an error report plus optional source
+code/runtime/expected-vs-actual context. It does not execute supplied commands,
+run a scanner, or prove a fix; confirmed results require an actual test,
+profiler, scanner, or runtime reproduction.
