@@ -64,6 +64,14 @@ class SafeToolTests(unittest.TestCase):
         self.assertIn("Do not claim code was run or tested", prompt)
         self.assertIn("Never execute arbitrary project code", prompt)
 
+    def test_prompt_includes_writing_translation_and_research_guidance(self):
+        assistant = CapabilityAssistant(provider=FakeProvider(), database=FakeDatabase())
+        prompt = assistant.build_prompt("Translate this email into Bengali")
+        self.assertIn("WRITING AND CONTENT CREATION", prompt)
+        self.assertIn("professional business emails", prompt)
+        self.assertIn("Translate faithfully", prompt)
+        self.assertIn("never invent citations", prompt)
+
     def test_calculator(self):
         self.assertEqual(calculate("(12 + 8) * 3"), 60)
         self.assertEqual(calculate("2 ** 3"), 8)
