@@ -22,6 +22,19 @@ class CleaningTests(unittest.TestCase):
         self.assertEqual(result["rejected"], 2)
         self.assertEqual(result["issues"]["duplicate"], 1)
 
+    def test_pipeline_indexes_signature_checked_images(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "source"
+            output = root / "output"
+            source.mkdir()
+            (source / "sample.png").write_bytes(b"\\x89PNG\\r\\n\\x1a\\n")
+            result = run_pipeline(source, output)
+            self.assertEqual(result["images_indexed"], 1)
+            image_row = json.loads((output / "images_manifest.jsonl").read_text(encoding="utf-8").strip())
+            self.assertEqual(image_row["format"], "png")
+            self.assertEqual(len(image_row["sha256"]), 64)
+
     def test_pipeline_writes_clean_dataset_and_report(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
