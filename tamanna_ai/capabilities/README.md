@@ -9,6 +9,8 @@ This package provides a conversation-aware orchestration layer over the existing
 
 - **Coding and software development:** supports code generation, explanation, review, debugging, refactoring, optimization, import/dependency investigation, focused test suggestions, and README/API documentation across common programming languages. The model proposes code; this capability layer does not execute arbitrary generated code or shell commands.
 - **Debugging discipline:** distinguishes inspected facts from assumptions and never reports a test as passed unless a real test runner returned a passing result. File modifications and repository writes must go through a separately authorized, constrained application workflow.
+- **Writing and content creation:** drafts original articles, research-based explainers, blog posts, professional emails, proposals, business plans, reports, and strategy summaries; translates between requested languages; and edits spelling, grammar, clarity, tone, and structure. Research claims and citations must be grounded in supplied or actually checked sources—never fabricated.
+- **Translation and editing discipline:** preserves meaning, context, and tone; flags ambiguous wording; and avoids silently changing the author's intent.
 - **Tools:** includes a deliberately restricted arithmetic calculator using Python AST (never `eval`) and an internal indexed project-code search; no shell or arbitrary code execution is exposed.
 - **Web/API tools:** must be explicitly configured and allow-listed. This package does not silently fetch arbitrary URLs or execute external actions.
 
