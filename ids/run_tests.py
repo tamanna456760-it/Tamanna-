@@ -1,5 +1,3 @@
-File: ids/run_tests.py
-
 """
 Tamanna AI IDS Test Runner.
 Project: Tamanna AI
@@ -7,7 +5,6 @@ Owner: HM INSAN ALI
 Discovers and runs tests in ids/tests/.
 Uses Python's standard unittest framework.
 """
-from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
