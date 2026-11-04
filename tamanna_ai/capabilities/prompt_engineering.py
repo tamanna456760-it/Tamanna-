@@ -213,7 +213,7 @@ def build_refactoring_prompt(
     ]
     if clean_goals:
         sections.extend(["USER PRIORITIES", *[f"- {item}" for item in clean_goals]])
-    return "\\n\\n".join(sections)
+    return "\n\n".join(sections)
 
 
 __all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples", "build_debugging_prompt", "build_refactoring_prompt"]
