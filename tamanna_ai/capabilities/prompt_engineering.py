@@ -268,7 +268,7 @@ def build_documentation_prompt(
     if include_api_reference:
         sections.append("- Produce API documentation only for endpoints and schemas evidenced by the source.")
     sections.append("- Do not claim repository files were changed unless a file-write operation confirms it.")
-    return "\\n\\n".join(sections)
+    return "\n\n".join(sections)
 
 
 __all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples", "build_debugging_prompt", "build_refactoring_prompt", "build_documentation_prompt"]
