@@ -28,7 +28,9 @@ class CapabilityAssistant:
         if not isinstance(message, str) or not message.strip():
             raise ValueError("Message cannot be empty")
         # Bound context by both item count and character count to avoid unbounded prompts.
-        history = self.database.load_history(conversation_id=conversation_id, user_id=user_id)[-self.history_pairs:] if self.history_pairs else []
+        history = self.database.load_history(
+            conversation_id=conversation_id, user_id=user_id, limit_pairs=self.history_pairs
+        ) if self.history_pairs else []
         memories = self.database.list_memories(user_id=user_id, limit=self.memory_items) if self.memory_items else []
         sections = [SYSTEM_GUIDANCE]
         if memories:
