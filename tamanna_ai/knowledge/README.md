@@ -67,3 +67,19 @@ Users should be able to inspect and delete their own indexed sources.
 - The SQLite implementation is suitable as a lightweight starting point. Large
   multi-user deployments may need PostgreSQL with pgvector or a managed vector
   database, with tested backups and migrations.
+
+## Structured data analysis
+
+`analyze_file(path)` provides bounded, read-only summaries for CSV, XLSX,
+and text-based PDF files. CSV/XLSX results include per-column numeric
+statistics or categorical frequencies and chart-ready series data. XLSX
+analysis reads the first worksheet only and uses cached cell values; formulas
+and macros are never executed. PDF extraction is text-only (OCR is not
+included). The default file limit is 20 MiB, with at most 100,000 rows and
+200 columns. XLSX requires optional `openpyxl`; PDF requires optional
+`pypdf`.
+
+This helper is not yet connected to an authenticated upload/chat API or a
+visual chart renderer. Large-document semantic retrieval remains available
+through the vector knowledge store, but indexing/search still needs to be
+wired into the public chat flow and protected by authenticated ownership.
