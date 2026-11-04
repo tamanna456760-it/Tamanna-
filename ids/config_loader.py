@@ -1,12 +1,9 @@
-File: ids/config_loader.py
-
 """
 Tamanna AI IDS Configuration Loader.
 Project: Tamanna AI
 Owner: HM INSAN ALI
 Loads and validates IDS configuration without applying system changes.
 """
-from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
