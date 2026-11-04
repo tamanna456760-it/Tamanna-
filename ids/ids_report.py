@@ -1,5 +1,3 @@
-File: ids/ids_report.py
-
 """
 Tamanna AI IDS Report Generator.
 Project: Tamanna AI
@@ -7,7 +5,6 @@ Owner: HM INSAN ALI
 Generates a read-only IDS status report.
 No automatic blocking or system firewall changes.
 """
-from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 from ids.health_check import run_health_check
