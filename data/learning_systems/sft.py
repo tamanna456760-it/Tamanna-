@@ -11,7 +11,7 @@ from data.training_pipeline.cleaning import clean_text
 def export_sft_dataset(source_path: str | Path, output_path: str | Path, *, min_chars: int = 2) -> dict:
     """Convert reviewed prompt/response JSONL into chat-format SFT JSONL.
 
-    Accepted source keys: prompt + response, or instruction + output.
+    Accepted source keys: prompt + response, instruction + output, or user + assistant.
     """
     source = Path(source_path)
     output = Path(output_path)
@@ -30,8 +30,8 @@ def export_sft_dataset(source_path: str | Path, output_path: str | Path, *, min_
             if not isinstance(row, dict):
                 rejected += 1
                 continue
-            prompt = str(row.get("prompt") or row.get("instruction") or "").strip()
-            response = str(row.get("response") or row.get("output") or "").strip()
+            prompt = str(row.get("prompt") or row.get("instruction") or row.get("user") or "").strip()
+            response = str(row.get("response") or row.get("output") or row.get("assistant") or "").strip()
             if len(prompt) < min_chars or len(response) < min_chars:
                 rejected += 1
                 continue
