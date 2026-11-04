@@ -202,3 +202,37 @@ def test_debugging_prompt_rejects_empty_error_report():
 
     with pytest.raises(ValueError):
         build_debugging_prompt(" ")
+
+
+from tamanna_ai.capabilities.prompt_engineering import build_refactoring_prompt
+
+
+def test_refactoring_prompt_covers_behavior_deprecations_and_performance():
+    prompt = build_refactoring_prompt(
+        "def old(x): return [i * 2 for i in x]",
+        language="Python",
+        runtime_version="3.12",
+        goals=["Improve readability", "Replace deprecated API"],
+    )
+    assert "CODE REFACTORING AND OPTIMIZATION TASK" in prompt
+    assert "LANGUAGE: Python" in prompt
+    assert "Preserve observable behavior" in prompt
+    assert "deprecated APIs" in prompt
+    assert "performance complexity" in prompt
+    assert "Improve readability" in prompt
+
+
+def test_refactoring_prompt_can_allow_explicit_behavior_change():
+    prompt = build_refactoring_prompt(
+        "function old() {}",
+        language="JavaScript",
+        preserve_behavior=False,
+    )
+    assert "Explain intended behavior/API changes" in prompt
+
+
+def test_refactoring_prompt_rejects_empty_source():
+    import pytest
+
+    with pytest.raises(ValueError):
+        build_refactoring_prompt(" ")
