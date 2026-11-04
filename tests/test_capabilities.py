@@ -274,3 +274,53 @@ def test_documentation_prompt_rejects_invalid_flags():
         build_documentation_prompt("x = 1", include_readme="yes")
     with pytest.raises(ValueError):
         build_documentation_prompt(" ")
+
+
+from tamanna_ai.capabilities.prompt_engineering import (
+    build_database_backend_prompt,
+    build_project_documentation_prompt,
+)
+
+
+def test_project_documentation_prompt_covers_readme_api_and_architecture():
+    prompt = build_project_documentation_prompt(
+        "README.md\ntamanna_ai/api/routes.py",
+        source_context="@api_router.get('/health')",
+    )
+    assert "WHOLE-PROJECT DOCUMENTATION GENERATION" in prompt
+    assert "root README.md" in prompt
+    assert "API documentation" in prompt
+    assert "architecture overview" in prompt
+    assert "Never invent commands" in prompt
+
+
+def test_project_documentation_prompt_validates_flags():
+    import pytest
+
+    with pytest.raises(TypeError):
+        build_project_documentation_prompt("README.md", include_readme=1)
+    with pytest.raises(ValueError):
+        build_project_documentation_prompt(" ")
+
+
+def test_database_backend_prompt_covers_sql_mongodb_rest_graphql_security():
+    prompt = build_database_backend_prompt(
+        "Create customer management endpoints",
+        backend_type="REST and SQL",
+        database="PostgreSQL",
+        framework="FastAPI",
+        requirements=["Tenant isolation", "Pagination"],
+    )
+    for expected in ("Parameterized queries", "MongoDB", "REST:", "GraphQL:", "owner", "tests"):
+        assert expected.lower() in prompt.lower()
+    assert "PostgreSQL" in prompt
+    assert "FastAPI" in prompt
+
+
+def test_database_backend_prompt_rejects_invalid_requirements():
+    import pytest
+
+    with pytest.raises(TypeError):
+        build_database_backend_prompt("Create API", requirements="not a list")
+    with pytest.raises(ValueError):
+        build_database_backend_prompt(" ")
