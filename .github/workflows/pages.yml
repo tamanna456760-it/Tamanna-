@@ -17,39 +17,26 @@ concurrency:
 
 jobs:
   build:
-    name: Prepare Static Website
+    name: Build Static Website
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare website files
-        shell: bash
-        run: |
-          set -Eeuo pipefail
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-          test -f index.html
-          test -f CNAME
-          test "$(tr -d '\r\n' < CNAME)" = "www.bd-king-r7.com"
+      - name: Install dependencies
+        run: npm ci
 
-          rm -rf _site
-          mkdir -p _site
+      - name: Validate server entry points
+        run: npm run check
 
-          cp index.html _site/index.html
-          cp CNAME _site/CNAME
-
-          for item in css js assets static; do
-            if [ -d "$item" ]; then
-              cp -R "$item" "_site/$item"
-            fi
-          done
-
-          touch _site/.nojekyll
-
-          test -f _site/index.html
-          test -f _site/CNAME
-          test -f _site/.nojekyll
-          echo "PASS: Static site artifact prepared."
+      - name: Build website
+        run: npm run build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -57,7 +44,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dist
 
   deploy:
     name: Publish website
