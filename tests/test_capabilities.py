@@ -176,3 +176,29 @@ def test_code_generation_prompt_rejects_empty_feature():
 
     with pytest.raises(ValueError):
         build_code_generation_prompt(" ")
+
+
+from tamanna_ai.capabilities.prompt_engineering import build_debugging_prompt
+
+
+def test_debugging_prompt_separates_evidence_and_requests_safe_fix():
+    prompt = build_debugging_prompt(
+        "ModuleNotFoundError: No module named 'fastapi'",
+        runtime="Python 3.11",
+        source_code="from fastapi import FastAPI",
+        expected_behavior="Server starts",
+        actual_behavior="Import fails",
+    )
+    assert "DEBUGGING AND ROOT-CAUSE ANALYSIS" in prompt
+    assert "ModuleNotFoundError" in prompt
+    assert "Separate directly observed evidence from hypotheses" in prompt
+    assert "smallest safe fix" in prompt
+    assert "Python 3.11" in prompt
+    assert "Do not execute commands" in prompt
+
+
+def test_debugging_prompt_rejects_empty_error_report():
+    import pytest
+
+    with pytest.raises(ValueError):
+        build_debugging_prompt(" ")
