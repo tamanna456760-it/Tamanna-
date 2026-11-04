@@ -15,7 +15,7 @@ The output directory must be outside the source directory. The pipeline writes:
 - `quality_report.json`: counts for accepted/rejected records, duplicates, short/empty records and redactions.
 - `skipped_files.json`: files/JSONL rows that could not be processed and reasons.
 
-Supported text/code extensions: TXT, MD, PY, JS/JSX, TS/TSX, JSON, JSONL, YAML, HTML and CSS. Files larger than 2 MiB are skipped by default. JSON/JSONL records may use a `text` or `content` field. Images and other binary files are intentionally not ingested as text; image training requires a separate vision model, licensed image dataset, labels/captions, and a dedicated image preprocessing pipeline.
+Supported text/code extensions: TXT, MD, PY, JS/JSX, TS/TSX, JSON, JSONL, YAML, HTML and CSS. Text/code files larger than 2 MiB are skipped by default. JSON/JSONL records may use a `text` or `content` field. JPG/JPEG, PNG, WEBP, GIF and BMP files up to 20 MiB are signature-checked and indexed in `images_manifest.jsonl`; the pipeline does not decode, augment or train on image pixels. Image model training still requires a vision model, licensed image dataset, labels/captions, and a dedicated preprocessing/training stage.
 
 ## Safety and quality
 
