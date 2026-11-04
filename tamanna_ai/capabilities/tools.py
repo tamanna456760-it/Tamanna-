@@ -56,4 +56,12 @@ def run_safe_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         if set(arguments) != {"expression"}:
             raise ValueError("calculator requires only the expression argument")
         return {"tool": name, "result": calculate(str(arguments["expression"]))}
+    if name == "project_search":
+        if not set(arguments).issubset({"query", "limit"}) or not isinstance(arguments.get("query"), str):
+            raise ValueError("project_search requires query and optional limit")
+        limit = int(arguments.get("limit", 10))
+        if not 1 <= limit <= 20:
+            raise ValueError("project_search limit must be between 1 and 20")
+        from tamanna_ai.knowledge.resource_search import search_code
+        return {"tool": name, "results": search_code(arguments["query"], limit=limit)}
     raise ValueError(f"Tool is not allow-listed: {name}")
