@@ -1,5 +1,3 @@
-File: ids/tests/test_config_loader.py
-
 """Tests for the Tamanna AI IDS configuration loader."""
 import json
 import tempfile
@@ -16,14 +14,14 @@ def valid_config():
         "mode": "monitor_only",
         "detection": {
             "failed_login_threshold": 5,
-            "failed_login_window": 300,
+            "failed_login_window_seconds": 300,
             "request_rate_threshold": 60,
-            "request_rate_window": 60,
+            "request_rate_window_seconds": 60,
         },
-        "collection": {
+        "event_collection": {
             "enabled": True,
-            "max_event_size": 16384,
-            "max_in_memory_events": 1000,
+            "max_event_size_bytes": 16384,
+            "max_events_in_memory": 1000,
             "redact_secrets": True,
         },
         "alerts": {
@@ -38,7 +36,7 @@ def valid_config():
         "enforcement": {
             "automatic_ip_blocking": False,
             "modify_system_firewall": False,
-            "manual_approval": True,
+            "require_manual_approval": True,
         },
     }
 class TestIDSConfigLoader(unittest.TestCase):
@@ -112,13 +110,13 @@ class TestIDSConfigLoader(unittest.TestCase):
             load_config(self.config_path)
     def test_missing_manual_approval_is_rejected(self):
         config = valid_config()
-        config["enforcement"]["manual_approval"] = False
+        config["enforcement"]["require_manual_approval"] = False
         self.write_config(config)
         with self.assertRaises(IDSConfigError):
             load_config(self.config_path)
     def test_secret_redaction_must_be_enabled(self):
         config = valid_config()
-        config["collection"]["redact_secrets"] = False
+        config["event_collection"]["redact_secrets"] = False
         self.write_config(config)
         with self.assertRaises(IDSConfigError):
             load_config(self.config_path)
