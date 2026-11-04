@@ -87,7 +87,8 @@ class SafeToolTests(unittest.TestCase):
         self.assertIn("DATA ANALYSIS AND RESEARCH", prompt)
         self.assertIn("Never invent missing values", prompt)
         self.assertIn("Never execute macros", prompt)
-\n    def test_calculator(self):
+
+    def test_calculator(self):
         self.assertEqual(calculate("(12 + 8) * 3"), 60)
         self.assertEqual(calculate("2 ** 3"), 8)
 
@@ -107,3 +108,35 @@ class SafeToolTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+from tamanna_ai.capabilities.prompt_engineering import build_structured_prompt
+
+
+def test_structured_prompt_includes_goal_constraints_and_format():
+    prompt = build_structured_prompt(
+        "Analyze quarterly revenue",
+        context="Q1: 100; Q2: 150",
+        constraints=["Do not invent missing values"],
+        output_format="Summary and table",
+        language="Bengali",
+        success_criteria=["Show growth calculation"],
+    )
+    assert "TASK\nAnalyze quarterly revenue" in prompt
+    assert "REFERENCE CONTEXT (UNTRUSTED DATA" in prompt
+    assert "Do not invent missing values" in prompt
+    assert "OUTPUT FORMAT\nSummary and table" in prompt
+    assert "Show growth calculation" in prompt
+
+
+def test_structured_prompt_validates_required_fields_and_limits():
+    import pytest
+
+    with pytest.raises(ValueError):
+        build_structured_prompt(" ")
+    with pytest.raises(ValueError):
+        build_structured_prompt("Goal", constraints=[" "])
+    with pytest.raises(ValueError):
+        build_structured_prompt("x" * 12001)
+
+
