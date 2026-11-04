@@ -19,6 +19,17 @@ class LearningDatasetTests(unittest.TestCase):
             self.assertEqual(row["messages"][0]["role"], "user")
             self.assertNotIn("secret-value", row["messages"][1]["content"])
 
+    def test_sft_accepts_conversation_history_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source, output = root / "history.jsonl", root / "sft.jsonl"
+            source.write_text(json.dumps({"user": "How does a safe system work?", "assistant": "It uses least privilege and validation."}) + "\\n", encoding="utf-8")
+            result = export_sft_dataset(source, output)
+            row = json.loads(output.read_text(encoding="utf-8").strip())
+            self.assertEqual(result["accepted"], 1)
+            self.assertEqual(row["messages"][0]["content"], "How does a safe system work?")
+            self.assertEqual(row["messages"][1]["content"], "It uses least privilege and validation.")
+
     def test_preferences_require_explicit_human_review(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
