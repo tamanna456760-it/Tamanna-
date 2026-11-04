@@ -23,7 +23,7 @@ class LearningDatasetTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             source, output = root / "history.jsonl", root / "sft.jsonl"
-            source.write_text(json.dumps({"user": "How does a safe system work?", "assistant": "It uses least privilege and validation."}) + "\\n", encoding="utf-8")
+            source.write_text(json.dumps({"user": "How does a safe system work?", "assistant": "It uses least privilege and validation."}) + "\n", encoding="utf-8")
             result = export_sft_dataset(source, output)
             row = json.loads(output.read_text(encoding="utf-8").strip())
             self.assertEqual(result["accepted"], 1)
