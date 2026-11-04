@@ -40,8 +40,8 @@ class CleaningTests(unittest.TestCase):
             root = Path(tmp)
             source, output = root / "source", root / "output"
             source.mkdir()
-            (source / "sample.wav").write_bytes(b"RIFF" + b"\\x00\\x00\\x00\\x00" + b"WAVE" + b"data")
-            (source / "sample.mp4").write_bytes(b"\\x00\\x00\\x00\\x18ftypisom")
+            (source / "sample.wav").write_bytes(b"RIFF" + b"\x00\x00\x00\x00" + b"WAVE" + b"data")
+            (source / "sample.mp4").write_bytes(b"\x00\x00\x00\x18ftypisom")
             (source / "sample.pdf").write_bytes(b"%PDF-1.7 sample")
             result = run_pipeline(source, output)
             self.assertEqual(result["audio_indexed"], 1)
