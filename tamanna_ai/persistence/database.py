@@ -139,6 +139,30 @@ class Database:
             user_id = user.id
         return user_id
 
+    def update_user_profile(self, *, user_id: int, name: str, email: str) -> bool:
+        """Update the profile name/email for the identified account."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        clean_name = str(name).strip()
+        clean_email = str(email).strip().lower()
+        if not clean_name or len(clean_name) > 80:
+            raise ValueError("name must contain 1 to 80 characters")
+        if len(clean_email) > 254 or "@" not in clean_email:
+            raise ValueError("A valid email is required")
+        self.init()
+        with self.Session.begin() as session:
+            user = session.get(User, user_id)
+            if user is None:
+                raise LookupError("User not found")
+            existing = session.scalar(select(User).where(
+                User.email == clean_email, User.id != user_id
+            ))
+            if existing is not None:
+                raise ValueError("Email is already in use")
+            user.name = clean_name
+            user.email = clean_email
+        return True
+
     def get_user_settings(self, *, user_id: int) -> dict[str, object]:
         """Return profile customization for this authenticated user only."""
         if user_id is None:
