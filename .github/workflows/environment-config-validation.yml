@@ -1,0 +1,42 @@
+name: Environment Configuration Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".env.example"
+      - "scripts/validate_env.py"
+      - "Main.py"
+      - ".github/workflows/environment-config-validation.yml"
+  pull_request:
+    paths:
+      - ".env.example"
+      - "scripts/validate_env.py"
+      - "Main.py"
+      - ".github/workflows/environment-config-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install environment parser
+        run: python -m pip install "python-dotenv>=1.0.0"
+      - name: Compile validator
+        run: python -m py_compile scripts/validate_env.py
+      - name: Validate template without real credentials
+        run: python scripts/validate_env.py --env-file .env.example
+      - name: Validate required settings using CI-only placeholders
+        env:
+          TAMANNA_SESSION_SECRET: ci-only-placeholder-session-secret-0123456789
+          GEMINI_API_KEY: ci-only-placeholder-gemini-key
+        run: python scripts/validate_env.py --env-file .env.example --strict
