@@ -22,4 +22,7 @@ def test_main_app_imports_and_health_endpoint(monkeypatch, tmp_path):
         response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["service"] == "Tamanna AI"
+    assert payload["storage"] == "sqlite"

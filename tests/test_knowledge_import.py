@@ -21,12 +21,13 @@ def test_import_chatgpt_export_and_retrieve(tmp_path):
     path = tmp_path / "conversations.json"
     path.write_text(json.dumps(export), encoding="utf-8")
     db = Database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
+    user_id = db.ensure_user("memory-test@example.test", "Memory Test")
 
-    result = import_knowledge_file(path, database=db, user_id=7)
+    result = import_knowledge_file(path, database=db, user_id=user_id)
     assert result["imported"] == 1
-    found = search_knowledge("source citations", database=db, user_id=7)
+    found = search_knowledge("source citations", database=db, user_id=user_id)
     assert found and found[0]["title"] == "Tamanna project"
-    assert search_knowledge("source citations", database=db, user_id=8) == []
+    assert search_knowledge("source citations", database=db, user_id=user_id + 1) == []
 
 
 def test_import_is_idempotent_and_redacts_secrets(tmp_path):
