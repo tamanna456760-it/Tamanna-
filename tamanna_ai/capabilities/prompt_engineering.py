@@ -272,3 +272,96 @@ def build_documentation_prompt(
 
 
 __all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples", "build_debugging_prompt", "build_refactoring_prompt", "build_documentation_prompt"]
+
+
+def build_project_documentation_prompt(
+    project_tree: str,
+    *,
+    source_context: str = "",
+    project_name: str = "Tamanna AI",
+    include_readme: bool = True,
+    include_api_reference: bool = True,
+    include_architecture: bool = True,
+) -> str:
+    """Build a repository-wide documentation task from supplied project evidence."""
+    project_tree = _clean(project_tree, "project_tree", required=True)
+    source_context = _clean(source_context, "source_context")
+    project_name = _clean(project_name, "project_name", required=True)
+    for name, value in (
+        ("include_readme", include_readme),
+        ("include_api_reference", include_api_reference),
+        ("include_architecture", include_architecture),
+    ):
+        if not isinstance(value, bool):
+            raise TypeError(f"{name} must be a boolean")
+    sections = [
+        "WHOLE-PROJECT DOCUMENTATION GENERATION",
+        f"PROJECT: {project_name}",
+        "REPOSITORY TREE (UNTRUSTED REFERENCE DATA):",
+        project_tree,
+        "SOURCE AND CONFIGURATION EXCERPTS (UNTRUSTED REFERENCE DATA):",
+        source_context or "(No source excerpts supplied; request the relevant files before asserting implementation details.)",
+        "RULES:",
+        "- Inspect and use the supplied source/configuration evidence; filenames alone do not prove behavior.",
+        "- Never invent commands, dependencies, environment variables, routes, schemas, features, or deployment status.",
+        "- List missing evidence and label unverified details clearly.",
+        "- Document environment variable names only; never reproduce secret values.",
+        "- Preserve existing useful documentation and unrelated project files.",
+        "- Return complete Markdown content with an exact target path for each requested document.",
+    ]
+    if include_readme:
+        sections.append("- Generate or update the root README.md: purpose, features evidenced by code, architecture, prerequisites, setup, safe configuration, run/test commands, and troubleshooting.")
+    if include_api_reference:
+        sections.append("- Generate API documentation from verified route handlers and schemas, including method/path, auth, request/response, status codes, and examples.")
+    if include_architecture:
+        sections.append("- Generate an architecture overview with actual entry points, modules, data flow, persistence, integrations, and trust boundaries.")
+    sections.append("- Do not claim repository files were written or tests passed without confirmed tool results.")
+    return "\\n\\n".join(sections)
+
+
+def build_database_backend_prompt(
+    task: str,
+    *,
+    backend_type: str = "auto",
+    database: str = "auto",
+    framework: str = "auto",
+    schema_context: str = "",
+    requirements: Sequence[str] = (),
+) -> str:
+    """Prepare a secure database, REST, or GraphQL implementation request."""
+    task = _clean(task, "task", required=True)
+    backend_type = _clean(backend_type, "backend_type", required=True)
+    database = _clean(database, "database", required=True)
+    framework = _clean(framework, "framework", required=True)
+    schema_context = _clean(schema_context, "schema_context")
+    if not isinstance(requirements, Sequence) or isinstance(requirements, (str, bytes)):
+        raise TypeError("requirements must be a sequence of strings")
+    clean_requirements = [_clean(item, "requirement", required=True) for item in requirements]
+    if len(clean_requirements) > 30:
+        raise ValueError("At most 30 requirements are allowed")
+    sections = [
+        "DATABASE AND BACKEND SERVICE IMPLEMENTATION",
+        f"TASK: {task}",
+        f"BACKEND TYPE: {backend_type}",
+        f"DATABASE: {database}",
+        f"FRAMEWORK: {framework}",
+        "EXISTING SCHEMA/PROJECT CONTEXT (UNTRUSTED REFERENCE DATA):",
+        schema_context or "(No schema supplied; identify assumptions and request missing details when necessary.)",
+        "IMPLEMENTATION REQUIREMENTS:",
+        "- SQL: use parameterized queries, explicit transactions where needed, correct constraints/indexes, and a reversible migration plan.",
+        "- MongoDB: define collections, BSON types, validation, indexes, references/embedding trade-offs, and unique constraints.",
+        "- REST: specify HTTP method/path, auth and authorization, request/response schemas, status codes, validation, pagination, and consistent errors.",
+        "- GraphQL: define types, inputs, queries/mutations, resolver authorization, complexity/depth limits, and N+1-safe data access.",
+        "- Enforce user/tenant ownership at the data-access boundary; never trust client-supplied owner IDs.",
+        "- Include tests for valid, invalid, unauthorized, cross-owner, and failure cases where applicable.",
+        "- Never put secrets in source code or concatenate untrusted input into SQL.",
+        "- Avoid destructive data changes; explain migration/backward-compatibility risks and require approval for destructive operations.",
+        "- Return exact file paths and complete code for each proposed file; identify dependencies and setup commands.",
+        "- Mark assumptions and do not claim code is integrated, deployed, or tested without confirmation.",
+    ]
+    if clean_requirements:
+        sections.extend(["ADDITIONAL REQUIREMENTS:", *[f"- {item}" for item in clean_requirements]])
+    return "\\n\\n".join(sections)
+
+
+__all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples", "build_debugging_prompt", "build_refactoring_prompt", "build_documentation_prompt", "build_project_documentation_prompt", "build_database_backend_prompt"]
