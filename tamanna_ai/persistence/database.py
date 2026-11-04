@@ -157,8 +157,7 @@ class Database:
             statement = select(Message).join(Conversation).order_by(Message.created_at.desc(), Message.id.desc())
             if conversation_id:
                 statement = statement.where(Message.conversation_id == conversation_id)
-            if user_id is not None:
-                statement = statement.where(Conversation.user_id == user_id)
+            statement = statement.where(Conversation.user_id == user_id)
             if limit_pairs is not None:
                 limit_pairs = max(1, min(int(limit_pairs), 100))
                 statement = statement.limit(limit_pairs * 2)
@@ -201,8 +200,7 @@ class Database:
         limit = max(1, min(int(limit), 500))
         with self.Session() as session:
             statement = select(Memory).order_by(Memory.created_at.desc(), Memory.id.desc()).limit(limit)
-            if user_id is not None:
-                statement = statement.where(Memory.user_id == user_id)
+            statement = statement.where(Memory.user_id == user_id)
             return [item.content for item in session.scalars(statement)]
 
     def update_memory(self, memory_id: int, content: str, *, user_id: int) -> bool:
