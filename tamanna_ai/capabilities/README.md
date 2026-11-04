@@ -6,7 +6,7 @@ This package provides a conversation-aware orchestration layer over the existing
 - **Reasoning:** asks the model to explain conclusions clearly, distinguish assumptions, and state uncertainty; it does not guarantee correctness.
 - **Memory/context:** adds a bounded number of recent conversation pairs and saved memories, scoped by user ID when supplied.
 - **Multimodal input:** Gemini provider accepts local JPG/JPEG, PNG, WEBP, GIF, MP3, WAV, OGG, MP4, WEBM and PDF files through inline data, with a combined 15 MiB limit. Call `CapabilityAssistant.chat_with_files(...)`. Upload handling, authentication, malware scanning and temporary-file lifecycle remain the responsibility of the API caller.
-- **Tools:** includes a deliberately restricted arithmetic calculator using Python AST (never `eval`); no shell or arbitrary code execution is exposed.
+- **Tools:** includes a deliberately restricted arithmetic calculator using Python AST (never `eval`) and an internal indexed project-code search; no shell or arbitrary code execution is exposed.
 - **Web/API tools:** must be explicitly configured and allow-listed. This package does not silently fetch arbitrary URLs or execute external actions.
 
 ## Usage
