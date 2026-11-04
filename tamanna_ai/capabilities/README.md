@@ -4,7 +4,7 @@ This package provides a conversation-aware orchestration layer over the existing
 
 - **NLP/chat:** sends language-aware guidance and the current user message to the configured model provider.
 - **Reasoning:** asks the model to explain conclusions clearly, distinguish assumptions, and state uncertainty; it does not guarantee correctness.
-- **Memory/context:** adds a bounded number of recent conversation pairs and saved memories, scoped by user ID when supplied.
+- **Short-term memory:** retrieves only a bounded number of recent complete user/assistant pairs for the active conversation, scoped by the authenticated user (or anonymous conversations) and capped by character budgets.\n- **Long-term memory:** stores persistent user memories in SQL storage; reads are isolated by user ID. Memory update/delete operations require an owner user ID and only affect that user's records. The application must authenticate users and pass the verified user ID; never trust a user ID supplied by the browser.
 - **Multimodal input:** Gemini provider accepts local JPG/JPEG, PNG, WEBP, GIF, MP3, WAV, OGG, MP4, WEBM and PDF files through inline data, with a combined 15 MiB limit. Call `CapabilityAssistant.chat_with_files(...)`. Upload handling, authentication, malware scanning and temporary-file lifecycle remain the responsibility of the API caller.
 - **Tools:** includes a deliberately restricted arithmetic calculator using Python AST (never `eval`) and an internal indexed project-code search; no shell or arbitrary code execution is exposed.
 - **Web/API tools:** must be explicitly configured and allow-listed. This package does not silently fetch arbitrary URLs or execute external actions.
@@ -25,3 +25,11 @@ The caller must authenticate the user and ensure that the conversation ID belong
 ## Important limitations
 
 This is runtime orchestration, not a new foundation model. It does not increase Gemini's native context window, guarantee factual answers, execute a hidden chain-of-thought, train model weights, or provide automatic web browsing. Long documents should be chunked/retrieved under a token budget. Audio/video/PDF availability and accepted formats depend on the selected Gemini model and API support.
+
+## Memory behavior
+
+- Short-term history is persisted as chat messages and only recent pairs are loaded into each prompt.
+- Long-term memories persist across conversations in the SQL database and are isolated by user ID.
+- The persistence layer exposes `add_memory`, `list_memories`, `update_memory` and `delete_memory`.
+- The model does not autonomously save arbitrary personal facts. A trusted application flow should ask for consent or apply an explicit memory policy before calling `add_memory`.
+- Provide users with a privacy/settings screen to inspect and delete their stored memories. Database backups and retention policies must also cover memory records.
