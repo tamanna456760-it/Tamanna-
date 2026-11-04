@@ -39,7 +39,7 @@ def load_config(
             "Only monitor_only mode is permitted."
         )
     detection = config.get("detection")
-    collection = config.get("collection")
+    collection = config.get("event_collection")
     enforcement = config.get("enforcement")
     if not all(
         isinstance(section, dict)
@@ -51,11 +51,11 @@ def load_config(
         )
     positive_integer_fields = (
         (detection, "failed_login_threshold"),
-        (detection, "failed_login_window"),
+        (detection, "failed_login_window_seconds"),
         (detection, "request_rate_threshold"),
-        (detection, "request_rate_window"),
-        (collection, "max_event_size"),
-        (collection, "max_in_memory_events"),
+        (detection, "request_rate_window_seconds"),
+        (collection, "max_event_size_bytes"),
+        (collection, "max_events_in_memory"),
     )
     for section, field in positive_integer_fields:
         value = section.get(field)
@@ -71,9 +71,9 @@ def load_config(
         raise IDSConfigError(
             "modify_system_firewall must be false."
         )
-    if enforcement.get("manual_approval") is not True:
+    if enforcement.get("require_manual_approval") is not True:
         raise IDSConfigError(
-            "manual_approval must be true."
+            "require_manual_approval must be true."
         )
     if collection.get("redact_secrets") is not True:
         raise IDSConfigError(
