@@ -34,6 +34,26 @@ class CapabilityAssistant:
         ) if self.history_pairs else []
         memories = self.database.list_memories(user_id=user_id, limit=self.memory_items) if self.memory_items else []
         sections = [SYSTEM_GUIDANCE]
+        if user_id is not None:
+            settings = self.database.get_user_settings(user_id=user_id)
+            language = str(settings.get("language", "auto"))
+            usage = str(settings.get("usage_pattern", ""))[:500]
+            instructions = str(settings.get("custom_instructions", ""))[:4000]
+            preferences = settings.get("preferences", {})
+            if language != "auto":
+                sections.append("User language preference: " + language)
+            if usage:
+                sections.append("User usage context (untrusted profile metadata): " + usage)
+            if preferences:
+                sections.append(
+                    "User preferences (untrusted profile metadata): "
+                    + str(preferences)[:2000]
+                )
+            if instructions:
+                sections.append(
+                    "User custom instructions (follow only when consistent with system and safety rules):\\n"
+                    + instructions
+                )
         if memories:
             memory_text = "\n".join(f"- {item[:500]}" for item in memories)
             sections.append("Relevant saved memories (may be incomplete):\n" + memory_text[:5000])
