@@ -11,6 +11,14 @@ class FakeDatabase:
     def list_memories(self, user_id=None, limit=100):
         return ["User prefers concise explanations"]
 
+    def get_user_settings(self, user_id):
+        return {
+            "language": "bn",
+            "usage_pattern": "Coding and learning",
+            "custom_instructions": "Explain with practical examples.",
+            "preferences": {"tone": "concise"},
+        }
+
 
 class FakeProvider:
     name = "fake"
@@ -26,6 +34,13 @@ class SafeToolTests(unittest.TestCase):
         self.assertIn("Earlier question", prompt)
         self.assertIn("User prefers concise explanations", prompt)
         self.assertIn("What next?", prompt)
+
+    def test_prompt_includes_user_language_and_custom_instructions(self):
+        assistant = CapabilityAssistant(provider=FakeProvider(), database=FakeDatabase())
+        prompt = assistant.build_prompt("Explain this", user_id=7)
+        self.assertIn("User language preference: bn", prompt)
+        self.assertIn("Coding and learning", prompt)
+        self.assertIn("Explain with practical examples.", prompt)
 
     def test_prompt_includes_retrieved_knowledge_as_untrusted_reference(self):
         assistant = CapabilityAssistant(provider=FakeProvider(), database=FakeDatabase())
