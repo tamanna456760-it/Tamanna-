@@ -65,5 +65,38 @@ class CleaningTests(unittest.TestCase):
             self.assertTrue((output / "quality_report.json").is_file())
 
 
+    def test_provenance_manifest_requires_explicit_training_permission(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps([{
+                "file": "article.md", "category": "article",
+                "source_url": "https://example.org/article",
+                "license": "CC-BY-4.0", "training_use_allowed": True
+            }]), encoding="utf-8")
+            entries = load_provenance(manifest)
+            self.assertEqual(entries["article.md"]["license"], "CC-BY-4.0")
+            manifest.write_text(json.dumps([{
+                "file": "article.md", "category": "article",
+                "source_url": "https://example.org/article",
+                "license": "unknown", "training_use_allowed": False
+            }]), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_provenance(manifest)
+
+    def test_pipeline_skips_files_without_provenance_when_required(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source, output = root / "source", root / "output"
+            source.mkdir()
+            (source / "article.md").write_text(
+                "A sufficiently long article content.", encoding="utf-8"
+            )
+            manifest = root / "sources.json"
+            manifest.write_text("[]", encoding="utf-8")
+            result = run_pipeline(source, output, provenance_path=manifest)
+            self.assertEqual(result["accepted"], 0)
+            self.assertEqual(result["files_skipped"], 1)
+
 if __name__ == "__main__":
     unittest.main()
