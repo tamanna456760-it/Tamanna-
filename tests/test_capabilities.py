@@ -1,9 +1,32 @@
 import unittest
 
 from tamanna_ai.capabilities.tools import calculate, run_safe_tool
+from tamanna_ai.capabilities.assistant import CapabilityAssistant
+
+
+class FakeDatabase:
+    def load_history(self, conversation_id=None, user_id=None):
+        return [{"user": "Earlier question", "assistant": "Earlier answer"}]
+
+    def list_memories(self, user_id=None, limit=100):
+        return ["User prefers concise explanations"]
+
+
+class FakeProvider:
+    name = "fake"
+
+    async def generate(self, prompt):
+        return "A grounded sample response."
 
 
 class SafeToolTests(unittest.TestCase):
+    def test_context_includes_bounded_history_and_memory(self):
+        assistant = CapabilityAssistant(provider=FakeProvider(), database=FakeDatabase())
+        prompt = assistant.build_prompt("What next?", conversation_id="chat-a", user_id=7)
+        self.assertIn("Earlier question", prompt)
+        self.assertIn("User prefers concise explanations", prompt)
+        self.assertIn("What next?", prompt)
+
     def test_calculator(self):
         self.assertEqual(calculate("(12 + 8) * 3"), 60)
         self.assertEqual(calculate("2 ** 3"), 8)
