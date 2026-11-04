@@ -52,18 +52,9 @@ function resolveImport(base) {
   const exact = candidates.find((candidate) => fs.existsSync(candidate));
   if (exact) return { exact };
 
-  const insensitive = findCaseInsensitivePath(base);
-  if (insensitive) return { insensitive };
-
-  const parent = findCaseInsensitivePath(path.dirname(base));
-  if (parent && fs.statSync(parent).isDirectory()) {
-    const wanted = path.basename(base).toLowerCase();
-    const match = fs.readdirSync(parent).find((entry) => {
-      const candidate = path.join(parent, entry);
-      return entry.toLowerCase() === wanted
-        && (fs.statSync(candidate).isFile() || fs.statSync(candidate).isDirectory());
-    });
-    if (match) return { insensitive: path.join(parent, match) };
+  for (const candidate of candidates) {
+    const insensitive = findCaseInsensitivePath(candidate);
+    if (insensitive) return { insensitive };
   }
   return {};
 }
