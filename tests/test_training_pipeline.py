@@ -5,7 +5,7 @@ from pathlib import Path
 
 from data.training_pipeline.cleaning import clean_text
 from data.training_pipeline.pipeline import run_pipeline
-from data.training_pipeline.quality import inspect_records
+from data.training_pipeline.quality import inspect_records\nfrom data.training_pipeline.provenance import load_provenance
 
 
 class CleaningTests(unittest.TestCase):
