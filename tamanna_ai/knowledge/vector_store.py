@@ -163,6 +163,11 @@ class VectorKnowledgeStore:
                 json.dumps(vector, separators=(",", ":")),
             ))
         with self._connect() as connection:
+            # Replace this owner's previous version of the same source atomically.
+            connection.execute(
+                "DELETE FROM knowledge_chunks WHERE owner_id = ? AND source = ?",
+                (owner, safe_source),
+            )
             connection.executemany("""
                 INSERT INTO knowledge_chunks
                 (chunk_id, owner_id, source, title, chunk_text, embedding_json)
