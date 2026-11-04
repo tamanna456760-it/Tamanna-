@@ -10,7 +10,7 @@ from data.training_pipeline.quality import inspect_records
 
 class CleaningTests(unittest.TestCase):
     def test_redacts_email_and_secret(self):
-        text, flags = clean_text("Contact person@example.com and api_key=abc123")
+        text, flags = clean_text("Contact person@example.com and GEMINI_API_KEY=abc123")
         self.assertNotIn("person@example.com", text)
         self.assertNotIn("abc123", text)
         self.assertIn("email_redacted", flags)
@@ -28,7 +28,7 @@ class CleaningTests(unittest.TestCase):
             source = root / "source"
             output = root / "output"
             source.mkdir()
-            (source / "sample.png").write_bytes(b"\\x89PNG\\r\\n\\x1a\\n")
+            (source / "sample.png").write_bytes(b"\x89PNG\r\n\x1a\n")
             result = run_pipeline(source, output)
             self.assertEqual(result["images_indexed"], 1)
             image_row = json.loads((output / "images_manifest.jsonl").read_text(encoding="utf-8").strip())
