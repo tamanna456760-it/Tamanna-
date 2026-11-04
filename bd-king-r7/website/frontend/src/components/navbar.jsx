@@ -11,7 +11,7 @@ import {
   Book,
   Mail,
 } from "lucide-react";
-import "./Navbar.css";
+import "./navbar.css";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
