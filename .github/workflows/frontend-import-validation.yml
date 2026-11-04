@@ -1,0 +1,32 @@
+name: Frontend Import Path Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bd-king-r7/website/frontend/src/**"
+      - "scripts/check-import-case.js"
+      - ".github/workflows/frontend-import-validation.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "bd-king-r7/website/frontend/src/**"
+      - "scripts/check-import-case.js"
+      - ".github/workflows/frontend-import-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check relative import paths and case
+        run: node scripts/check-import-case.js
