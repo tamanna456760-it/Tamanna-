@@ -168,7 +168,7 @@ def build_debugging_prompt(
     ):
         if value:
             sections.extend([label, value])
-    return "\\n\\n".join(sections)
+    return "\n\n".join(sections)
 
 
 __all__ = ["build_structured_prompt", "build_code_generation_prompt", "supported_language_examples", "build_debugging_prompt"]
