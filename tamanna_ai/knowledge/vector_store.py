@@ -173,6 +173,16 @@ class VectorKnowledgeStore:
             """, prepared)
         return len(prepared)
 
+    def index_document(self, file_path: str | Path, *, owner_id: str) -> int:
+        """Extract text from an approved local document and add its chunks."""
+        from .document_loader import load_document_text
+
+        path = Path(file_path)
+        text = load_document_text(path, max_bytes=self.max_file_bytes)
+        return self.index_text(
+            text, owner_id=owner_id, source=path.name, title=path.stem
+        )
+
     def search(self, query: str, *, owner_id: str, limit: int = 5) -> list[dict[str, object]]:
         owner = str(owner_id).strip()
         if not owner:
