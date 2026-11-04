@@ -41,3 +41,11 @@ This is runtime orchestration, not a new foundation model. It does not increase 
 - The persistence layer exposes `add_memory`, `list_memories`, `update_memory` and `delete_memory`.
 - The model does not autonomously save arbitrary personal facts. A trusted application flow should ask for consent or apply an explicit memory policy before calling `add_memory`.
 - Provide users with a privacy/settings screen to inspect and delete their stored memories. Database backups and retention policies must also cover memory records.
+
+## Prompt engineering
+
+`tamanna_ai.capabilities.prompt_engineering.build_structured_prompt()`
+builds a consistent prompt from a goal, optional untrusted reference context,
+constraints, output format, language, and measurable success criteria. It
+validates required fields and size limits. This is a deterministic prompt
+builder, not an automatic guarantee of model accuracy or task completion.
