@@ -53,3 +53,41 @@ Preference pairs require `human_reviewed: true` and an explicit `preferred: "a"`
 ```bash
 python -m unittest discover -s tests -p 'test_*.py'
 ```
+
+
+## Source provenance and training-use approval
+
+You can require explicit provenance for every ingested file:
+
+```bash
+python -m data.training_pipeline.cli ./licensed_sources ./private_dataset_output --provenance ./source_manifest.json
+```
+
+The JSON manifest is an array with one record per relative filename. Example:
+
+```json
+[
+  {
+    "file": "article.md",
+    "category": "article",
+    "source_url": "https://example.org/article",
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "training_use_allowed": true,
+    "reviewed_by": "dataset-reviewer"
+  }
+]
+```
+
+When a provenance manifest is supplied, files without a matching entry or
+explicit `training_use_allowed: true` are skipped or rejected. Categories
+include website, article, book, code, technical documentation, and research
+paper. A license label alone is not legal advice: verify the actual license,
+terms, attribution, share-alike, privacy, and jurisdictional requirements for
+the intended training use. Do not assume that publicly reachable content is
+free to train on. Keep the manifest and source snapshots with the private
+dataset for auditability.
+
+The pipeline still performs dataset preparation only. It does not crawl the
+web, download books/papers/repositories, determine legal rights automatically,
+or pre-train/fine-tune model weights.
