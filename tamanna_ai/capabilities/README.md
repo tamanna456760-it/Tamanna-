@@ -49,3 +49,15 @@ builds a consistent prompt from a goal, optional untrusted reference context,
 constraints, output format, language, and measurable success criteria. It
 validates required fields and size limits. This is a deterministic prompt
 builder, not an automatic guarantee of model accuracy or task completion.
+
+ 
+## Core code generation
+
+`build_code_generation_prompt()` turns a feature description into a
+structured software task with language/framework, project context, complete
+file deliverables, dependency/setup instructions, tests, and verification
+requirements. `supported_language_examples()` lists more than 50 language
+and syntax examples; this is an illustrative list, not a benchmark or a
+guarantee that every provider supports every language equally. The helper
+prepares prompts; actual code generation still requires the configured model
+provider, and execution/testing requires a separate approved runtime.
