@@ -25,7 +25,7 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
     checks = {
         "session_secret": len(value("TAMANNA_SESSION_SECRET")) >= 32,
         "gemini_api_key": bool(value("TAMANNA_MODEL_API_KEY") or value("GEMINI_API_KEY")),
-        "database_url": bool(value("TAMANNA_DATABASE_URL")) or not strict,
+        "database_url": True,  # SQLite is the supported built-in fallback.
         "cors_origins": bool(value("TAMANNA_CORS_ORIGINS")),
     }
     missing = [name for name, ok in checks.items() if not ok]
