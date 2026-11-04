@@ -81,3 +81,12 @@ framework/runtime version, user priorities, behavior preservation, deprecated
 API migration, performance analysis, regression tests, and verification.
 Performance improvements and compatibility claims require actual profiling
 or test results; the prompt helper itself does not modify or execute project files.
+
+
+## Documentation and inline comments
+
+`build_documentation_prompt()` prepares source-grounded inline comments,
+docstrings, README, and API reference requests. It supports audience and
+documentation-style settings, and avoids comments that merely restate code.
+Generated documentation must be checked against the actual implementation;
+the helper does not itself edit repository files.
