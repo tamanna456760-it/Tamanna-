@@ -40,7 +40,7 @@ for (const asset of ['css/style.css', 'js/auth.js', 'js/chat.js', 'js/settings.j
 fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(output, { recursive: true });
 
-for (const file of ['index.html', 'CNAME']) {
+for (const file of ['index.html', '404.html', 'CNAME']) {
   fs.copyFileSync(path.join(root, file), path.join(output, file));
 }
 
@@ -52,7 +52,7 @@ for (const directory of ['css', 'js', 'assets', 'static']) {
 }
 
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
-for (const relative of ['index.html', 'CNAME', '.nojekyll', 'css/style.css', 'js/chat.js']) {
+for (const relative of ['index.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'js/chat.js']) {
   if (!fs.existsSync(path.join(output, relative))) {
     fail(`Build output is incomplete: dist/${relative}`);
   }
