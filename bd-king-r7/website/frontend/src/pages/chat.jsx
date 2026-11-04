@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, User, Bot, Copy, Download, Trash2 } from "lucide-react";
 import axios from "axios";
-import "./Chat.css";
+import "./chat.css";
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
