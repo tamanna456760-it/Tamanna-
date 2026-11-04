@@ -123,3 +123,22 @@ provide external long-term memory and RAG. The vector store must be explicitly
 supplied to `CapabilityAssistant`; it is not silently enabled or populated.
 Parametric memory belongs to the model provider's trained weights and cannot
 be directly edited through ordinary provider API calls.
+
+
+## Live web search and user-provided context
+
+Optional live search is available through `BraveSearchClient` and
+`CapabilityAssistant.chat(..., use_live_search=True)`. Configure
+`BRAVE_SEARCH_API_KEY` in the private runtime environment; never commit it.
+Search is opt-in, bounded to five results by default, and returns source title,
+HTTPS URL, and snippet metadata for the model context and caller response.
+Snippets are untrusted and are not equivalent to opening or verifying the
+underlying pages. Search is unavailable until a valid key and outbound network
+access are configured.
+
+User-provided text is the current message context. Existing
+`chat_with_files(...)` sends supported local image/audio/video/PDF files to
+the configured multimodal provider, subject to provider support and upload
+limits. The caller must authenticate the user, validate uploads, and ensure
+file ownership before passing temporary file paths. This library does not
+provide a public upload endpoint or automatic file ingestion on its own.
