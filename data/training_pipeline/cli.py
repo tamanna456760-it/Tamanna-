@@ -9,7 +9,7 @@ from .pipeline import run_pipeline
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Clean and quality-check local Tamanna AI text/code datasets.")
+    parser = argparse.ArgumentParser(description="Prepare local Tamanna AI text, code, conversation and media datasets.")
     parser.add_argument("source", help="Local source file or directory")
     parser.add_argument("output", help="Output directory (must be outside source)")
     parser.add_argument("--min-chars", type=int, default=20)
