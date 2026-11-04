@@ -25,6 +25,12 @@ class GeminiProvider:
         except GeminiError as exc:
             raise ModelProviderError(str(exc)) from exc
 
+    async def generate_with_files(self, prompt: str, file_paths: list[str]) -> str:
+        try:
+            return await self.client.generate_with_files(prompt, file_paths)
+        except GeminiError as exc:
+            raise ModelProviderError(str(exc)) from exc
+
 class MockProvider:
     """Deterministic provider allowed only in an explicit test environment."""
     name = "mock"
