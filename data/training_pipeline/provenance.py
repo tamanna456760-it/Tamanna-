@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-CATEGORIES = {"website", "article", "book", "code", "technical_documentation", "research_paper", "other"}
+CATEGORIES = {"website", "article", "book", "code", "technical_documentation", "research_paper", "other", "open_source_code", "programming_documentation", "technical_article", "educational_material", "training_dataset", "tutorial"}
 
 
 def load_provenance(path: str | Path) -> dict[str, dict[str, object]]:
