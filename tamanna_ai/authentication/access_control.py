@@ -5,7 +5,9 @@ from starlette.responses import JSONResponse
 from tamanna_ai.authentication.router import COOKIE, current_user
 
 USER_ROUTES = {
-    "/api/chat", "/api/history",
+    "/api/chat", "/api/chat/master", "/api/history",
+    "/api/skills/match", "/api/code-builder/inspect",
+    "/api/autonomous/plan", "/api/code-builder/plan",
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
     "/api/code-builder/propose",
     "/api/self-improvement/analyze", "/api/self-healing/diagnose",
@@ -30,7 +32,9 @@ BLOCKED_EXECUTION_ROUTES = {
 
 ADMIN_ROUTES = {
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
-    "/api/code-builder/propose", "/api/self-healing/cycle", "/api/autonomous/build",
+    "/api/code-builder/propose", "/api/code-builder/inspect",
+    "/api/self-improvement/analyze", "/api/autonomous/plan",
+    "/api/code-builder/plan", "/api/self-healing/cycle", "/api/autonomous/build",
     "/api/autonomous/repair", "/api/code-builder/apply",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
