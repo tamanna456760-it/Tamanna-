@@ -9,6 +9,7 @@ from tamanna_ai.persistence.database import Database
 from tamanna_ai.integrations.provider import get_model_provider
 from .context_window import fit_context_window
 from .web_search import BraveSearchClient, WebSearchError
+from .web_fetch import SafeWebFetcher
 
 
 SYSTEM_GUIDANCE = """You are Tamanna AI. Understand the user's language and answer in that language.
@@ -133,13 +134,14 @@ PROMPT ENGINEERING:
 class CapabilityAssistant:
     """Adds bounded chat history and memory context to the configured model provider."""
 
-    def __init__(self, provider=None, database: Database | None = None, history_pairs: int = 8, memory_items: int = 12, knowledge_store=None, context_window_tokens: int = 24000, web_search_client=None):
+    def __init__(self, provider=None, database: Database | None = None, history_pairs: int = 8, memory_items: int = 12, knowledge_store=None, context_window_tokens: int = 24000, web_search_client=None, web_fetcher=None):
         self.provider = provider or get_model_provider()
         self.database = database or Database()
         self.history_pairs = max(0, min(int(history_pairs), 20))
         self.memory_items = max(0, min(int(memory_items), 30))
         self.knowledge_store = knowledge_store
         self.web_search_client = web_search_client or BraveSearchClient()
+        self.web_fetcher = web_fetcher or SafeWebFetcher()
 
     def build_prompt(self, message: str, conversation_id: str = "default", user_id: int | None = None, retrieved_knowledge: list[dict[str, object]] | None = None) -> str:
         if not isinstance(message, str) or not message.strip():
@@ -192,7 +194,7 @@ class CapabilityAssistant:
         )
         return str(fitted["prompt"])
 
-    async def chat(self, message: str, conversation_id: str = "default", user_id: int | None = None, *, use_live_search: bool = False) -> dict[str, Any]:
+    async def chat(self, message: str, conversation_id: str = "default", user_id: int | None = None, *, use_live_search: bool = False, fetch_urls: list[str] | None = None, raw_web_source: bool = False) -> dict[str, Any]:
         retrieved = []
         if self.knowledge_store is not None and user_id is not None:
             retrieved = await asyncio.to_thread(
@@ -202,12 +204,20 @@ class CapabilityAssistant:
         if use_live_search:
             web_sources = await self.web_search_client.search(message.strip(), limit=5)
             retrieved.extend({"source": item["url"], "title": item["title"], "content": item["description"]} for item in web_sources)
+        fetched_sources = []
+        if fetch_urls is not None:
+            if not isinstance(fetch_urls, list) or len(fetch_urls) > 3:
+                raise ValueError("fetch_urls must be a list of at most three URLs")
+            for url in fetch_urls:
+                page = await self.web_fetcher.fetch(url, raw_source=raw_web_source)
+                fetched_sources.append(page)
+                retrieved.append({"source": page["url"], "title": page["title"], "content": str(page["content"])[:8000]})
         prompt = self.build_prompt(message, conversation_id, user_id, retrieved)
         reply = await self.provider.generate(prompt)
         if not isinstance(reply, str) or not reply.strip():
             raise RuntimeError("Model provider returned an empty response")
         self.database.save_chat_pair(message.strip(), reply.strip(), conversation_id, user_id)
-        return {"ok": True, "reply": reply.strip(), "conversation_id": conversation_id, "provider": getattr(self.provider, "name", "custom"), "web_search_used": bool(use_live_search), "web_sources": web_sources}
+        return {"ok": True, "reply": reply.strip(), "conversation_id": conversation_id, "provider": getattr(self.provider, "name", "custom"), "web_search_used": bool(use_live_search), "web_sources": web_sources, "web_fetch_used": bool(fetch_urls), "fetched_sources": [{"url": item["url"], "title": item["title"], "content_type": item["content_type"], "bytes": item["bytes"]} for item in fetched_sources]}
 
     async def chat_with_files(
         self, message: str, file_paths: list[str], conversation_id: str = "default",
