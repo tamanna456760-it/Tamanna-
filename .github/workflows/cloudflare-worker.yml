@@ -7,6 +7,11 @@ on:
       - codex/cloudflare-worker-foundation
     paths:
       - "worker.js"
+      - "Main.py"
+      - "tamanna_ai/authentication/**"
+      - "tests/**"
+      - "requirements-server.txt"
+      - "requirements-test.txt"
       - "wrangler.jsonc"
       - "scripts/build-static.js"
       - "index.html"
@@ -63,6 +68,19 @@ jobs:
 
       - name: Validate Worker JavaScript syntax
         run: cp worker.js /tmp/tamanna-worker.mjs && node --check /tmp/tamanna-worker.mjs
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-test.txt
+
+      - name: Install Python test dependencies
+        run: python -m pip install -r requirements-test.txt
+
+      - name: Test privileged API route coverage
+        run: python -m pytest -q tests/test_privileged_route_coverage.py
 
       - name: Validate Wrangler configuration and dry-run bundle
         run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/tamanna-worker-dry-run
