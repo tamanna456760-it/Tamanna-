@@ -280,9 +280,88 @@
           ]
         }
       ]
+    },
+    {
+      "id": "llm_engineering_and_research",
+      "name": "LLM Engineering, Model Hubs and Research",
+      "sources": [
+        {
+          "id": "huggingface_docs",
+          "name": "Hugging Face Documentation",
+          "url": "https://huggingface.co/docs",
+          "type": "official_documentation",
+          "topics": [
+            "Transformers",
+            "model loading",
+            "datasets",
+            "inference",
+            "fine-tuning"
+          ]
+        },
+        {
+          "id": "openai_platform_docs",
+          "name": "OpenAI Platform Documentation",
+          "url": "https://platform.openai.com/docs",
+          "type": "official_documentation",
+          "topics": [
+            "API integration",
+            "models",
+            "tool calling",
+            "structured outputs",
+            "embeddings"
+          ]
+        },
+        {
+          "id": "langchain",
+          "name": "LangChain",
+          "url": "https://www.langchain.com",
+          "type": "ai_development_framework",
+          "topics": [
+            "LLM applications",
+            "RAG",
+            "agents",
+            "tool orchestration"
+          ]
+        },
+        {
+          "id": "huggingface_models",
+          "name": "Hugging Face Models",
+          "url": "https://huggingface.co/models",
+          "type": "model_hub",
+          "topics": [
+            "open-weight models",
+            "model cards",
+            "model evaluation",
+            "model licensing"
+          ]
+        },
+        {
+          "id": "arxiv",
+          "name": "arXiv",
+          "url": "https://arxiv.org",
+          "type": "research_papers",
+          "topics": [
+            "machine learning papers",
+            "Transformers",
+            "RAG",
+            "AI agents"
+          ]
+        },
+        {
+          "id": "papers_with_code",
+          "name": "Papers with Code",
+          "url": "https://paperswithcode.com",
+          "type": "research_and_implementations",
+          "topics": [
+            "research papers",
+            "benchmarks",
+            "reproducible implementations"
+          ]
+        }
+      ]
     }
   ],
-  "source_count": 26,
+  "source_count": 32,
   "learning_paths": [
     {
       "level": 1,
@@ -356,6 +435,132 @@
         }
       ],
       "completion_project": "Create a small text-embedding search demo, then implement or inspect a simple attention/Transformer example in PyTorch."
+    },
+    {
+      "level": 3,
+      "id": "llm_engineering_and_agent_systems",
+      "title": "LLM Engineering and AI Agent Systems",
+      "goal": "Learn to integrate language models, run suitable open-weight models locally, build retrieval systems, and design reliable tool-using and multi-agent applications.",
+      "topics": [
+        "LLM APIs and model serving",
+        "Hugging Face model hubs and model cards",
+        "Local inference with Llama, Qwen, DeepSeek, Mistral and Phi model families",
+        "Transformer architecture and the Attention Is All You Need paper",
+        "Retrieval-Augmented Generation (RAG)",
+        "Agent systems and tool calling",
+        "Knowledge Graphs",
+        "Multi-Agent AI"
+      ],
+      "recommended_order": [
+        "Read Hugging Face and OpenAI platform documentation; learn model loading, tokenization, inference, API usage and tool calling.",
+        "Compare model cards, licenses, context limits, benchmarks, quantization options and hardware requirements before selecting a local model.",
+        "Study the Transformer architecture and the Attention Is All You Need paper; trace tokenization, embeddings, attention, positional encoding and generation.",
+        "Build a basic RAG pipeline: document ingestion, chunking, embeddings, vector retrieval, grounded generation and source citations.",
+        "Build a constrained agent with an explicit tool registry, input validation, permission checks, timeouts, logging and human approval for risky actions.",
+        "Study Knowledge Graphs and connect entities/relationships to retrieval where structured relationships improve answers.",
+        "Experiment with Multi-Agent AI using narrow roles, explicit message schemas, bounded handoffs, shared task state and loop limits.",
+        "Evaluate quality, latency, cost, retrieval accuracy, tool success and safety before integrating components into Tamanna AI."
+      ],
+      "model_families": [
+        {
+          "id": "llama",
+          "name": "Llama",
+          "publisher": "Meta",
+          "model_hub_search_url": "https://huggingface.co/models?search=Llama"
+        },
+        {
+          "id": "qwen",
+          "name": "Qwen",
+          "publisher": "Qwen",
+          "model_hub_search_url": "https://huggingface.co/models?search=Qwen"
+        },
+        {
+          "id": "deepseek",
+          "name": "DeepSeek",
+          "publisher": "DeepSeek",
+          "model_hub_search_url": "https://huggingface.co/models?search=DeepSeek"
+        },
+        {
+          "id": "mistral",
+          "name": "Mistral",
+          "publisher": "Mistral AI",
+          "model_hub_search_url": "https://huggingface.co/models?search=Mistral"
+        },
+        {
+          "id": "phi",
+          "name": "Phi",
+          "publisher": "Microsoft",
+          "model_hub_search_url": "https://huggingface.co/models?search=Phi"
+        }
+      ],
+      "resources": [
+        {
+          "id": "huggingface_docs",
+          "name": "Hugging Face Documentation",
+          "url": "https://huggingface.co/docs"
+        },
+        {
+          "id": "openai_platform_docs",
+          "name": "OpenAI Platform Documentation",
+          "url": "https://platform.openai.com/docs"
+        },
+        {
+          "id": "langchain",
+          "name": "LangChain",
+          "url": "https://www.langchain.com"
+        },
+        {
+          "id": "huggingface_models",
+          "name": "Hugging Face Models",
+          "url": "https://huggingface.co/models"
+        },
+        {
+          "id": "arxiv",
+          "name": "arXiv Research Papers",
+          "url": "https://arxiv.org"
+        },
+        {
+          "id": "papers_with_code",
+          "name": "Papers with Code",
+          "url": "https://paperswithcode.com"
+        }
+      ],
+      "key_papers_and_subjects": [
+        {
+          "title": "Attention Is All You Need",
+          "subject": "Transformer architecture",
+          "search_url": "https://arxiv.org/search/?query=Attention+Is+All+You+Need&searchtype=all"
+        },
+        {
+          "title": "Retrieval-Augmented Generation (RAG)",
+          "subject": "Knowledge-grounded generation",
+          "search_url": "https://arxiv.org/search/?query=retrieval+augmented+generation&searchtype=all"
+        },
+        {
+          "title": "Agent Systems",
+          "subject": "Tool use, planning and evaluation",
+          "search_url": "https://arxiv.org/search/?query=LLM+agents&searchtype=all"
+        },
+        {
+          "title": "Knowledge Graphs",
+          "subject": "Entity and relationship representation",
+          "search_url": "https://arxiv.org/search/?query=knowledge+graphs&searchtype=all"
+        },
+        {
+          "title": "Multi-Agent AI",
+          "subject": "Cooperative and multi-agent language-model systems",
+          "search_url": "https://arxiv.org/search/?query=multi-agent+LLM&searchtype=all"
+        }
+      ],
+      "safety_and_model_selection": [
+        "Do not automatically download or run model weights; require an explicit user request and an approved destination.",
+        "Check each exact model revision's license, usage restrictions, model card, provenance and security notes.",
+        "Estimate RAM/VRAM, disk space, context length and inference speed before selecting a model; use quantization only when appropriate.",
+        "Load untrusted model files and code in an isolated environment; do not execute remote custom model code by default.",
+        "Never expose local model servers to the public internet without authentication, network restrictions and rate limits.",
+        "Keep API keys and access tokens outside the repository and logs."
+      ],
+      "completion_project": "Build a local-or-API LLM chat prototype with a selectable model provider, a cited RAG knowledge base, and one permission-controlled tool-using agent. Add evaluation tests for retrieval, answer grounding, tool permissions and failure handling."
     }
   ]
 }
