@@ -17,7 +17,7 @@ USER_ROUTES = {
     "/api/linux/run", "/api/linux/shell", "/api/command",
     "/api/tamanna/echo", "/api/tools/execute",
 }
-READ_ROUTES = {"/api/history"}
+READ_ROUTES = {"/api/history", "/api/memory"}
 
 BLOCKED_EXECUTION_ROUTES = {
     "/api/linux/run",
@@ -51,8 +51,13 @@ class TamannaAccessControl:
             return
         method = scope.get("method", "")
         path = scope.get("path", "")
-        is_write = method in {"POST", "PUT", "PATCH", "DELETE"} and path in USER_ROUTES
-        is_protected_read = method == "GET" and path in READ_ROUTES
+        is_memory_route = path == "/api/memory" or path.startswith("/api/memory/")
+        is_write = method in {"POST", "PUT", "PATCH", "DELETE"} and (
+            path in USER_ROUTES or is_memory_route
+        )
+        is_protected_read = method == "GET" and (
+            path in READ_ROUTES or is_memory_route
+        )
         if not (is_write or is_protected_read):
             await self.app(scope, receive, send)
             return
@@ -63,7 +68,7 @@ class TamannaAccessControl:
             )
             await response(scope, receive, send)
             return
-        if path not in USER_ROUTES:
+        if path not in USER_ROUTES and not is_memory_route:
             await self.app(scope, receive, send)
             return
         cookie_header = dict(scope.get("headers", [])).get(b"cookie", b"").decode("latin-1")
