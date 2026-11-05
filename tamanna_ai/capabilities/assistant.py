@@ -220,6 +220,84 @@ class CapabilityAssistant:
         return {"ok": True, "reply": reply.strip(), "conversation_id": conversation_id, "provider": getattr(self.provider, "name", "custom"), "web_search_used": bool(use_live_search), "web_sources": web_sources, "web_fetch_used": bool(fetch_urls), "fetched_sources": [{"url": item["url"], "title": item["title"], "content_type": item["content_type"], "bytes": item["bytes"]} for item in fetched_sources]}
 
 
+
+    async def complete_code(
+        self,
+        code_prefix: str,
+        *,
+        language: str = "auto",
+        instruction: str = "",
+        project_context: str = "",
+    ) -> dict[str, Any]:
+        """Suggest a focused continuation for code currently being written."""
+        from .prompt_engineering import build_code_completion_prompt
+
+        prompt = build_code_completion_prompt(
+            code_prefix, language=language, instruction=instruction,
+            project_context=project_context,
+        )
+        suggestion = await self.provider.generate(prompt)
+        if not isinstance(suggestion, str) or not suggestion.strip():
+            raise RuntimeError("Model provider returned an empty code-completion response")
+        return {
+            "ok": True, "suggestion": suggestion.strip(),
+            "language": language, "executed": False, "verified": False,
+        }
+
+    async def generate_code(
+        self,
+        feature: str,
+        *,
+        language: str = "Python",
+        framework: str = "",
+        project_context: str = "",
+        requirements: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """Generate a code proposal from a natural-language feature request."""
+        from .prompt_engineering import build_code_generation_prompt
+
+        prompt = build_code_generation_prompt(
+            feature, language=language, framework=framework,
+            project_context=project_context,
+            requirements=requirements or (),
+        )
+        generated = await self.provider.generate(prompt)
+        if not isinstance(generated, str) or not generated.strip():
+            raise RuntimeError("Model provider returned an empty code-generation response")
+        return {
+            "ok": True, "code": generated.strip(), "language": language,
+            "executed": False, "verified": False,
+        }
+
+    async def debug_code(
+        self,
+        error_report: str,
+        *,
+        source_code: str = "",
+        runtime: str = "",
+        expected_behavior: str = "",
+        actual_behavior: str = "",
+    ) -> dict[str, Any]:
+        """Diagnose supplied code and error evidence without running it."""
+        from .prompt_engineering import build_debugging_prompt
+
+        prompt = build_debugging_prompt(
+            error_report, source_code=source_code, runtime=runtime,
+            expected_behavior=expected_behavior,
+            actual_behavior=actual_behavior,
+        )
+        diagnosis = await self.provider.generate(prompt)
+        if not isinstance(diagnosis, str) or not diagnosis.strip():
+            raise RuntimeError("Model provider returned an empty debugging response")
+        return {
+            "ok": True, "diagnosis": diagnosis.strip(),
+            "executed": False, "verified": False,
+        }
+
+    async def explain_code(self, code: str, **kwargs: Any) -> dict[str, Any]:
+        """Explain supplied code using the static syntax and logic analysis workflow."""
+        return await self.analyze_code(code, **kwargs)
+
     async def analyze_code(
         self,
         code: str,
