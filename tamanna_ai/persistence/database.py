@@ -291,6 +291,29 @@ class Database:
             statement = statement.where(Memory.user_id == user_id)
             return [item.content for item in session.scalars(statement)]
 
+    def list_memory_records(self, *, user_id: int, limit: int = 100) -> list[dict[str, object]]:
+        """Return memory metadata for one authenticated user only."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        self.init()
+        limit = max(1, min(int(limit), 200))
+        with self.Session() as session:
+            statement = (
+                select(Memory)
+                .where(Memory.user_id == user_id)
+                .order_by(Memory.created_at.desc(), Memory.id.desc())
+                .limit(limit)
+            )
+            return [
+                {
+                    "id": item.id,
+                    "content": item.content,
+                    "metadata": json.loads(item.metadata_json or "{}"),
+                    "created_at": item.created_at.isoformat(),
+                }
+                for item in session.scalars(statement)
+            ]
+
     def update_memory(self, memory_id: int, content: str, *, user_id: int) -> bool:
         """Update only a memory owned by the authenticated user."""
         if user_id is None:
