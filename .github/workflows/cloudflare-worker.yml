@@ -80,7 +80,7 @@ jobs:
         run: python -m pip install -r requirements-test.txt
 
       - name: Test privileged API route coverage
-        run: python -m pytest -q tests/test_privileged_route_coverage.py
+        run: python -m pytest -q tests/test_privileged_route_coverage.py tests/test_memory_persistence.py tests/test_memory_api_security.py tests/test_feature_flags.py
 
       - name: Validate Wrangler configuration and dry-run bundle
         run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/tamanna-worker-dry-run
