@@ -38,7 +38,7 @@ def _luhn_valid(value: str) -> bool:
 
 def redact_sensitive_data(value: str) -> tuple[str, list[str]]:
     """Redact detectable PII/credentials and return category-only audit flags."""
-    text, flags = value.replace("\\\\n", "\\n"), []
+    text, flags = value.replace("\\n", "\n"), []
     def replace(pattern: re.Pattern[str], replacement: str, flag: str) -> None:
         nonlocal text
         text, count = pattern.subn(replacement, text)
