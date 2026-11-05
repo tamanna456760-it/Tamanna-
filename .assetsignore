@@ -1,0 +1,48 @@
+# Cloudflare Workers static assets: keep private/generated server data out of uploads.
+# These files remain in GitHub; they are not deleted.
+
+# Security and threat-intelligence reports
+tamanna_security/threat_intel/reports/
+tamanna_security/**/reports/
+**/security_report.json
+**/*security*report*.json
+
+# Private datasets, indexes, and generated training output
+data/datasets/
+data/private_datasets/
+data/training_pipeline/output/
+training_output/
+**/vector_store/
+**/embeddings/
+**/chroma/
+
+# Runtime state, logs, backups, and local environments
+logs/
+**/logs/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.backup
+*.backup-*
+.venv/
+**/.venv/
+venv/
+**/venv/
+node_modules/
+**/node_modules/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+**/.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+**/site-packages/
+
+# Repository and CI metadata are not website assets
+.git/
+.github/
+.gitattributes
+.gitignore
+.assetsignore
