@@ -1,0 +1,286 @@
+{
+  "name": "Tamanna AI Developer Learning Sources",
+  "version": "1.0.0",
+  "description": "Curated external references for documentation, open-source code, developer communities, learning, and AI-coder technologies.",
+  "owner": "HM INSAN ALI",
+  "policy": {
+    "purpose": "Reference discovery and learning support for Tamanna AI coding and research workflows.",
+    "external_content_is_untrusted": true,
+    "fetch_policy": "Do not crawl, download, execute, or ingest external content automatically. Retrieve only when a user or an explicitly authorized workflow requests it.",
+    "execution_policy": "Never execute code from these websites or repositories without review, sandboxing, and security checks.",
+    "citation_policy": "Prefer official documentation for API and language facts; cite the original page used.",
+    "secrets_policy": "Never store API keys, credentials, or private tokens in this catalog."
+  },
+  "categories": [
+    {
+      "id": "official_documentation",
+      "name": "Official Documentation",
+      "sources": [
+        {
+          "id": "python_docs",
+          "name": "Python Docs",
+          "url": "https://docs.python.org/",
+          "type": "official_documentation",
+          "topics": [
+            "Python",
+            "standard_library",
+            "language_reference"
+          ]
+        },
+        {
+          "id": "mdn_javascript",
+          "name": "JavaScript (MDN)",
+          "url": "https://developer.mozilla.org/",
+          "type": "documentation",
+          "topics": [
+            "JavaScript",
+            "Web APIs",
+            "HTML",
+            "CSS"
+          ]
+        },
+        {
+          "id": "nodejs_docs",
+          "name": "Node.js",
+          "url": "https://nodejs.org/docs",
+          "type": "official_documentation",
+          "topics": [
+            "Node.js",
+            "JavaScript runtime",
+            "server-side JavaScript"
+          ]
+        },
+        {
+          "id": "fastapi_docs",
+          "name": "FastAPI",
+          "url": "https://fastapi.tiangolo.com/",
+          "type": "official_documentation",
+          "topics": [
+            "Python",
+            "FastAPI",
+            "ASGI",
+            "REST APIs"
+          ]
+        },
+        {
+          "id": "django_docs",
+          "name": "Django",
+          "url": "https://docs.djangoproject.com/",
+          "type": "official_documentation",
+          "topics": [
+            "Python",
+            "Django",
+            "web development"
+          ]
+        },
+        {
+          "id": "react_docs",
+          "name": "React",
+          "url": "https://react.dev/",
+          "type": "official_documentation",
+          "topics": [
+            "React",
+            "JavaScript",
+            "frontend"
+          ]
+        },
+        {
+          "id": "microsoft_learn",
+          "name": "Microsoft Learn",
+          "url": "https://learn.microsoft.com/",
+          "type": "official_documentation",
+          "topics": [
+            "Microsoft technologies",
+            "Azure",
+            "C#",
+            ".NET",
+            "developer training"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "open_source_repositories",
+      "name": "Open-Source Code Repositories",
+      "sources": [
+        {
+          "id": "github",
+          "name": "GitHub",
+          "url": "https://github.com/",
+          "type": "code_hosting",
+          "topics": [
+            "open source",
+            "repositories",
+            "version control"
+          ]
+        },
+        {
+          "id": "gitlab",
+          "name": "GitLab",
+          "url": "https://gitlab.com/",
+          "type": "code_hosting",
+          "topics": [
+            "open source",
+            "repositories",
+            "CI/CD"
+          ]
+        },
+        {
+          "id": "bitbucket",
+          "name": "Bitbucket",
+          "url": "https://bitbucket.org/",
+          "type": "code_hosting",
+          "topics": [
+            "repositories",
+            "Git",
+            "code collaboration"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "developer_qa_communities",
+      "name": "Q&A and Developer Communities",
+      "sources": [
+        {
+          "id": "stackoverflow",
+          "name": "Stack Overflow",
+          "url": "https://stackoverflow.com/",
+          "type": "developer_qa",
+          "topics": [
+            "programming questions",
+            "debugging",
+            "answers"
+          ]
+        },
+        {
+          "id": "reddit_programming",
+          "name": "Reddit Programming",
+          "url": "https://www.reddit.com/r/programming/",
+          "type": "community",
+          "topics": [
+            "programming discussions",
+            "developer news",
+            "community experience"
+          ]
+        },
+        {
+          "id": "dev_community",
+          "name": "DEV Community",
+          "url": "https://dev.to/",
+          "type": "developer_community",
+          "topics": [
+            "developer articles",
+            "tutorials",
+            "engineering"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "programming_learning",
+      "name": "Programming Learning Platforms",
+      "sources": [
+        {
+          "id": "freecodecamp",
+          "name": "freeCodeCamp",
+          "url": "https://www.freecodecamp.org/",
+          "type": "learning_platform",
+          "topics": [
+            "programming courses",
+            "web development",
+            "projects"
+          ]
+        },
+        {
+          "id": "w3schools",
+          "name": "W3Schools",
+          "url": "https://www.w3schools.com/",
+          "type": "learning_platform",
+          "topics": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "Python",
+            "tutorials"
+          ]
+        },
+        {
+          "id": "geeksforgeeks",
+          "name": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/",
+          "type": "learning_platform",
+          "topics": [
+            "data structures",
+            "algorithms",
+            "computer science",
+            "programming"
+          ]
+        },
+        {
+          "id": "tutorialspoint",
+          "name": "TutorialsPoint",
+          "url": "https://www.tutorialspoint.com/",
+          "type": "learning_platform",
+          "topics": [
+            "programming tutorials",
+            "software technologies",
+            "learning"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ai_coder_technology",
+      "name": "AI-Coder Technology and Research",
+      "sources": [
+        {
+          "id": "openai",
+          "name": "OpenAI",
+          "url": "https://openai.com/",
+          "type": "ai_research_and_platform",
+          "topics": [
+            "AI models",
+            "AI research",
+            "developer platform"
+          ]
+        },
+        {
+          "id": "anthropic",
+          "name": "Anthropic",
+          "url": "https://www.anthropic.com/",
+          "type": "ai_research_and_platform",
+          "topics": [
+            "AI research",
+            "language models",
+            "AI safety"
+          ]
+        },
+        {
+          "id": "google_deepmind",
+          "name": "Google DeepMind",
+          "url": "https://deepmind.google/",
+          "type": "ai_research",
+          "topics": [
+            "AI research",
+            "machine learning",
+            "scientific research"
+          ]
+        },
+        {
+          "id": "hugging_face",
+          "name": "Hugging Face",
+          "url": "https://huggingface.co/",
+          "type": "ai_models_and_datasets",
+          "topics": [
+            "open models",
+            "datasets",
+            "Transformers",
+            "machine learning"
+          ]
+        }
+      ]
+    }
+  ],
+  "source_count": 21
+}
