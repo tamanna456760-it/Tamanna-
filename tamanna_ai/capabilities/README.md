@@ -153,3 +153,17 @@ the configured multimodal provider, subject to provider support and upload
 limits. The caller must authenticate the user, validate uploads, and ensure
 file ownership before passing temporary file paths. This library does not
 provide a public upload endpoint or automatic file ingestion on its own.
+
+
+## Natural-language code understanding (NLP)
+
+`build_code_analysis_prompt(...)` creates an evidence-led analysis request for
+source code. `CapabilityAssistant.analyze_code(code, language=..., task=..., file_path=..., related_context=...)`
+sends the supplied code text to the configured model and returns an analysis
+with `executed: false`. It covers syntax and structure, control/data flow,
+function and class behavior, likely defects, edge cases, security observations,
+and suggested tests. Input is bounded (40,000 code characters and 12,000
+related-context characters). This is model-assisted static explanation, not a
+compiler, parser, type checker, linter, or test runner; accuracy depends on the
+model and supplied context. It does not execute source code or inspect files
+unless a separate authorized file-reading workflow supplies their contents.
