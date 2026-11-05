@@ -346,3 +346,43 @@ def test_web_fetcher_validates_resource_limits():
         SafeWebFetcher(max_bytes=10_000_000)
     with pytest.raises(ValueError):
         SafeWebFetcher(max_redirects=10)
+
+
+from tamanna_ai.capabilities.prompt_engineering import build_code_analysis_prompt
+
+
+def test_code_analysis_prompt_covers_syntax_logic_and_safety():
+    prompt = build_code_analysis_prompt(
+        "def add(a, b):\\n    return a + b",
+        language="python",
+        file_path="sample.py",
+    )
+    assert "STATIC CODE UNDERSTANDING" in prompt
+    assert "Syntax/Structure" in prompt
+    assert "Logic/Data Flow" in prompt
+    assert "Never execute the code" in prompt
+    assert "sample.py" in prompt
+
+
+def test_code_analysis_prompt_rejects_oversized_input():
+    import pytest
+    with pytest.raises(ValueError):
+        build_code_analysis_prompt("x" * 40001)
+
+
+def test_assistant_code_analysis_returns_non_execution_metadata():
+    import asyncio
+
+    class FakeProvider:
+        name = "fake"
+        async def generate(self, prompt):
+            assert "STATIC CODE UNDERSTANDING" in prompt
+            return "The function adds two values."
+
+    from tamanna_ai.capabilities.assistant import CapabilityAssistant
+    assistant = CapabilityAssistant.__new__(CapabilityAssistant)
+    assistant.provider = FakeProvider()
+    result = asyncio.run(assistant.analyze_code("def add(a,b): return a+b"))
+    assert result["ok"] is True
+    assert result["executed"] is False
+    assert "adds two values" in result["analysis"]
