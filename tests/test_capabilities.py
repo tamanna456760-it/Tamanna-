@@ -324,3 +324,25 @@ def test_database_backend_prompt_rejects_invalid_requirements():
         build_database_backend_prompt("Create API", requirements="not a list")
     with pytest.raises(ValueError):
         build_database_backend_prompt(" ")
+
+
+from tamanna_ai.capabilities.web_fetch import SafeWebFetcher
+
+
+def test_web_fetcher_rejects_http_private_and_credential_urls():
+    import pytest
+    fetcher = SafeWebFetcher()
+    with pytest.raises(ValueError):
+        fetcher._validate_url("http://example.com")
+    with pytest.raises(ValueError):
+        fetcher._validate_url("https://127.0.0.1/")
+    with pytest.raises(ValueError):
+        fetcher._validate_url("https://user:pass@example.com/")
+
+
+def test_web_fetcher_validates_resource_limits():
+    import pytest
+    with pytest.raises(ValueError):
+        SafeWebFetcher(max_bytes=10_000_000)
+    with pytest.raises(ValueError):
+        SafeWebFetcher(max_redirects=10)
