@@ -219,6 +219,34 @@ class CapabilityAssistant:
         self.database.save_chat_pair(message.strip(), reply.strip(), conversation_id, user_id)
         return {"ok": True, "reply": reply.strip(), "conversation_id": conversation_id, "provider": getattr(self.provider, "name", "custom"), "web_search_used": bool(use_live_search), "web_sources": web_sources, "web_fetch_used": bool(fetch_urls), "fetched_sources": [{"url": item["url"], "title": item["title"], "content_type": item["content_type"], "bytes": item["bytes"]} for item in fetched_sources]}
 
+
+    async def analyze_code(
+        self,
+        code: str,
+        *,
+        language: str = "auto",
+        task: str = "Explain syntax, structure, and logic",
+        file_path: str = "",
+        related_context: str = "",
+    ) -> dict[str, Any]:
+        """Analyze supplied source text with the model; never execute it."""
+        from .prompt_engineering import build_code_analysis_prompt
+
+        prompt = build_code_analysis_prompt(
+            code, language=language, task=task,
+            file_path=file_path, related_context=related_context,
+        )
+        reply = await self.provider.generate(prompt)
+        if not isinstance(reply, str) or not reply.strip():
+            raise RuntimeError("Model provider returned an empty code-analysis response")
+        return {
+            "ok": True,
+            "analysis": reply.strip(),
+            "language": language,
+            "file_path": file_path,
+            "executed": False,
+        }
+
     async def chat_with_files(
         self, message: str, file_paths: list[str], conversation_id: str = "default",
         user_id: int | None = None,
