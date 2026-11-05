@@ -383,7 +383,7 @@ def build_code_analysis_prompt(
         raise ValueError("code exceeds the 40000-character analysis limit")
     if len(related_context) > 12000:
         raise ValueError("related_context exceeds the 12000-character limit")
-    return "\\n\\n".join([
+    return "\n\n".join([
         "STATIC CODE UNDERSTANDING AND NLP ANALYSIS",
         f"TASK: {task}",
         f"LANGUAGE: {language}",
