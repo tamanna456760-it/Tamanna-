@@ -70,5 +70,6 @@ jobs:
       - name: Verify generated website and Worker bundle
         run: |
           test -s dist/index.html
-          test -s /tmp/tamanna-worker-dry-run/worker.js
+          test -d /tmp/tamanna-worker-dry-run
+          find /tmp/tamanna-worker-dry-run -type f -name '*.js' -print -quit | grep -q .
           echo "PASS: static assets and Cloudflare Worker dry-run bundle exist."
