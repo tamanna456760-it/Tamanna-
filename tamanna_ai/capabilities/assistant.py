@@ -139,6 +139,7 @@ class CapabilityAssistant:
         self.database = database or Database()
         self.history_pairs = max(0, min(int(history_pairs), 20))
         self.memory_items = max(0, min(int(memory_items), 30))
+        self.context_window_tokens = max(1024, min(int(context_window_tokens), 100000))
         self.knowledge_store = knowledge_store
         self.web_search_client = web_search_client or BraveSearchClient()
         self.web_fetcher = web_fetcher or SafeWebFetcher()
