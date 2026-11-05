@@ -1,0 +1,74 @@
+name: Tamanna Cloudflare Worker CI
+
+on:
+  push:
+    branches:
+      - main
+      - codex/cloudflare-worker-foundation
+    paths:
+      - "worker.js"
+      - "wrangler.jsonc"
+      - "scripts/build-static.js"
+      - "index.html"
+      - "css/**"
+      - "js/**"
+      - "assets/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/cloudflare-worker.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "worker.js"
+      - "wrangler.jsonc"
+      - "scripts/build-static.js"
+      - "index.html"
+      - "css/**"
+      - "js/**"
+      - "assets/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/cloudflare-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-cloudflare-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build static website
+        run: npm run build
+
+      - name: Validate Worker JavaScript syntax
+        run: node --check worker.js
+
+      - name: Validate Wrangler configuration and dry-run bundle
+        run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/tamanna-worker-dry-run
+
+      - name: Verify generated website and Worker bundle
+        run: |
+          test -s dist/index.html
+          test -s /tmp/tamanna-worker-dry-run/worker.js
+          echo "PASS: static assets and Cloudflare Worker dry-run bundle exist."
