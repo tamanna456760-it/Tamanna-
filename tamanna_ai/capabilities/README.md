@@ -125,7 +125,7 @@ Parametric memory belongs to the model provider's trained weights and cannot
 be directly edited through ordinary provider API calls.
 
 
-## Live web search and user-provided context
+## Live web search, page retrieval, and user-provided context
 
 Optional live search is available through `BraveSearchClient` and
 `CapabilityAssistant.chat(..., use_live_search=True)`. Configure
@@ -135,6 +135,17 @@ HTTPS URL, and snippet metadata for the model context and caller response.
 Snippets are untrusted and are not equivalent to opening or verifying the
 underlying pages. Search is unavailable until a valid key and outbound network
 access are configured.
+
+SafeWebFetcher and CapabilityAssistant.chat(fetch_urls=[...]) retrieve up to
+three explicitly supplied public HTTPS URLs. HTML is converted to readable
+text; text, JSON, XML, CSS and JavaScript source are retrieved as text.
+raw_web_source=True preserves HTML source. Requests are read-only, limited to
+1 MB per page by default, use short timeouts, validate redirects, reject embedded
+credentials, and block private/non-public IP ranges. Retrieved content is
+untrusted and is never executed. This is URL retrieval, not a crawler or a
+JavaScript browser; it cannot log in or access private/password-protected pages.
+Production deployments should also enforce outbound network restrictions to
+mitigate DNS rebinding and other network-level risks.
 
 User-provided text is the current message context. Existing
 `chat_with_files(...)` sends supported local image/audio/video/PDF files to
