@@ -62,7 +62,7 @@ jobs:
         run: npm run build
 
       - name: Validate Worker JavaScript syntax
-        run: node --check worker.js
+        run: cp worker.js /tmp/tamanna-worker.mjs && node --check /tmp/tamanna-worker.mjs
 
       - name: Validate Wrangler configuration and dry-run bundle
         run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/tamanna-worker-dry-run
