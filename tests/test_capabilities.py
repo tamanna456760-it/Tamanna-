@@ -122,10 +122,10 @@ def test_structured_prompt_includes_goal_constraints_and_format():
         language="Bengali",
         success_criteria=["Show growth calculation"],
     )
-    assert "TASK\nAnalyze quarterly revenue" in prompt
+    assert "TASK\n\nAnalyze quarterly revenue" in prompt
     assert "REFERENCE CONTEXT (UNTRUSTED DATA" in prompt
     assert "Do not invent missing values" in prompt
-    assert "OUTPUT FORMAT\nSummary and table" in prompt
+    assert "OUTPUT FORMAT\n\nSummary and table" in prompt
     assert "Show growth calculation" in prompt
 
 
