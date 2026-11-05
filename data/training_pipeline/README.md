@@ -91,3 +91,35 @@ dataset for auditability.
 The pipeline still performs dataset preparation only. It does not crawl the
 web, download books/papers/repositories, determine legal rights automatically,
 or pre-train/fine-tune model weights.
+
+## Programming knowledge sources and code-usage learning
+
+The provenance manifest accepts these additional source categories:
+`open_source_code`, `programming_documentation`, `tutorial`,
+`technical_article`, `educational_material`, and `training_dataset`.
+Existing categories such as `book`, `code`, `technical_documentation`,
+`article`, `website`, and `research_paper` remain supported.
+Every source still requires an HTTPS origin, a recorded license, and
+`training_use_allowed: true`. Public availability alone does not grant
+training rights; review attribution, share-alike, privacy, and terms.
+
+Analyze common patterns in a curated code corpus:
+
+```python
+from data.training_pipeline.usage_patterns import analyze_code_patterns
+
+report = analyze_code_patterns([
+    {"path": "src/api.py", "language": "python", "text": "def handler(): ..."},
+    {"path": "tests/test_api.py", "language": "python", "text": "def test_handler(): assert True"},
+])
+print(report)
+```
+
+The report measures how often patterns occur inside the supplied corpus,
+including functions, classes, async code, exception handling, tests, HTTP
+APIs, SQL, file I/O, serialization, logging, and iteration. It does not
+measure industry-wide popularity, execute code, or update model weights.
+Use reviewed examples and human evaluation to select code appropriate to
+the task. This is corpus analysis and retrieval support, not fine-tuning.
+Actual model training requires a separate approved training job, compatible
+model/provider, compute budget, evaluation set, and explicit approval.
