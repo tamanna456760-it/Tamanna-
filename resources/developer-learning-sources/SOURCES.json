@@ -282,5 +282,80 @@
       ]
     }
   ],
-  "source_count": 21
+  "source_count": 26,
+  "learning_paths": [
+    {
+      "level": 1,
+      "id": "programming_mastery",
+      "title": "Programming Mastery",
+      "goal": "Build strong software-engineering foundations before moving into AI model internals.",
+      "topics": [
+        "Python",
+        "Data Structures",
+        "Algorithms",
+        "Object-Oriented Programming (OOP)",
+        "Linux",
+        "Git"
+      ],
+      "recommended_order": [
+        "Python fundamentals and standard library",
+        "Data structures: arrays/lists, stacks, queues, hash maps, trees, graphs",
+        "Algorithms: searching, sorting, recursion, complexity and Big-O",
+        "OOP: classes, objects, encapsulation, inheritance and composition",
+        "Linux: shell, files, permissions, processes and networking basics",
+        "Git: commits, branches, merges, pull requests and conflict resolution"
+      ],
+      "resources": [
+        {
+          "id": "roadmap_python",
+          "name": "roadmap.sh Python Roadmap",
+          "url": "https://roadmap.sh/python"
+        },
+        {
+          "id": "roadmap_backend",
+          "name": "roadmap.sh Backend Roadmap",
+          "url": "https://roadmap.sh/backend"
+        }
+      ],
+      "completion_project": "Build a Python CLI application with modular OOP design, tests, Git history, and Linux run instructions."
+    },
+    {
+      "level": 2,
+      "id": "how_ai_understands_text",
+      "title": "How AI Understands Text",
+      "goal": "Understand the mathematical and architectural foundations behind modern language models.",
+      "topics": [
+        "Neural Networks",
+        "Deep Learning",
+        "Embeddings",
+        "Transformers",
+        "Attention Mechanism"
+      ],
+      "recommended_order": [
+        "Neural-network basics: tensors, layers, weights, activations and loss",
+        "Deep-learning training: forward pass, backpropagation, gradient descent and evaluation",
+        "Embeddings: vector representations, similarity and semantic search",
+        "Attention: queries, keys, values and scaled dot-product attention",
+        "Transformers: tokenization, positional information, encoder/decoder patterns and model training/inference"
+      ],
+      "resources": [
+        {
+          "id": "deeplearning_ai",
+          "name": "DeepLearning.AI",
+          "url": "https://www.deeplearning.ai/"
+        },
+        {
+          "id": "huggingface_learn",
+          "name": "Hugging Face Learn",
+          "url": "https://huggingface.co/learn"
+        },
+        {
+          "id": "pytorch_tutorials",
+          "name": "PyTorch Tutorials",
+          "url": "https://pytorch.org/tutorials/"
+        }
+      ],
+      "completion_project": "Create a small text-embedding search demo, then implement or inspect a simple attention/Transformer example in PyTorch."
+    }
+  ]
 }
