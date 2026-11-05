@@ -386,3 +386,23 @@ def test_assistant_code_analysis_returns_non_execution_metadata():
     assert result["ok"] is True
     assert result["executed"] is False
     assert "adds two values" in result["analysis"]
+
+
+from tamanna_ai.capabilities.prompt_engineering import build_code_completion_prompt
+
+
+def test_code_completion_prompt_has_context_and_safe_output_rules():
+    prompt = build_code_completion_prompt(
+        "def greet(name):\\n    ",
+        language="python",
+        instruction="Return a greeting",
+    )
+    assert "CODE COMPLETION" in prompt
+    assert "Return only the suggested code" in prompt
+    assert "def greet(name)" in prompt
+
+
+def test_code_completion_prompt_rejects_oversized_prefix():
+    import pytest
+    with pytest.raises(ValueError):
+        build_code_completion_prompt("x" * 20001)
