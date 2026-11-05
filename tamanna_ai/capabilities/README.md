@@ -167,3 +167,27 @@ related-context characters). This is model-assisted static explanation, not a
 compiler, parser, type checker, linter, or test runner; accuracy depends on the
 model and supplied context. It does not execute source code or inspect files
 unless a separate authorized file-reading workflow supplies their contents.
+
+
+## AI coding assistant workflows
+
+`CapabilityAssistant` exposes four focused code workflows in addition to
+`analyze_code(...)`:
+
+- `complete_code(code_prefix, language=..., instruction=..., project_context=...)`
+  proposes a short continuation from the current editor prefix. It returns
+  `suggestion` and marks the result as not executed or verified.
+- `generate_code(feature, language=..., framework=..., project_context=..., requirements=...)`
+  turns a natural-language feature request into a code proposal. For example,
+  a request to build a Python calculator can produce an implementation proposal.
+- `debug_code(error_report, source_code=..., runtime=..., expected_behavior=..., actual_behavior=...)`
+  explains likely causes and suggests a minimal fix based on supplied evidence.
+- `explain_code(code, ...)` explains syntax, structure, control flow, and
+  logic through the existing static-analysis workflow.
+
+All workflows send bounded text to the configured model provider. They do not
+run generated or supplied code, edit repository files, or execute tests.
+Generated suggestions are untrusted proposals and must be reviewed and tested
+in a safe environment before use. Completion input is limited to 20,000
+characters and project context to 8,000 characters. A model response is not a
+compiler, linter, or proof of correctness.
