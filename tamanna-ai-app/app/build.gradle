@@ -4,7 +4,16 @@ plugins {
 }
 
 android {
+    namespace "com.tamanna.ai"
     compileSdk 34
+
+    sourceSets {
+        main {
+            // Keep legacy experimental modules in the repository without compiling
+            // them into the production launcher until each module has its own tests.
+            java.setSrcDirs(["src/build/java"])
+        }
+    }
 
     defaultConfig {
         applicationId "com.tamanna.ai"
