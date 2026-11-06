@@ -64,6 +64,7 @@ jobs:
         run: gradle --no-daemon assembleDebug
 
       - name: Build release APK
+        if: always()
         working-directory: tamanna-ai-app
         run: gradle --no-daemon assembleRelease
 
@@ -81,6 +82,7 @@ jobs:
           find packaged-apk/release -type f -name '*.apk' -print
 
       - name: Upload debug APK artifact
+        if: always() && hashFiles('packaged-apk/debug/*.apk') != ''
         uses: actions/upload-artifact@v4
         with:
           name: tamanna-apk-debug-${{ github.run_id }}
@@ -89,6 +91,7 @@ jobs:
           retention-days: 30
 
       - name: Upload release APK artifact
+        if: always() && hashFiles('packaged-apk/release/*.apk') != ''
         uses: actions/upload-artifact@v4
         with:
           name: tamanna-apk-release-${{ github.run_id }}
