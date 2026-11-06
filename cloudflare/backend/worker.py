@@ -293,6 +293,17 @@ async def chat(data: ChatInput, request: Request):
     if not re.fullmatch(r"[A-Za-z0-9._-]{1,100}", model):
         raise HTTPException(500, "Invalid model configuration.")
     db = database(request)
+    request_time = int(time.time())
+    recent = await query(
+        db, "SELECT COUNT(*) AS total FROM chat_requests WHERE user_id=? AND requested_at>=?",
+        user["user_id"], request_time - 60,
+    )
+    if recent and int(recent[0]["total"]) >= 20:
+        raise HTTPException(429, "Chat rate limit reached. Please wait one minute.")
+    await execute(
+        db, "INSERT INTO chat_requests(user_id,requested_at) VALUES(?,?)",
+        user["user_id"], request_time,
+    )
     previous = await query(
         db, "SELECT role,content FROM messages WHERE user_id=? ORDER BY id DESC LIMIT 20",
         user["user_id"],
