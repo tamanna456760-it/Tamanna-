@@ -10,6 +10,8 @@
     "build": "node scripts/build-static.js",
     "start": "node scripts/serve-static.js dist",
     "check": "node scripts/npm-build-check.js",
+    "check:cloudflare": "npm run build && node scripts/verify-cloudflare-deploy.js",
+    "deploy:cloudflare": "npm run check:cloudflare && npx wrangler deploy --config wrangler.jsonc",
     "test": "node --test"
   },
   "engines": {
