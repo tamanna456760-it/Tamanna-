@@ -35,6 +35,7 @@ jobs:
           test -f tamanna-ai-app/app/src/main/AndroidManifest.xml
           test -f tamanna-ai-app/app/src/build/java/com/tamanna/ai/TamannaWebActivity.kt
           echo "Android project: tamanna-ai-app"
+          grep -E "^(android.useAndroidX|android.enableJetifier)=true$" gradle.properties
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -61,12 +62,12 @@ jobs:
 
       - name: Build debug APK
         working-directory: tamanna-ai-app
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleDebug
 
       - name: Build release APK
         if: always()
         working-directory: tamanna-ai-app
-        run: gradle --no-daemon assembleRelease
+        run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleRelease
 
       - name: Locate and package APK files
         run: |
