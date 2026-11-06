@@ -9,16 +9,18 @@
         android:text="Tamanna AI Ready"
         android:textSize="20sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/scanBtn"
         android:text="Run AI Scan"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/chatBtn"
+        android:text="Open AI Chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>
-<Button
-    android:id="@+id/chatBtn"
-    android:text="Open AI Chat"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
