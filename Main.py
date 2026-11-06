@@ -448,6 +448,40 @@ async def index():
 # STATUS
 # ============================================================
 
+@app.get("/admin")
+async def admin_dashboard_page():
+    admin_file = BASE_DIR / "admin.html"
+    if not admin_file.is_file():
+        raise HTTPException(status_code=404, detail="Admin dashboard is not installed.")
+    return FileResponse(admin_file)
+
+
+@app.get("/api/admin/overview")
+async def admin_overview(request: Request):
+    token = request.cookies.get(COOKIE)
+    user = current_user(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    allowed_admins = {
+        item.strip().lower()
+        for item in os.getenv("TAMANNA_ADMIN_EMAIL", "").split(",")
+        if item.strip()
+    }
+    if not allowed_admins or user.get("email", "").strip().lower() not in allowed_admins:
+        raise HTTPException(status_code=403, detail="Admin access is not enabled for this account.")
+    return {
+        "ok": True,
+        "admin": {"email": user["email"], "name": user.get("name", "")},
+        "system": {
+            "status": "online",
+            "assistant": "Tamanna AI",
+            "model_provider": os.getenv("TAMANNA_MODEL_PROVIDER", "gemini"),
+            "database": os.getenv("TAMANNA_DATABASE_URL", "sqlite:///data/tamanna.sqlite3"),
+            "environment": os.getenv("TAMANNA_ENV", "production"),
+        },
+    }
+
+
 @app.get("/api/status")
 async def status():
 
