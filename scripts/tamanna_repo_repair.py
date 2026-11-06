@@ -23,7 +23,7 @@ RISK_PATTERNS = [
     ("HIGH", r"git\s+add\s+\.\s*(?:&&|;|\n).*git\s+commit"),
     ("HIGH", r"contents:\s*write"),
     ("HIGH", r"pull_request_target"),
-    ("HIGH", r"\$\{\{\s*github\.event\.(?:comment\.body|issue\.title|issue\.body)"),
+
     ("MEDIUM", r"continue-on-error:\s*true"),
     ("MEDIUM", r"actions/upload-artifact@v[123]\b"),
     ("MEDIUM", r"uses:\s*[^#\s]+@(main|master)\b"),
@@ -35,6 +35,24 @@ RISK_PATTERNS = [
 SCRIPT_RE = re.compile(
     r"""(?:python(?:3)?|py)\s+["']?([A-Za-z0-9_./-]+\.py)"""
 )
+
+UNTRUSTED_EVENT_EXPRESSION = re.compile(
+    r"\$\{\{\s*github\.event\.(?:comment\.body|issue\.title|issue\.body)"
+)
+
+
+def iter_run_commands(value):
+    """Yield shell commands; event data passed through env: is not shell interpolation."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key == "run" and isinstance(item, str):
+                yield item
+            else:
+                yield from iter_run_commands(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from iter_run_commands(item)
+
 
 def read_text(path):
     try:
@@ -123,7 +141,14 @@ def main():
                     yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
                     construct_mapping,
                 )
-                yaml.load(content, Loader=UniqueKeyLoader)
+                document = yaml.load(content, Loader=UniqueKeyLoader)
+                for command in iter_run_commands(document):
+                    if UNTRUSTED_EVENT_EXPRESSION.search(command):
+                        findings.append((
+                            "HIGH", rel,
+                            "Untrusted GitHub event data is interpolated directly "
+                            "inside a shell run command."
+                        ))
             except ImportError:
                 pass
             except Exception as exc:
