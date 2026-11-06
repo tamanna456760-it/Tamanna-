@@ -4,143 +4,144 @@
 
 # Tamanna AI
 
-Owner: HM INSAN ALI
+**Owner:** HM INSAN ALI
 
-## Verification status
+> AI chat application with a separate administrator workspace. The static interface can be opened without live APIs; live account data, privileged actions and AI responses require their respective backend services.
 
-**Development state: verification pending.** The repository now contains a FastAPI server entry point, a model-provider interface, SQLAlchemy persistence, authentication controls, and an allow-listed tool module. These components must not be treated as production-ready until the current GitHub Actions run completes successfully.
+## Project dashboard
 
-Latest server CI: [Tamanna AI Server CI](https://github.com/tamanna456760-it/Tamanna-/actions/workflows/Build.yml)
+| Area | Open |
+|---|---|
+| User Chat | [Open Tamanna AI chat](https://www.bd-king-r7.com/) |
+| Admin Control Center | [Open Admin Dashboard](https://www.bd-king-r7.com/admin/) |
+| Source repository | [GitHub main branch](https://github.com/tamanna456760-it/Tamanna-/tree/main) |
+| Build and CI status | [GitHub Actions](https://github.com/tamanna456760-it/Tamanna-/actions) |
+| Server CI | [Tamanna AI Server CI](https://github.com/tamanna456760-it/Tamanna-/actions/workflows/Build.yml) |
+| Remaining work | [ROADMAP.md](ROADMAP.md) |
 
-No successful end-to-end result is claimed in this README while that run is queued or failing.
+**Admin allowlist:** `Tamanna456760@gmail.com`. The backend must verify this address against the private `TAMANNA_ADMIN_EMAIL` environment variable. A displayed email or hidden UI element is never authorization.
 
-## Repository entry points
+## What works without an API?
 
-- `Main.py` defines the FastAPI application.
-- `run_server.py` is the launcher.
-- `requirements-server.txt` lists the intended server runtime dependencies.
-- `requirements-test.txt` adds the test dependencies.
-- `.env.example` is a template only. It contains no real credentials.
+The static website can be built and previewed without Gemini, a database, or a running FastAPI server.
 
-## Local verification commands
+| Feature | No-API mode | Live service needed |
+|---|---|---|
+| Chat page layout and navigation | Yes | No |
+| Admin dashboard layout and module navigation | Yes | No |
+| Responsive design and static assets | Yes | No |
+| Admin preview / API connection notice | Yes | No |
+| Real sign-in and session verification | No | Authentication backend |
+| AI-generated chat replies | No | Model provider + backend |
+| Real user list, roles and account actions | No | Admin APIs + database |
+| Live analytics, audit logs and security events | No | Backend + storage |
+| Live server/deployment status | No | Monitoring integrations |
+| Persistent settings and conversation memory | No | Backend + storage |
 
-Use Python 3.12 or newer in a clean virtual environment:
+When the API is unavailable, the Admin page stays in **Preview Mode** and labels live information as pending. It must not invent statistics or enable privileged actions. Never put private credentials in browser JavaScript.
 
-```bash
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements-server.txt
-python -m pip install -r requirements-test.txt
-python -c "import Main"
-python -m pytest -q
-docker build -t tamanna-ai:local .
-```
+## Admin workspace modules
 
-These are verification commands, not a statement that the current repository has passed them. Review the output before deployment.
+1. **Overview** — backend, model provider, environment and database connection state.
+2. **User Management** — user directory, roles and account controls (backend integration pending).
+3. **AI & API Settings** — provider/model configuration and usage limits (backend integration pending).
+4. **Memory & Conversations** — storage health and retention controls (backend integration pending).
+5. **Application Settings** — maintenance mode, feature flags, themes and language defaults (backend integration pending).
+6. **Logs & Audit Trail** — login events, admin actions and application errors (backend integration pending).
+7. **Security Center** — sessions, 2FA, rate limits and suspicious activity (backend integration pending).
+8. **Server & Deployment** — build results, Cloudflare, backups and service health (integration pending).
+9. **Analytics & Usage** — real activity, request volume, latency and quota reports (backend integration pending).
+
+This is a control-center interface, not a claim that every backend operation is implemented. Each action must be connected to a permission-checked endpoint and tested before being marked live.
+
+## Run the static app without APIs
+
+Requirements: Node.js 20 or newer.
+
+    npm ci
+    npm run build
+    npm run dev
+
+To preview the generated production files:
+
+    npm run build
+    npm start
+
+Open the local URL printed by the server. The static build includes both /admin.html and the clean /admin/ route. If the API is unavailable, the Admin page displays Preview Mode.
+
+Cloudflare Workers static assets can serve the built frontend, but static deployment alone does not provide FastAPI endpoints, Gemini inference, authentication, database access, or privileged admin operations.
+
+## Run the FastAPI backend separately
+
+Requirements: Python 3.12 or newer.
+
+    python3 -m venv .venv
+    . .venv/bin/activate
+    python -m pip install -r requirements-server.txt
+    python run_server.py
+
+Use a private, untracked .env file for runtime configuration. See Private configuration below.
+
+## Local verification
+
+    npm ci
+    npm run build
+    npm test
+    python -m compileall -q .
+    python -m pytest -q
+
+Run Python checks in an environment with server and test dependencies installed. These commands are instructions, not a claim that the latest commit has passed. Check [GitHub Actions](https://github.com/tamanna456760-it/Tamanna-/actions) for verified results before deployment.
 
 ## Private configuration
 
-Copy `.env.example` to a local `.env`, then set both required credentials:
+Copy .env.example to a local .env, then configure only the values needed for services you enable:
 
+- `TAMANNA_ADMIN_EMAIL=Tamanna456760@gmail.com`: backend administrator allowlist.
 - `TAMANNA_SESSION_SECRET`: generate a unique value with `python -c "import secrets; print(secrets.token_urlsafe(48))"` (at least 32 characters).
-- `GEMINI_API_KEY` (or `TAMANNA_MODEL_API_KEY`): your Gemini API key, required for AI chat.
-- `TAMANNA_DATABASE_URL`: optional; the built-in SQLite database is used when this is blank or unset.
+- `GEMINI_API_KEY` (or `TAMANNA_MODEL_API_KEY`): private Gemini key, required for Gemini chat.
+- `TAMANNA_DATABASE_URL`: optional database URL; confirm backend-supported defaults before deployment.
 - `TAMANNA_CORS_ORIGINS`: exact trusted frontend origins, including `https://www.bd-king-r7.com`.
 
-The server loads the repository-root `.env` before importing its application modules. Missing credentials are reported as readiness warnings without printing secret values: the website and health endpoint can start, while login or Gemini chat returns a clear configuration error until its setting is supplied.
+Set secrets in the hosting provider's environment settings or in a local untracked .env. Never paste keys into README, HTML, JavaScript, commits, or public issues. The static-only frontend can run without these values; backend features cannot.
 
-Validate configuration locally (the report never prints credential values):
+Validate configuration locally:
 
-```sh
-cp .env.example .env
-# Edit .env and fill in the private credentials.
-python scripts/validate_env.py
-python scripts/validate_env.py --strict
-``
+    cp .env.example .env
+    # Edit .env locally; do not commit it.
+    python scripts/validate_env.py
+    python scripts/validate_env.py --strict
 
-The strict check fails until both authentication and Gemini credentials are configured. The normal check reports missing settings as warnings.
+The strict check is expected to fail until required backend credentials are configured.
 
-Never commit `.env`, API keys, session secrets, account databases, chat-history backups, or tool logs.
+## Safety and access control
 
-## Safety boundary
+- Admin authorization must be enforced by the backend on every protected request.
+- Admin Preview Mode grants no administrative privileges.
+- Never expose session secrets, provider keys, database credentials or private user data to the frontend.
+- Destructive actions require explicit confirmation, role checks, audit logging and tests.
+- Keep command execution and arbitrary file-write routes disabled unless separately reviewed and securely restricted.
+- Do not claim an operation succeeded unless the server confirms it.
 
-The chat endpoint is intended to call the configured model provider. The tool registry is limited to web search and read-only files under `data/docs/`. Command-execution endpoints are disabled by the access-control middleware. Do not re-enable them without a separate security review.
+## Repository entry points
+
+- `index.html` — user-facing chat page.
+- `admin.html` — Admin Control Center.
+- `Main.py` — FastAPI application.
+- `run_server.py` — backend launcher.
+- `requirements-server.txt` — server runtime dependencies.
+- `requirements-test.txt` — test dependencies.
+- `scripts/build-static.js` — static site build, including /admin/.
+- `wrangler.jsonc` — Cloudflare Workers static-assets configuration.
+- `.env.example` — safe configuration template; no real credentials.
 
 ## Documentation
 
-- [ROADMAP](ROADMAP.md): work that remains unverified or incomplete.
-- [CI workflow review](docs/CI_WORKFLOWS_REVIEW.md): overlapping workflows retained for your review.
+- [ROADMAP.md](ROADMAP.md) — incomplete and unverified work.
+- [CI workflow review](docs/CI_WORKFLOWS_REVIEW.md) — workflow review notes.
+- [GitHub Actions](https://github.com/tamanna456760-it/Tamanna-/actions) — build and test results.
 
-## Run Tamanna AI independently
+## Deployment boundary
 
-This repository is the **Tamanna AI application**. It runs independently from the separate `Tamanna-server` repository. It does not start or depend on that Compose project.
+The current Cloudflare configuration describes a static-assets Worker. It can serve the chat and Admin interface, but it does not automatically proxy /api/* to FastAPI. Until backend hosting and secure routing are configured, treat the deployed Admin interface as a preview. Login, AI chat, user management and live monitoring are not guaranteed to work there.
 
-Requirements: Docker Engine or Docker Desktop with Docker Compose.
-
-1. Copy `.env.example` to `.env`.
-2. Set a unique `TAMANNA_SESSION_SECRET` and your private `GEMINI_API_KEY` in `.env` if you want Gemini chat. Never commit `.env`.
-3. From this repository folder, run:
-
-```sh
-docker compose up --build -d
-docker compose ps
-```
-
-Tamanna AI application/API: http://127.0.0.1:8001
-Health check: http://127.0.0.1:8001/health
-
-To stop only Tamanna AI:
-
-```sh
-docker compose down
-```
-
-The container listens on port 8000 internally and is published on localhost port 8001 so it can run alongside the separate Tamanna Central Server, which uses localhost port 8000. Each repository has its own Compose project and data volume.
-
-## Optional Tor v3 onion access
-
-An optional Tor hidden-service container is included for the Tamanna AI application. It is separate from the Central Server repository and is started with this repository's Compose project.
-
-Start both the AI app and Tor service:
-
-```sh
-docker compose up --build -d
-docker compose ps
-```
-
-After the Tor container becomes healthy, read the **Tor-generated v3 hostname**:
-
-```sh
-docker compose exec -T tor cat /var/lib/tor/hidden_service/hostname
-```
-
-Tor creates and persists its private key in the `tamanna_tor_data` Docker volume. Back up that volume securely; losing the key changes the onion address. Do not publish or commit the private key.
-
-**Important about the requested name:** `bd-king-r7.onion` cannot be assigned like a normal DNS domain. A v3 onion address is derived from its cryptographic key. The service therefore generates its own valid `.onion` hostname. Getting the exact vanity name `bd-king-r7.onion` would require a matching vanity key-generation search and cannot be guaranteed by configuration alone. The generated hostname is the working address until such a key exists.
-
-The onion service forwards HTTP port 80 internally to the Tamanna AI app container. It does not expose a Tor SOCKS proxy or publish a public host port. Use Tor Browser to access the generated address.
-
-
-## Central Server service protocol
-
-Tamanna AI includes a small internal client at `tamanna_ai/integrations/central_server.py` for the signed `tamanna-service/1` report protocol. Configure `TAMANNA_SERVER_URL`, `TAMANNA_SERVER_KEY_ID`, and `TAMANNA_SERVER_SHARED_SECRET` in the private `.env` file. The shared secret must exactly match `TAMANNA_SERVICE_SHARED_SECRET` in the separate Tamanna-server repository. Generate it locally with `openssl rand -hex 32`; never commit it.
-
-The client sends only the report payload you explicitly pass to `send_report(report)`. It does not run automatically, does not forward chat messages, and does not grant shell or remote code execution. Protocol specification: [Tamanna Central Server protocol v1](https://github.com/tamanna456760-it/Tamanna-server/blob/main/docs/TAMANNA_SERVICE_PROTOCOL_V1.md).
-
-
-## Project-wide documentation and backend development
-
-Tamanna AI includes prompt helpers for producing source-grounded project
-documentation and database/backend implementation plans:
-
-- `build_project_documentation_prompt()`: prepare a complete root README,
-  verified API reference, and architecture overview from the repository tree
-  plus relevant source/configuration excerpts.
-- `build_database_backend_prompt()`: prepare SQL, MongoDB, REST, and GraphQL
-  implementation requests with validation, authorization, owner isolation,
-  safe migrations, error handling, and tests.
-
-These helpers structure requests for the configured AI provider. They do not
-automatically crawl the repository, write files, connect to a live database,
-or deploy endpoints. Supply actual source files as context and verify generated
-code and documentation before use.
+Run locally as a static preview without APIs, or run FastAPI when private configuration is ready. Production deployment and live admin functionality require separate end-to-end verification.
