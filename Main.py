@@ -449,7 +449,17 @@ async def index():
 # ============================================================
 
 @app.get("/admin")
-async def admin_dashboard_page():
+async def admin_dashboard_page(request: Request):
+    user = current_user(request.cookies.get(COOKIE))
+    allowed_admins = {
+        item.strip().lower()
+        for item in os.getenv("TAMANNA_ADMIN_EMAIL", "").split(",")
+        if item.strip()
+    }
+    if not user:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    if not allowed_admins or user.get("email", "").strip().lower() not in allowed_admins:
+        raise HTTPException(status_code=403, detail="Admin access is not enabled for this account.")
     admin_file = BASE_DIR / "admin.html"
     if not admin_file.is_file():
         raise HTTPException(status_code=404, detail="Admin dashboard is not installed.")
