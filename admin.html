@@ -1,39 +1,42 @@
 <!doctype html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#11172b">
-  <title>Tamanna AI — Admin Dashboard</title>
-  <link rel="icon" href="/assets/tamanna-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/css/admin.css">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11172b"><title>Tamanna AI — Admin Control Center</title>
+  <link rel="icon" href="/assets/tamanna-logo.svg" type="image/svg+xml"><link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
-  <header class="admin-topbar">
-    <a class="admin-brand" href="/"><img src="/assets/tamanna-logo.svg" alt="Tamanna AI TI Logo"><span><strong>Tamanna AI</strong><small>ADMIN CONTROL CENTER</small></span></a>
-    <div class="top-actions"><span id="adminIdentity">Checking access…</span><a class="top-link" href="/">Open User Chat</a></div>
-  </header>
-  <main class="admin-main">
-    <section class="welcome"><div><p class="eyebrow">SYSTEM OVERVIEW</p><h1>Admin Dashboard</h1><p>Manage and monitor your Tamanna AI service.</p></div><span id="systemStatus" class="status-pill">Checking…</span></section>
-    <section id="accessState" class="access-state" role="status" aria-live="polite">Verifying administrator permissions…</section>
-    <section id="adminContent" hidden>
-      <div class="stats-grid">
-        <article class="stat-card"><span>Backend Status</span><strong id="backendStatus">—</strong><small>FastAPI service</small></article>
-        <article class="stat-card"><span>AI Provider</span><strong id="modelProvider">—</strong><small>Configured model provider</small></article>
-        <article class="stat-card"><span>Environment</span><strong id="environment">—</strong><small>Runtime configuration</small></article>
-        <article class="stat-card"><span>Database</span><strong id="database">—</strong><small>Configured storage</small></article>
-      </div>
-      <div class="admin-grid">
-        <section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">CONTROL CENTER</p><h2>System tools</h2></div><span class="panel-icon">✦</span></div><div class="tool-list">
-          <div class="tool-row"><span class="tool-icon">♙</span><div><strong>User management</strong><small>Account administration is not exposed until a protected user-management API is implemented.</small></div><span class="tool-state">Not enabled</span></div>
-          <div class="tool-row"><span class="tool-icon">◈</span><div><strong>Security & access</strong><small>Administrator access is checked by the FastAPI backend.</small></div><span class="tool-state enabled">Protected</span></div>
-          <div class="tool-row"><span class="tool-icon">⌁</span><div><strong>Memory & conversations</strong><small>Conversation storage remains in the existing backend database.</small></div><span class="tool-state">Existing service</span></div>
-          <div class="tool-row"><span class="tool-icon">⚙</span><div><strong>Application settings</strong><small>Runtime settings are managed through private server configuration.</small></div><span class="tool-state">Server-side</span></div>
-        </div></section>
-        <section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">ADMIN ACCOUNT</p><h2>Signed in as</h2></div></div><p id="adminName" class="admin-name">—</p><p id="adminEmail" class="admin-email">—</p><p class="security-note">Admin accounts are allowlisted with the private <code>TAMANNA_ADMIN_EMAIL</code> environment variable. Never set it to a public or shared address.</p><button id="adminLogout" class="logout-button" type="button">Sign out</button></section>
-      </div>
-    </section>
-  </main>
-  <script src="/js/admin.js?v=20261106"></script>
-</body>
-</html>
+<header class="admin-topbar"><a class="admin-brand" href="/"><img src="/assets/tamanna-logo.svg" alt="Tamanna AI TI Logo"><span><strong>Tamanna AI</strong><small>ADMIN CONTROL CENTER</small></span></a><div class="top-actions"><span id="adminIdentity">Admin workspace</span><a class="top-link" href="/">Open User Chat</a></div></header>
+<main class="admin-main">
+<section class="welcome"><div><p class="eyebrow">TAMANNA AI / CONTROL CENTER</p><h1>Admin Dashboard</h1><p>এক জায়গা থেকে Tamanna AI-এর সিস্টেম পরিচালনা ও পর্যবেক্ষণ করুন।</p></div><span id="systemStatus" class="status-pill">Checking connection…</span></section>
+<section id="modeBanner" class="access-state" role="status" aria-live="polite">Backend connection যাচাই করা হচ্ছে…</section>
+<section id="adminContent">
+<div class="stats-grid">
+<article class="stat-card"><span>Backend</span><strong id="backendStatus">API Pending</strong><small>FastAPI connection</small></article>
+<article class="stat-card"><span>AI Provider</span><strong id="modelProvider">API Pending</strong><small>Gemini / provider status</small></article>
+<article class="stat-card"><span>Environment</span><strong id="environment">API Pending</strong><small>Runtime configuration</small></article>
+<article class="stat-card"><span>Database</span><strong id="database">API Pending</strong><small>SQLite / configured storage</small></article>
+</div>
+<div class="admin-grid">
+<section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">MANAGEMENT</p><h2>Control modules</h2></div><span class="panel-icon">✦</span></div><div class="tool-list">
+<div class="tool-row"><span class="tool-icon">♙</span><div><strong>User Management</strong><small>User list, roles, suspend/restore and account controls.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">◈</span><div><strong>AI & API Settings</strong><small>Provider, model, usage limits and connection diagnostics.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">⌁</span><div><strong>Memory & Conversations</strong><small>Storage health, retention controls and conversation tools.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">⚙</span><div><strong>Application Settings</strong><small>Maintenance mode, feature flags, themes and language defaults.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">▤</span><div><strong>Logs & Audit Trail</strong><small>Admin actions, errors, login events and request diagnostics.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">⬡</span><div><strong>Security Center</strong><small>2FA, sessions, rate limits, suspicious activity and access policy.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">☁</span><div><strong>Server & Deployment</strong><small>Build history, Cloudflare status, backups and deployment checks.</small></div><span class="tool-state">API Pending</span></div>
+<div class="tool-row"><span class="tool-icon">▥</span><div><strong>Analytics & Usage</strong><small>Real user activity, chat volume, latency and quota reporting.</small></div><span class="tool-state">API Pending</span></div>
+</div></section>
+<section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">ADMIN ACCOUNT</p><h2>Administrator</h2></div></div><p id="adminName" class="admin-name">Tamanna AI Admin</p><p id="adminEmail" class="admin-email">Tamanna456760@gmail.com</p><p class="security-note">Production access must be verified by FastAPI using the private TAMANNA_ADMIN_EMAIL allowlist. Preview mode does not grant administrator privileges or expose account data.</p><button id="adminLogout" class="logout-button" type="button" hidden>Sign out</button>
+</section>
+</div>
+<section class="panel-card api-checklist"><p class="eyebrow">IMPLEMENTATION PLAN</p><h2>Backend connection checklist</h2><div class="tool-list">
+<div class="tool-row"><div><strong>Admin authentication & role checks</strong><small>Use existing session cookie and email allowlist; add 2FA before production.</small></div><span class="tool-state">Existing / harden</span></div>
+<div class="tool-row"><div><strong>Overview, users, analytics and audit APIs</strong><small>Read-only endpoints first, then permission-checked actions.</small></div><span class="tool-state">Pending</span></div>
+<div class="tool-row"><div><strong>Settings, deployment and security APIs</strong><small>Validate every action server-side and record it in audit logs.</small></div><span class="tool-state">Pending</span></div>
+</div></section>
+</section>
+</main>
+<script src="/js/admin.js?v=20261106_preview"></script>
+</body></html>
