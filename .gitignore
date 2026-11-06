@@ -17,6 +17,10 @@ node_modules/
 **/node_modules/
 
 # Secrets and local credentials
+.dev.vars
+**/.dev.vars
+.wrangler/
+**/.wrangler/
 .ven
 **/.ven
 .env
