@@ -34,9 +34,16 @@ if (hostname !== 'www.bd-king-r7.com') {
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-for (const asset of ['css/style.css', 'css/admin.css', 'js/auth.js', 'js/chat.js', 'js/settings.js', 'js/admin.js']) {
+for (const asset of ['css/style.css', 'js/auth.js', 'js/chat.js', 'js/settings.js']) {
   if (!html.includes(asset)) {
     fail(`index.html does not reference required asset: ${asset}`);
+  }
+}
+
+const adminHtml = fs.readFileSync(path.join(root, 'admin.html'), 'utf8');
+for (const asset of ['css/admin.css', 'js/admin.js']) {
+  if (!adminHtml.includes(asset)) {
+    fail(`admin.html does not reference required asset: ${asset}`);
   }
 }
 
