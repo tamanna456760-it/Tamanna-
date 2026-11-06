@@ -49,10 +49,13 @@ for (const asset of ['css/admin.css', 'js/admin.js']) {
 
 fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(output, { recursive: true });
+fs.mkdirSync(path.join(output, 'admin'), { recursive: true });
 
 for (const file of ['index.html', 'admin.html', '404.html', 'CNAME']) {
   fs.copyFileSync(path.join(root, file), path.join(output, file));
 }
+// Cloudflare static assets can now resolve the clean /admin path.
+fs.copyFileSync(path.join(root, 'admin.html'), path.join(output, 'admin', 'index.html'));
 
 for (const directory of ['css', 'js', 'assets', 'static']) {
   const source = path.join(root, directory);
@@ -62,7 +65,7 @@ for (const directory of ['css', 'js', 'assets', 'static']) {
 }
 
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
-for (const relative of ['index.html', 'admin.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js']) {
+for (const relative of ['index.html', 'admin.html', 'admin/index.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js']) {
   if (!fs.existsSync(path.join(output, relative))) {
     fail(`Build output is incomplete: dist/${relative}`);
   }
