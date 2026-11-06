@@ -50,6 +50,12 @@ function main() {
   }
 
   if (config.name !== 'titamanna') fail('Unexpected Cloudflare Worker name.');
+  const packagePath = path.join(root, 'package.json');
+  if (!fs.existsSync(packagePath)) fail('package.json is missing.');
+  const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  if (packageJson.scripts?.deploy !== 'npx wrangler deploy --config ./wrangler.jsonc') {
+    fail('package.json deploy script must explicitly load ./wrangler.jsonc.');
+  }
   if (!config.assets || config.assets.directory !== './dist') {
     fail('Wrangler assets.directory must be exactly ./dist; never upload repository root.');
   }
