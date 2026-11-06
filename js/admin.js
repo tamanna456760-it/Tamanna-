@@ -8,7 +8,7 @@ function setPreview(reason){
   status.classList.remove("online");
   $("adminIdentity").textContent="Offline preview";
   $("adminName").textContent="Tamanna AI Admin";
-  $("adminEmail").textContent="Tamanna456760@gmail.com";
+  $("adminEmail").textContent="Backend connection required";
   logout.hidden=true;
 }
 function setLive(data){
