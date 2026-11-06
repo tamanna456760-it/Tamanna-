@@ -15,7 +15,11 @@
     "preview": "npx wrangler dev --config ./wrangler.jsonc",
     "deploy:cloudflare": "npm run check:cloudflare && npm run deploy",
     "test": "node --test",
-    "audit:domain": "bash scripts/domain-audit.sh"
+    "audit:domain": "bash scripts/domain-audit.sh",
+    "api:dev": "cd cloudflare/backend && uv run pywrangler dev",
+    "api:deploy": "cd cloudflare/backend && uv run pywrangler deploy",
+    "api:db:create": "cd cloudflare/backend && npx wrangler d1 create tamanna-ai-db",
+    "api:db:migrate": "cd cloudflare/backend && npx wrangler d1 execute tamanna-ai-db --remote --file=./schema.sql"
   },
   "engines": {
     "node": ">=20"
