@@ -52,20 +52,21 @@
 
     <section class="settings-group">
       <h3>General / সাধারণ</h3>
-      <div class="setting-row"><label for="languageSetting">Language</label><select id="languageSetting" data-setting="language"><option value="bn">বাংলা</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="ar">العربية</option></select></div>
-    </section>
-
-    <section class="settings-group">
-      <h3>Chat & Notifications</h3>
-      <div class="setting-row"><label for="historySetting">Chat history preference</label><input id="historySetting" type="checkbox" data-setting="chatHistory"></div>
-      <div class="setting-row"><label for="notificationsSetting">Notifications preference</label><input id="notificationsSetting" type="checkbox" data-setting="notifications"></div>
-      <p class="settings-note">এই দুটি অপশন আপাতত UI preference হিসেবে সংরক্ষিত হয়; সার্ভারের chat history বা push notification behavior পরিবর্তন করে না।</p>
-      <div class="settings-actions"><button id="clearLocalChat" class="settings-secondary" type="button">স্ক্রিনের চ্যাট পরিষ্কার</button></div>
+      <div class="setting-row"><label for="languageSetting">Language preference</label><select id="languageSetting" data-setting="language"><option value="bn">বাংলা</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="ar">العربية</option></select></div>
+      <p class="settings-note">ভাষার পছন্দ সংরক্ষিত হবে। সম্পূর্ণ বহুভাষিক UI অনুবাদ এখনো সম্পন্ন নয়।</p>
     </section>
 
     <section class="settings-group">
       <h3>Account & Security</h3>
-      <p class="settings-note">Login, signup, profile update এবং secure account sessions backend authentication service-এর সঙ্গে যুক্ত। Password reset ও email verification এখনো চালু নয়। নিরাপত্তার জন্য password browser storage-এ রাখা হয় না।</p>
+      <p id="settingsAccountStatus" class="settings-note">অ্যাকাউন্টের অবস্থা যাচাই করা হচ্ছে…</p>
+      <div class="settings-actions"><button id="manageAccountButton" class="settings-secondary" type="button">অ্যাকাউন্ট পরিচালনা</button></div>
+      <p class="settings-note">প্রোফাইল পরিবর্তন, লগইন/লগআউট এবং পাসওয়ার্ড পরিবর্তন অ্যাকাউন্ট প্যানেল থেকে করা যাবে।</p>
+    </section>
+
+    <section class="settings-group">
+      <h3>Chat</h3>
+      <p class="settings-note">চ্যাট ইতিহাস সার্ভারের SQLite account storage-এ সংরক্ষিত হয়। এই বোতামটি শুধু বর্তমান স্ক্রিন পরিষ্কার করে; সার্ভারে সংরক্ষিত ইতিহাস মুছে দেয় না।</p>
+      <div class="settings-actions"><button id="clearLocalChat" class="settings-secondary" type="button">বর্তমান স্ক্রিন পরিষ্কার</button></div>
     </section>
 
     <div class="settings-actions">
