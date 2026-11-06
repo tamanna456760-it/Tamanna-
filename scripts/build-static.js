@@ -7,6 +7,9 @@ const root = path.resolve(__dirname, '..');
 const output = path.join(root, 'dist');
 const requiredFiles = [
   'index.html',
+  'admin.html',
+  'css/admin.css',
+  'js/admin.js',
   'CNAME',
   'css/style.css',
   'js/auth.js',
@@ -31,7 +34,7 @@ if (hostname !== 'www.bd-king-r7.com') {
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-for (const asset of ['css/style.css', 'js/auth.js', 'js/chat.js', 'js/settings.js']) {
+for (const asset of ['css/style.css', 'css/admin.css', 'js/auth.js', 'js/chat.js', 'js/settings.js', 'js/admin.js']) {
   if (!html.includes(asset)) {
     fail(`index.html does not reference required asset: ${asset}`);
   }
@@ -40,7 +43,7 @@ for (const asset of ['css/style.css', 'js/auth.js', 'js/chat.js', 'js/settings.j
 fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(output, { recursive: true });
 
-for (const file of ['index.html', '404.html', 'CNAME']) {
+for (const file of ['index.html', 'admin.html', '404.html', 'CNAME']) {
   fs.copyFileSync(path.join(root, file), path.join(output, file));
 }
 
@@ -52,7 +55,7 @@ for (const directory of ['css', 'js', 'assets', 'static']) {
 }
 
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
-for (const relative of ['index.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'js/chat.js']) {
+for (const relative of ['index.html', 'admin.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js']) {
   if (!fs.existsSync(path.join(output, relative))) {
     fail(`Build output is incomplete: dist/${relative}`);
   }
