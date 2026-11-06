@@ -1,0 +1,30 @@
+name: Cloudflare Python API Validation
+
+on:
+  push:
+    paths:
+      - "cloudflare/backend/**"
+      - ".github/workflows/cloudflare-api.yml"
+  pull_request:
+    paths:
+      - "cloudflare/backend/**"
+      - ".github/workflows/cloudflare-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Compile Python Worker
+        run: python -m py_compile cloudflare/backend/worker.py
+      - name: Validate Cloudflare API contract and D1 schema
+        run: python -m pytest cloudflare/backend/tests -q
