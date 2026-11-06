@@ -11,7 +11,7 @@ Use Cloudflare Workers Builds for the production hostname `www.bd-king-r7.com`.
 | Production branch | `main` |
 | Root directory | repository root `/` |
 | Build command | `npm run check:cloudflare` |
-| Deploy command | `npx wrangler deploy --config wrangler.jsonc` |
+| Deploy command | `npm run deploy` |
 | Worker name | `titamanna` |
 | Static assets directory | `./dist` |
 
@@ -37,7 +37,7 @@ Store API keys and session secrets only in Cloudflare/server secret storage, not
 
 ```sh
 npm run check:cloudflare
-npx wrangler deploy --config wrangler.jsonc
+npm run deploy
 ```
 
 ## Domain audit
