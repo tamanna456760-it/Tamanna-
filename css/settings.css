@@ -3,8 +3,9 @@
   --settings-accent: #8b7cff;
   --settings-overlay: rgba(3, 6, 18, .68);
 }
-:root[data-accent="blue"] { --settings-accent: #4f8cff; }
-:root[data-accent="teal"] { --settings-accent: #22b8a7; }
+:root[data-accent="blue"] { --settings-accent: #4f8cff; --accent: #4f8cff; }
+:root[data-accent="teal"] { --settings-accent: #22b8a7; --accent: #22b8a7; }
+:root[data-accent="purple"] { --settings-accent: #8b7cff; --accent: #8b7cff; }
 :root[data-theme="light"] {
   --bg: #f4f6fc; --panel: #ffffff; --panel2: #edf0fa;
   --text: #172039; --muted: #66708a; --border: rgba(40, 50, 80, .16);
@@ -65,4 +66,49 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 @media (max-width:600px) {
   .settings-trigger { margin-top:-53px; margin-right:12px; padding:8px 10px; }
   .settings-panel { padding:17px; }
+}
+
+
+/* Theme and accent are applied consistently across the user chat surface. */
+:root[data-theme="light"] body:has(.user-chat-app) {
+  background: var(--bg);
+}
+:root[data-theme="light"] .user-chat-app {
+  background: var(--bg);
+}
+:root[data-theme="light"] .user-chat-app .chat-header {
+  background: rgba(255,255,255,.92);
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .user-chat-app .header-actions button {
+  color: var(--text);
+  background: var(--panel2);
+}
+:root[data-theme="light"] .user-chat-app .ai-message {
+  color: var(--text);
+  background: transparent;
+}
+:root[data-theme="light"] .user-chat-app .user-message {
+  color: var(--text);
+  background: var(--panel2);
+  border-color: var(--settings-accent);
+}
+:root[data-theme="light"] .composer-wrap {
+  background: linear-gradient(180deg, rgba(244,246,252,0), var(--bg) 20%);
+}
+:root[data-theme="light"] .user-chat-app .typing-area {
+  background: var(--panel);
+  border-color: var(--border);
+}
+:root[data-theme="light"] #messageInput {
+  color: var(--text);
+}
+:root[data-theme="light"] .composer-note {
+  color: var(--muted);
+}
+.user-chat-app .user-message {
+  border-color: color-mix(in srgb, var(--settings-accent) 38%, transparent);
+}
+.user-chat-app #messageInput:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
