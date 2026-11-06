@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "Tamanna AI",
+  "short_name": "Tamanna",
+  "description": "Tamanna AI assistant",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07152F",
+  "theme_color": "#07152F",
+  "icons": [
+    {
+      "src": "/assets/tamanna-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
