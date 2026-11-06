@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+GEMINI_API_KEY=
+TAMANNA_SESSION_SECRET=
+GEMINI_MODEL=gemini-2.5-flash
