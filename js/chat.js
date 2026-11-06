@@ -5,6 +5,7 @@
   const input = document.getElementById("messageInput");
   const sendButton = document.getElementById("sendButton");
   const chatBox = document.getElementById("chatBox");
+  const newChatButton = document.getElementById("newChatButton");
 
   if (!input || !sendButton || !chatBox) return;
 
@@ -100,6 +101,18 @@
   }
 
   sendButton.addEventListener("click", sendMessage);
+
+  newChatButton?.addEventListener("click", () => {
+    chatBox.replaceChildren();
+    addMessage("assistant", "নতুন কথোপকথন শুরু হলো। কীভাবে সাহায্য করতে পারি?");
+    input.value = "";
+    input.focus();
+  });
+
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 180) + "px";
+  });
 
   input.addEventListener("keydown", event => {
     if (event.key === "Enter" && !event.shiftKey) {
