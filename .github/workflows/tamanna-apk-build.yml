@@ -53,6 +53,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The legacy "tools" package was removed from Google's SDK repository.
+          # Install only supported SDK packages required by compileSdk 34.
+          packages: 'platform-tools, platforms;android-34, build-tools;34.0.0'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
