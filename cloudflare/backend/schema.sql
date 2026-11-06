@@ -40,3 +40,12 @@ CREATE TABLE IF NOT EXISTS auth_attempts (
 );
 CREATE INDEX IF NOT EXISTS auth_attempts_lookup_idx
 ON auth_attempts(ip_hash, action, attempted_at);
+
+
+CREATE TABLE IF NOT EXISTS chat_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  requested_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS chat_requests_user_time_idx
+ON chat_requests(user_id, requested_at);
