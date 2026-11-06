@@ -7,6 +7,15 @@ android {
     namespace "com.tamanna.ai"
     compileSdk 34
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     sourceSets {
         main {
             // Keep legacy experimental modules in the repository without compiling
