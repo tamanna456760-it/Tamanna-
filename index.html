@@ -95,6 +95,12 @@
     <div id="accountDetails" hidden>
       <p id="accountIdentity"></p>
       <form id="profileForm" class="auth-form"><label for="profileName">নাম পরিবর্তন</label><input id="profileName" type="text" minlength="2" maxlength="80" required><button type="submit">প্রোফাইল সংরক্ষণ</button></form>
+      <form id="changePasswordForm" class="auth-form">
+        <h3>পাসওয়ার্ড পরিবর্তন</h3>
+        <label for="currentPassword">বর্তমান পাসওয়ার্ড</label><input id="currentPassword" type="password" autocomplete="current-password" required maxlength="128">
+        <label for="newPassword">নতুন পাসওয়ার্ড (কমপক্ষে ১২ অক্ষর)</label><input id="newPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="128">
+        <button type="submit">পাসওয়ার্ড পরিবর্তন করুন</button>
+      </form>
       <button id="logoutButton" class="settings-secondary" type="button">লগআউট</button>
     </div>
     <p class="settings-note">পাসওয়ার্ড নিরাপদভাবে হ্যাশ করে সার্ভারে রাখা হয়। পাসওয়ার্ড ব্রাউজারে সংরক্ষণ করা হয় না।</p>
