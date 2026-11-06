@@ -4,19 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Tamanna AI — personal AI chat assistant">
+  <link rel="icon" href="/assets/tamanna-logo.svg" type="image/svg+xml">
   <title>Tamanna AI</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/settings.css">
   <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
-  <div class="chat-app">
+  <div class="chat-app user-chat-app">
     <header class="chat-header">
       <div>
-        <h1>🤖 Tamanna AI</h1>
-        <span>AI Assistant</span>
+        <div class="brand-lockup"><img class="brand-logo" src="/assets/tamanna-logo.svg" alt="Tamanna AI TI Logo"><div><h1>Tamanna AI</h1>
+        <span>AI Assistant</span></div></div>
       </div>
-      <div class="header-actions"><button id="openAuth" class="header-action" type="button">লগইন</button><button id="openSettings" class="settings-trigger" type="button" aria-haspopup="dialog" aria-controls="settingsPanel">⚙ সেটিংস</button></div>
+      <div class="header-actions"><button id="newChatButton" class="header-action" type="button">＋ নতুন চ্যাট</button><button id="openAuth" class="header-action" type="button">লগইন</button><button id="openSettings" class="settings-trigger" type="button" aria-haspopup="dialog" aria-controls="settingsPanel">⚙ সেটিংস</button></div>
     </header>
 
     <main id="chatBox" class="chat-box" aria-live="polite">
@@ -26,10 +28,10 @@
       </div>
     </main>
 
-    <div class="typing-area">
-      <input id="messageInput" type="text" placeholder="আপনার মেসেজ লিখুন..." autocomplete="off" aria-label="আপনার মেসেজ">
-      <button id="sendButton" type="button">Send</button>
-    </div>
+    <div class="composer-wrap"><div class="typing-area">
+      <textarea id="messageInput" rows="1" placeholder="Tamanna AI-কে মেসেজ করুন..." autocomplete="off" aria-label="আপনার মেসেজ"></textarea>
+      <button id="sendButton" type="button" aria-label="মেসেজ পাঠান">↑</button>
+    </div><p class="composer-note">Tamanna AI ভুল করতে পারে। গুরুত্বপূর্ণ তথ্য যাচাই করে নিন।</p></div>
   </div>
 
   <div id="settingsBackdrop" class="settings-backdrop" hidden></div>
@@ -96,8 +98,8 @@
     <p class="settings-note">পাসওয়ার্ড নিরাপদভাবে হ্যাশ করে সার্ভারে রাখা হয়। পাসওয়ার্ড ব্রাউজারে সংরক্ষণ করা হয় না।</p>
   </section>
 
-  <script src="/js/auth.js?v=20261102_auth"></script>
-  <script src="/js/chat.js?v=20261102_settings"></script>
+  <script src="/js/auth.js?v=20261106_roles"></script>
+  <script src="/js/chat.js?v=20261106_chatui"></script>
   <script src="/js/settings.js?v=20261102_settings"></script>
 </body>
 </html>
