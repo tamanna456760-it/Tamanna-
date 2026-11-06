@@ -40,3 +40,11 @@ jobs:
           test "$(tr -d '\r\n' < CNAME)" = "www.bd-king-r7.com"
           grep -q '"directory": "./dist"' wrangler.jsonc
           echo "PASS: canonical hostname and Wrangler asset directory"
+
+      - name: Upload website build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-website-dist-${{ github.run_id }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
