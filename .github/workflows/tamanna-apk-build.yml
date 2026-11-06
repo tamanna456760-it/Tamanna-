@@ -6,15 +6,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: "APK build type"
-        required: true
-        default: debug
-        type: choice
-        options:
-          - debug
-          - release
 
 permissions:
   contents: read
@@ -25,9 +16,9 @@ concurrency:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Debug and Release APKs
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
 
     steps:
       - name: Checkout repository
@@ -54,8 +45,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          # This action expects space-separated package names, not commas.
-          # Keep setup to the default platform-tools package.
           packages: 'platform-tools'
 
       - name: Install Android compile SDK
@@ -68,69 +57,54 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.4"
-          # This APK job invokes the installed Gradle CLI directly; an unrelated
-          # legacy wrapper JAR elsewhere in the repository is not used here.
           validate-wrappers: false
 
-      - name: Determine build type
-        id: build_type
-        env:
-          INPUT_BUILD_TYPE: ${{ inputs.build_type }}
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          BUILD_TYPE="${INPUT_BUILD_TYPE:-debug}"
-          if [ "$EVENT_NAME" != "workflow_dispatch" ]; then
-            BUILD_TYPE="debug"
-          fi
-          if [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
-            echo "ERROR: Unsupported build type."
-            exit 1
-          fi
-          echo "value=$BUILD_TYPE" >> "$GITHUB_OUTPUT"
-
       - name: Build debug APK
-        if: steps.build_type.outputs.value == 'debug'
         working-directory: tamanna-ai-app
         run: gradle --no-daemon assembleDebug
 
       - name: Build release APK
-        if: steps.build_type.outputs.value == 'release'
         working-directory: tamanna-ai-app
         run: gradle --no-daemon assembleRelease
 
-      - name: Locate APK files
-        id: apk
-        env:
-          BUILD_TYPE: ${{ steps.build_type.outputs.value }}
+      - name: Locate and package APK files
         run: |
           set -euo pipefail
-          APK_DIR="tamanna-ai-app/app/build/outputs/apk/$BUILD_TYPE"
-          test -d "$APK_DIR"
-          mkdir -p packaged-apk
-          find "$APK_DIR" -maxdepth 1 -type f -name '*.apk' -exec cp {} packaged-apk/ \;
-          APK_COUNT="$(find packaged-apk -type f -name '*.apk' | wc -l)"
-          test "$APK_COUNT" -gt 0
-          echo "APK_COUNT=$APK_COUNT" >> "$GITHUB_OUTPUT"
-          find packaged-apk -type f -name '*.apk' -print
+          mkdir -p packaged-apk/debug packaged-apk/release
+          find tamanna-ai-app/app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' -exec cp {} packaged-apk/debug/ \;
+          find tamanna-ai-app/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -exec cp {} packaged-apk/release/ \;
+          test "$(find packaged-apk/debug -type f -name '*.apk' | wc -l)" -gt 0
+          test "$(find packaged-apk/release -type f -name '*.apk' | wc -l)" -gt 0
+          echo "DEBUG APK:"
+          find packaged-apk/debug -type f -name '*.apk' -print
+          echo "RELEASE APK:"
+          find packaged-apk/release -type f -name '*.apk' -print
 
-      - name: Upload APK artifact
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-apk-${{ steps.build_type.outputs.value }}-${{ github.run_id }}
-          path: packaged-apk/*.apk
+          name: tamanna-apk-debug-${{ github.run_id }}
+          path: packaged-apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload release APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-apk-release-${{ github.run_id }}
+          path: packaged-apk/release/*.apk
           if-no-files-found: error
           retention-days: 30
 
       - name: Build summary
         if: always()
         env:
-          BUILD_TYPE: ${{ steps.build_type.outputs.value }}
           JOB_STATUS: ${{ job.status }}
         run: |
           {
             echo "## Tamanna APK Build"
-            echo "- Project: tamanna-ai-app"
-            echo "- Build type: ${BUILD_TYPE:-unknown}"
+            echo "- Debug APK: requested"
+            echo "- Release APK: requested (unsigned unless signing is configured)"
             echo "- Branch: $GITHUB_REF_NAME"
             echo "- Commit: $GITHUB_SHA"
             echo "- Status: $JOB_STATUS"
