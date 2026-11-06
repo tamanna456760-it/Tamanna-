@@ -38,6 +38,9 @@ jobs:
       - name: Build website
         run: npm run build
 
+      - name: Validate Cloudflare static asset payload
+        run: node scripts/verify-cloudflare-deploy.js
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
