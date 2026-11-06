@@ -1,64 +1,60 @@
-# Tamanna AI Deployment Guide
+# Tamanna AI — Domain and Deployment Configuration
 
 Owner: HM INSAN ALI
 
-## Deployment Workflows
+## Canonical hostname
 
-- `.github/workflows/deploy.yml`
-  validates deployment configuration.
-- `.github/workflows/pages.yml`
-  publishes the static website to GitHub Pages.
-- `Main.py` runs the Python/FastAPI backend.
-- `CNAME` identifies the configured custom domain.
+The only canonical website hostname configured in this repository is:
 
-## GitHub Pages Setup
+`https://www.bd-king-r7.com`
 
-1. Open the GitHub repository.
-2. Go to Settings → Pages.
-3. Select GitHub Actions as the source.
-4. Open the Actions tab.
-5. Check the latest Pages workflow run.
+The root/apex hostname `bd-king-r7.com` is not the canonical host. If you want it to work, configure a Cloudflare Redirect Rule to send all requests to `https://www.bd-king-r7.com` while preserving the path and query string. Do not create a second origin for the apex hostname.
 
-A successful workflow is required before confirming
-that the static website has been published.
+## Choose one production host
 
-## Custom Domain
+Production static hosting is configured for **Cloudflare Workers Static Assets**:
 
-The CNAME file must contain:
+- Git branch: `main`
+- Build command: `npm run check:cloudflare`
+- Deploy command: `npx wrangler deploy --config wrangler.jsonc`
+- Static assets directory: `./dist`
+- Worker name: `titamanna`
 
-    www.bd-king-r7.com
+Attach `www.bd-king-r7.com` to the Worker as a Custom Domain in Cloudflare. The Cloudflare zone must be Active, and the DNS record must be created/managed by Cloudflare. Do not point the same hostname simultaneously at GitHub Pages and the Worker.
 
-Before modifying DNS records, verify domain ownership
-and access to the domain's DNS settings.
+The GitHub Actions workflow `.github/workflows/pages.yml` is now validation-only. It no longer publishes a competing GitHub Pages site.
 
-Configure the DNS records recommended by GitHub Pages.
-Do not overwrite existing records without checking them.
+## DNS checklist in Cloudflare
 
-## HTTPS and TLS
+1. Confirm you own/control the registration for `bd-king-r7.com`.
+2. Confirm the registrar delegates the domain to the exact Cloudflare nameservers assigned to your zone.
+3. Cloudflare Dashboard → Websites → `bd-king-r7.com`: zone status must be **Active**, not Pending or Finish setup.
+4. Workers & Pages → `titamanna` → Settings → Domains & Routes: add `www.bd-king-r7.com` as a Custom Domain.
+5. For the apex redirect, create a Redirect Rule from `bd-king-r7.com/*` to `https://www.bd-king-r7.com/$1`, preserving query strings. Verify the rule syntax in the dashboard before enabling.
+6. Do not add guessed A/AAAA IP addresses. For a Worker Custom Domain, let Cloudflare create the required DNS mapping.
+7. If DNSSEC is enabled at the registrar, ensure the DS record matches Cloudflare's DNSSEC settings. A stale DS record can make the whole domain fail resolution.
 
-1. Open Settings → Pages.
-2. Check the custom domain status.
-3. Wait for certificate provisioning if necessary.
-4. Enable Enforce HTTPS when available.
-5. Visit https://www.bd-king-r7.com and verify the
-   browser reports a valid certificate.
+## HTTPS
 
-## FastAPI Backend
+- Use Cloudflare SSL/TLS mode **Full (strict)** when the origin/backend has a valid certificate. A Worker Custom Domain is served by Cloudflare's edge.
+- Enable HTTPS redirects and HSTS only after HTTPS is verified.
+- Confirm the certificate covers `www.bd-king-r7.com`.
+- Do not disable certificate verification to work around TLS errors.
 
-GitHub Pages only hosts static files. It does not
-execute Main.py or run FastAPI API endpoints.
+## Important: frontend and backend are separate
 
-Host the backend on a Python-capable server and
-configure the frontend to use that backend's HTTPS URL.
+The Cloudflare static asset Worker serves the files in `dist/`. It does not execute `Main.py`, FastAPI, or the Python AI backend. The current browser frontend calls the relative endpoint `/api/chat`; this will not work on a static-only Worker unless an API route/backend is separately deployed and routed.
 
-Never commit API keys, private keys, access tokens,
-or a real `.env` file to the repository.
+Before announcing the AI chat as live, deploy the Python backend to a supported server/service and configure a secure Cloudflare route or Worker proxy for `/api/*`. Keep API keys and session secrets in server/Cloudflare secrets, never in Git. Set exact allowed CORS origins and secure cookies for `https://www.bd-king-r7.com`.
 
-## Troubleshooting
+## Read-only audit
 
-- Check the Actions tab for workflow errors.
-- Verify Settings → Pages and deployment permissions.
-- Verify DNS records and the CNAME file.
-- Verify HTTPS after the certificate is issued.
-- If the homepage loads but chat fails, check whether
-  the FastAPI backend is deployed and configured.
+On Termux, iSH, Linux, or macOS with Bash and curl (dig and openssl recommended):
+
+```sh
+bash scripts/domain-audit.sh
+```
+
+The script checks apex and www DNS, HTTP/HTTPS responses, redirects, TLS verification, and the repository CNAME. It does not change DNS or push code.
+
+A repository check cannot confirm registrar ownership, Cloudflare account zone status, custom-domain attachment, DNS propagation from all resolvers, or live API readiness. Those must be verified in the relevant account and from the deployed service.
