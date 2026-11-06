@@ -1,10 +1,9 @@
-/* Tamanna AI application settings — client preferences only.
-   Authentication is intentionally not simulated in the browser. */
+/* Tamanna AI settings: validated local preferences + authenticated account sync. */
 (() => {
   "use strict";
 
   const STORAGE_KEY = "tamanna.app.preferences.v1";
-  const defaults = {
+  const defaults = Object.freeze({
     theme: "dark",
     accent: "purple",
     language: "bn",
@@ -12,19 +11,37 @@
     chatHistory: true,
     notifications: false,
     compactMode: false
+  });
+  const choices = {
+    theme: ["dark", "light"],
+    accent: ["purple", "blue", "teal"],
+    language: ["bn", "en", "hi", "ar"],
+    fontSize: ["small", "medium", "large"]
   };
+  const $ = (id) => document.getElementById(id);
 
-  const readPreferences = () => {
+  function normalizePreferences(value) {
+    const clean = { ...defaults };
+    if (!value || typeof value !== "object" || Array.isArray(value)) return clean;
+    for (const key of Object.keys(choices)) {
+      if (choices[key].includes(value[key])) clean[key] = value[key];
+    }
+    for (const key of ["chatHistory", "notifications", "compactMode"]) {
+      if (typeof value[key] === "boolean") clean[key] = value[key];
+    }
+    return clean;
+  }
+
+  function readPreferences() {
     try {
-      const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      return { ...defaults, ...(value && typeof value === "object" ? value : {}) };
+      return normalizePreferences(JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"));
     } catch {
       return { ...defaults };
     }
-  };
+  }
 
   let preferences = readPreferences();
-  const $ = (id) => document.getElementById(id);
+  let saveQueue = Promise.resolve();
   const panel = $("settingsPanel");
   const backdrop = $("settingsBackdrop");
   const openButton = $("openSettings");
@@ -39,39 +56,65 @@
     document.body.classList.toggle("compact-chat", preferences.compactMode);
   }
 
-  async function savePreferences() {
+  function syncControls() {
+    document.querySelectorAll("[data-setting]").forEach((control) => {
+      const key = control.dataset.setting;
+      if (!(key in preferences)) return;
+      if (control.type === "checkbox") control.checked = preferences[key];
+      else control.value = preferences[key];
+    });
+  }
+
+  function updateAccountStatus() {
+    const target = $("settingsAccountStatus");
+    if (!target) return;
+    const user = window.TamannaAuth?.getUser();
+    target.textContent = user
+      ? "লগইন করা আছে: " + user.name + " (" + user.email + ")"
+      : "আপনি এখনো লগইন করেননি। অ্যাকাউন্ট sync ও chat ব্যবহার করতে লগইন করুন।";
+  }
+
+  function savePreferences() {
+    const snapshot = { ...preferences };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
-      applyPreferences();
-      if (window.TamannaAuth?.getUser()) {
-        await window.TamannaAuth.api("/preferences", {
-          method: "PUT",
-          body: JSON.stringify({ preferences })
-        });
-        if (status) status.textContent = "সেটিংস অ্যাকাউন্টে সংরক্ষিত হয়েছে";
-      } else if (status) {
-        status.textContent = "এই ডিভাইসে সংরক্ষিত হয়েছে। অ্যাকাউন্টে লগইন করলে cloud sync হবে।";
-      }
-    } catch (error) {
-      if (status) status.textContent = "সেটিংস সংরক্ষণে সমস্যা: " + error.message;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    } catch {
+      if (status) status.textContent = "এই ডিভাইসে সেটিংস সংরক্ষণ করা যায়নি (storage unavailable)।";
+      return;
     }
+    applyPreferences();
+
+    const user = window.TamannaAuth?.getUser();
+    if (!user) {
+      if (status) status.textContent = "এই ডিভাইসে সংরক্ষিত হয়েছে। লগইন করলে অ্যাকাউন্টে sync হবে।";
+      return;
+    }
+
+    saveQueue = saveQueue.catch(() => {}).then(async () => {
+      await window.TamannaAuth.api("/preferences", {
+        method: "PUT",
+        body: JSON.stringify({ preferences: snapshot })
+      });
+      if (status) status.textContent = "সেটিংস এই ডিভাইস ও অ্যাকাউন্টে সংরক্ষিত হয়েছে।";
+    }).catch((error) => {
+      if (status) status.textContent = "ডিভাইসে সংরক্ষিত; cloud sync ব্যর্থ: " + error.message;
+    });
   }
 
   async function loadAccountPreferences() {
+    updateAccountStatus();
     if (!window.TamannaAuth?.getUser()) return;
     try {
       const result = await window.TamannaAuth.api("/preferences");
-      preferences = { ...preferences, ...result.preferences };
+      preferences = normalizePreferences(result.preferences);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
       syncControls();
       applyPreferences();
+      if (status) status.textContent = "অ্যাকাউন্টের সেটিংস sync হয়েছে।";
     } catch (error) {
-      if (status) status.textContent = "অ্যাকাউন্টের সেটিংস লোড করা যায়নি: " + error.message;
+      if (status) status.textContent = "অ্যাকাউন্টের সেটিংস লোড হয়নি: " + error.message;
     }
   }
-
-  window.addEventListener("tamanna:authenticated", loadAccountPreferences);
-
 
   function openSettings() {
     if (!panel || !backdrop) return;
@@ -79,6 +122,7 @@
     backdrop.hidden = false;
     document.body.classList.add("settings-open");
     closeButton?.focus();
+    updateAccountStatus();
   }
 
   function closeSettings() {
@@ -87,15 +131,6 @@
     backdrop.hidden = true;
     document.body.classList.remove("settings-open");
     openButton?.focus();
-  }
-
-  function syncControls() {
-    document.querySelectorAll("[data-setting]").forEach((control) => {
-      const key = control.dataset.setting;
-      if (!(key in preferences)) return;
-      if (control.type === "checkbox") control.checked = Boolean(preferences[key]);
-      else control.value = String(preferences[key]);
-    });
   }
 
   openButton?.addEventListener("click", openSettings);
@@ -109,7 +144,10 @@
     const control = event.target.closest("[data-setting]");
     if (!control) return;
     const key = control.dataset.setting;
+    if (!(key in preferences)) return;
     preferences[key] = control.type === "checkbox" ? control.checked : control.value;
+    preferences = normalizePreferences(preferences);
+    syncControls();
     savePreferences();
   });
 
@@ -119,19 +157,39 @@
     savePreferences();
   });
 
-  $("clearLocalChat")?.addEventListener("click", () => {
-    if (!window.confirm("এই ব্রাউজারে সংরক্ষিত চ্যাট মুছতে চান? সার্ভারের chat_history.json এতে মুছবে না।")) return;
-    const box = $("chatBox");
-    if (box) box.replaceChildren();
-    if (status) status.textContent = "বর্তমান স্ক্রিনের চ্যাট পরিষ্কার হয়েছে";
+  $("manageAccountButton")?.addEventListener("click", () => {
+    $("openAuth")?.click();
   });
 
-  applyPreferences();
-  syncControls();
+  $("clearLocalChat")?.addEventListener("click", () => {
+    if (!window.confirm("শুধু বর্তমান স্ক্রিনের কথোপকথন পরিষ্কার করবেন? সার্ভারে সংরক্ষিত ইতিহাস অক্ষত থাকবে।")) return;
+    const box = $("chatBox");
+    if (box) {
+      box.replaceChildren();
+      const message = document.createElement("div");
+      message.className = "message ai-message";
+      const name = document.createElement("div");
+      name.className = "message-name";
+      name.textContent = "Tamanna AI";
+      const body = document.createElement("div");
+      body.className = "message-text";
+      body.textContent = "স্ক্রিন পরিষ্কার করা হয়েছে। নতুন কথোপকথন শুরু করুন।";
+      message.append(name, body);
+      box.append(message);
+    }
+    if (status) status.textContent = "বর্তমান স্ক্রিন পরিষ্কার হয়েছে; সার্ভার history মুছে যায়নি।";
+  });
+
+  window.addEventListener("tamanna:authenticated", loadAccountPreferences);
   window.addEventListener("tamanna:loggedout", () => {
     preferences = readPreferences();
     syncControls();
     applyPreferences();
+    updateAccountStatus();
   });
-  window.addEventListener("tamanna:authenticated", loadAccountPreferences);
+
+  applyPreferences();
+  syncControls();
+  updateAccountStatus();
+  if (window.TamannaAuth?.getUser()) loadAccountPreferences();
 })();
