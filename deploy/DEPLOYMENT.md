@@ -41,6 +41,19 @@ The GitHub Actions workflow `.github/workflows/pages.yml` is now validation-only
 - Confirm the certificate covers `www.bd-king-r7.com`.
 - Do not disable certificate verification to work around TLS errors.
 
+## Backend hosting is not decided yet
+
+The repository intentionally keeps backend hosting provider-neutral until a host,
+plan, database, and persistent-storage strategy are selected. Review
+[`BACKEND_HOSTING_PLAN.md`](../BACKEND_HOSTING_PLAN.md) before deployment.
+
+The root `Dockerfile` and `run_server.py` are the portable baseline for the
+existing FastAPI application. The separate `cloudflare/backend/` Python Worker
+is an optional Cloudflare-native API prototype; it does not run the full
+`Main.py` application and must not be treated as the production backend until
+its runtime, Gemini outbound requests, D1 persistence, and migration behavior
+have been tested.
+
 ## Important: frontend and backend are separate
 
 The Cloudflare static asset Worker serves the files in `dist/`. It does not execute `Main.py`, FastAPI, or the Python AI backend. The current browser frontend calls the relative endpoint `/api/chat`; this will not work on a static-only Worker unless an API route/backend is separately deployed and routed.
