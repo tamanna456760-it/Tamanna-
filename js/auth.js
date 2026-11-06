@@ -76,6 +76,27 @@
       showStatus("প্রোফাইল আপডেট হয়েছে।");
     } catch (error) { showStatus(error.message, true); }
   });
+  $("changePasswordForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const currentPassword = $("currentPassword").value;
+    const newPassword = $("newPassword").value;
+    if (newPassword.length < 12) {
+      showStatus("নতুন পাসওয়ার্ড কমপক্ষে ১২ অক্ষরের হতে হবে।", true);
+      return;
+    }
+    try {
+      await api("/change-password", {
+        method: "POST",
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+      });
+      $("changePasswordForm").reset();
+      renderUser(null);
+      window.dispatchEvent(new Event("tamanna:loggedout"));
+      showStatus("পাসওয়ার্ড পরিবর্তন হয়েছে। নিরাপত্তার জন্য সব সেশন বন্ধ করা হয়েছে—নতুন পাসওয়ার্ড দিয়ে আবার লগইন করুন।");
+    } catch (error) {
+      showStatus(error.message, true);
+    }
+  });
   $("logoutButton").addEventListener("click", async () => {
     try {
       await api("/logout", {method:"POST",body:"{}"});
