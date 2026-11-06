@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11172b">
+  <title>Tamanna AI — Admin Dashboard</title>
+  <link rel="icon" href="/assets/tamanna-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <header class="admin-topbar">
+    <a class="admin-brand" href="/"><img src="/assets/tamanna-logo.svg" alt="Tamanna AI TI Logo"><span><strong>Tamanna AI</strong><small>ADMIN CONTROL CENTER</small></span></a>
+    <div class="top-actions"><span id="adminIdentity">Checking access…</span><a class="top-link" href="/">Open User Chat</a></div>
+  </header>
+  <main class="admin-main">
+    <section class="welcome"><div><p class="eyebrow">SYSTEM OVERVIEW</p><h1>Admin Dashboard</h1><p>Manage and monitor your Tamanna AI service.</p></div><span id="systemStatus" class="status-pill">Checking…</span></section>
+    <section id="accessState" class="access-state" role="status" aria-live="polite">Verifying administrator permissions…</section>
+    <section id="adminContent" hidden>
+      <div class="stats-grid">
+        <article class="stat-card"><span>Backend Status</span><strong id="backendStatus">—</strong><small>FastAPI service</small></article>
+        <article class="stat-card"><span>AI Provider</span><strong id="modelProvider">—</strong><small>Configured model provider</small></article>
+        <article class="stat-card"><span>Environment</span><strong id="environment">—</strong><small>Runtime configuration</small></article>
+        <article class="stat-card"><span>Database</span><strong id="database">—</strong><small>Configured storage</small></article>
+      </div>
+      <div class="admin-grid">
+        <section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">CONTROL CENTER</p><h2>System tools</h2></div><span class="panel-icon">✦</span></div><div class="tool-list">
+          <div class="tool-row"><span class="tool-icon">♙</span><div><strong>User management</strong><small>Account administration is not exposed until a protected user-management API is implemented.</small></div><span class="tool-state">Not enabled</span></div>
+          <div class="tool-row"><span class="tool-icon">◈</span><div><strong>Security & access</strong><small>Administrator access is checked by the FastAPI backend.</small></div><span class="tool-state enabled">Protected</span></div>
+          <div class="tool-row"><span class="tool-icon">⌁</span><div><strong>Memory & conversations</strong><small>Conversation storage remains in the existing backend database.</small></div><span class="tool-state">Existing service</span></div>
+          <div class="tool-row"><span class="tool-icon">⚙</span><div><strong>Application settings</strong><small>Runtime settings are managed through private server configuration.</small></div><span class="tool-state">Server-side</span></div>
+        </div></section>
+        <section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">ADMIN ACCOUNT</p><h2>Signed in as</h2></div></div><p id="adminName" class="admin-name">—</p><p id="adminEmail" class="admin-email">—</p><p class="security-note">Admin accounts are allowlisted with the private <code>TAMANNA_ADMIN_EMAIL</code> environment variable. Never set it to a public or shared address.</p><button id="adminLogout" class="logout-button" type="button">Sign out</button></section>
+      </div>
+    </section>
+  </main>
+  <script src="/js/admin.js?v=20261106"></script>
+</body>
+</html>
