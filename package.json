@@ -11,7 +11,9 @@
     "start": "node scripts/serve-static.js dist",
     "check": "node scripts/npm-build-check.js",
     "check:cloudflare": "npm run build && node scripts/verify-cloudflare-deploy.js",
-    "deploy:cloudflare": "npm run check:cloudflare && npx wrangler deploy --config wrangler.jsonc",
+    "deploy": "npx wrangler deploy --config ./wrangler.jsonc",
+    "preview": "npx wrangler dev --config ./wrangler.jsonc",
+    "deploy:cloudflare": "npm run check:cloudflare && npm run deploy",
     "test": "node --test",
     "audit:domain": "bash scripts/domain-audit.sh"
   },
