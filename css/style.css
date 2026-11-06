@@ -219,3 +219,21 @@ button:disabled {
     padding: 12px 14px;
   }
 }
+
+
+/* User-facing ChatGPT-style layout */
+body:has(.user-chat-app){padding:0;background:var(--bg)}
+.user-chat-app{width:100%;min-height:100vh;max-width:none;margin:0;border:0;border-radius:0;background:#0b1020;box-shadow:none}
+.user-chat-app .chat-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px clamp(16px,4vw,44px);background:rgba(13,18,35,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(185,198,235,.12)}
+.brand-lockup{display:flex;align-items:center;gap:12px}.brand-logo{width:42px;height:42px;border-radius:12px}.user-chat-app .chat-header h1{font-size:1.12rem;letter-spacing:.01em}.user-chat-app .chat-header span{font-size:.78rem}
+.header-actions{display:flex;align-items:center;gap:8px}.header-actions button{padding:9px 13px;font-size:.88rem;border:1px solid var(--border);background:#171e35}
+.user-chat-app .chat-box{width:min(100%,850px);flex:1;min-height:calc(100vh - 190px);max-height:none;margin:0 auto;padding:clamp(22px,5vh,56px) 22px 30px;gap:22px}
+.user-chat-app .message{max-width:min(90%,760px);padding:15px 18px;border-radius:18px}.user-chat-app .ai-message{background:transparent;border-color:transparent}.user-chat-app .user-message{background:#28234b;border:1px solid rgba(160,145,255,.18)}
+.user-chat-app .message-name{font-size:.8rem;color:#bcb6ff}.user-chat-app .message-text{font-size:1rem;line-height:1.75}
+.composer-wrap{position:sticky;bottom:0;width:min(100%,850px);margin:0 auto;padding:12px 18px 16px;background:linear-gradient(180deg,rgba(11,16,32,0),#0b1020 18%)}
+.user-chat-app .typing-area{align-items:flex-end;padding:9px 10px 9px 17px;background:#171e35;border:1px solid rgba(185,198,235,.2);border-radius:24px;box-shadow:0 10px 34px rgba(0,0,0,.22)}
+#messageInput{min-height:28px;max-height:180px;resize:vertical;padding:9px 0;background:transparent;border:0;outline:0;font:inherit;line-height:1.5}
+#messageInput:focus{border:0}.user-chat-app .typing-area button{width:42px;height:42px;padding:0;border-radius:50%;font-size:1.4rem;line-height:1}
+.composer-note{text-align:center;color:#7783a3;font-size:.72rem;margin:8px 0 0}
+.settings-panel{z-index:30}.settings-backdrop{z-index:25}
+@media(max-width:600px){body:has(.user-chat-app){padding:0}.user-chat-app .chat-header{padding:12px}.brand-logo{width:36px;height:36px}.header-actions{gap:5px}.header-actions button{padding:8px 9px;font-size:.76rem}.user-chat-app .chat-box{min-height:calc(100vh - 175px);padding:20px 12px}.composer-wrap{padding:8px 10px 12px}.user-chat-app .message{max-width:96%;padding:12px 13px}}
