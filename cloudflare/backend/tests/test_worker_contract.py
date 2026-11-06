@@ -42,7 +42,7 @@ def test_d1_schema_creates_expected_tables():
             "SELECT name FROM sqlite_master WHERE type='table'"
         )
     }
-    assert {"users", "sessions", "preferences", "messages", "auth_attempts"} <= names
+    assert {"users", "sessions", "preferences", "messages", "auth_attempts", "chat_requests"} <= names
     connection.close()
 
 
