@@ -66,6 +66,8 @@ def test_import_handles_utf8_character_split_across_read_blocks(tmp_path):
     assert result["imported"] == 1
     found = search_knowledge("বাংলা", database=db)
     assert found and "বাংলা" in found[0]["content"]
+
+
 def test_duplicate_fingerprints_are_scoped_per_user(tmp_path):
     path = tmp_path / "shared.txt"
     path.write_text("Private knowledge must remain tenant isolated.", encoding="utf-8")
@@ -82,3 +84,13 @@ def test_duplicate_fingerprints_are_scoped_per_user(tmp_path):
     assert second["imported"] == 1
     assert search_knowledge("tenant isolated", database=db, user_id=first_user)
     assert search_knowledge("tenant isolated", database=db, user_id=second_user)
+
+def test_import_rejects_invalid_utf8_without_persisting(tmp_path):
+    path = tmp_path / "invalid.txt"
+    path.write_bytes(b"valid prefix\xffinvalid utf8")
+    db = Database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
+
+    with pytest.raises(UnicodeDecodeError):
+        import_knowledge_file(path, database=db)
+
+    assert search_knowledge("valid prefix", database=db) == []
