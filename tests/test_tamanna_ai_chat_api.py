@@ -269,6 +269,26 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(b'"completed": 50', body)
         self.assertIn(b'"done": true', body)
 
+    async def test_model_preflight_reports_conservative_ram_estimate(self):
+        class ResourceProvider:
+            name = "ollama"
+            async def list_model_details(self):
+                return [{"name": "qwen2.5:7b", "size_bytes": 2 * 1024 ** 3}]
+        host = {"memory": {"total_bytes": 16 * 1024 ** 3, "used_bytes": 2 * 1024 ** 3}}
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user", return_value={
+                "id": 1, "email": "tamanna456760@gmail.com"
+            }
+        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=ResourceProvider()), patch(
+            "tamanna_ai.api.routes.collect_system_metrics", new=AsyncMock(return_value=host)
+        ):
+            result = await model_preflight(
+                ModelSelectRequest(model="qwen2.5:7b"), request=object(), token="admin"
+            )
+        self.assertEqual(result["status"], "likely_fit")
+        self.assertEqual(result["estimated_memory_bytes"], 4 * 1024 ** 3)
+        self.assertFalse(result["selection_loads_model"])
+
     async def test_select_model_persists_only_an_installed_local_model(self):
         manager = FakeModelManager()
         with patch("tamanna_ai.api.routes.check_origin"), patch(
