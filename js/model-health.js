@@ -297,6 +297,42 @@
     return size.toFixed(unit >= 3 ? 2 : 1) + " " + units[unit];
   }
 
+  function renderResourceAdvice(metrics) {
+    const list = $("resourceAdviceList");
+    if (!list) return;
+    list.replaceChildren();
+    const suggestions = [];
+    const cpu = metrics.cpu || {};
+    const memory = metrics.memory || {};
+    const disk = metrics.disk || {};
+    const gpu = metrics.gpu || {};
+    if (Number.isFinite(cpu.usage_percent)) {
+      if (cpu.usage_percent >= 90) suggestions.push("CPU খুব ব্যস্ত (" + cpu.usage_percent + "%): একসঙ্গে চলা inference/job কমান এবং দীর্ঘ কাজ queue-তে চালান।");
+      else if (cpu.usage_percent >= 75) suggestions.push("CPU load উঁচু (" + cpu.usage_percent + "%): concurrent chat request সীমিত রাখুন এবং benchmark idle সময়ে চালান।");
+    }
+    if (Number.isFinite(memory.usage_percent)) {
+      if (memory.usage_percent >= 90) suggestions.push("RAM চাপের মধ্যে (" + memory.usage_percent + "%): কম parameter-এর quantized model বিবেচনা করুন এবং অপ্রয়োজনীয় process বন্ধ করুন।");
+      else if (memory.usage_percent >= 80) suggestions.push("RAM ব্যবহার বেশি (" + memory.usage_percent + "%): model context length ও parallel request কমিয়ে পরীক্ষা করুন।");
+    }
+    if (Number.isFinite(disk.usage_percent)) {
+      if (disk.usage_percent >= 95) suggestions.push("Disk প্রায় পূর্ণ (" + disk.usage_percent + "%): backup যাচাই করে পুরোনো log/cache পরিষ্কার করার পরিকল্পনা করুন; model data না বুঝে মুছবেন না।");
+      else if (disk.usage_percent >= 85) suggestions.push("Disk usage বাড়ছে (" + disk.usage_percent + "%): model storage, logs ও backup-এর জায়গা পর্যবেক্ষণ করুন।");
+    }
+    if (gpu.available && Number.isFinite(gpu.utilization_percent) && gpu.utilization_percent >= 95) {
+      suggestions.push("NVIDIA GPU utilization খুব বেশি (" + gpu.utilization_percent + "%): request queue ও batch size পর্যালোচনা করুন।");
+    } else if (!gpu.available) {
+      suggestions.push("NVIDIA GPU telemetry পাওয়া যায়নি: CPU inference হতে পারে ধীর; GPU আছে কি না এবং runtime support আলাদাভাবে যাচাই করুন।");
+    }
+    suggestions.forEach((message) => {
+      const item = document.createElement("li");
+      item.textContent = message;
+      list.append(item);
+    });
+    set("resourceAdviceStatus", suggestions.length
+      ? suggestions.length + "টি optimization suggestion পাওয়া গেছে।"
+      : "বর্তমান metrics-এ নির্ধারিত high-resource threshold অতিক্রম করেনি।");
+  }
+
   async function refreshMetrics() {
     const user = window.TamannaAuth?.getUser();
     if (!user) {
@@ -313,6 +349,7 @@
       const memory = metrics.memory || {};
       const disk = metrics.disk || {};
       const gpu = metrics.gpu || {};
+      renderResourceAdvice(metrics);
       set("metricCpu", Number.isFinite(cpu.usage_percent) ? cpu.usage_percent + "%" : "Unavailable");
       set("metricCpuDetail", (cpu.logical_cores || "—") + " logical CPU core(s)");
       set("metricRam", Number.isFinite(memory.usage_percent) ? memory.usage_percent + "%" : "Unavailable");
