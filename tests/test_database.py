@@ -176,3 +176,10 @@ def test_sqlite_restore_rejects_backup_missing_core_tables(tmp_path):
     with pytest.raises(ValueError, match="conversations, messages"):
         Database.restore_backup_to(incomplete, destination)
     assert not destination.exists()
+
+
+def test_sqlite_backup_rejects_in_memory_database(tmp_path):
+    db = Database("sqlite:///:memory:")
+    with pytest.raises(ValueError, match="file-backed"):
+        db.backup_to(tmp_path / "memory-backup.sqlite3")
+    assert not (tmp_path / "memory-backup.sqlite3").exists()
