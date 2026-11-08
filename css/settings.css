@@ -243,3 +243,8 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .benchmark-bar { height:100%; border-radius:inherit; background:var(--accent, #7c83ff); transition:width .25s ease; }
 .benchmark-history ol { display:grid; gap:7px; padding-left:22px; }
 .benchmark-history li { overflow-wrap:anywhere; color:var(--text); font-size:.82rem; }
+
+.benchmark-regression { display:grid; gap:7px; margin-top:10px; }
+.benchmark-regression h5 { margin:0; color:var(--text); font-size:.92rem; }
+.benchmark-regression ul { display:grid; gap:6px; margin:0; padding-left:20px; }
+.benchmark-regression li { overflow-wrap:anywhere; color:var(--text); font-size:.82rem; }
