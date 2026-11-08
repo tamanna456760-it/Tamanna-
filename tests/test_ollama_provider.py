@@ -59,3 +59,34 @@ class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProviderSelectionTests(unittest.TestCase):
+    def test_local_ollama_is_the_default_and_needs_no_api_key(self):
+        import os
+        from unittest.mock import patch
+        from tamanna_ai.integrations.provider import OllamaProvider, get_model_provider
+
+        with patch.dict(os.environ, {
+            "TAMANNA_MODEL_PROVIDER": "",
+            "TAMANNA_OLLAMA_URL": "http://127.0.0.1:11434",
+            "TAMANNA_OLLAMA_MODEL": "qwen2.5:7b",
+        }, clear=False):
+            os.environ.pop("TAMANNA_MODEL_PROVIDER", None)
+            os.environ.pop("GEMINI_API_KEY", None)
+            os.environ.pop("TAMANNA_MODEL_API_KEY", None)
+            provider = get_model_provider()
+        self.assertIsInstance(provider, OllamaProvider)
+        self.assertEqual(provider.name, "ollama")
+
+    def test_mock_provider_is_test_only(self):
+        import os
+        from unittest.mock import patch
+        from tamanna_ai.integrations.provider import ModelConfigurationError, get_model_provider
+
+        with patch.dict(os.environ, {
+            "TAMANNA_MODEL_PROVIDER": "mock",
+            "TAMANNA_ENV": "production",
+        }):
+            with self.assertRaises(ModelConfigurationError):
+                get_model_provider()
