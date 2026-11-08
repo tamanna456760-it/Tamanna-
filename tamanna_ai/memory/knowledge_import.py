@@ -10,6 +10,7 @@ import hashlib
 import heapq
 import json
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -200,10 +201,28 @@ def search_knowledge(
     limit: int = 5,
 ) -> list[dict[str, str]]:
     """Small dependency-free lexical retrieval; callers must enforce user auth."""
-    terms = {term.lower() for term in re.findall(r"[\w-]{2,}", query) if len(term) < 80}
+    # Python's default \w is not Unicode-letter complete (for example, it
+    # misses Bengali letters). Tokenize by Unicode character categories.
+    tokens: list[str] = []
+    current: list[str] = []
+    for character in query.casefold():
+        category = unicodedata.category(character)
+        if category[0] in {"L", "N"} or character in "_-":
+            current.append(character)
+        elif current:
+            token = "".join(current)
+            if 2 <= len(token) < 80:
+                tokens.append(token)
+            current = []
+    if current:
+        token = "".join(current)
+        if 2 <= len(token) < 80:
+            tokens.append(token)
+    terms = set(tokens)
     if not terms:
         return []
     limit = max(1, min(int(limit), 20))
+    database.init()
     # Restrict SQL rows to one owner (or anonymous imports), then stream in batches.
     # A bounded min-heap keeps top-k ranking O(n log k), avoiding a full sort per hit.
     ranked: list[tuple[int, Any, int, str, dict[str, Any]]] = []
