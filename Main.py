@@ -62,17 +62,17 @@ app = FastAPI(
 def initialize_persistence():
     # Report configuration readiness without ever logging credential values.
     session_secret_ready = len(os.getenv("TAMANNA_SESSION_SECRET", "").strip()) >= 32
-    model_provider = os.getenv("TAMANNA_MODEL_PROVIDER", "gemini").strip().lower()
-    model_key_ready = bool(
-        os.getenv("TAMANNA_MODEL_API_KEY", "").strip()
-        or os.getenv("GEMINI_API_KEY", "").strip()
-    )
+    model_provider = os.getenv("TAMANNA_MODEL_PROVIDER", "ollama").strip().lower()
+    ollama_url = os.getenv("TAMANNA_OLLAMA_URL", "http://127.0.0.1:11434").strip()
+    ollama_model = os.getenv("TAMANNA_OLLAMA_MODEL", "qwen2.5:7b").strip()
     if not session_secret_ready:
         print("[CONFIG] WARNING: TAMANNA_SESSION_SECRET is missing or shorter than 32 characters; signup/login will return 503.")
-    if model_provider == "gemini" and not model_key_ready:
-        print("[CONFIG] WARNING: Gemini API key is missing; chat requests will return 503 until configured.")
-    if model_provider not in {"gemini", "mock"}:
-        print("[CONFIG] WARNING: Unsupported TAMANNA_MODEL_PROVIDER; chat requests will be unavailable.")
+    if model_provider == "ollama":
+        print(f"[MODEL] Local inference configured: {ollama_model} at {ollama_url}; runtime availability is checked on request.")
+    elif model_provider == "mock" and os.getenv("TAMANNA_ENV", "").strip().lower() == "test":
+        print("[MODEL] Deterministic test provider enabled.")
+    else:
+        print("[CONFIG] WARNING: Unsupported TAMANNA_MODEL_PROVIDER; use ollama (local) or mock in tests.")
     print("[CONFIG] Environment values loaded from process environment / private .env; secret values are never logged.")
 
     init_database()
