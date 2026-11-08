@@ -278,3 +278,70 @@ def test_auth_rate_limit_blocks_eleventh_attempt_and_is_action_scoped(monkeypatc
 
     # Signup has its own action bucket and must not inherit login failures.
     auth.rate_limit_auth(request, "signup")
+
+
+def _create_auth_test_user(monkeypatch, tmp_path, filename="sessions.sqlite3"):
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
+    monkeypatch.setattr(auth, "DB", tmp_path / filename)
+    auth.init_db()
+    with auth.db() as conn:
+        cursor = conn.execute(
+            "INSERT INTO users(email,name,password_hash,created_at,updated_at) VALUES(?,?,?,?,?)",
+            ("session-user@example.test", "Session User",
+             auth.password_hash("correct horse battery"), auth.now(), auth.now()),
+        )
+        user_id = cursor.lastrowid
+        conn.execute(
+            "INSERT INTO preferences(user_id,data,updated_at) VALUES(?,?,?)",
+            (user_id, "{}", auth.now()),
+        )
+    return user_id
+
+
+def test_logout_revokes_server_side_session_and_clears_cookie(monkeypatch, tmp_path):
+    from fastapi import Response
+
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "logout.sqlite3")
+    token = auth.issue_session(user_id)
+    assert auth.current_user(token)["id"] == user_id
+
+    response = Response()
+    result = auth.logout(
+        request=SimpleNamespace(headers={}),
+        response=response,
+        token=token,
+    )
+
+    assert result == {"ok": True}
+    assert auth.current_user(token) is None
+    assert "tamanna_session" in response.headers.get("set-cookie", "")
+
+
+def test_password_change_revokes_all_existing_sessions(monkeypatch, tmp_path):
+    from fastapi import Response
+    from tamanna_ai.authentication.router import ChangePassword, change_password
+
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "password-change.sqlite3")
+    first_token = auth.issue_session(user_id)
+    second_token = auth.issue_session(user_id)
+    assert auth.current_user(first_token)
+    assert auth.current_user(second_token)
+
+    result = change_password(
+        ChangePassword(
+            current_password="correct horse battery",
+            new_password="a much stronger replacement password",
+        ),
+        request=SimpleNamespace(headers={}),
+        token=first_token,
+    )
+
+    assert result["ok"] is True
+    assert auth.current_user(first_token) is None
+    assert auth.current_user(second_token) is None
+    with auth.db() as conn:
+        stored = conn.execute(
+            "SELECT password_hash FROM users WHERE id=?", (user_id,)
+        ).fetchone()["password_hash"]
+    assert auth.password_ok("a much stronger replacement password", stored)
+    assert not auth.password_ok("correct horse battery", stored)
