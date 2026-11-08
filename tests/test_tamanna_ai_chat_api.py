@@ -109,6 +109,11 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         class BenchmarkProvider:
             name = "ollama"
 
+            client = type("ClientInfo", (), {"model": "qwen2.5:7b"})()
+
+            async def list_models(self):
+                return ["qwen2.5:7b"]
+
             async def benchmark(self):
                 return expected
 
@@ -117,7 +122,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             return_value={"id": 1, "email": "Tamanna456760@gmail.com"},
         ), patch("tamanna_ai.api.routes.get_model_provider", return_value=BenchmarkProvider()):
             result = await model_benchmark(request=object(), token="admin-session")
-        self.assertEqual(result, {"ok": True, "benchmark": expected})
+        self.assertEqual(result, {"ok": True, "benchmark": expected, "scope": "single_local_inference"})
 
     async def test_model_benchmark_denies_non_admin(self):
         with patch("tamanna_ai.api.routes.check_origin"), patch(
