@@ -27,7 +27,8 @@ class FakeAsyncClient:
 class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_sends_chat_to_local_runtime_without_api_key(self):
         FakeAsyncClient.response = httpx.Response(
-            200, json={"message": {"content": "Local model answer"}}
+            200, json={"message": {"content": "Local model answer"}},
+            request=httpx.Request("POST", "http://127.0.0.1:11434/api/chat")
         )
         client = OllamaClient(
             base_url="http://127.0.0.1:11434",
@@ -51,7 +52,10 @@ class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
             OllamaClient(base_url="file:///etc/passwd")
 
     async def test_reports_invalid_response(self):
-        FakeAsyncClient.response = httpx.Response(200, json={"unexpected": True})
+        FakeAsyncClient.response = httpx.Response(
+            200, json={"unexpected": True},
+            request=httpx.Request("POST", "http://127.0.0.1:11434/api/chat"),
+        )
         with patch("tamanna_ai.integrations.ollama.httpx.AsyncClient", FakeAsyncClient):
             with self.assertRaises(OllamaError):
                 await OllamaClient().generate("Hello")
