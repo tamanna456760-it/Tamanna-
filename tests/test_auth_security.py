@@ -376,3 +376,35 @@ def test_auth_user_foreign_keys_cascade_preferences_and_sessions(monkeypatch, tm
             "SELECT COUNT(*) FROM sessions WHERE user_id=?", (user_id,)
         ).fetchone()[0] == 0
         assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
+
+
+def test_model_admin_controls_fail_closed_without_configured_admin(monkeypatch):
+    from tamanna_ai.api import routes as api_routes
+
+    monkeypatch.delenv("TAMANNA_ADMIN_EMAIL", raising=False)
+    monkeypatch.setattr(api_routes, "require_user", lambda token: {
+        "email": "tamanna456760@gmail.com", "id": 1,
+    })
+    with pytest.raises(Exception) as exc:
+        api_routes._require_model_admin("session")
+    assert getattr(exc.value, "status_code", None) == 503
+
+
+def test_model_admin_controls_support_configured_admin_allowlist(monkeypatch):
+    from tamanna_ai.api import routes as api_routes
+
+    monkeypatch.setenv(
+        "TAMANNA_ADMIN_EMAIL",
+        "first-admin@example.test, second-admin@example.test",
+    )
+    monkeypatch.setattr(api_routes, "require_user", lambda token: {
+        "email": " SECOND-ADMIN@example.test ", "id": 2,
+    })
+    assert api_routes._require_model_admin("session")["id"] == 2
+
+    monkeypatch.setattr(api_routes, "require_user", lambda token: {
+        "email": "outsider@example.test", "id": 3,
+    })
+    with pytest.raises(Exception) as exc:
+        api_routes._require_model_admin("session")
+    assert getattr(exc.value, "status_code", None) == 403
