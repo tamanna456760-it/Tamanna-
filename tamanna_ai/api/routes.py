@@ -8,7 +8,7 @@ from fastapi import APIRouter, Cookie, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from tamanna_ai.authentication.router import COOKIE, check_origin, require_user
-from tamanna_ai.knowledge.vector_store import EmbeddingError, VectorKnowledgeStore
+from tamanna_ai.knowledge.vector_store import (\n    EmbeddingError, OllamaEmbeddingProvider, VectorKnowledgeStore, get_default_embedder,\n)
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -74,12 +74,36 @@ async def model_status():
     selected_model_installed = (
         selected_model in models if selected_model and models else False
     )
+    try:
+        embedding_provider = get_default_embedder()
+        if isinstance(embedding_provider, OllamaEmbeddingProvider):
+            embedding_status = {
+                "provider": "ollama",
+                "model": embedding_provider.model,
+                "configured": True,
+                "installed": embedding_provider.model in models,
+            }
+        else:
+            embedding_status = {
+                "provider": "local-feature",
+                "model": None,
+                "configured": True,
+                "installed": True,
+            }
+    except (ValueError, EmbeddingError):
+        embedding_status = {
+            "provider": "unknown",
+            "model": None,
+            "configured": False,
+            "installed": False,
+        }
     return {
         "status": "ready" if models else "no_models_installed",
         "provider": provider.name,
         "selected_model": selected_model,
         "selected_model_installed": selected_model_installed,
         "installed_models": models,
+        "embedding": embedding_status,
     }
 
 
