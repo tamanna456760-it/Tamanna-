@@ -25,12 +25,17 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_chat_uses_configured_local_provider(self):
         provider = FakeProvider()
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \
+             patch("tamanna_ai.api.routes.require_user", return_value={"id": 42}), \
              patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             result = await chat(ChatRequest(prompt="Explain photosynthesis"))
         self.assertEqual(result.response, "Local model response")
         self.assertEqual(result.provider, "ollama")
         provider.generate.assert_awaited_once_with("Explain photosynthesis")
-        store.return_value.search.assert_called_once_with(
+        self.assertEqual(store.return_value.search.call_count, 2)
+        store.return_value.search.assert_any_call(
+            "Explain photosynthesis", owner_id="user:42", limit=4
+        )
+        store.return_value.search.assert_any_call(
             "Explain photosynthesis", owner_id="tamanna-public", limit=4
         )
 
@@ -62,6 +67,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_chat_includes_retrieved_context_as_untrusted_reference(self):
         provider = FakeProvider()
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \
+             patch("tamanna_ai.api.routes.require_user", return_value={"id": 42}), \
              patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             store.return_value.search.return_value = [{
                 "source": "guide.md",
@@ -78,6 +84,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_chat_can_disable_knowledge_retrieval(self):
         provider = FakeProvider()
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \
+             patch("tamanna_ai.api.routes.require_user", return_value={"id": 42}), \
              patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             await chat(ChatRequest(prompt="Hello", use_knowledge=False))
         store.assert_not_called()
