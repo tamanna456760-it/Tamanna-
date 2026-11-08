@@ -347,6 +347,96 @@ def test_password_change_revokes_all_existing_sessions(monkeypatch, tmp_path):
     assert not auth.password_ok("correct horse battery", stored)
 
 
+
+def test_profile_and_preferences_are_isolated_between_accounts(monkeypatch, tmp_path):
+    from fastapi import FastAPI
+
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "account-isolation.sqlite3")
+    auth.init_db()
+    user_a = _create_auth_test_user(monkeypatch, tmp_path, "account-isolation.sqlite3")
+    with auth.db() as connection:
+        cursor = connection.execute(
+            "INSERT INTO users(email,name,password_hash,created_at,updated_at) VALUES(?,?,?,?,?)",
+            ("second@example.test", "Second User",
+             auth.password_hash("another correct password"), auth.now(), auth.now()),
+        )
+        user_b = cursor.lastrowid
+        connection.execute(
+            "INSERT INTO preferences(user_id,data,updated_at) VALUES(?,?,?)",
+            (user_b, "{}", auth.now()),
+        )
+
+    app = FastAPI()
+    app.include_router(auth.router)
+    token_a = auth.issue_session(user_a)
+    token_b = auth.issue_session(user_b)
+    client_a = TestClient(app)
+    client_b = TestClient(app)
+    client_a.cookies.set(auth.COOKIE, token_a)
+    client_b.cookies.set(auth.COOKIE, token_b)
+
+    response = client_a.patch("/api/auth/profile", json={"name": "Updated A"})
+    assert response.status_code == 200
+    response = client_a.put(
+        "/api/auth/preferences",
+        json={"preferences": {"theme": "dark", "language": "bn"}},
+    )
+    assert response.status_code == 200
+
+    assert client_a.get("/api/auth/me").json()["user"]["name"] == "Updated A"
+    assert client_b.get("/api/auth/me").json()["user"]["name"] == "Session User"
+    assert client_a.get("/api/auth/preferences").json()["preferences"] == {
+        "theme": "dark", "language": "bn"
+    }
+    assert client_b.get("/api/auth/preferences").json()["preferences"] == {}
+
+
+def test_password_change_revokes_only_the_current_accounts_sessions(monkeypatch, tmp_path):
+    from fastapi import FastAPI
+
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    user_a = _create_auth_test_user(monkeypatch, tmp_path, "password-isolation.sqlite3")
+    with auth.db() as connection:
+        cursor = connection.execute(
+            "INSERT INTO users(email,name,password_hash,created_at,updated_at) VALUES(?,?,?,?,?)",
+            ("other@example.test", "Other User",
+             auth.password_hash("another correct password"), auth.now(), auth.now()),
+        )
+        user_b = cursor.lastrowid
+        connection.execute(
+            "INSERT INTO preferences(user_id,data,updated_at) VALUES(?,?,?)",
+            (user_b, "{}", auth.now()),
+        )
+    app = FastAPI()
+    app.include_router(auth.router)
+    token_a1, token_a2 = auth.issue_session(user_a), auth.issue_session(user_a)
+    token_b = auth.issue_session(user_b)
+    client_a = TestClient(app)
+    client_b = TestClient(app)
+    client_a.cookies.set(auth.COOKIE, token_a1)
+    client_b.cookies.set(auth.COOKIE, token_b)
+
+    response = client_a.post(
+        "/api/auth/change-password",
+        json={
+            "current_password": "correct horse battery",
+            "new_password": "a much stronger replacement password",
+        },
+    )
+    assert response.status_code == 200
+    assert auth.current_user(token_a1) is None
+    assert auth.current_user(token_a2) is None
+    assert auth.current_user(token_b)["id"] == user_b
+    assert client_b.get("/api/auth/me").status_code == 200
+
+
 def test_auth_schema_initialization_is_idempotent_and_preserves_accounts(monkeypatch, tmp_path):
     user_id = _create_auth_test_user(monkeypatch, tmp_path, "schema-idempotent.sqlite3")
     token = auth.issue_session(user_id)
