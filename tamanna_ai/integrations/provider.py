@@ -33,6 +33,12 @@ class OllamaProvider:
         except OllamaError as exc:
             raise ModelProviderError(str(exc)) from exc
 
+    async def list_model_details(self) -> list[dict]:
+        try:
+            return await self.client.list_model_details()
+        except OllamaError as exc:
+            raise ModelProviderError(str(exc)) from exc
+
     async def list_running_models(self) -> list[dict]:
         try:
             return await self.client.list_running_models()
