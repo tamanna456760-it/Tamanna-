@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
 
 from tamanna_ai.api.routes import (
-    model_resources, model_preflight, ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, model_benchmark, chat, delete_conversation,
+    model_resources, model_recovery, model_preflight, ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, model_benchmark, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, model_benchmark_history, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
@@ -316,6 +316,28 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 )
         self.assertEqual(raised.exception.status_code, 422)
         save.assert_not_called()
+
+    async def test_model_recovery_reports_admin_runtime_diagnostics(self):
+        class RecoveryProvider:
+            name = "ollama"
+            client = type("ClientInfo", (), {"model": "qwen2.5:7b"})()
+            async def list_models(self):
+                return ["qwen2.5:7b"]
+
+        host = {"memory": {"usage_percent": 35}, "disk": {"usage_percent": 40}}
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 1, "email": "tamanna456760@gmail.com"}), patch(
+            "tamanna_ai.api.routes.get_model_provider", return_value=RecoveryProvider()
+        ), patch("tamanna_ai.api.routes.collect_system_metrics", new=AsyncMock(return_value=host)):
+            result = await model_recovery(token="admin-session")
+        self.assertEqual(result["status"], "healthy")
+        self.assertEqual(result["code"], "runtime_available")
+        self.assertFalse(result["automatic_changes"])
+
+    async def test_model_recovery_denies_non_admin(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 2, "email": "member@example.test"}):
+            with self.assertRaises(HTTPException) as raised:
+                await model_recovery(token="member-session")
+        self.assertEqual(raised.exception.status_code, 403)
 
     async def test_model_status_lists_installed_models(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()):
