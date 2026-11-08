@@ -10,6 +10,9 @@ import json
 import math
 import re
 import sqlite3
+import os
+
+import httpx
 from pathlib import Path
 from contextlib import contextmanager
 from typing import Iterator
@@ -72,6 +75,76 @@ class LocalFeatureEmbedder:
             vector = [value / norm for value in vector]
         return vector
 
+class OllamaEmbeddingProvider:
+    """Synchronous embeddings from a locally running Ollama server.
+
+    No hosted API or API key is used. The embedding model must already be
+    installed in the local Ollama runtime (for example: nomic-embed-text).
+    """
+
+    def __init__(
+        self,
+        base_url: str | None = None,
+        model: str | None = None,
+        timeout: float = 45.0,
+    ):
+        self.base_url = (base_url or os.getenv(
+            "TAMANNA_OLLAMA_URL", "http://127.0.0.1:11434"
+        )).strip().rstrip("/")
+        self.model = (model or os.getenv(
+            "TAMANNA_EMBEDDING_MODEL", "nomic-embed-text"
+        )).strip()
+        self.timeout = float(timeout)
+        if not self.model or len(self.model) > 200:
+            raise ValueError("A valid local embedding model name is required")
+        if self.timeout <= 0:
+            raise ValueError("Embedding timeout must be positive")
+
+    def __call__(
+        self, text: str, task_type: str = "RETRIEVAL_DOCUMENT"
+    ) -> list[float]:
+        if task_type not in {"RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"}:
+            raise ValueError("Unsupported embedding task type")
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError("Embedding text cannot be empty")
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(
+                    f"{self.base_url}/api/embed",
+                    json={"model": self.model, "input": text},
+                )
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise EmbeddingError(
+                "Local Ollama embedding failed. Check that Ollama is running "
+                "and the configured embedding model is installed."
+            ) from exc
+        try:
+            data = response.json()
+            vector = data["embeddings"][0]
+            values = [float(value) for value in vector]
+        except (ValueError, KeyError, IndexError, TypeError) as exc:
+            raise EmbeddingError(
+                "Local Ollama returned an invalid embedding response."
+            ) from exc
+        if not values or not all(math.isfinite(value) for value in values):
+            raise EmbeddingError("Local Ollama returned an empty or invalid vector.")
+        norm = math.sqrt(sum(value * value for value in values))
+        if not norm:
+            raise EmbeddingError("Local Ollama returned a zero-length vector.")
+        return [value / norm for value in values]
+
+
+def get_default_embedder():
+    """Select local neural embeddings only when explicitly configured."""
+    provider = os.getenv("TAMANNA_EMBEDDING_PROVIDER", "local-feature").strip().lower()
+    if provider in {"ollama", "ollama-local"}:
+        return OllamaEmbeddingProvider()
+    if provider in {"local-feature", "feature", ""}:
+        return LocalFeatureEmbedder()
+    raise ValueError("Unsupported TAMANNA_EMBEDDING_PROVIDER setting")
+
+
 def chunk_text(text: str, *, max_chars: int = 1200, overlap: int = 150) -> list[str]:
     """Split text into bounded overlapping chunks, preferring paragraph boundaries."""
     if not isinstance(text, str) or not text.strip():
@@ -118,7 +191,7 @@ class VectorKnowledgeStore:
         *,
         max_file_bytes: int = 10 * 1024 * 1024,
     ):
-        self.embedder = embedder or LocalFeatureEmbedder()
+        self.embedder = embedder if embedder is not None else get_default_embedder()
         self.db_path = Path(db_path)
         self.max_file_bytes = max(1024, int(max_file_bytes))
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -290,5 +363,5 @@ class VectorKnowledgeStore:
 
 
 __all__ = [
-    "EmbeddingError", "LocalFeatureEmbedder", "VectorKnowledgeStore", "chunk_text",
+    "EmbeddingError", "LocalFeatureEmbedder", "OllamaEmbeddingProvider",\n    "VectorKnowledgeStore", "chunk_text", "get_default_embedder",
 ]
