@@ -27,13 +27,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate scanner
+      - name: Validate scanner and formatter
         run: |
           test -s scripts/scan.py
-          python -m py_compile scripts/scan.py
+          test -s scripts/ai_debugger.py
+          python -m py_compile scripts/scan.py scripts/ai_debugger.py
+          python -m unittest discover -s tests -p 'test_ai_debugger_offline.py' -v
 
       - name: Run offline static scan
         run: python scripts/scan.py
+
+      - name: Build offline diagnostic summary
+        run: python scripts/ai_debugger.py
 
       - name: Publish scan summary
         if: always()
@@ -45,20 +50,24 @@ jobs:
             echo "This workflow performs local static checks only."
             echo "It does not call OpenAI, Gemini, or any hosted AI API."
             echo
-            if [ -s report.txt ]; then
-              echo '~~~text'
-              cat report.txt
-              echo '~~~'
-            else
-              echo "No report was generated. Check the scanner step."
-            fi
+            for file in report.txt ai_debugger_report.txt; do
+              if [ -s "$file" ]; then
+                echo "### $file"
+                echo '~~~text'
+                cat "$file"
+                echo '~~~'
+                echo
+              fi
+            done
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload static scan report
+      - name: Upload offline scan reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-offline-scan-report
-          path: report.txt
+          name: tamanna-offline-scan-reports
+          path: |
+            report.txt
+            ai_debugger_report.txt
           if-no-files-found: warn
           retention-days: 7
