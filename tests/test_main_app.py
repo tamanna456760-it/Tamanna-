@@ -26,3 +26,36 @@ def test_main_app_imports_and_health_endpoint(monkeypatch, tmp_path):
     assert payload["status"] == "ok"
     assert payload["service"] == "Tamanna AI"
     assert payload["storage"] == "sqlite"
+
+
+def test_safe_tool_execution_requires_authenticated_session(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.test")
+    monkeypatch.setenv("TAMANNA_COOKIE_SECURE", "0")
+    monkeypatch.setenv("TAMANNA_CORS_ORIGINS", "http://testserver")
+
+    import tamanna_ai.authentication.router as auth_router
+
+    monkeypatch.setattr(auth_router, "DB", tmp_path / "tool-auth.sqlite3")
+    import Main
+
+    with TestClient(Main.app) as client:
+        payload = {"name": "not-allow-listed", "arguments": {}}
+        unauthenticated = client.post("/api/tools/execute", json=payload)
+        assert unauthenticated.status_code == 401
+
+        signup = client.post(
+            "/api/auth/signup",
+            json={
+                "email": "member@example.test",
+                "name": "Test Member",
+                "password": "Strong-test-password-123!",
+            },
+        )
+        assert signup.status_code == 201
+
+        authenticated = client.post("/api/tools/execute", json=payload)
+        assert authenticated.status_code == 422
