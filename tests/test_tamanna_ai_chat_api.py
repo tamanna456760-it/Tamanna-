@@ -100,11 +100,11 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             name = "ollama"
 
             async def pull_model(self, model):
-                self.assertEqual(model, "qwen2.5:7b")
+                assert model == "qwen2.5:7b"
                 yield {"status": "pulling", "completed": 50, "total": 100}
 
         with patch("tamanna_ai.api.routes.check_origin"), patch(
-            "tamanna_ai.api.routes.require_user", return_value={"id": 12}
+            "tamanna_ai.api.routes.require_user", return_value={"id": 12, "email": "Tamanna456760@gmail.com"}
         ), patch("tamanna_ai.api.routes.get_model_provider", return_value=PullProvider()):
             response = await pull_model(
                 ModelPullRequest(model="qwen2.5:7b"),
