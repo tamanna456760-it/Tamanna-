@@ -207,7 +207,7 @@ def search_knowledge(
     current: list[str] = []
     for character in query.casefold():
         category = unicodedata.category(character)
-        if category[0] in {"L", "N"} or character in "_-":
+        if category[0] in {"L", "N"} or (category[0] == "M" and current) or character in "_-":
             current.append(character)
         elif current:
             token = "".join(current)
