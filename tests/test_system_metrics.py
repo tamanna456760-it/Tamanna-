@@ -5,6 +5,18 @@ from tamanna_ai.integrations import system_metrics
 
 
 class SystemMetricsTests(unittest.IsolatedAsyncioTestCase):
+    def test_memory_reader_falls_back_when_proc_meminfo_cannot_be_read(self):
+        fake_path = type("UnreadablePath", (), {
+            "exists": lambda self: True,
+            "read_text": lambda self, **kwargs: (_ for _ in ()).throw(OSError("permission denied")),
+        })()
+        with patch.object(system_metrics, "Path", return_value=fake_path), patch.dict(
+            "sys.modules", {"psutil": None}
+        ):
+            total, used = system_metrics._memory_bytes()
+        self.assertIsNone(total)
+        self.assertIsNone(used)
+
     async def test_collects_cpu_memory_disk_and_gpu_metrics(self):
         disk = type("DiskUsage", (), {
             "used": 500, "total": 1000, "free": 500
