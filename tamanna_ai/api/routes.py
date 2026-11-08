@@ -19,6 +19,7 @@ from tamanna_ai.knowledge.vector_store import (
 )
 from tamanna_ai.integrations.model_settings import set_selected_model
 from tamanna_ai.integrations.system_metrics import collect_system_metrics
+from tamanna_ai.integrations.recovery_advisor import build_recovery_report
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -160,6 +161,40 @@ async def model_resources(
         "ok": True, "models": models, "count": len(models),
         "installed_models": installed, "host": host,
     }
+
+
+
+
+@api_router.get("/model/recovery")
+async def model_recovery(
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Return read-only local model diagnostics and safe recovery guidance."""
+    _require_model_admin(token)
+    provider_name = "unknown"
+    selected_model = None
+    installed = []
+    runtime_error = None
+    try:
+        provider = get_model_provider()
+        provider_name = provider.name
+        selected_model = getattr(getattr(provider, "client", None), "model", None)
+        if provider_name != "ollama" or not hasattr(provider, "list_models"):
+            runtime_error = "unsupported_provider"
+        else:
+            installed = await provider.list_models()
+    except ModelConfigurationError:
+        runtime_error = "provider_configuration"
+    except ModelProviderError as exc:
+        runtime_error = "runtime_unreachable" if "Cannot reach" in str(exc) else "runtime_error"
+    host = await collect_system_metrics()
+    return build_recovery_report(
+        provider=provider_name,
+        selected_model=selected_model,
+        installed_models=installed,
+        runtime_error=runtime_error,
+        host_metrics=host,
+    )
 
 
 @api_router.get("/model/status")
