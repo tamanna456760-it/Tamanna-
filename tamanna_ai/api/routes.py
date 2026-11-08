@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Cookie, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from tamanna_ai.authentication.router import COOKIE, check_origin, require_user
@@ -39,6 +40,10 @@ class ChatResponse(BaseModel):
 
 
 class ModelSelectRequest(BaseModel):
+    model: str = Field(min_length=1, max_length=200)
+
+
+class ModelPullRequest(BaseModel):
     model: str = Field(min_length=1, max_length=200)
 
 
@@ -115,6 +120,43 @@ async def model_status():
         "installed_models": models,
         "embedding": embedding_status,
     }
+
+
+@api_router.post("/model/pull")
+async def pull_model(
+    payload: ModelPullRequest,
+    request: Request,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Download a named model only after an authenticated user explicitly requests it."""
+    check_origin(request)
+    require_user(token)
+    model_name = payload.model.strip()
+    if not model_name or len(model_name) > 200:
+        raise HTTPException(status_code=422, detail="Invalid model name.")
+    try:
+        provider = get_model_provider()
+    except ModelConfigurationError as exc:
+        raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
+    if provider.name != "ollama" or not hasattr(provider, "pull_model"):
+        raise HTTPException(
+            status_code=409,
+            detail="Model download is supported only by the local Ollama provider.",
+        )
+
+    async def progress_events():
+        try:
+            async for event in provider.pull_model(model_name):
+                yield json.dumps(event, ensure_ascii=False) + "\n"
+            yield json.dumps({"status": "success", "done": True}, ensure_ascii=False) + "\n"
+        except (ModelProviderError, ValueError) as exc:
+            yield json.dumps({"status": "error", "error": str(exc)[:300]}, ensure_ascii=False) + "\n"
+
+    return StreamingResponse(
+        progress_events(),
+        media_type="application/x-ndjson",
+        headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
+    )
 
 
 @api_router.post("/model/select")
