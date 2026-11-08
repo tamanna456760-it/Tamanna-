@@ -68,19 +68,17 @@ async def model_status():
 
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, token: str | None = Cookie(default=None, alias=COOKIE)):
-    """Generate a reply using only the signed-in user's private corpus and shared references."""
-    user = require_user(token)
-    """Generate a reply with the configured local model provider."""
+    """Generate a reply using the signed-in user's private corpus and shared references."""
     prompt = request.prompt.strip()
     if not prompt:
         raise HTTPException(status_code=422, detail="Prompt cannot be blank.")
+    user = require_user(token)
 
     try:
         provider = get_model_provider()
         model_prompt = prompt
         if request.use_knowledge:
-            # Only the explicitly shared public/system corpus is injected here.
-            # Private user corpora require authenticated user identity first.
+            # Retrieve only the authenticated user's corpus plus explicitly shared references.
             store = VectorKnowledgeStore()
             matches = store.search(
                 prompt, owner_id=f"user:{user['id']}", limit=4
