@@ -106,3 +106,59 @@ def test_benchmark_history_limit_is_bounded(tmp_path):
         db.save_benchmark_run(model="local-test", result={"index": index})
     assert len(db.list_benchmark_runs(limit=0)) == 1
     assert len(db.list_benchmark_runs(limit=1000)) == 3
+
+
+def test_sqlite_backup_and_restore_preserve_user_data(tmp_path):
+    source = tmp_path / "live.sqlite3"
+    backup = tmp_path / "backup.sqlite3"
+    restored = tmp_path / "restored.sqlite3"
+    db = Database("sqlite:///" + source.as_posix())
+    user_id = db.ensure_user("backup@example.test", "Backup User")
+    db.add_memory("preserve this memory", user_id=user_id)
+
+    assert db.backup_to(backup) == backup
+    Database.restore_backup_to(backup, restored)
+
+    restored_db = Database("sqlite:///" + restored.as_posix())
+    assert restored_db.list_memories(user_id=user_id) == ["preserve this memory"]
+    with restored_db.Session() as session:
+        assert session.query(User).filter_by(id=user_id).one().email == "backup@example.test"
+
+
+def test_sqlite_backup_refuses_live_database_and_existing_destination(tmp_path):
+    source = tmp_path / "live.sqlite3"
+    db = Database("sqlite:///" + source.as_posix())
+    db.init()
+
+    with pytest.raises(ValueError, match="differ"):
+        db.backup_to(source)
+
+    existing = tmp_path / "existing.sqlite3"
+    existing.write_bytes(b"keep existing file")
+    with pytest.raises(FileExistsError):
+        db.backup_to(existing)
+    assert existing.read_bytes() == b"keep existing file"
+
+
+def test_sqlite_restore_refuses_existing_destination(tmp_path):
+    backup = tmp_path / "backup.sqlite3"
+    destination = tmp_path / "destination.sqlite3"
+    db = Database("sqlite:///" + backup.as_posix())
+    db.init()
+    db.backup_to(tmp_path / "valid-backup.sqlite3")
+    valid_backup = tmp_path / "valid-backup.sqlite3"
+    destination.write_bytes(b"do not overwrite")
+
+    with pytest.raises(FileExistsError):
+        Database.restore_backup_to(valid_backup, destination)
+    assert destination.read_bytes() == b"do not overwrite"
+
+
+def test_sqlite_restore_rejects_corrupt_backup_without_leaving_destination(tmp_path):
+    corrupt = tmp_path / "corrupt.sqlite3"
+    destination = tmp_path / "restored.sqlite3"
+    corrupt.write_bytes(b"not a sqlite database")
+
+    with pytest.raises(Exception):
+        Database.restore_backup_to(corrupt, destination)
+    assert not destination.exists()
