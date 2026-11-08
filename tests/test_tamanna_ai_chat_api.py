@@ -95,6 +95,20 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             ))
         add.assert_not_called()
 
+    async def test_model_selection_is_admin_only(self):
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user",
+            return_value={"id": 13, "email": "ordinary-user@example.test"},
+        ), patch("tamanna_ai.api.routes.get_model_provider") as get_provider:
+            with self.assertRaises(HTTPException) as raised:
+                await select_model(
+                    ModelSelectRequest(model="qwen2.5:7b"),
+                    request=object(),
+                    token="user-session",
+                )
+        self.assertEqual(raised.exception.status_code, 403)
+        get_provider.assert_not_called()
+
     async def test_pull_model_streams_progress_after_authentication(self):
         class PullProvider:
             name = "ollama"
