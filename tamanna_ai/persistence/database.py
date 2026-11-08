@@ -315,6 +315,23 @@ class Database:
             memory_id = record.id
         return memory_id
 
+    def list_memory_records(self, *, user_id: int, limit: int = 100) -> list[dict[str, object]]:
+        """List memory records and metadata for one authenticated user."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        self.init()
+        limit = max(1, min(int(limit), 500))
+        with self.Session() as session:
+            statement = select(Memory).where(Memory.user_id == user_id).order_by(
+                Memory.created_at.desc(), Memory.id.desc()
+            ).limit(limit)
+            return [
+                {"id": item.id, "content": item.content,
+                 "metadata": json.loads(item.metadata_json),
+                 "created_at": item.created_at.isoformat()}
+                for item in session.scalars(statement)
+            ]
+
     def list_memories(self, *, user_id: int | None = None, limit: int = 100) -> list[str]:
         self.init()
         limit = max(1, min(int(limit), 500))
