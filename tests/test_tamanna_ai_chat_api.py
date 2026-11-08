@@ -101,6 +101,27 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["status"], "ready")
         self.assertTrue(result["selected_model_installed"])
 
+    async def test_model_status_reports_local_feature_embedding_provider(self):
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()), patch(
+            "tamanna_ai.api.routes.get_default_embedder",
+            return_value=__import__("tamanna_ai.knowledge.vector_store", fromlist=["LocalFeatureEmbedder"]).LocalFeatureEmbedder(),
+        ):
+            result = await model_status()
+        self.assertEqual(result["embedding"]["provider"], "local-feature")
+        self.assertTrue(result["embedding"]["configured"])
+        self.assertTrue(result["embedding"]["installed"])
+
+    async def test_model_status_reports_ollama_embedding_installation(self):
+        from tamanna_ai.knowledge.vector_store import OllamaEmbeddingProvider
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()), patch(
+            "tamanna_ai.api.routes.get_default_embedder",
+            return_value=OllamaEmbeddingProvider(model="nomic-embed-text"),
+        ):
+            result = await model_status()
+        self.assertEqual(result["embedding"]["provider"], "ollama")
+        self.assertTrue(result["embedding"]["installed"])
+
+
     async def test_model_status_marks_missing_selected_model(self):
         manager = FakeModelManager()
         manager.client = type("ClientInfo", (), {"model": "qwen2.5:14b"})()
