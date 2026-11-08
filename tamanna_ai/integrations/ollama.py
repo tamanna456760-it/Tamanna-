@@ -1,6 +1,7 @@
 """Local Ollama-compatible inference client; no hosted model API or API key."""
 from __future__ import annotations
 
+import json
 import os
 import re
 from typing import AsyncIterator
@@ -81,14 +82,14 @@ class OllamaClient:
                         if not line:
                             continue
                         try:
-                            event = response_event = __import__("json").loads(line)
+                            event = json.loads(line)
                         except (ValueError, TypeError) as exc:
                             raise OllamaError("Ollama returned invalid pull progress data.") from exc
-                        if not isinstance(response_event, dict):
+                        if not isinstance(event, dict):
                             raise OllamaError("Ollama returned an invalid pull event.")
-                        if response_event.get("error"):
-                            raise OllamaError(str(response_event["error"])[:300])
-                        yield response_event
+                        if event.get("error"):
+                            raise OllamaError(str(event["error"])[:300])
+                        yield event
         except httpx.HTTPStatusError as exc:
             raise OllamaError(
                 f"Local model runtime returned HTTP {exc.response.status_code} while downloading."
