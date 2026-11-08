@@ -51,3 +51,8 @@ def test_reject_unsupported_or_oversized_file(tmp_path):
     unsupported.write_bytes(b"x")
     with pytest.raises(ValueError):
         import_knowledge_file(unsupported, database=db)
+
+    oversized = tmp_path / "large.txt"
+    oversized.write_text("x" * 32, encoding="utf-8")
+    with pytest.raises(ValueError, match="size limit"):
+        import_knowledge_file(oversized, database=db, max_file_bytes=16)
