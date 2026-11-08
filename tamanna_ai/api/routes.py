@@ -8,7 +8,7 @@ from fastapi import APIRouter, Cookie, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from tamanna_ai.authentication.router import COOKIE, check_origin, require_user
-from tamanna_ai.knowledge.vector_store import VectorKnowledgeStore
+from tamanna_ai.knowledge.vector_store import EmbeddingError, VectorKnowledgeStore
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -60,6 +60,11 @@ async def model_status():
         if list_models is None:
             raise ModelProviderError("Configured provider does not expose model discovery.")
         models = await list_models()
+    except EmbeddingError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Local knowledge embedding model is unavailable. Check Ollama and the configured model.",
+        ) from exc
     except (ModelConfigurationError, ModelProviderError) as exc:
         raise HTTPException(
             status_code=503,
@@ -112,6 +117,11 @@ async def import_knowledge(
             source=filename,
             title=Path(filename).stem,
         )
+    except EmbeddingError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Local embedding model is unavailable. Check Ollama and the configured model.",
+        ) from exc
     except ValueError as exc:
         status_code = 413 if "size limit" in str(exc).lower() else 422
         raise HTTPException(status_code=status_code, detail=str(exc)) from exc
