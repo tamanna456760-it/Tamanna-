@@ -33,12 +33,21 @@ _benchmark_lock = asyncio.Lock()
 
 def _require_model_admin(token: str | None):
     user = require_user(token)
-    admin_email = (
-        os.getenv("TAMANNA_ADMIN_EMAIL", "").strip().lower()
-        or "tamanna456760@gmail.com"
-    )
-    if not admin_email or user.get("email", "").strip().lower() != admin_email:
-        raise HTTPException(status_code=403, detail="শুধু Tamanna AI admin model পরিচালনা করতে পারবেন।")
+    admin_emails = {
+        item.strip().lower()
+        for item in os.getenv("TAMANNA_ADMIN_EMAIL", "").split(",")
+        if item.strip()
+    }
+    if not admin_emails:
+        raise HTTPException(
+            status_code=503,
+            detail="Admin model controls are disabled until TAMANNA_ADMIN_EMAIL is configured.",
+        )
+    if user.get("email", "").strip().lower() not in admin_emails:
+        raise HTTPException(
+            status_code=403,
+            detail="শুধু Tamanna AI admin model পরিচালনা করতে পারবেন।",
+        )
     return user
 
 
