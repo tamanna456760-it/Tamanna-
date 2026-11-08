@@ -23,6 +23,10 @@ class FakeAsyncClient:
         type(self).posted = (url, json)
         return type(self).response
 
+    async def get(self, url):
+        type(self).requested_url = url
+        return type(self).response
+
 
 class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
     async def test_sends_chat_to_local_runtime_without_api_key(self):
@@ -42,6 +46,18 @@ class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload["model"], "qwen2.5:7b")
         self.assertFalse(payload["stream"])
         self.assertEqual(payload["messages"][0]["content"], "Hello")
+
+
+    async def test_lists_installed_local_models(self):
+        FakeAsyncClient.response = httpx.Response(
+            200, json={"models": [{"name": "qwen2.5:7b"}, {"name": "llama3.2:3b"}]},
+            request=httpx.Request("GET", "http://127.0.0.1:11434/api/tags")
+        )
+        client = OllamaClient(base_url="http://127.0.0.1:11434")
+        with patch("tamanna_ai.integrations.ollama.httpx.AsyncClient", FakeAsyncClient):
+            models = await client.list_models()
+        self.assertEqual(models, ["llama3.2:3b", "qwen2.5:7b"])
+        self.assertEqual(FakeAsyncClient.requested_url, "http://127.0.0.1:11434/api/tags")
 
     async def test_rejects_empty_prompt(self):
         with self.assertRaises(ValueError):
