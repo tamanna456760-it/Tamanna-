@@ -225,6 +225,22 @@ class VectorKnowledgeStore:
             for score, source, title, chunk in ranked[:limit]
         ]
 
+    def list_sources(self, *, owner_id: str) -> list[dict[str, object]]:
+        """List document-level metadata for one owner without exposing chunk contents."""
+        owner = str(owner_id).strip()
+        if not owner:
+            raise ValueError("owner_id is required to list private knowledge")
+        with self._connect() as connection:
+            rows = connection.execute("""
+                SELECT source, title, COUNT(*) AS chunks, MAX(created_at) AS indexed_at
+                FROM knowledge_chunks WHERE owner_id = ?
+                GROUP BY source, title ORDER BY source COLLATE NOCASE
+            """, (owner,)).fetchall()
+        return [
+            {"source": source, "title": title, "chunks": chunks, "indexed_at": indexed_at}
+            for source, title, chunks, indexed_at in rows
+        ]
+
     def delete_source(self, source: str, *, owner_id: str) -> int:
         owner = str(owner_id).strip()
         if not owner:
