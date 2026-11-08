@@ -33,6 +33,45 @@
     return data;
   }
 
+  const benchmarkButton = $("runModelBenchmark");
+  benchmarkButton?.addEventListener("click", async () => {
+    if (!window.TamannaAuth?.getUser()) {
+      set("benchmarkStatus", "Benchmark চালাতে প্রথমে লগইন করুন।");
+      return;
+    }
+    benchmarkButton.disabled = true;
+    set("benchmarkStatus", "Local model benchmark চলছে… প্রথমবার model load হতে সময় লাগতে পারে।");
+    ["benchmarkLatency", "benchmarkGeneration", "benchmarkPrompt", "benchmarkTokens"].forEach((id) => set(id, "পরীক্ষা হচ্ছে…"));
+    try {
+      const response = await fetch("/tamanna-ai/model/benchmark", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json" }
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const detail = result.detail;
+        throw new Error(typeof detail === "string" ? detail : detail?.message || "HTTP " + response.status);
+      }
+      const metrics = result.benchmark || {};
+      const display = (value, suffix) => Number.isFinite(value) ? value + suffix : "Unavailable";
+      set("benchmarkLatency", display(metrics.wall_time_ms, " ms"));
+      set("benchmarkGeneration", display(metrics.generation_tokens_per_second, " tok/s"));
+      set("benchmarkPrompt", display(metrics.prompt_tokens_per_second, " tok/s"));
+      set("benchmarkTokens", display(metrics.output_tokens, ""));
+      set("benchmarkDetails", "Model: " + (metrics.model || "Unknown") +
+        " · Prompt: " + (metrics.prompt_tokens ?? "—") + " tokens" +
+        " · Ollama total: " + display(metrics.total_duration_ms, " ms") +
+        " · Model load: " + display(metrics.model_load_ms, " ms"));
+      set("benchmarkStatus", "Benchmark সফল · " + new Date().toLocaleString());
+    } catch (error) {
+      ["benchmarkLatency", "benchmarkGeneration", "benchmarkPrompt", "benchmarkTokens"].forEach((id) => set(id, "—"));
+      set("benchmarkStatus", "Benchmark ব্যর্থ: " + error.message);
+    } finally {
+      benchmarkButton.disabled = false;
+    }
+  });
+
   function formatBytes(value) {
     if (!Number.isFinite(value) || value < 0) return "Unavailable";
     const units = ["B", "KB", "MB", "GB", "TB"];
