@@ -103,6 +103,47 @@ def test_admin_only_routes_reject_regular_authenticated_user(monkeypatch):
 
 
 
+
+def test_admin_allowlist_supports_multiple_configured_emails(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "second-admin@example.com", "id": 3,
+    })
+    monkeypatch.setenv(
+        "TAMANNA_ADMIN_EMAIL",
+        "first-admin@example.com, second-admin@example.com",
+    )
+
+    @app.post("/api/skills/create")
+    async def create_skill():
+        return {"ok": True}
+
+    response = TestClient(app).post(
+        "/api/skills/create",
+        cookies={auth.COOKIE: "test-session"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+
+def test_admin_allowlist_rejects_email_not_in_configured_list(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "outsider@example.com", "id": 4,
+    })
+    monkeypatch.setenv(
+        "TAMANNA_ADMIN_EMAIL",
+        "first-admin@example.com, second-admin@example.com",
+    )
+    response = TestClient(app).post(
+        "/api/skills/create",
+        cookies={auth.COOKIE: "test-session"},
+    )
+    assert response.status_code == 403
+
+
 def test_auth_rate_limit_fails_with_clear_503_when_session_secret_missing(monkeypatch, tmp_path):
     monkeypatch.delenv("TAMANNA_SESSION_SECRET", raising=False)
     monkeypatch.setattr(auth, "DB", tmp_path / "auth.sqlite3")
