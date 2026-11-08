@@ -63,6 +63,18 @@
       <p class="settings-note">প্রোফাইল পরিবর্তন, লগইন/লগআউট এবং পাসওয়ার্ড পরিবর্তন অ্যাকাউন্ট প্যানেল থেকে করা যাবে।</p>
     </section>
 
+    <section class="settings-group" id="memoryManager">
+      <h3>Memory / ব্যক্তিগত স্মৃতি</h3>
+      <p class="settings-note">আপনার অ্যাকাউন্টে সংরক্ষিত তথ্য এখানে দেখুন, যোগ করুন, সম্পাদনা করুন বা মুছুন।</p>
+      <form id="memoryForm" class="auth-form">
+        <label for="memoryContent">নতুন Memory</label>
+        <textarea id="memoryContent" rows="3" maxlength="10000" required placeholder="যেমন: আমি বাংলায় উত্তর পছন্দ করি"></textarea>
+        <button type="submit">Memory সংরক্ষণ</button>
+      </form>
+      <p id="memoryStatus" class="settings-note" role="status" aria-live="polite">Memory দেখতে লগইন করুন।</p>
+      <div id="memoryList" class="memory-list" aria-live="polite"></div>
+    </section>
+
     <section class="settings-group">
       <h3>Chat</h3>
       <p class="settings-note">চ্যাট ইতিহাস সার্ভারের SQLite account storage-এ সংরক্ষিত হয়। এই বোতামটি শুধু বর্তমান স্ক্রিন পরিষ্কার করে; সার্ভারে সংরক্ষিত ইতিহাস মুছে দেয় না।</p>
@@ -109,5 +121,6 @@
   <script src="/js/auth.js?v=20261106_account_security"></script>
   <script src="/js/chat.js?v=20261106_chatui"></script>
   <script src="/js/settings.js?v=20261106_preferences2"></script>
+  <script src="/js/memories.js?v=20261108_memory_dashboard"></script>
 </body>
 </html>
