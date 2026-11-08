@@ -119,3 +119,36 @@ def test_legacy_code_builder_and_unified_routes_are_not_public(monkeypatch, tmp_
             "/api/code-builder/build", json={"files": []}
         ).status_code == 410
         assert client.post("/api/code-builder/compile").status_code == 410
+
+def def test_linux_and_command_routes_fail_closed_for_anonymous_users(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.test")
+    monkeypatch.setenv("TAMANNA_COOKIE_SECURE", "0")
+
+    import tamanna_ai.authentication.router as auth_router
+
+    monkeypatch.setattr(auth_router, "DB", tmp_path / "linux-auth.sqlite3")
+    import Main
+
+    with TestClient(Main.app) as client:
+        for path in (
+            "/api/linux/tools",
+            "/api/linux/status",
+            "/api/linux/shell/status",
+        ):
+            assert client.get(path).status_code == 401
+
+        for path, payload in (
+            ("/api/linux/run", {"command": "id"}),
+            ("/api/linux/shell", {"command": "id"}),
+            ("/api/command", {"command": "id"}),
+        ):
+            response = client.post(path, json=payload)
+            assert response.status_code == 410
+
+        assert client.post(
+            "/api/tamanna/echo", json={"message": "hello"}
+        ).status_code == 401
