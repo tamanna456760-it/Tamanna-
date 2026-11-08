@@ -4,7 +4,8 @@ from __future__ import annotations
 import os
 from typing import Protocol
 
-from .ollama import OllamaClient, OllamaError\nfrom .model_settings import get_selected_model
+from .ollama import OllamaClient, OllamaError
+from .model_settings import get_selected_model
 
 
 class ModelConfigurationError(RuntimeError):
