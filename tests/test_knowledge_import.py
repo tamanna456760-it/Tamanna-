@@ -66,3 +66,19 @@ def test_import_handles_utf8_character_split_across_read_blocks(tmp_path):
     assert result["imported"] == 1
     found = search_knowledge("বাংলা", database=db)
     assert found and "বাংলা" in found[0]["content"]
+def test_duplicate_fingerprints_are_scoped_per_user(tmp_path):
+    path = tmp_path / "shared.txt"
+    path.write_text("Private knowledge must remain tenant isolated.", encoding="utf-8")
+    db = Database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
+    first_user = db.ensure_user("first@example.test", "First")
+    second_user = db.ensure_user("second@example.test", "Second")
+
+    first = import_knowledge_file(path, database=db, user_id=first_user)
+    repeat = import_knowledge_file(path, database=db, user_id=first_user)
+    second = import_knowledge_file(path, database=db, user_id=second_user)
+
+    assert first["imported"] == 1
+    assert repeat["imported"] == 0
+    assert second["imported"] == 1
+    assert search_knowledge("tenant isolated", database=db, user_id=first_user)
+    assert search_knowledge("tenant isolated", database=db, user_id=second_user)
