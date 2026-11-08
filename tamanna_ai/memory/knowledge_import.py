@@ -79,12 +79,33 @@ def _chatgpt_export_records(data: Any) -> list[tuple[str, str]]:
     return records
 
 
+def _read_bounded_text(path: Path, max_file_bytes: int) -> str:
+    """Read in fixed-size blocks and reject oversized imports before persistence."""
+    if max_file_bytes < 1:
+        raise ValueError("max_file_bytes must be positive")
+    if path.stat().st_size > max_file_bytes:
+        raise ValueError("Import exceeds the configured file size limit")
+    parts: list[str] = []
+    total = 0
+    with path.open("rb") as stream:
+        while True:
+            block = stream.read(64 * 1024)
+            if not block:
+                break
+            total += len(block)
+            if total > max_file_bytes:
+                raise ValueError("Import exceeds the configured file size limit")
+            parts.append(block.decode("utf-8", errors="strict"))
+    return "".join(parts)
+
+
 def import_knowledge_file(
     file_path: str | Path,
     *,
     database: Database,
     user_id: int | None = None,
     source_label: str | None = None,
+    max_file_bytes: int = 10 * 1024 * 1024,
 ) -> dict[str, Any]:
     """Explicitly import a user-selected .json, .txt, or .md file.
 
@@ -97,14 +118,15 @@ def import_knowledge_file(
         raise ValueError("Supported formats are .json, .txt, and .md")
     if not path.is_file():
         raise FileNotFoundError(path)
+    raw_file = _read_bounded_text(path, int(max_file_bytes))
     if path.suffix.lower() == ".json":
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(raw_file)
         records = _chatgpt_export_records(data)
         if not records:
             serialized = json.dumps(data, ensure_ascii=False, indent=2)
             records = [(path.stem, serialized)]
     else:
-        records = [(path.stem, path.read_text(encoding="utf-8"))]
+        records = [(path.stem, raw_file)]
 
     database.init()
     imported = skipped = 0
