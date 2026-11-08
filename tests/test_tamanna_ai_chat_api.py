@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
 
 from tamanna_ai.api.routes import (
-    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, select_model, chat, delete_conversation,
+    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
@@ -94,6 +94,28 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 use_knowledge=False, remember=False,
             ))
         add.assert_not_called()
+
+    async def test_pull_model_streams_progress_after_authentication(self):
+        class PullProvider:
+            name = "ollama"
+
+            async def pull_model(self, model):
+                self.assertEqual(model, "qwen2.5:7b")
+                yield {"status": "pulling", "completed": 50, "total": 100}
+
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user", return_value={"id": 12}
+        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=PullProvider()):
+            response = await pull_model(
+                ModelPullRequest(model="qwen2.5:7b"),
+                request=object(),
+                token="session",
+            )
+        chunks = [chunk async for chunk in response.body_iterator]
+        body = b"".join(chunk if isinstance(chunk, bytes) else chunk.encode() for chunk in chunks)
+        self.assertIn(b'"status": "pulling"', body)
+        self.assertIn(b'"completed": 50', body)
+        self.assertIn(b'"done": true', body)
 
     async def test_select_model_persists_only_an_installed_local_model(self):
         manager = FakeModelManager()
