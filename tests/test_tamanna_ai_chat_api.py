@@ -6,7 +6,8 @@ from fastapi import HTTPException
 from tamanna_ai.api.routes import (
     ChatRequest, KnowledgeImportRequest, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
-    list_knowledge, model_status,
+    list_knowledge, model_status, MemoryRequest, create_memory, list_memories,
+    update_memory, delete_memory,
 )
 
 
@@ -158,6 +159,31 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         with patch("tamanna_ai.api.routes.require_user", return_value={"id": 4, "email": "four@example.test", "name": "Four"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=4), patch("tamanna_ai.api.routes.database.delete_conversation", return_value=True) as delete:
             result = await delete_conversation("mine", token="session")
         delete.assert_called_once_with("mine", user_id=4)
+        self.assertTrue(result["ok"])
+
+
+    async def test_create_memory_uses_authenticated_user(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 6, "email": "six@example.test", "name": "Six"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=6), patch("tamanna_ai.api.routes.database.add_memory", return_value=31) as add:
+            result = await create_memory(MemoryRequest(content="Prefers Bengali"))
+        add.assert_called_once_with("Prefers Bengali", user_id=6, metadata={"source": "user"})
+        self.assertEqual(result["memory"]["id"], 31)
+
+    async def test_list_memories_is_user_scoped(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 6, "email": "six@example.test", "name": "Six"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=6), patch("tamanna_ai.api.routes.database.list_memory_records", return_value=[{"id": 31, "content": "Private"}]) as listing:
+            result = await list_memories()
+        listing.assert_called_once_with(user_id=6, limit=200)
+        self.assertEqual(result["memories"][0]["id"], 31)
+
+    async def test_update_memory_is_user_scoped(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 6, "email": "six@example.test", "name": "Six"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=6), patch("tamanna_ai.api.routes.database.update_memory", return_value=True) as update:
+            result = await update_memory(31, MemoryRequest(content="Updated preference"))
+        update.assert_called_once_with(31, "Updated preference", user_id=6)
+        self.assertTrue(result["ok"])
+
+    async def test_delete_memory_is_user_scoped(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 6, "email": "six@example.test", "name": "Six"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=6), patch("tamanna_ai.api.routes.database.delete_memory", return_value=True) as delete:
+            result = await delete_memory(31)
+        delete.assert_called_once_with(31, user_id=6)
         self.assertTrue(result["ok"])
 
     async def test_blank_prompt_is_rejected(self):
