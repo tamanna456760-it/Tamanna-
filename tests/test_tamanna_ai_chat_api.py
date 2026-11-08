@@ -156,11 +156,21 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             async def list_running_models(self):
                 return expected
 
+            async def list_model_details(self):
+                return [{"name": "qwen2.5:7b", "size_bytes": 4200000000}]
+
+        host = {"memory": {"total_bytes": 10000, "used_bytes": 3000}, "gpu": {"available": False}}
         with patch("tamanna_ai.api.routes.require_user", return_value={
             "id": 1, "email": "Tamanna456760@gmail.com"
-        }), patch("tamanna_ai.api.routes.get_model_provider", return_value=ResourceProvider()):
+        }), patch("tamanna_ai.api.routes.get_model_provider", return_value=ResourceProvider()), patch(
+            "tamanna_ai.api.routes.collect_system_metrics", new=AsyncMock(return_value=host)
+        ):
             result = await model_resources(token="admin-session")
-        self.assertEqual(result, {"ok": True, "models": expected, "count": 1})
+        self.assertEqual(result, {
+            "ok": True, "models": expected, "count": 1,
+            "installed_models": [{"name": "qwen2.5:7b", "size_bytes": 4200000000}],
+            "host": host,
+        })
 
     async def test_model_resources_denies_non_admin(self):
         with patch("tamanna_ai.api.routes.require_user", return_value={
