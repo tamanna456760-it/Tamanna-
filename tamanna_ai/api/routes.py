@@ -31,6 +31,33 @@ async def health():
     return {"status": "healthy"}
 
 
+@api_router.get("/model/status")
+async def model_status():
+    """Report local runtime availability and installed model names."""
+    try:
+        provider = get_model_provider()
+        list_models = getattr(provider, "list_models", None)
+        if list_models is None:
+            raise ModelProviderError("Configured provider does not expose model discovery.")
+        models = await list_models()
+    except (ModelConfigurationError, ModelProviderError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unavailable",
+                "message": "Tamanna AI local model runtime is unavailable.",
+                "reason": str(exc),
+            },
+        ) from exc
+
+    return {
+        "status": "ready" if models else "no_models_installed",
+        "provider": provider.name,
+        "selected_model": getattr(getattr(provider, "client", None), "model", None),
+        "installed_models": models,
+    }
+
+
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """Generate a reply with the configured local model provider."""
