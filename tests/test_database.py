@@ -162,3 +162,17 @@ def test_sqlite_restore_rejects_corrupt_backup_without_leaving_destination(tmp_p
     with pytest.raises(Exception):
         Database.restore_backup_to(corrupt, destination)
     assert not destination.exists()
+
+
+def test_sqlite_restore_rejects_backup_missing_core_tables(tmp_path):
+    import sqlite3
+
+    incomplete = tmp_path / "incomplete.sqlite3"
+    destination = tmp_path / "restored.sqlite3"
+    with sqlite3.connect(incomplete) as connection:
+        connection.execute("CREATE TABLE users (id INTEGER PRIMARY KEY)")
+        connection.execute("CREATE TABLE memories (id INTEGER PRIMARY KEY)")
+
+    with pytest.raises(ValueError, match="conversations, messages"):
+        Database.restore_backup_to(incomplete, destination)
+    assert not destination.exists()
