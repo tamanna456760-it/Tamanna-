@@ -51,6 +51,23 @@ class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload["messages"][0]["content"], "Hello")
 
 
+    async def test_lists_loaded_model_resource_footprints(self):
+        FakeAsyncClient.response = httpx.Response(
+            200, json={"models": [{
+                "name": "qwen2.5:7b", "size": 4200000000,
+                "size_vram": 3900000000, "context_length": 8192,
+                "expires_at": "2026-11-08T15:00:00Z",
+            }]},
+            request=httpx.Request("GET", "http://127.0.0.1:11434/api/ps"),
+        )
+        client = OllamaClient(base_url="http://127.0.0.1:11434", model="qwen2.5:7b")
+        with patch("tamanna_ai.integrations.ollama.httpx.AsyncClient", FakeAsyncClient):
+            models = await client.list_running_models()
+        self.assertEqual(FakeAsyncClient.requested_url, "http://127.0.0.1:11434/api/ps")
+        self.assertEqual(models[0]["name"], "qwen2.5:7b")
+        self.assertEqual(models[0]["memory_bytes"], 3900000000)
+        self.assertEqual(models[0]["context_length"], 8192)
+
     async def test_lists_installed_local_models(self):
         FakeAsyncClient.response = httpx.Response(
             200, json={"models": [{"name": "qwen2.5:7b"}, {"name": "llama3.2:3b"}]},
