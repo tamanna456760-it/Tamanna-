@@ -36,6 +36,31 @@ class OllamaClient:
         if self.timeout <= 0:
             raise ValueError("timeout must be positive")
 
+    async def list_models(self) -> list[str]:
+        """Return installed local model names from the Ollama runtime."""
+        try:
+            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0)) as client:
+                response = await client.get(f"{self.base_url}/api/tags")
+                response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            raise OllamaError(
+                f"Local model runtime returned HTTP {exc.response.status_code}"
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise OllamaError(
+                f"Cannot reach local model runtime ({type(exc).__name__})."
+            ) from exc
+
+        try:
+            models = response.json()["models"]
+            names = [
+                item["name"] for item in models
+                if isinstance(item, dict) and isinstance(item.get("name"), str)
+            ]
+        except (ValueError, KeyError, TypeError) as exc:
+            raise OllamaError("Local model runtime returned an invalid model list.") from exc
+        return sorted(set(names))
+
     async def generate(self, prompt: str, *, temperature: float = 0.2,
                        max_output_tokens: int = 2048) -> str:
         prompt = prompt.strip()
