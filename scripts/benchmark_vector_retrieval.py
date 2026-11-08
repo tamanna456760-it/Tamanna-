@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""Evaluate local Tamanna knowledge retrieval on a small bilingual fixture.
+
+Run from the repository root:
+    python scripts/benchmark_vector_retrieval.py --top-k 3
+
+This measures retrieval ranking only, not answer correctness or GPT/Gemini
+equivalence. The default embedder is API-free; set
+TAMANNA_EMBEDDING_PROVIDER=ollama to evaluate a local Ollama embedding model.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import tempfile
+import time
+from pathlib import Path
+
+from tamanna_ai.knowledge.vector_store import VectorKnowledgeStore
+
+
+DOCUMENTS = [
+    (
+        "bengali-knowledge.md",
+        "বাংলা জ্ঞানভান্ডার",
+        "বাংলা ভাষার জ্ঞানভান্ডারে নথি, প্রশ্ন, উত্তর এবং তথ্য অনুসন্ধান "
+        "করা যায়। বাংলা লেখা ও যুক্তাক্ষর সংরক্ষণ গুরুত্বপূর্ণ।",
+    ),
+    (
+        "database-backup.md",
+        "Database backup and restore",
+        "SQLite database backup restore integrity validation and safe recovery. "
+        "A backup must be checked before restoring user data.",
+    ),
+    (
+        "privacy-memory.md",
+        "ব্যক্তিগত স্মৃতি ও privacy",
+        "ব্যবহারকারীর ব্যক্তিগত স্মৃতি নিরাপদে সংরক্ষণ করতে হবে। "
+        "প্রতিটি user-এর knowledge আলাদা রাখতে হবে। Private user data "
+        "must remain isolated and protected.",
+    ),
+    (
+        "local-model.md",
+        "Local Ollama model",
+        "Run a local language model with Ollama without hosted GPT or Gemini APIs. "
+        "Local model inference requires available RAM and compute resources.",
+    ),
+    (
+        "android-build.md",
+        "Android APK build",
+        "Build and test the Android application APK. Debug and release artifacts "
+        "are produced by the Android CI workflow.",
+    ),
+]
+
+CASES = [
+    {"query": "বাংলা ভাষার জ্ঞানভান্ডার অনুসন্ধান", "relevant": "bengali-knowledge.md"},
+    {"query": "SQLite backup restore integrity", "relevant": "database-backup.md"},
+    {"query": "ব্যক্তিগত স্মৃতি এবং user data নিরাপত্তা", "relevant": "privacy-memory.md"},
+    {"query": "local Ollama model without GPT Gemini API", "relevant": "local-model.md"},
+    {"query": "Android APK release build test", "relevant": "android-build.md"},
+]
+
+
+def evaluate(store: VectorKnowledgeStore, *, top_k: int = 3) -> dict:
+    """Return hit-rate and mean reciprocal rank for the fixed bilingual cases."""
+    if not 1 <= top_k <= 20:
+        raise ValueError("top_k must be between 1 and 20")
+
+    reciprocal_ranks = []
+    hits = 0
+    details = []
+    for case in CASES:
+        started = time.perf_counter()
+        results = store.search(case["query"], owner_id="benchmark", limit=top_k)
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        rank = next(
+            (index for index, item in enumerate(results, start=1)
+             if item["source"] == case["relevant"]),
+            None,
+        )
+        if rank is not None:
+            hits += 1
+        reciprocal_ranks.append(1.0 / rank if rank else 0.0)
+        details.append({
+            "query": case["query"],
+            "expected_source": case["relevant"],
+            "retrieved_sources": [item["source"] for item in results],
+            "relevant_rank": rank,
+            "latency_ms": round(elapsed_ms, 3),
+        })
+
+    total = len(CASES)
+    return {
+        "cases": total,
+        "top_k": top_k,
+        "hit_rate": round(hits / total, 4),
+        "mean_reciprocal_rank": round(sum(reciprocal_ranks) / total, 4),
+        "results": details,
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--top-k", type=int, default=3)
+    args = parser.parse_args()
+    if not 1 <= args.top_k <= 20:
+        parser.error("--top-k must be between 1 and 20")
+
+    with tempfile.TemporaryDirectory(prefix="tamanna-vector-eval-") as directory:
+        store = VectorKnowledgeStore(db_path=Path(directory) / "evaluation.sqlite3")
+        for source, title, content in DOCUMENTS:
+            store.index_text(
+                content, owner_id="benchmark", source=source, title=title
+            )
+        report = evaluate(store, top_k=args.top_k)
+        report["embedding_provider"] = type(store.embedder).__name__
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
