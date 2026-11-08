@@ -34,6 +34,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             patch("tamanna_ai.api.routes.database.ensure_user", return_value=user_id),
             patch("tamanna_ai.api.routes.database.load_history", return_value=[]),
             patch("tamanna_ai.api.routes.database.save_chat_pair"),
+            patch("tamanna_ai.api.routes.database.list_memories", return_value=[]),
         )
 
     async def test_chat_uses_configured_local_provider_and_persists(self):
@@ -58,6 +59,17 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("My name is Ali", sent)
         self.assertIn("Current user message: What is my name?", sent)
         self.assertEqual(result.conversation_id, "thread-9")
+
+
+    async def test_chat_uses_private_saved_memories_as_context(self):
+        provider = FakeProvider()
+        auth, ensure, history, save, memories = self.auth_patches(15)
+        with auth, ensure, history, save, memories as memory_mock, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore"):
+            memory_mock.return_value = ["User prefers Bengali responses"]
+            await chat(ChatRequest(prompt="Explain this", use_knowledge=True))
+        sent = provider.generate.await_args.args[0]
+        self.assertIn("<user_memories>", sent)
+        self.assertIn("User prefers Bengali responses", sent)
 
     async def test_model_status_lists_installed_models(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()):
