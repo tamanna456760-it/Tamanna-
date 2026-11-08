@@ -3,7 +3,14 @@
 from .analytics import analyze_file
 from .documentation_indexer import DocumentationIndexer, index_documentation
 from .document_loader import load_document_text
-from .vector_store import (\n    EmbeddingError, LocalFeatureEmbedder, OllamaEmbeddingProvider,\n    VectorKnowledgeStore, chunk_text, get_default_embedder,\n)
+from .vector_store import (
+    EmbeddingError,
+    LocalFeatureEmbedder,
+    OllamaEmbeddingProvider,
+    VectorKnowledgeStore,
+    chunk_text,
+    get_default_embedder,
+)
 
 __all__ = [
     "analyze_file",
@@ -12,6 +19,8 @@ __all__ = [
     "load_document_text",
     "EmbeddingError",
     "LocalFeatureEmbedder",
+    "OllamaEmbeddingProvider",
     "VectorKnowledgeStore",
     "chunk_text",
+    "get_default_embedder",
 ]
