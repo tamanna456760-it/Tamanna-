@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Protocol
+from typing import AsyncIterator, Protocol
 
 from .ollama import OllamaClient, OllamaError
 from .model_settings import get_selected_model
@@ -31,6 +31,13 @@ class OllamaProvider:
         try:
             return await self.client.list_models()
         except OllamaError as exc:
+            raise ModelProviderError(str(exc)) from exc
+
+    async def pull_model(self, model: str) -> AsyncIterator[dict]:
+        try:
+            async for event in self.client.pull_model(model):
+                yield event
+        except (OllamaError, ValueError) as exc:
             raise ModelProviderError(str(exc)) from exc
 
     async def generate(self, prompt: str) -> str:
