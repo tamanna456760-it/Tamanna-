@@ -53,6 +53,26 @@ CHAT_FILE = DATA_DIR / "chat_history.json"
 # ============================================================
 
 app = FastAPI(
+
+
+
+def _require_feature_access(request: Request, *, admin: bool = False, write: bool = False):
+    if write:
+        check_origin(request)
+    user = current_user(request.cookies.get(COOKIE))
+    if not user:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    if admin:
+        allowed = {
+            item.strip().lower()
+            for item in os.getenv("TAMANNA_ADMIN_EMAIL", "").split(",")
+            if item.strip()
+        }
+        if not allowed:
+            raise HTTPException(status_code=503, detail="Admin access is not configured.")
+        if user.get("email", "").strip().lower() not in allowed:
+            raise HTTPException(status_code=403, detail="Admin access required.")
+    return user
     title="Tamanna AI",
     version="1.0.0"
 )
@@ -97,7 +117,8 @@ try:
     )
 
     @app.get("/api/skills")
-    async def tamanna_skills():
+    async def tamanna_skills(request: Request):
+        _require_feature_access(request, admin=True)
         skills = TAMANNA_SKILLS.list_skills()
 
         return {
@@ -116,7 +137,9 @@ try:
     @app.post("/api/skills/match")
     async def tamanna_skill_match(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request)
         query = str(
             payload.get("query")
             or payload.get("task")
@@ -140,7 +163,8 @@ try:
         }
 
     @app.get("/api/skills/interview")
-    async def tamanna_skill_interview():
+    async def tamanna_skill_interview(request: Request):
+        _require_feature_access(request, admin=True)
         return {
             "status": "ok",
             "questions": (
@@ -151,7 +175,9 @@ try:
     @app.post("/api/skills/create")
     async def tamanna_skill_create(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request, admin=True, write=True)
         interview = payload.get(
             "interview"
         )
@@ -173,7 +199,9 @@ try:
     @app.post("/api/skills/test")
     async def tamanna_skill_test(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request, admin=True, write=True)
         path = payload.get("path")
 
         if not path:
@@ -189,7 +217,9 @@ try:
     @app.post("/api/skills/refine")
     async def tamanna_skill_refine(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request, admin=True, write=True)
         path = payload.get("path")
         correction = payload.get(
             "correction"
@@ -247,7 +277,8 @@ try:
     )
 
     @app.get("/api/code-builder/status")
-    async def code_builder_status():
+    async def code_builder_status(request: Request):
+        _require_feature_access(request, admin=True)
         return {
             "status": "online",
             "engine": "Tamanna Intelligent Code Builder",
@@ -257,13 +288,16 @@ try:
         }
 
     @app.get("/api/code-builder/scan")
-    async def code_builder_scan():
+    async def code_builder_scan(request: Request):
+        _require_feature_access(request, admin=True)
         return TAMANNA_CODE_BUILDER.scan_project()
 
     @app.post("/api/code-builder/inspect")
     async def code_builder_inspect(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request, admin=True)
         path = payload.get("path")
 
         if not path:
@@ -277,7 +311,9 @@ try:
     @app.post("/api/code-builder/propose")
     async def code_builder_propose(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request, admin=True, write=True)
         path = payload.get("path")
         content = payload.get("content")
 
@@ -301,7 +337,9 @@ try:
     @app.post("/api/code-builder/apply")
     async def code_builder_apply(
         payload: dict,
+        request: Request,
     ):
+        _require_feature_access(request, admin=True, write=True)
         path = payload.get("path")
         content = payload.get("content")
         confirm = payload.get("confirm") is True
