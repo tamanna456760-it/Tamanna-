@@ -71,6 +71,15 @@ Open the local URL printed by the server. The static build includes both /admin.
 
 Cloudflare Workers static assets can serve the built frontend, but static deployment alone does not provide FastAPI endpoints, Gemini inference, authentication, database access, or privileged admin operations.
 
+## Local AI model setup (no Gemini/GPT API)
+
+Install Ollama on the same server as Tamanna AI, then pull a model that fits the server's RAM/VRAM. Example:
+
+    ollama pull qwen2.5:7b
+    ollama serve
+
+Set `TAMANNA_MODEL_PROVIDER=ollama`, `TAMANNA_OLLAMA_URL=http://127.0.0.1:11434`, and `TAMANNA_OLLAMA_MODEL=qwen2.5:7b` in the private environment. Keep Ollama bound to localhost or a protected private network; do not expose port 11434 directly to the public internet. The selected model's quality and speed depend on its weights and available hardware. This connector does not claim Tamanna has trained its own foundation model.
+
 ## Run the FastAPI backend separately
 
 Requirements: Python 3.12 or newer.
@@ -98,7 +107,10 @@ Copy .env.example to a local .env, then configure only the values needed for ser
 
 - `TAMANNA_ADMIN_EMAIL=Tamanna456760@gmail.com`: backend administrator allowlist.
 - `TAMANNA_SESSION_SECRET`: generate a unique value with `python -c "import secrets; print(secrets.token_urlsafe(48))"` (at least 32 characters).
-- `GEMINI_API_KEY` (or `TAMANNA_MODEL_API_KEY`): private Gemini key, required for Gemini chat.
+- `TAMANNA_MODEL_PROVIDER=ollama`: local model runtime (default; no hosted AI API key).
+- `TAMANNA_OLLAMA_URL=http://127.0.0.1:11434`: private/local Ollama endpoint.
+- `TAMANNA_OLLAMA_MODEL=qwen2.5:7b`: model name already pulled into the local runtime.
+- The mock provider is test-only and requires `TAMANNA_ENV=test`.
 - `TAMANNA_DATABASE_URL`: optional database URL; confirm backend-supported defaults before deployment.
 - `TAMANNA_CORS_ORIGINS`: exact trusted frontend origins, including `https://www.bd-king-r7.com`.
 
