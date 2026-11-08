@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from typing import Protocol
 
-from .ollama import OllamaClient, OllamaError
+from .ollama import OllamaClient, OllamaError\nfrom .model_settings import get_selected_model
 
 
 class ModelConfigurationError(RuntimeError):
@@ -59,7 +59,7 @@ def get_model_provider() -> ModelProvider:
         try:
             return OllamaProvider(
                 base_url=os.getenv("TAMANNA_OLLAMA_URL") or None,
-                model=os.getenv("TAMANNA_OLLAMA_MODEL") or None,
+                model=get_selected_model() or os.getenv("TAMANNA_OLLAMA_MODEL") or None,
             )
         except (TypeError, ValueError) as exc:
             raise ModelConfigurationError(
