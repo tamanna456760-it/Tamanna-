@@ -1,5 +1,6 @@
 """FastAPI routes for the Tamanna AI API package."""
 
+import asyncio
 import json
 import os
 import uuid
@@ -26,6 +27,8 @@ from tamanna_ai.integrations.provider import (
 )
 
 api_router = APIRouter(prefix="/tamanna-ai", tags=["tamanna-ai"])
+
+_benchmark_lock = asyncio.Lock()
 
 def _require_model_admin(token: str | None):
     user = require_user(token)
@@ -87,20 +90,31 @@ async def model_benchmark(
     """Run a short, explicit benchmark against the configured local model."""
     check_origin(request)
     _require_model_admin(token)
-    try:
-        provider = get_model_provider()
-        benchmark = getattr(provider, "benchmark", None)
-        if benchmark is None:
-            raise HTTPException(
-                status_code=409,
-                detail="Benchmark is supported only by the local Ollama provider.",
-            )
-        result = await benchmark()
-    except ModelConfigurationError as exc:
-        raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
-    except ModelProviderError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return {"ok": True, "benchmark": result}
+    if _benchmark_lock.locked():
+        raise HTTPException(status_code=409, detail="A model benchmark is already running.")
+    async with _benchmark_lock:
+        try:
+            provider = get_model_provider()
+            benchmark = getattr(provider, "benchmark", None)
+            list_models = getattr(provider, "list_models", None)
+            if benchmark is None or list_models is None:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Benchmark is supported only by the local Ollama provider.",
+                )
+            installed = await list_models()
+            selected = getattr(getattr(provider, "client", None), "model", None)
+            if not selected or selected not in installed:
+                raise HTTPException(
+                    status_code=409,
+                    detail="The selected local model is not installed. Install or select a model first.",
+                )
+            result = await benchmark()
+        except ModelConfigurationError as exc:
+            raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
+        except ModelProviderError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"ok": True, "benchmark": result, "scope": "single_local_inference"}
 
 
 @api_router.get("/system/metrics")
