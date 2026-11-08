@@ -88,7 +88,7 @@
       return;
     }
     try {
-      const data = await getJson("/tamanna-ai/model/benchmark/history?limit=10");
+      const data = await getJson("/tamanna-ai/model/benchmark/history?limit=100");
       const runs = Array.isArray(data.runs) ? data.runs : [];
       list.replaceChildren();
       runs.forEach((run) => {
@@ -106,9 +106,11 @@
       });
       set("benchmarkHistoryStatus", runs.length ? runs.length + "টি সাম্প্রতিক benchmark" : "এখনো কোনো benchmark সংরক্ষিত নেই।");
       renderBenchmarkComparison(runs);
+      renderBenchmarkRegressions(runs);
     } catch (error) {
       list.replaceChildren();
       renderBenchmarkComparison([]);
+      renderBenchmarkRegressions([]);
       set("benchmarkHistoryStatus", "History unavailable: " + error.message);
     }
   }
@@ -174,6 +176,57 @@
     set("benchmarkComparisonStatus", summaries.length
       ? summaries.length + "টি local model-এর তুলনা · দ্রুততম generation speed উপরে"
       : "তুলনার জন্য benchmark history নেই।");
+  }
+
+  function renderBenchmarkRegressions(runs) {
+    const list = $("benchmarkRegressionList");
+    if (!list) return;
+    list.replaceChildren();
+    const grouped = new Map();
+    runs.forEach((run) => {
+      const model = String(run.model || "Unknown model");
+      if (!grouped.has(model)) grouped.set(model, []);
+      grouped.get(model).push(run.result || {});
+    });
+    let compared = 0;
+    let warnings = 0;
+    grouped.forEach((results, model) => {
+      if (results.length < 2) return;
+      compared += 1;
+      const latest = results[0];
+      const previous = results[1];
+      const issues = [];
+      const latestSpeed = latest.generation_tokens_per_second;
+      const previousSpeed = previous.generation_tokens_per_second;
+      if (Number.isFinite(latestSpeed) && Number.isFinite(previousSpeed) && previousSpeed > 0) {
+        const drop = (previousSpeed - latestSpeed) / previousSpeed * 100;
+        if (drop >= 20) issues.push("Generation speed কমেছে " + drop.toFixed(1) + "%");
+      }
+      const latestLatency = latest.wall_time_ms;
+      const previousLatency = previous.wall_time_ms;
+      if (Number.isFinite(latestLatency) && Number.isFinite(previousLatency) && previousLatency > 0) {
+        const rise = (latestLatency - previousLatency) / previousLatency * 100;
+        if (rise >= 25) issues.push("Latency বেড়েছে " + rise.toFixed(1) + "%");
+      }
+      if (Number.isFinite(latest.passed_checks) && Number.isFinite(previous.passed_checks) &&
+          latest.passed_checks < previous.passed_checks) {
+        issues.push("Instruction checks কমেছে " + previous.passed_checks + " → " + latest.passed_checks);
+      }
+      if (!issues.length) return;
+      warnings += 1;
+      const item = document.createElement("li");
+      const title = document.createElement("strong");
+      title.textContent = model + ": ";
+      const detail = document.createElement("span");
+      detail.textContent = issues.join(" · ");
+      item.append(title, detail);
+      list.append(item);
+    });
+    set("benchmarkRegressionStatus", warnings
+      ? warnings + "টি model-এ regression signal পাওয়া গেছে। নতুন benchmark দিয়ে পুনরায় যাচাই করুন।"
+      : compared
+        ? compared + "টি model তুলনা করা হয়েছে; নির্ধারিত threshold-এ regression signal নেই।"
+        : "প্রতিটি model-এর অন্তত ২টি benchmark দরকার।");
   }
 
   function formatBytes(value) {
