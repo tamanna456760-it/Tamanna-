@@ -5,9 +5,8 @@ Owner: HM INSAN ALI
 ## Retrieval-Augmented Generation (RAG)
 
 Tamanna AI has a local-first vector knowledge store for explicitly selected,
-user-owned documents. It extracts text, splits it into bounded chunks, creates
-Gemini embeddings, stores vectors in SQLite, and ranks retrieved chunks by
-cosine similarity before they are supplied to an AI prompt by an application
+user-owned documents. It extracts text, splits it into bounded chunks, creates deterministic local feature-hash vectors without a hosted API,
+stores vectors in SQLite, and ranks retrieved chunks by cosine similarity before they are supplied to an AI prompt by an application
 integration.
 
 ### Supported document extraction
@@ -21,10 +20,13 @@ transcription are not implemented by this document loader.
 
 ### Configuration
 
-Set `GEMINI_API_KEY` in the private server `.env`. Never commit real keys.
-The embedding adapter uses Google's `gemini-embedding-001` embedding endpoint.
-Vector records are stored in `data/knowledge_vectors.sqlite3` by default;
-protect this file with server filesystem permissions and encrypted backups.
+No API key or network connection is required for the default embedder.
+`LocalFeatureEmbedder` hashes words and character n-grams into normalized
+vectors and is a lightweight lexical retrieval baseline, not a trained neural
+embedding model. Vector records are stored in
+`data/knowledge_vectors.sqlite3` by default; protect this file with server
+filesystem permissions and encrypted backups. A stronger locally hosted
+embedding model can be added later behind the same embedder interface.
 
 Install optional document readers only when needed:
 
@@ -35,9 +37,12 @@ pip install pypdf python-docx
 ### Python usage
 
 ```python
-from tamanna_ai.knowledge import GeminiEmbedder, VectorKnowledgeStore
+from tamanna_ai.knowledge import LocalFeatureEmbedder, VectorKnowledgeStore
 
-store = VectorKnowledgeStore(GeminiEmbedder())
+# LocalFeatureEmbedder is the default; no API key is needed.
+store = VectorKnowledgeStore()
+# Or explicitly select the local implementation:
+store = VectorKnowledgeStore(LocalFeatureEmbedder())
 store.index_document("/private/uploads/handbook.pdf", owner_id="AUTHENTICATED_USER_ID")
 matches = store.search(
     "How does the handbook explain account security?",
@@ -61,7 +66,7 @@ Users should be able to inspect and delete their own indexed sources.
   files for malware, enforce authentication/quotas, and clean up temporary files.
 - Embeddings are derived data and can still reveal information. Apply the same
   access controls, retention, deletion, backup and privacy rules as source docs.
-- Similarity ranking is semantic retrieval, not proof that a source is correct.
+- Similarity ranking is lexical similarity retrieval, not proof that a source is correct.
   Answers should cite source title/file and clearly state when no relevant
   material was found.
 - The SQLite implementation is suitable as a lightweight starting point. Large
