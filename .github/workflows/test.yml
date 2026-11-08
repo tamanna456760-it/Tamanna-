@@ -51,11 +51,14 @@ jobs:
           pytest -q
 
       - name: Run API-free retrieval benchmark
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           set -euo pipefail
           python scripts/benchmark_vector_retrieval.py --top-k 3 > benchmark-report.json
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
 
           report = json.loads(Path("benchmark-report.json").read_text(encoding="utf-8"))
@@ -76,9 +79,10 @@ jobs:
                   f"| {language} | {stats['cases']} | {stats['hit_rate']:.2%} | "
                   f"{stats['mean_reciprocal_rank']:.4f} |"
               )
-          Path("benchmark-summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
-              summary.write("\n".join(lines) + "\n")
+          summary = "\n".join(lines) + "\n"
+          Path("benchmark-summary.md").write_text(summary, encoding="utf-8")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as output:
+              output.write(summary)
           PY
 
       - name: Upload retrieval benchmark report
