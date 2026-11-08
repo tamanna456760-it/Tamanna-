@@ -77,6 +77,23 @@
       <div id="memoryList" class="memory-list" aria-live="polite"></div>
     </section>
 
+    <section class="settings-group" id="knowledgeManager">
+      <h3>Knowledge Base / জ্ঞানভান্ডার</h3>
+      <p class="settings-note">নিজের TXT, Markdown বা JSON নথি index করুন। Embedding model বদলালে পুরোনো নথির vector এখানে পুনরায় তৈরি করুন।</p>
+      <form id="knowledgeForm" class="auth-form">
+        <label for="knowledgeFilename">নথির নাম</label>
+        <input id="knowledgeFilename" type="text" maxlength="180" required placeholder="notes.md">
+        <label for="knowledgeContent">নথির লেখা</label>
+        <textarea id="knowledgeContent" rows="4" maxlength="1000000" required placeholder="আপনার জ্ঞান বা নথির লেখা এখানে দিন"></textarea>
+        <button type="submit">Knowledge index করুন</button>
+      </form>
+      <div class="settings-actions">
+        <button id="reindexKnowledgeButton" class="settings-secondary" type="button">সব Knowledge পুনরায় index করুন</button>
+      </div>
+      <p id="knowledgeStatus" class="settings-note" role="status" aria-live="polite">Knowledge Base পরিচালনা করতে লগইন করুন।</p>
+      <div id="knowledgeList" class="memory-list" aria-live="polite"></div>
+    </section>
+
     <section class="settings-group">
       <h3>Chat</h3>
       <p class="settings-note">চ্যাট ইতিহাস সার্ভারের SQLite account storage-এ সংরক্ষিত হয়। এই বোতামটি শুধু বর্তমান স্ক্রিন পরিষ্কার করে; সার্ভারে সংরক্ষিত ইতিহাস মুছে দেয় না।</p>
