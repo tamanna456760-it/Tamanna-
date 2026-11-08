@@ -54,11 +54,11 @@ DOCUMENTS = [
 ]
 
 CASES = [
-    {"query": "বাংলা ভাষার জ্ঞানভান্ডার অনুসন্ধান", "relevant": "bengali-knowledge.md"},
-    {"query": "SQLite backup restore integrity", "relevant": "database-backup.md"},
-    {"query": "ব্যক্তিগত স্মৃতি এবং user data নিরাপত্তা", "relevant": "privacy-memory.md"},
-    {"query": "local Ollama model without GPT Gemini API", "relevant": "local-model.md"},
-    {"query": "Android APK release build test", "relevant": "android-build.md"},
+    {"query": "বাংলা ভাষার জ্ঞানভান্ডার অনুসন্ধান", "relevant": "bengali-knowledge.md", "language": "bn"},
+    {"query": "SQLite backup restore integrity", "relevant": "database-backup.md", "language": "en"},
+    {"query": "ব্যক্তিগত স্মৃতি এবং user data নিরাপত্তা", "relevant": "privacy-memory.md", "language": "mixed"},
+    {"query": "local Ollama model without GPT Gemini API", "relevant": "local-model.md", "language": "en"},
+    {"query": "Android APK release build test", "relevant": "android-build.md", "language": "en"},
 ]
 
 
@@ -70,6 +70,7 @@ def evaluate(store: VectorKnowledgeStore, *, top_k: int = 3) -> dict:
     reciprocal_ranks = []
     hits = 0
     details = []
+    language_stats: dict[str, dict[str, float | int]] = {}
     for case in CASES:
         started = time.perf_counter()
         results = store.search(case["query"], owner_id="benchmark", limit=top_k)
@@ -81,8 +82,15 @@ def evaluate(store: VectorKnowledgeStore, *, top_k: int = 3) -> dict:
         )
         if rank is not None:
             hits += 1
-        reciprocal_ranks.append(1.0 / rank if rank else 0.0)
+        reciprocal_rank = 1.0 / rank if rank else 0.0
+        reciprocal_ranks.append(reciprocal_rank)
+        language = case["language"]
+        bucket = language_stats.setdefault(language, {"cases": 0, "hits": 0, "reciprocal_rank_sum": 0.0})
+        bucket["cases"] += 1
+        bucket["hits"] += int(rank is not None)
+        bucket["reciprocal_rank_sum"] += reciprocal_rank
         details.append({
+            "language": language,
             "query": case["query"],
             "expected_source": case["relevant"],
             "retrieved_sources": [item["source"] for item in results],
@@ -91,11 +99,20 @@ def evaluate(store: VectorKnowledgeStore, *, top_k: int = 3) -> dict:
         })
 
     total = len(CASES)
+    by_language = {
+        language: {
+            "cases": stats["cases"],
+            "hit_rate": round(stats["hits"] / stats["cases"], 4),
+            "mean_reciprocal_rank": round(stats["reciprocal_rank_sum"] / stats["cases"], 4),
+        }
+        for language, stats in sorted(language_stats.items())
+    }
     return {
         "cases": total,
         "top_k": top_k,
         "hit_rate": round(hits / total, 4),
         "mean_reciprocal_rank": round(sum(reciprocal_ranks) / total, 4),
+        "by_language": by_language,
         "results": details,
     }
 
