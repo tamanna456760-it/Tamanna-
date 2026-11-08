@@ -89,6 +89,15 @@ class KnowledgeFingerprint(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+class BenchmarkRun(Base):
+    """Admin-only historical record of a local model benchmark."""
+    __tablename__ = "benchmark_runs"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    model: Mapped[str] = mapped_column(String(200), index=True)
+    result_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
 class Migration(Base):
     __tablename__ = "schema_migrations"
     name: Mapped[str] = mapped_column(String(120), primary_key=True)
@@ -366,6 +375,40 @@ class Database:
             session.delete(record)
         return True
 
+
+    def save_benchmark_run(self, *, model: str, result: dict[str, object]) -> int:
+        """Persist benchmark metrics without prompts, responses, or user content."""
+        clean_model = str(model).strip()[:200]
+        if not clean_model or not isinstance(result, dict):
+            raise ValueError("A model name and benchmark result are required")
+        safe_result = json.dumps(result, ensure_ascii=False, allow_nan=False)
+        self.init()
+        with self.Session.begin() as session:
+            record = BenchmarkRun(model=clean_model, result_json=safe_result)
+            session.add(record)
+            session.flush()
+            return record.id
+
+    def list_benchmark_runs(self, *, limit: int = 20) -> list[dict[str, object]]:
+        """Return recent benchmark summaries, newest first."""
+        self.init()
+        limit = max(1, min(int(limit), 100))
+        with self.Session() as session:
+            rows = session.scalars(
+                select(BenchmarkRun).order_by(
+                    BenchmarkRun.created_at.desc(), BenchmarkRun.id.desc()
+                ).limit(limit)
+            )
+            return [
+                {
+                    "id": row.id,
+                    "model": row.model,
+                    "created_at": row.created_at.isoformat(),
+                    "result": json.loads(row.result_json),
+                }
+                for row in rows
+            ]
+
     def migrate_legacy_json(self, json_path: str | Path) -> dict[str, object]:
         path = Path(json_path)
         if not path.is_file():
@@ -441,6 +484,6 @@ def load_history(
 
 __all__ = [
     "Base", "User", "Conversation", "Message", "Memory", "Migration",
-    "KnowledgeFingerprint", "Database", "database", "init_database", "migrate_legacy_json",
+    "KnowledgeFingerprint", "BenchmarkRun", "Database", "database", "init_database", "migrate_legacy_json",
     "save_chat", "load_history",
 ]
