@@ -39,7 +39,25 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             result = await model_status()
         self.assertEqual(result["status"], "ready")
         self.assertEqual(result["selected_model"], "qwen2.5:7b")
+        self.assertTrue(result["selected_model_installed"])
         self.assertIn("llama3.2:3b", result["installed_models"])
+
+
+    async def test_model_status_marks_missing_selected_model(self):
+        manager = FakeModelManager()
+        manager.client = type("ClientInfo", (), {"model": "qwen2.5:14b"})()
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=manager):
+            result = await model_status()
+        self.assertEqual(result["status"], "ready")
+        self.assertFalse(result["selected_model_installed"])
+
+    async def test_model_status_reports_no_models_installed(self):
+        manager = FakeModelManager()
+        manager.list_models = AsyncMock(return_value=[])
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=manager):
+            result = await model_status()
+        self.assertEqual(result["status"], "no_models_installed")
+        self.assertFalse(result["selected_model_installed"])
 
     async def test_chat_includes_retrieved_context_as_untrusted_reference(self):
         provider = FakeProvider()
