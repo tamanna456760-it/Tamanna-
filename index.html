@@ -136,6 +136,10 @@
         <h4 id="modelResourceTitle">Loaded Model Resource Manager</h4>
         <p class="settings-note">Ollama-তে বর্তমানে memory-তে থাকা model, size ও VRAM footprint · Admin only</p>
         <p id="modelResourceStatus" class="settings-note" role="status" aria-live="polite">Resource তথ্য এখনো সংগ্রহ করা হয়নি।</p>
+        <h5>RAM / VRAM Model Recommendations</h5>
+        <p id="modelResourceAdviceStatus" class="settings-note" role="status" aria-live="polite">Recommendation অপেক্ষমাণ।</p>
+        <ul id="modelResourceAdvice"></ul>
+        <small class="settings-note">Model file size runtime memory-এর সমান নয়। এই shortlist কেবল আনুমানিক; load করার আগে বাস্তব RAM/VRAM এবং context requirement যাচাই করুন।</small>
         <ul id="modelResourceList"></ul>
         <button id="refreshModelResources" class="settings-secondary" type="button">Refresh Loaded Models</button>
       </section>
