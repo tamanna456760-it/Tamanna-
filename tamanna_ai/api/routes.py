@@ -52,10 +52,15 @@ async def model_status():
             },
         ) from exc
 
+    selected_model = getattr(getattr(provider, "client", None), "model", None)
+    selected_model_installed = (
+        selected_model in models if selected_model and models else False
+    )
     return {
         "status": "ready" if models else "no_models_installed",
         "provider": provider.name,
-        "selected_model": getattr(getattr(provider, "client", None), "model", None),
+        "selected_model": selected_model,
+        "selected_model_installed": selected_model_installed,
         "installed_models": models,
     }
 
