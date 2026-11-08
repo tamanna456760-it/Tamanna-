@@ -196,3 +196,25 @@ def test_vector_store_rejects_invalid_query_embedding(tmp_path):
     )
     with pytest.raises(EmbeddingError):
         store.search("বাংলা প্রশ্ন", owner_id="user-1")
+
+
+
+def test_bilingual_retrieval_benchmark_reports_ranking_metrics(tmp_path):
+    from scripts.benchmark_vector_retrieval import DOCUMENTS, evaluate
+    from tamanna_ai.knowledge.vector_store import LocalFeatureEmbedder
+
+    store = VectorKnowledgeStore(
+        LocalFeatureEmbedder(), tmp_path / "evaluation.sqlite3"
+    )
+    for source, title, content in DOCUMENTS:
+        store.index_text(
+            content, owner_id="benchmark", source=source, title=title
+        )
+
+    report = evaluate(store, top_k=3)
+
+    assert report["cases"] == len(DOCUMENTS)
+    assert 0.0 <= report["hit_rate"] <= 1.0
+    assert 0.0 <= report["mean_reciprocal_rank"] <= 1.0
+    assert len(report["results"]) == len(DOCUMENTS)
+    assert all("latency_ms" in result for result in report["results"])
