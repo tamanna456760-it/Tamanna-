@@ -90,6 +90,19 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         store.assert_not_called()
         provider.generate.assert_awaited_once_with("Hello")
 
+
+    async def test_chat_rejects_anonymous_user(self):
+        with self.assertRaises(HTTPException) as raised:
+            await chat(ChatRequest(prompt="Private question"))
+        self.assertEqual(raised.exception.status_code, 401)
+
+    async def test_package_app_mounts_signup_and_login_routes(self):
+        from tamanna_ai.api.server import create_app
+        paths = {route.path for route in create_app().routes}
+        self.assertIn("/api/auth/signup", paths)
+        self.assertIn("/api/auth/login", paths)
+        self.assertIn("/tamanna-ai/chat", paths)
+
     async def test_blank_prompt_is_rejected(self):
         with self.assertRaises(HTTPException) as raised:
             await chat(ChatRequest(prompt="   "))
