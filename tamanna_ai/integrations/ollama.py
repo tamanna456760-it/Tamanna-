@@ -69,6 +69,7 @@ class OllamaClient:
         model = model.strip() if isinstance(model, str) else ""
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}", model):
             raise ValueError("Invalid local model name")
+        completed = False
         try:
             async with httpx.AsyncClient(timeout=None) as client:
                 async with client.stream(
@@ -89,7 +90,11 @@ class OllamaClient:
                             raise OllamaError("Ollama returned an invalid pull event.")
                         if event.get("error"):
                             raise OllamaError(str(event["error"])[:300])
+                        if event.get("done") is True or event.get("status") == "success":
+                            completed = True
                         yield event
+            if not completed:
+                raise OllamaError("Ollama ended the model download without confirming success.")
         except httpx.HTTPStatusError as exc:
             raise OllamaError(
                 f"Local model runtime returned HTTP {exc.response.status_code} while downloading."
