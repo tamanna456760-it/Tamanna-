@@ -81,12 +81,17 @@ class TamannaAccessControl:
             await response(scope, receive, send)
             return
         if path in ADMIN_ROUTES:
-            admin_email = os.getenv("TAMANNA_ADMIN_EMAIL", "").strip().lower()
-            if not admin_email:
+            admin_emails = {
+                item.strip().lower()
+                for item in os.getenv("TAMANNA_ADMIN_EMAIL", "").split(",")
+                if item.strip()
+            }
+            if not admin_emails:
                 response = JSONResponse({"detail": "Admin access is disabled until TAMANNA_ADMIN_EMAIL is configured."}, status_code=503)
                 await response(scope, receive, send)
                 return
-            if user.get("email", "").lower() != admin_email:
+            user_email = str(user.get("email") or "").strip().lower()
+            if user_email not in admin_emails:
                 response = JSONResponse({"detail": "Administrator access required."}, status_code=403)
                 await response(scope, receive, send)
                 return
