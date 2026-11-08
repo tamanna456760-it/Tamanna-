@@ -183,3 +183,53 @@ def test_sqlite_backup_rejects_in_memory_database(tmp_path):
     with pytest.raises(ValueError, match="file-backed"):
         db.backup_to(tmp_path / "memory-backup.sqlite3")
     assert not (tmp_path / "memory-backup.sqlite3").exists()
+
+def test_conversation_history_is_isolated_between_users(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "tenant-history.sqlite3").as_posix())
+    db.init()
+    alice_id = db.ensure_user("alice@example.test", "Alice")
+    bob_id = db.ensure_user("bob@example.test", "Bob")
+
+    db.save_chat_pair(
+        "Alice private question", "Alice private answer",
+        conversation_id="alice-private-thread", user_id=alice_id,
+    )
+
+    assert db.load_history(
+        conversation_id="alice-private-thread", user_id=alice_id
+    )[0]["user"] == "Alice private question"
+    assert db.load_history(
+        conversation_id="alice-private-thread", user_id=bob_id
+    ) == []
+    assert db.list_conversations(user_id=bob_id) == []
+    assert db.delete_conversation(
+        "alice-private-thread", user_id=bob_id
+    ) is False
+    assert db.load_history(
+        conversation_id="alice-private-thread", user_id=alice_id
+    )[0]["assistant"] == "Alice private answer"
+
+
+def test_user_cannot_reuse_another_users_conversation_id(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "tenant-write.sqlite3").as_posix())
+    db.init()
+    alice_id = db.ensure_user("alice@example.test", "Alice")
+    bob_id = db.ensure_user("bob@example.test", "Bob")
+
+    db.save_chat_pair(
+        "Original owner message", "Original owner answer",
+        conversation_id="shared-thread-id", user_id=alice_id,
+    )
+
+    with pytest.raises(PermissionError, match="does not belong"):
+        db.save_chat_pair(
+            "Unauthorized overwrite attempt", "Should not be stored",
+            conversation_id="shared-thread-id", user_id=bob_id,
+        )
+
+    history = db.load_history(
+        conversation_id="shared-thread-id", user_id=alice_id
+    )
+    assert len(history) == 1
+    assert history[0]["user"] == "Original owner message"
+
