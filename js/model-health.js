@@ -616,6 +616,28 @@
     saveModelButton.disabled = true;
     if (modelSelectStatus) modelSelectStatus.textContent = "Model selection সংরক্ষণ হচ্ছে…";
     try {
+      const preflightResponse = await fetch("/tamanna-ai/model/preflight", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ model })
+      });
+      const preflight = await preflightResponse.json().catch(() => ({}));
+      if (!preflightResponse.ok) {
+        const detail = preflight.detail;
+        throw new Error(typeof detail === "string" ? detail : detail?.message || "Preflight HTTP " + preflightResponse.status);
+      }
+      const estimate = Number.isFinite(preflight.estimated_memory_bytes)
+        ? formatBytes(preflight.estimated_memory_bytes) : "অজানা";
+      const available = Number.isFinite(preflight.available_memory_bytes)
+        ? formatBytes(preflight.available_memory_bytes) : "অজানা";
+      const warning = preflight.status === "likely_fit" ? "" : "\\n\\nসতর্কতা: " + preflight.message;
+      if (!window.confirm("Model: " + model + "\\nআনুমানিক memory: " + estimate +
+          "\\nবর্তমান free RAM: " + available + "\\n" + preflight.message +
+          warning + "\\n\\nএটি শুধু model selection; এখনই model load হবে না। চালিয়ে যাবেন?")) {
+        if (modelSelectStatus) modelSelectStatus.textContent = "Model selection বাতিল করা হয়েছে।";
+        return;
+      }
       const response = await fetch("/tamanna-ai/model/select", {
         method: "POST",
         credentials: "same-origin",
