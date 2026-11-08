@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
 
 from tamanna_ai.api.routes import (
-    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, chat, delete_conversation,
+    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
@@ -94,6 +94,30 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 use_knowledge=False, remember=False,
             ))
         add.assert_not_called()
+
+    async def test_system_metrics_requires_admin_and_returns_host_metrics(self):
+        expected = {
+            "cpu": {"usage_percent": 12.5, "logical_cores": 4},
+            "memory": {"usage_percent": 40.0, "used_bytes": 400, "total_bytes": 1000},
+            "disk": {"usage_percent": 50.0, "used_bytes": 500, "free_bytes": 500, "total_bytes": 1000},
+            "gpu": {"available": False, "vendor": None, "utilization_percent": None,
+                    "memory_used_mb": None, "memory_total_mb": None, "name": None},
+        }
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 1, "email": "Tamanna456760@gmail.com"
+        }), patch("tamanna_ai.api.routes.collect_system_metrics", return_value=expected) as collect:
+            result = await system_metrics(token="admin-session")
+        self.assertEqual(result, expected)
+        collect.assert_awaited_once()
+
+    async def test_system_metrics_denies_non_admin(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 2, "email": "member@example.test"
+        }), patch("tamanna_ai.api.routes.collect_system_metrics") as collect:
+            with self.assertRaises(HTTPException) as raised:
+                await system_metrics(token="member-session")
+        self.assertEqual(raised.exception.status_code, 403)
+        collect.assert_not_awaited()
 
     async def test_model_selection_is_admin_only(self):
         with patch("tamanna_ai.api.routes.check_origin"), patch(
