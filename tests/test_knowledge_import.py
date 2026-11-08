@@ -56,3 +56,13 @@ def test_reject_unsupported_or_oversized_file(tmp_path):
     oversized.write_text("x" * 32, encoding="utf-8")
     with pytest.raises(ValueError, match="size limit"):
         import_knowledge_file(oversized, database=db, max_file_bytes=16)
+def test_import_handles_utf8_character_split_across_read_blocks(tmp_path):
+    path = tmp_path / "utf8-boundary.txt"
+    path.write_text("x" * 65535 + "বাংলা knowledge boundary test", encoding="utf-8")
+    db = Database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
+
+    result = import_knowledge_file(path, database=db)
+
+    assert result["imported"] == 1
+    found = search_knowledge("বাংলা", database=db)
+    assert found and "বাংলা" in found[0]["content"]
