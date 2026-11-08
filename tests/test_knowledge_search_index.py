@@ -63,8 +63,23 @@ def test_init_adds_index_to_existing_legacy_memory_table(tmp_path):
             )
             """
         )
+        connection.exec_driver_sql(
+            """
+            INSERT INTO memories
+                (id, user_id, conversation_id, content, metadata_json, created_at)
+            VALUES (41, NULL, NULL, 'legacy knowledge', '{}', '2026-01-01 00:00:00')
+            """
+        )
 
+    # Repeated startup must remain safe and must not rewrite existing records.
     database.init()
+    database.init()
+
+    with database.engine.connect() as connection:
+        preserved = connection.exec_driver_sql(
+            "SELECT id, content FROM memories WHERE id = 41"
+        ).one()
+    assert preserved == (41, "legacy knowledge")
 
     indexes = inspect(database.engine).get_indexes("memories")
     indexed_columns = {
