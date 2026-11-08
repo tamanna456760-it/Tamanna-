@@ -4,6 +4,9 @@
   const $ = (id) => document.getElementById(id);
   const refreshButton = $("refreshModelHealth");
   const updated = $("modelHealthUpdated");
+  const modelSelect = $("localModelSelect");
+  const saveModelButton = $("saveLocalModel");
+  const modelSelectStatus = $("modelSelectStatus");
   if (!refreshButton || !updated) return;
 
   function set(id, value) {
@@ -35,6 +38,22 @@
     try {
       const model = await getJson("/tamanna-ai/model/status");
       const models = Array.isArray(model.installed_models) ? model.installed_models : [];
+      if (modelSelect) {
+        const current = model.selected_model || "";
+        modelSelect.replaceChildren();
+        models.forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          modelSelect.append(option);
+        });
+        if (current && models.includes(current)) modelSelect.value = current;
+        modelSelect.disabled = models.length === 0;
+        if (saveModelButton) saveModelButton.disabled = models.length === 0;
+        if (modelSelectStatus) modelSelectStatus.textContent = models.length
+          ? "নির্বাচিত: " + (current || "কোনো installed model নয়")
+          : "Ollama-তে কোনো model installed নেই।";
+      }
       const chatReady = Boolean(model.selected_model_installed);
       set("healthChatStatus", chatReady ? "Ready" : "Model unavailable");
       set("healthChatDetail", (model.provider || "Unknown provider") + " · " + (model.selected_model || "No model selected"));
@@ -76,6 +95,36 @@
       refreshButton.disabled = false;
     }
   }
+
+  saveModelButton?.addEventListener("click", async () => {
+    if (!window.TamannaAuth?.getUser()) {
+      if (modelSelectStatus) modelSelectStatus.textContent = "Model পরিবর্তনের জন্য প্রথমে লগইন করুন।";
+      return;
+    }
+    const model = modelSelect?.value;
+    if (!model) return;
+    saveModelButton.disabled = true;
+    if (modelSelectStatus) modelSelectStatus.textContent = "Model selection সংরক্ষণ হচ্ছে…";
+    try {
+      const response = await fetch("/tamanna-ai/model/select", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ model })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const detail = result.detail;
+        throw new Error(typeof detail === "string" ? detail : detail?.message || "HTTP " + response.status);
+      }
+      if (modelSelectStatus) modelSelectStatus.textContent = "সক্রিয় Chat Model: " + result.selected_model;
+      await refresh();
+    } catch (error) {
+      if (modelSelectStatus) modelSelectStatus.textContent = "Model পরিবর্তন ব্যর্থ: " + error.message;
+    } finally {
+      saveModelButton.disabled = !modelSelect || modelSelect.options.length === 0;
+    }
+  });
 
   refreshButton.addEventListener("click", refresh);
   $("openSettings")?.addEventListener("click", refresh);
