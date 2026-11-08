@@ -17,6 +17,7 @@ from tamanna_ai.knowledge.vector_store import (
     get_default_embedder,
 )
 from tamanna_ai.integrations.model_settings import set_selected_model
+from tamanna_ai.integrations.system_metrics import collect_system_metrics
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -76,6 +77,15 @@ async def status():
 @api_router.get("/health")
 async def health():
     return {"status": "healthy"}
+
+
+@api_router.get("/system/metrics")
+async def system_metrics(
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Return host resource usage to the authenticated Tamanna AI administrator."""
+    _require_model_admin(token)
+    return await collect_system_metrics()
 
 
 @api_router.get("/model/status")
