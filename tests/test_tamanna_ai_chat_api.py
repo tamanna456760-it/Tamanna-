@@ -113,7 +113,11 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_model_status_reports_ollama_embedding_installation(self):
         from tamanna_ai.knowledge.vector_store import OllamaEmbeddingProvider
-        with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()), patch(
+        manager = FakeModelManager()
+        manager.list_models = AsyncMock(return_value=[
+            "qwen2.5:7b", "llama3.2:3b", "nomic-embed-text",
+        ])
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=manager), patch(
             "tamanna_ai.api.routes.get_default_embedder",
             return_value=OllamaEmbeddingProvider(model="nomic-embed-text"),
         ):
