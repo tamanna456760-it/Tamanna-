@@ -214,10 +214,46 @@ class VectorKnowledgeStore:
                 SELECT source, title, chunk_text, embedding_json
                 FROM knowledge_chunks WHERE owner_id = ?
             """, (owner,)).fetchall()
+        # Hybrid local ranking: hashed-vector similarity plus token relevance,
+        # inverse document frequency, and exact phrase coverage. This improves
+        # lexical/context matching without pretending to be a trained semantic model.
+        token_pattern = re.compile(r"[^\\W_]+", flags=re.UNICODE)
+        query_tokens = [token for token in token_pattern.findall(query.casefold()) if len(token) > 1]
+        query_terms = set(query_tokens)
+        document_tokens = [
+            set(token_pattern.findall(str(row[2]).casefold()))
+            for row in rows
+        ]
+        document_frequency = {
+            term: sum(1 for tokens in document_tokens if term in tokens)
+            for term in query_terms
+        }
+        total_documents = max(1, len(rows))
         ranked = []
-        for source, title, chunk, vector_json in rows:
-            score = _cosine(query_vector, json.loads(vector_json))
-            if score >= 0:
+        normalized_query = " ".join(query.casefold().split())
+        for index, (source, title, chunk, vector_json) in enumerate(rows):
+            vector_score = max(0.0, _cosine(query_vector, json.loads(vector_json)))
+            tokens = document_tokens[index]
+            matched = query_terms.intersection(tokens)
+            if query_terms:
+                coverage = len(matched) / len(query_terms)
+                idf_score = sum(
+                    math.log(1 + (total_documents - document_frequency[term] + 0.5)
+                             / (document_frequency[term] + 0.5))
+                    for term in matched
+                )
+                max_idf = sum(
+                    math.log(1 + (total_documents + 0.5) / 0.5)
+                    for _ in query_terms
+                )
+                idf_score = idf_score / max_idf if max_idf else 0.0
+            else:
+                coverage = idf_score = 0.0
+            normalized_chunk = " ".join(str(chunk).casefold().split())
+            phrase_score = 1.0 if normalized_query and normalized_query in normalized_chunk else 0.0
+            score = (0.45 * vector_score + 0.30 * coverage
+                     + 0.20 * idf_score + 0.05 * phrase_score)
+            if score > 0:
                 ranked.append((score, source, title, chunk))
         ranked.sort(key=lambda item: item[0], reverse=True)
         return [
