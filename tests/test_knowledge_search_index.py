@@ -197,3 +197,20 @@ def test_restore_rejects_corrupt_backup(tmp_path):
         Database.restore_backup_to(corrupt_backup, destination)
 
     assert not destination.exists()
+
+
+def test_backup_initializes_schema_and_handles_spaces_in_paths(tmp_path):
+    live_path = tmp_path / "live database.sqlite3"
+    backup_path = tmp_path / "backup folder" / "safe backup.sqlite3"
+    database = Database(f"sqlite:///{live_path}")
+
+    created = database.backup_to(backup_path)
+    assert created.is_file()
+
+    restored_path = Database.restore_backup_to(
+        created, tmp_path / "restored folder" / "restored database.sqlite3"
+    )
+    restored = Database(f"sqlite:///{restored_path}")
+    assert restored.ping()
+    with restored.Session() as session:
+        assert session.query(Memory).count() == 0
