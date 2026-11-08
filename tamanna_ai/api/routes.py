@@ -137,6 +137,25 @@ async def system_metrics(
     return await collect_system_metrics()
 
 
+@api_router.get("/model/resources")
+async def model_resources(
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Expose loaded local model resource usage to the configured admin."""
+    _require_model_admin(token)
+    try:
+        provider = get_model_provider()
+        list_running = getattr(provider, "list_running_models", None)
+        if provider.name != "ollama" or list_running is None:
+            raise HTTPException(status_code=409, detail="Loaded model inspection requires local Ollama.")
+        models = await list_running()
+    except ModelConfigurationError as exc:
+        raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
+    except ModelProviderError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"ok": True, "models": models, "count": len(models)}
+
+
 @api_router.get("/model/status")
 async def model_status():
     """Report local runtime availability and installed model names."""
