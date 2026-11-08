@@ -39,8 +39,8 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_chat_uses_configured_local_provider_and_persists(self):
         provider = FakeProvider()
-        auth, ensure, history, save = self.auth_patches()
-        with auth, ensure, history, save as save_mock, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+        auth, ensure, history, save, memories = self.auth_patches()
+        with auth, ensure, history, save, memories as save_mock, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             result = await chat(ChatRequest(prompt="Explain photosynthesis"))
         self.assertEqual(result.response, "Local model response")
         self.assertEqual(result.provider, "ollama")
@@ -53,7 +53,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_chat_reuses_conversation_and_includes_prior_turns(self):
         provider = FakeProvider()
         auth, ensure, _, save = self.auth_patches(9)
-        with auth, ensure, patch("tamanna_ai.api.routes.database.load_history", return_value=[{"user": "My name is Ali", "assistant": "Hello Ali"}]), save, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider):
+        with auth, ensure, patch("tamanna_ai.api.routes.database.load_history", return_value=[{"user": "My name is Ali", "assistant": "Hello Ali"}]), save, memories, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider):
             result = await chat(ChatRequest(prompt="What is my name?", use_knowledge=False, conversation_id="thread-9"))
         sent = provider.generate.await_args.args[0]
         self.assertIn("My name is Ali", sent)
@@ -93,8 +93,8 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_chat_includes_retrieved_context_as_untrusted_reference(self):
         provider = FakeProvider()
-        auth, ensure, history, save = self.auth_patches()
-        with auth, ensure, history, save, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+        auth, ensure, history, save, memories = self.auth_patches()
+        with auth, ensure, history, save, memories, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             store.return_value.search.return_value = [{"source": "guide.md", "content": "Tamanna AI uses local inference.", "score": 0.9}]
             await chat(ChatRequest(prompt="How does Tamanna work?"))
         sent = provider.generate.await_args.args[0]
@@ -104,8 +104,8 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_chat_can_disable_knowledge_retrieval(self):
         provider = FakeProvider()
-        auth, ensure, history, save = self.auth_patches()
-        with auth, ensure, history, save, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+        auth, ensure, history, save, memories = self.auth_patches()
+        with auth, ensure, history, save, memories, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             await chat(ChatRequest(prompt="Hello", use_knowledge=False))
         store.assert_not_called()
         provider.generate.assert_awaited_once_with("Hello")
