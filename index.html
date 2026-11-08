@@ -108,6 +108,12 @@
             <article class="health-card"><span>Output Tokens</span><strong id="benchmarkTokens">—</strong></article>
           </div>
           <small id="benchmarkDetails" class="settings-note">Metrics Ollama runtime থেকে আসবে; benchmark-এর সময় model load delay latency-তে অন্তর্ভুক্ত।</small>
+          <div class="benchmark-comparison">
+            <h5>Model Performance Comparison</h5>
+            <p id="benchmarkComparisonStatus" class="settings-note">কমপক্ষে একটি benchmark হলে তুলনা দেখা যাবে।</p>
+            <div id="benchmarkComparisonList" class="benchmark-comparison-list" aria-live="polite"></div>
+            <small class="settings-note">প্রতি model-এর সর্বশেষ ৫টি saved run-এর গড় ব্যবহার করা হয়; এটি model quality বা GPT/Gemini সমমানের প্রমাণ নয়।</small>
+          </div>
           <div class="benchmark-history">
             <h5>Benchmark History</h5>
             <p id="benchmarkHistoryStatus" class="settings-note" role="status" aria-live="polite">ইতিহাস লোড করা হয়নি।</p>
