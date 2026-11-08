@@ -219,3 +219,12 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 }
 .system-metrics h4 { margin:0; color:var(--text); font-size:.98rem; }
 .system-metrics .health-grid { margin-top:2px; }
+
+
+/* Local model benchmark panel */
+.model-benchmark {
+  display:grid; gap:9px; margin-top:12px; padding:12px;
+  border:1px solid var(--border); border-radius:12px; background:var(--panel);
+}
+.model-benchmark h4 { margin:0; color:var(--text); font-size:.98rem; }
+.model-benchmark button:disabled { opacity:.55; cursor:wait; }
