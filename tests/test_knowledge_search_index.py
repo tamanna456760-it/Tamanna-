@@ -87,3 +87,56 @@ def test_init_adds_index_to_existing_legacy_memory_table(tmp_path):
         for index in indexes
     }
     assert ("user_id", "id") in indexed_columns
+
+
+def test_sqlite_backup_preserves_knowledge_records(tmp_path):
+    database_path = tmp_path / "live.sqlite3"
+    backup_path = tmp_path / "backups" / "tamanna-backup.sqlite3"
+    database = Database(f"sqlite:///{database_path}")
+    database.init()
+    owner_id = database.ensure_user("backup-owner@example.test", "Backup Owner")
+
+    with database.Session.begin() as session:
+        session.add(
+            Memory(
+                user_id=owner_id,
+                content="backup verification record",
+                metadata_json='{"kind":"test"}',
+            )
+        )
+
+    created_backup = database.backup_to(backup_path)
+    assert created_backup == backup_path.resolve()
+    assert created_backup.is_file()
+
+    backup_database = Database(f"sqlite:///{created_backup}")
+    with backup_database.Session() as session:
+        restored = session.query(Memory).filter_by(
+            content="backup verification record"
+        ).one()
+        assert restored.user_id == owner_id
+
+
+def test_sqlite_backup_refuses_to_overwrite_existing_file(tmp_path):
+    database = Database(f"sqlite:///{tmp_path / 'live.sqlite3'}")
+    database.init()
+    destination = tmp_path / "existing-backup.sqlite3"
+    destination.write_text("keep existing file", encoding="utf-8")
+
+    import pytest
+
+    with pytest.raises(FileExistsError):
+        database.backup_to(destination)
+
+    assert destination.read_text(encoding="utf-8") == "keep existing file"
+
+
+def test_sqlite_backup_rejects_live_database_as_destination(tmp_path):
+    database_path = tmp_path / "live.sqlite3"
+    database = Database(f"sqlite:///{database_path}")
+    database.init()
+
+    import pytest
+
+    with pytest.raises(ValueError, match="differ"):
+        database.backup_to(database_path)
