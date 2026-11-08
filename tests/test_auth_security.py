@@ -233,6 +233,7 @@ def test_unknown_login_email_performs_dummy_pbkdf2_verification(monkeypatch, tmp
     from unittest.mock import patch
 
     monkeypatch.setattr(auth, "DB", tmp_path / "dummy-login.sqlite3")
+    auth.init_db()
     monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
     request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.25"), headers={})
     with patch.object(auth, "password_ok", wraps=auth.password_ok) as verify:
@@ -249,6 +250,7 @@ def test_unknown_and_wrong_password_login_errors_are_indistinguishable(monkeypat
     from tamanna_ai.authentication.router import Login, Signup, login, signup
 
     monkeypatch.setattr(auth, "DB", tmp_path / "generic-login.sqlite3")
+    auth.init_db()
     monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
     request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.26"), headers={})
     signup(Signup(email="member@example.test", name="Member",
