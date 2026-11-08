@@ -70,6 +70,7 @@
       set("benchmarkStatus", "Benchmark সম্পন্ন · " +
         (metrics.passed_checks ?? "—") + "/" + (metrics.total_checks ?? "—") +
         " basic instruction checks pass · " + new Date().toLocaleString());
+      await refreshBenchmarkHistory();
     } catch (error) {
       ["benchmarkLatency", "benchmarkGeneration", "benchmarkPrompt", "benchmarkTokens"].forEach((id) => set(id, "—"));
       set("benchmarkStatus", "Benchmark ব্যর্থ: " + error.message);
@@ -77,6 +78,38 @@
       benchmarkButton.disabled = false;
     }
   });
+
+  async function refreshBenchmarkHistory() {
+    const list = $("benchmarkHistoryList");
+    if (!list) return;
+    if (!window.TamannaAuth?.getUser()) {
+      set("benchmarkHistoryStatus", "ইতিহাস দেখতে admin account-এ লগইন করুন।");
+      list.replaceChildren();
+      return;
+    }
+    try {
+      const data = await getJson("/tamanna-ai/model/benchmark/history?limit=10");
+      const runs = Array.isArray(data.runs) ? data.runs : [];
+      list.replaceChildren();
+      runs.forEach((run) => {
+        const item = document.createElement("li");
+        const result = run.result || {};
+        const date = document.createElement("time");
+        date.textContent = run.created_at ? new Date(run.created_at).toLocaleString() : "তারিখ অজানা";
+        const summary = document.createElement("span");
+        summary.textContent = " · " + (run.model || "Unknown model") + " · " +
+          (result.passed_checks ?? "—") + "/" + (result.total_checks ?? "—") +
+          " checks · " + (Number.isFinite(result.wall_time_ms) ? result.wall_time_ms + " ms" : "latency unavailable") +
+          " · " + (Number.isFinite(result.generation_tokens_per_second) ? result.generation_tokens_per_second + " tok/s" : "speed unavailable");
+        item.append(date, summary);
+        list.append(item);
+      });
+      set("benchmarkHistoryStatus", runs.length ? runs.length + "টি সাম্প্রতিক benchmark" : "এখনো কোনো benchmark সংরক্ষিত নেই।");
+    } catch (error) {
+      list.replaceChildren();
+      set("benchmarkHistoryStatus", "History unavailable: " + error.message);
+    }
+  }
 
   function formatBytes(value) {
     if (!Number.isFinite(value) || value < 0) return "Unavailable";
@@ -300,9 +333,11 @@
     if (document.visibilityState === "visible") refreshMetrics();
   }, 15000);
   window.addEventListener("tamanna:authenticated", refresh);
+  window.addEventListener("tamanna:authenticated", refreshBenchmarkHistory);
   window.addEventListener("tamanna:loggedout", () => {
     set("healthKnowledgeStatus", "লগইন প্রয়োজন");
     set("healthKnowledgeDetail", "Private index শুধু account owner দেখতে পারবেন");
   });
   refresh();
+  refreshBenchmarkHistory();
 })();
