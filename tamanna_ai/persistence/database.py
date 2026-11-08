@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -135,6 +136,31 @@ class Database:
             if index.name == "ix_memories_user_id_id"
         )
         memory_index.create(self.engine, checkfirst=True)
+
+    def backup_to(self, destination: str | Path) -> Path:
+        """Create a consistent SQLite backup without modifying the live database."""
+        if not self.url.startswith("sqlite"):
+            raise ValueError("Database backup is currently supported for SQLite only")
+        source_name = self.engine.url.database
+        if not source_name or source_name == ":memory:":
+            raise ValueError("A file-backed SQLite database is required for backup")
+
+        source_path = Path(source_name).expanduser().resolve()
+        target_path = Path(destination).expanduser().resolve()
+        if source_path == target_path:
+            raise ValueError("Backup destination must differ from the live database")
+        if target_path.exists():
+            raise FileExistsError(f"Backup destination already exists: {target_path}")
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with self.engine.connect() as source:
+                with sqlite3.connect(str(target_path)) as target:
+                    source.connection.driver_connection.backup(target)
+        except Exception:
+            target_path.unlink(missing_ok=True)
+            raise
+        return target_path
 
     def ping(self) -> bool:
         with self.engine.connect() as connection:
