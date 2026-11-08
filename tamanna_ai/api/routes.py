@@ -1,5 +1,8 @@
 """FastAPI routes for the Tamanna AI API package."""
 
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, Cookie, HTTPException
 from pydantic import BaseModel, Field
 
@@ -22,6 +25,11 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     provider: str
+
+
+class KnowledgeImportRequest(BaseModel):
+    filename: str = Field(min_length=1, max_length=180)
+    content: str = Field(min_length=1, max_length=1000000)
 
 
 @api_router.get("/status")
@@ -64,6 +72,62 @@ async def model_status():
         "selected_model_installed": selected_model_installed,
         "installed_models": models,
     }
+
+
+@api_router.post("/knowledge/import")
+async def import_knowledge(
+    request: KnowledgeImportRequest,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Index a bounded text document in the authenticated user's private corpus."""
+    user = require_user(token)
+    filename = request.filename.strip()
+    if Path(filename).name != filename or filename in {".", ".."}:
+        raise HTTPException(status_code=422, detail="Filename must not contain a path.")
+    suffix = Path(filename).suffix.lower()
+    if suffix not in {".txt", ".md", ".markdown", ".json"}:
+        raise HTTPException(status_code=415, detail="Only TXT, Markdown, and JSON files are supported.")
+    if not request.content.strip():
+        raise HTTPException(status_code=422, detail="Document content cannot be blank.")
+    if suffix == ".json":
+        try:
+            json.loads(request.content)
+        except json.JSONDecodeError as exc:
+            raise HTTPException(status_code=422, detail="JSON document is invalid.") from exc
+    try:
+        chunks = VectorKnowledgeStore().index_text(
+            request.content,
+            owner_id=f"user:{user['id']}",
+            source=filename,
+            title=Path(filename).stem,
+        )
+    except ValueError as exc:
+        status_code = 413 if "size limit" in str(exc).lower() else 422
+        raise HTTPException(status_code=status_code, detail=str(exc)) from exc
+    return {"ok": True, "filename": filename, "chunks_indexed": chunks}
+
+
+@api_router.get("/knowledge")
+async def list_knowledge(token: str | None = Cookie(default=None, alias=COOKIE)):
+    """List only the signed-in user's indexed document metadata."""
+    user = require_user(token)
+    documents = VectorKnowledgeStore().list_sources(owner_id=f"user:{user['id']}")
+    return {"ok": True, "documents": documents}
+
+
+@api_router.delete("/knowledge/{filename}")
+async def delete_knowledge(
+    filename: str,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Delete one source only from the signed-in user's private corpus."""
+    user = require_user(token)
+    deleted = VectorKnowledgeStore().delete_source(
+        filename, owner_id=f"user:{user['id']}"
+    )
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Knowledge document not found.")
+    return {"ok": True, "filename": filename, "chunks_deleted": deleted}
 
 
 @api_router.post("/chat", response_model=ChatResponse)
