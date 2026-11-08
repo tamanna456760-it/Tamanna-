@@ -1,8 +1,9 @@
 """FastAPI routes for the Tamanna AI API package."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Cookie, HTTPException
 from pydantic import BaseModel, Field
 
+from tamanna_ai.authentication.router import COOKIE, require_user
 from tamanna_ai.knowledge.vector_store import VectorKnowledgeStore
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -66,7 +67,9 @@ async def model_status():
 
 
 @api_router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, token: str | None = Cookie(default=None, alias=COOKIE)):
+    """Generate a reply using only the signed-in user's private corpus and shared references."""
+    user = require_user(token)
     """Generate a reply with the configured local model provider."""
     prompt = request.prompt.strip()
     if not prompt:
@@ -78,9 +81,16 @@ async def chat(request: ChatRequest):
         if request.use_knowledge:
             # Only the explicitly shared public/system corpus is injected here.
             # Private user corpora require authenticated user identity first.
-            matches = VectorKnowledgeStore().search(
-                prompt, owner_id="tamanna-public", limit=4
+            store = VectorKnowledgeStore()
+            matches = store.search(
+                prompt, owner_id=f"user:{user['id']}", limit=4
             )
+            matches.extend(store.search(
+                prompt, owner_id="tamanna-public", limit=4
+            ))
+            matches = sorted(
+                matches, key=lambda item: float(item.get("score", 0)), reverse=True
+            )[:4]
             if matches:
                 context = "\n\n".join(
                     f"[Source: {item['source']}]\n{item['content']}"
