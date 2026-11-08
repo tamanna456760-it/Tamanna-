@@ -114,7 +114,18 @@ async def model_benchmark(
             raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
         except ModelProviderError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+    database.save_benchmark_run(model=str(result.get("model") or selected), result=result)
     return {"ok": True, "benchmark": result, "scope": "single_local_inference"}
+
+
+@api_router.get("/model/benchmark/history")
+async def model_benchmark_history(
+    limit: int = 20,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Return recent benchmark history to the configured admin only."""
+    _require_model_admin(token)
+    return {"runs": database.list_benchmark_runs(limit=limit)}
 
 
 @api_router.get("/system/metrics")
