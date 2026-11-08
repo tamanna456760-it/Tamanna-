@@ -178,7 +178,7 @@ async def select_model(
 ):
     """Select an already-installed local Ollama model and persist its name."""
     check_origin(request)
-    require_user(token)
+    _require_model_admin(token)
     model_name = payload.model.strip()
     try:
         provider = get_model_provider()
