@@ -120,7 +120,7 @@ def test_legacy_code_builder_and_unified_routes_are_not_public(monkeypatch, tmp_
         ).status_code == 410
         assert client.post("/api/code-builder/compile").status_code == 410
 
-def def test_linux_and_command_routes_fail_closed_for_anonymous_users(monkeypatch, tmp_path):
+def test_linux_and_command_routes_fail_closed_for_anonymous_users(monkeypatch, tmp_path):
     monkeypatch.setenv(
         "TAMANNA_SESSION_SECRET",
         "test-only-session-secret-do-not-use-in-production-123456",
