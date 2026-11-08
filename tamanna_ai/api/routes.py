@@ -274,6 +274,52 @@ async def pull_model(
     )
 
 
+@api_router.post("/model/preflight")
+async def model_preflight(
+    payload: ModelSelectRequest,
+    request: Request,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Estimate whether an installed model is a cautious fit for current host RAM."""
+    check_origin(request)
+    _require_model_admin(token)
+    try:
+        provider = get_model_provider()
+        if provider.name != "ollama" or not hasattr(provider, "list_model_details"):
+            raise HTTPException(status_code=409, detail="Preflight requires local Ollama model metadata.")
+        installed = await provider.list_model_details()
+        model = next((item for item in installed if item.get("name") == payload.model.strip()), None)
+        if model is None:
+            raise HTTPException(status_code=422, detail="Modelটি local Ollama-তে installed নেই।")
+        host = await collect_system_metrics()
+    except ModelConfigurationError as exc:
+        raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
+    except ModelProviderError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    size = model.get("size_bytes")
+    memory = host.get("memory", {})
+    total = memory.get("total_bytes")
+    used = memory.get("used_bytes")
+    free = max(0, total - used) if isinstance(total, int) and isinstance(used, int) else None
+    estimate = int(size * 1.5) + 1024 ** 3 if isinstance(size, int) and size > 0 else None
+    if free is None or estimate is None:
+        status = "unknown"
+        message = "RAM বা model size telemetry অসম্পূর্ণ; নিরাপদ fit নিশ্চিত করা যাচ্ছে না।"
+    elif estimate <= free * 0.75:
+        status = "likely_fit"
+        message = "বর্তমান free RAM অনুযায়ী সম্ভাব্য fit; runtime memory নিশ্চিত নয়।"
+    else:
+        status = "caution"
+        message = "বর্তমান free RAM কম হতে পারে; model load করলে memory pressure বা failure হতে পারে।"
+    return {
+        "ok": True, "model": model["name"], "status": status,
+        "model_size_bytes": size, "estimated_memory_bytes": estimate,
+        "available_memory_bytes": free, "message": message,
+        "selection_loads_model": False,
+    }
+
+
 @api_router.post("/model/select")
 async def select_model(
     payload: ModelSelectRequest,
