@@ -1,12 +1,19 @@
-"""External model integrations for Tamanna AI."""
-from .gemini import GeminiClient, GeminiError, generate_text
+"""Model integrations for Tamanna AI; local inference is the default."""
+from .ollama import OllamaClient, OllamaError
 from .provider import (
-    GeminiProvider, MockProvider, ModelConfigurationError,
-    ModelProviderError, get_model_provider,
+    ModelConfigurationError,
+    ModelProviderError,
+    OllamaProvider,
+    MockProvider,
+    get_model_provider,
 )
 
 __all__ = [
-    "GeminiClient", "GeminiError", "generate_text", "GeminiProvider",
-    "MockProvider", "ModelConfigurationError", "ModelProviderError",
+    "OllamaClient",
+    "OllamaError",
+    "OllamaProvider",
+    "MockProvider",
+    "ModelConfigurationError",
+    "ModelProviderError",
     "get_model_provider",
 ]
