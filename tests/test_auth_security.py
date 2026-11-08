@@ -76,6 +76,56 @@ def test_every_user_protected_route_rejects_anonymous_write():
         assert response.status_code == expected, (path, response.status_code)
 
 
+
+def test_internal_read_routes_reject_anonymous_access():
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    client = TestClient(app)
+
+    for path in sorted(access_control.READ_ROUTES):
+        response = client.get(path)
+        assert response.status_code == 401, (path, response.status_code)
+
+
+def test_admin_read_routes_reject_regular_authenticated_user(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "regular@example.com", "id": 7,
+    })
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.com")
+
+    @app.get("/api/admin/overview")
+    async def admin_overview():
+        return {"ok": True}
+
+    response = TestClient(app).get(
+        "/api/admin/overview",
+        cookies={auth.COOKIE: "test-session"},
+    )
+    assert response.status_code == 403
+
+
+def test_admin_read_routes_allow_configured_admin(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "admin@example.com", "id": 8,
+    })
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.com")
+
+    @app.get("/api/admin/overview")
+    async def admin_overview():
+        return {"ok": True}
+
+    response = TestClient(app).get(
+        "/api/admin/overview",
+        cookies={auth.COOKIE: "test-session"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+
 def test_command_execution_routes_are_disabled_even_for_admin(monkeypatch):
     app = FastAPI()
     app.add_middleware(access_control.TamannaAccessControl)
