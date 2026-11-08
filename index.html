@@ -77,6 +77,19 @@
       <div id="memoryList" class="memory-list" aria-live="polite"></div>
     </section>
 
+    <section class="settings-group" id="modelHealthDashboard">
+      <h3>Model Health / AI System Status</h3>
+      <p class="settings-note">Local Chat Model, Embedding Model এবং Knowledge Index-এর বর্তমান অবস্থা।</p>
+      <div class="health-grid">
+        <article class="health-card"><span>Chat Model</span><strong id="healthChatStatus">যাচাই হচ্ছে…</strong><small id="healthChatDetail">Local model runtime</small></article>
+        <article class="health-card"><span>Embedding Model</span><strong id="healthEmbeddingStatus">যাচাই হচ্ছে…</strong><small id="healthEmbeddingDetail">Knowledge retrieval</small></article>
+        <article class="health-card"><span>Ollama Runtime</span><strong id="healthOllamaStatus">যাচাই হচ্ছে…</strong><small id="healthOllamaDetail">Local model connection</small></article>
+        <article class="health-card"><span>Knowledge Index</span><strong id="healthKnowledgeStatus">লগইন প্রয়োজন</strong><small id="healthKnowledgeDetail">Private indexed documents</small></article>
+      </div>
+      <div class="settings-actions"><button id="refreshModelHealth" class="settings-secondary" type="button">Status আবার পরীক্ষা করুন</button></div>
+      <p id="modelHealthUpdated" class="settings-note" role="status" aria-live="polite">Status এখনো পরীক্ষা করা হয়নি।</p>
+    </section>
+
     <section class="settings-group" id="knowledgeManager">
       <h3>Knowledge Base / জ্ঞানভান্ডার</h3>
       <p class="settings-note">নিজের TXT, Markdown বা JSON নথি index করুন। Embedding model বদলালে পুরোনো নথির vector এখানে পুনরায় তৈরি করুন।</p>
@@ -140,6 +153,6 @@
   <script src="/js/auth.js?v=20261106_account_security"></script>
   <script src="/js/chat.js?v=20261108_conversations"></script>
   <script src="/js/settings.js?v=20261106_preferences2"></script>
-  <script src="/js/memories.js?v=20261108_memory_dashboard"></script>\n  <script src="/js/knowledge.js?v=20261108_knowledge_dashboard"></script>
+  <script src="/js/memories.js?v=20261108_memory_dashboard"></script>\n  <script src="/js/knowledge.js?v=20261108_knowledge_dashboard"><script src="/js/model-health.js?v=20261108_model_health"></script>
 </body>
 </html>
