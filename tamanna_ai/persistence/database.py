@@ -152,6 +152,7 @@ class Database:
         if target_path.exists():
             raise FileExistsError(f"Backup destination already exists: {target_path}")
 
+        self.init()
         target_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with self.engine.connect() as source:
@@ -176,7 +177,7 @@ class Database:
 
         target_path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            with sqlite3.connect(f"file:{backup_path}?mode=ro", uri=True) as source:
+            with sqlite3.connect(f"{backup_path.as_uri()}?mode=ro", uri=True) as source:
                 integrity = source.execute("PRAGMA integrity_check").fetchone()
                 if not integrity or integrity[0] != "ok":
                     raise ValueError("Backup failed SQLite integrity check")
