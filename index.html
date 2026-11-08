@@ -132,6 +132,13 @@
           </div>
         </div>
       </div>
+      <section class="model-resource-manager" aria-labelledby="modelResourceTitle">
+        <h4 id="modelResourceTitle">Loaded Model Resource Manager</h4>
+        <p class="settings-note">Ollama-তে বর্তমানে memory-তে থাকা model, size ও VRAM footprint · Admin only</p>
+        <p id="modelResourceStatus" class="settings-note" role="status" aria-live="polite">Resource তথ্য এখনো সংগ্রহ করা হয়নি।</p>
+        <ul id="modelResourceList"></ul>
+        <button id="refreshModelResources" class="settings-secondary" type="button">Refresh Loaded Models</button>
+      </section>
       <div class="model-manager">
         <label for="localModelSelect">Installed local Chat Model</label>
         <select id="localModelSelect" disabled><option value="">প্রথমে status refresh করুন</option></select>
