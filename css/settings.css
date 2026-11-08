@@ -178,3 +178,20 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 @media(max-width:420px) {
   .health-grid { grid-template-columns:1fr; }
 }
+
+
+/* Local model manager controls */
+.model-manager {
+  display:grid; gap:8px; margin-top:14px; padding:12px;
+  border:1px solid var(--border); border-radius:12px; background:var(--panel);
+}
+.model-manager label { color:var(--muted); font-size:.84rem; }
+.model-manager select {
+  box-sizing:border-box; width:100%; padding:10px;
+  color:var(--text); background:var(--bg);
+  border:1px solid var(--border); border-radius:9px; font:inherit;
+}
+.model-manager button { justify-self:start; }
+.model-manager button:disabled, .model-manager select:disabled {
+  opacity:.55; cursor:not-allowed;
+}
