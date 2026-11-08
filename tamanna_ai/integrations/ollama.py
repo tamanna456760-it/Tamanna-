@@ -64,6 +64,35 @@ class OllamaClient:
             raise OllamaError("Local model runtime returned an invalid model list.") from exc
         return sorted(set(names))
 
+    async def list_running_models(self) -> list[dict]:
+        """Return loaded model names and runtime memory footprints from Ollama."""
+        try:
+            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0)) as client:
+                response = await client.get(f"{self.base_url}/api/ps")
+                response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            raise OllamaError(f"Local model runtime returned HTTP {exc.response.status_code}") from exc
+        except httpx.HTTPError as exc:
+            raise OllamaError(f"Cannot read loaded model resources ({type(exc).__name__}).") from exc
+        try:
+            raw_models = response.json()["models"]
+            if not isinstance(raw_models, list):
+                raise TypeError("models must be a list")
+            models = []
+            for item in raw_models:
+                if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+                    continue
+                models.append({
+                    "name": item["name"][:200],
+                    "size_bytes": item.get("size") if isinstance(item.get("size"), int) and item.get("size") >= 0 else None,
+                    "memory_bytes": item.get("size_vram") if isinstance(item.get("size_vram"), int) and item.get("size_vram") >= 0 else None,
+                    "expires_at": item.get("expires_at") if isinstance(item.get("expires_at"), str) else None,
+                    "context_length": item.get("context_length") if isinstance(item.get("context_length"), int) and item.get("context_length") > 0 else None,
+                })
+            return models
+        except (ValueError, KeyError, TypeError) as exc:
+            raise OllamaError("Local model runtime returned invalid loaded-model data.") from exc
+
     async def pull_model(self, model: str) -> AsyncIterator[dict]:
         """Stream Ollama model-pull progress as validated NDJSON events."""
         model = model.strip() if isinstance(model, str) else ""
