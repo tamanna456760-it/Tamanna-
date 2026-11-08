@@ -8,7 +8,12 @@ from fastapi import APIRouter, Cookie, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from tamanna_ai.authentication.router import COOKIE, check_origin, require_user
-from tamanna_ai.knowledge.vector_store import (\n    EmbeddingError, OllamaEmbeddingProvider, VectorKnowledgeStore, get_default_embedder,\n)
+from tamanna_ai.knowledge.vector_store import (
+    EmbeddingError,
+    OllamaEmbeddingProvider,
+    VectorKnowledgeStore,
+    get_default_embedder,
+)
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
