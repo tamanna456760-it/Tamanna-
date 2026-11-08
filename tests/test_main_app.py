@@ -57,6 +57,18 @@ def test_safe_tool_execution_requires_authenticated_session(monkeypatch, tmp_pat
         )
         assert signup.status_code == 201
 
+        still_anonymous = client.post("/api/tools/execute", json=payload)
+        assert still_anonymous.status_code == 401
+
+        login = client.post(
+            "/api/auth/login",
+            json={
+                "email": "member@example.test",
+                "password": "Strong-test-password-123!",
+            },
+        )
+        assert login.status_code == 200
+
         authenticated = client.post("/api/tools/execute", json=payload)
         assert authenticated.status_code == 422
 
