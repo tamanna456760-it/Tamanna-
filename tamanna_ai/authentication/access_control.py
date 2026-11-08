@@ -4,17 +4,6 @@ from http.cookies import SimpleCookie
 from starlette.responses import JSONResponse
 from tamanna_ai.authentication.router import COOKIE, current_user
 
-USER_ROUTES = {
-    "/api/chat", "/api/chat/master", *READ_ROUTES,
-    "/api/skills/create", "/api/skills/test", "/api/skills/refine",
-    "/api/code-builder/propose", "/api/code-builder/inspect", "/api/code-builder/plan",
-    "/api/self-improvement/analyze", "/api/self-healing/diagnose", "/api/autonomous/plan",
-    "/api/self-healing/cycle", "/api/autonomous/build",
-    "/api/autonomous/repair", "/api/code-builder/apply",
-    "/api/code-builder/build", "/api/code-builder/compile",
-    "/api/linux/run", "/api/linux/shell", "/api/command",
-    "/api/tamanna/echo", "/api/tools/execute",
-}
 READ_ROUTES = {
     "/api/history",
     "/api/admin/overview",
@@ -39,6 +28,18 @@ READ_ROUTES = {
     "/api/unified/project",
 }
 ADMIN_READ_ROUTES = READ_ROUTES - {"/api/history"}
+
+USER_ROUTES = {
+    "/api/chat", "/api/chat/master", *READ_ROUTES,
+    "/api/skills/create", "/api/skills/test", "/api/skills/refine",
+    "/api/code-builder/propose", "/api/code-builder/inspect", "/api/code-builder/plan",
+    "/api/self-improvement/analyze", "/api/self-healing/diagnose",
+    "/api/autonomous/plan", "/api/self-healing/cycle", "/api/autonomous/build",
+    "/api/autonomous/repair", "/api/code-builder/apply",
+    "/api/code-builder/build", "/api/code-builder/compile",
+    "/api/linux/run", "/api/linux/shell", "/api/command",
+    "/api/tamanna/echo", "/api/tools/execute",
+}
 
 BLOCKED_EXECUTION_ROUTES = {
     "/api/linux/run",
