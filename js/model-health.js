@@ -430,6 +430,44 @@
 
   $("refreshModelResources")?.addEventListener("click", refreshModelResources);
 
+  async function refreshModelRecovery() {
+    const button = $("refreshModelRecovery");
+    const actions = $("modelRecoveryActions");
+    if (!actions) return;
+    if (!window.TamannaAuth?.getUser()) {
+      actions.replaceChildren();
+      set("modelRecoveryStatus", "Recovery diagnostics দেখতে admin account-এ লগইন করুন।");
+      if (button) button.disabled = true;
+      return;
+    }
+    if (button) button.disabled = true;
+    set("modelRecoveryStatus", "Local runtime ও host resource পরীক্ষা হচ্ছে…");
+    try {
+      const report = await getJson("/tamanna-ai/model/recovery");
+      actions.replaceChildren();
+      (Array.isArray(report.actions) ? report.actions : []).forEach((message) => {
+        const item = document.createElement("li");
+        item.textContent = message;
+        actions.append(item);
+      });
+      const label = report.status === "healthy" ? "Healthy"
+        : report.status === "offline" ? "Offline" : "Attention required";
+      set("modelRecoveryStatus", label + " · " + (report.code || "unknown") +
+        " · " + (report.installed_model_count ?? 0) + " installed model(s)");
+    } catch (error) {
+      actions.replaceChildren();
+      const item = document.createElement("li");
+      item.textContent = error.message;
+      actions.append(item);
+      set("modelRecoveryStatus", "Recovery check সম্পন্ন হয়নি।");
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  $("refreshModelRecovery")?.addEventListener("click", refreshModelRecovery);
+
+
   async function refreshMetrics() {
     const user = window.TamannaAuth?.getUser();
     if (!user) {
@@ -527,6 +565,7 @@
       updated.textContent = "সর্বশেষ পরীক্ষা: " + new Date().toLocaleString();
       await refreshMetrics();
       await refreshModelResources();
+      await refreshModelRecovery();
     } catch (error) {
       set("healthChatStatus", "Unavailable");
       set("healthChatDetail", error.message);
