@@ -112,3 +112,16 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .user-chat-app #messageInput:focus {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--settings-accent) 28%, transparent);
 }
+
+
+/* Private memory manager */
+.memory-list { display:grid; gap:12px; margin-top:12px; }
+.memory-item { padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--panel); }
+.memory-item textarea, #memoryContent {
+  box-sizing:border-box; width:100%; max-width:100%; min-height:76px;
+  padding:10px; color:var(--text); background:var(--bg);
+  border:1px solid var(--border); border-radius:9px; font:inherit; resize:vertical;
+}
+.memory-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:9px; }
+.memory-actions button { padding:8px 10px; }
+.memory-item .settings-note { overflow-wrap:anywhere; }
