@@ -36,6 +36,10 @@ class KnowledgeImportRequest(BaseModel):
     content: str = Field(min_length=1, max_length=1000000)
 
 
+class MemoryRequest(BaseModel):
+    content: str = Field(min_length=1, max_length=10000)
+
+
 @api_router.get("/status")
 async def status():
     return {"status": "ok", "service": "tamanna_ai"}
@@ -132,6 +136,68 @@ async def delete_knowledge(
     if not deleted:
         raise HTTPException(status_code=404, detail="Knowledge document not found.")
     return {"ok": True, "filename": filename, "chunks_deleted": deleted}
+
+
+@api_router.post("/memories")
+async def create_memory(
+    request: MemoryRequest,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Create a private memory for the authenticated account."""
+    user = require_user(token)
+    if not request.content.strip():
+        raise HTTPException(status_code=422, detail="Memory content cannot be blank.")
+    persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
+    memory_id = database.add_memory(
+        request.content, user_id=persistent_user_id, metadata={"source": "user"}
+    )
+    return {"ok": True, "memory": {"id": memory_id, "content": request.content.strip()}}
+
+
+@api_router.get("/memories")
+async def list_memories(token: str | None = Cookie(default=None, alias=COOKIE)):
+    """List only the authenticated user's private memories."""
+    user = require_user(token)
+    persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
+    return {"ok": True, "memories": database.list_memory_records(
+        user_id=persistent_user_id, limit=200
+    )}
+
+
+@api_router.patch("/memories/{memory_id}")
+async def update_memory(
+    memory_id: int,
+    request: MemoryRequest,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Update a memory only when it belongs to the authenticated account."""
+    user = require_user(token)
+    if not request.content.strip():
+        raise HTTPException(status_code=422, detail="Memory content cannot be blank.")
+    persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
+    try:
+        updated = database.update_memory(
+            memory_id, request.content, user_id=persistent_user_id
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if not updated:
+        raise HTTPException(status_code=404, detail="Memory not found.")
+    return {"ok": True, "memory_id": memory_id}
+
+
+@api_router.delete("/memories/{memory_id}")
+async def delete_memory(
+    memory_id: int,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Delete a memory only when it belongs to the authenticated account."""
+    user = require_user(token)
+    persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
+    deleted = database.delete_memory(memory_id, user_id=persistent_user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Memory not found.")
+    return {"ok": True, "memory_id": memory_id}
 
 
 @api_router.get("/conversations")
@@ -251,5 +317,5 @@ async def chat(request: ChatRequest, token: str | None = Cookie(default=None, al
 
 
 __all__ = [
-    "api_router", "ChatRequest", "ChatResponse", "KnowledgeImportRequest",
+    "api_router", "ChatRequest", "ChatResponse", "KnowledgeImportRequest", "MemoryRequest",
 ]
