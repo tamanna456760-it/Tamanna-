@@ -220,6 +220,11 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 .system-metrics h4 { margin:0; color:var(--text); font-size:.98rem; }
 .system-metrics .health-grid { margin-top:2px; }
 
+.resource-advice { display:grid; gap:7px; margin-top:10px; padding:11px; border:1px solid var(--border); border-radius:10px; }
+.resource-advice h4 { margin:0; color:var(--text); font-size:.92rem; }
+.resource-advice ul { display:grid; gap:7px; margin:0; padding-left:20px; }
+.resource-advice li { overflow-wrap:anywhere; color:var(--text); font-size:.84rem; }
+
 
 /* Local model benchmark panel */
 .model-benchmark {
