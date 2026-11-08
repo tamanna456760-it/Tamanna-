@@ -82,3 +82,52 @@ def test_hybrid_search_ranks_documents_with_more_query_context_first(tmp_path):
     assert results[0]["source"] == "combined.md"
     assert results[0]["score"] > results[1]["score"]
     assert all(0.0 <= result["score"] <= 1.0 for result in results)
+
+
+def test_ollama_embedding_provider_uses_local_embed_endpoint():
+    import httpx
+    from unittest.mock import patch
+    from tamanna_ai.knowledge.vector_store import OllamaEmbeddingProvider
+
+    class FakeClient:
+        request_data = None
+
+        def __init__(self, timeout=None):
+            self.timeout = timeout
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def post(self, url, json):
+            type(self).request_data = (url, json)
+            return httpx.Response(
+                200, json={"embeddings": [[3.0, 4.0]]},
+                request=httpx.Request("POST", url),
+            )
+
+    with patch("tamanna_ai.knowledge.vector_store.httpx.Client", FakeClient):
+        vector = OllamaEmbeddingProvider(
+            base_url="http://127.0.0.1:11434", model="nomic-embed-text"
+        )("meaning of life", task_type="RETRIEVAL_QUERY")
+
+    assert vector == [0.6, 0.8]
+    url, payload = FakeClient.request_data
+    assert url == "http://127.0.0.1:11434/api/embed"
+    assert payload == {"model": "nomic-embed-text", "input": "meaning of life"}
+
+
+def test_embedding_provider_selection_is_local_and_configurable(tmp_path, monkeypatch):
+    from tamanna_ai.knowledge.vector_store import (
+        LocalFeatureEmbedder, OllamaEmbeddingProvider,
+    )
+
+    monkeypatch.delenv("TAMANNA_EMBEDDING_PROVIDER", raising=False)
+    assert isinstance(VectorKnowledgeStore(db_path=tmp_path / "default.sqlite").embedder,
+                      LocalFeatureEmbedder)
+    monkeypatch.setenv("TAMANNA_EMBEDDING_PROVIDER", "ollama")
+    monkeypatch.setenv("TAMANNA_EMBEDDING_MODEL", "nomic-embed-text")
+    assert isinstance(VectorKnowledgeStore(db_path=tmp_path / "ollama.sqlite").embedder,
+                      OllamaEmbeddingProvider)
