@@ -60,6 +60,41 @@ jobs:
           gradle-version: "8.4"
           validate-wrappers: false
 
+      - name: Prepare optional release signing
+        id: signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          configured=0
+          for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
+            if [[ -n "$value" ]]; then configured=$((configured + 1)); fi
+          done
+          if [[ "$configured" -eq 0 ]]; then
+            echo "Release signing secrets are not configured; producing an unsigned release APK."
+            echo "release_signing=unsigned" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$configured" -ne 4 ]]; then
+            echo "::error::Configure all four Android release signing secrets, or leave all four empty."
+            exit 1
+          fi
+          keystore_path="$RUNNER_TEMP/tamanna-release-keystore.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          test -s "$keystore_path"
+          chmod 600 "$keystore_path"
+          {
+            echo "TAMANNA_RELEASE_STORE_FILE=$keystore_path"
+            echo "TAMANNA_RELEASE_STORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "TAMANNA_RELEASE_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+            echo "TAMANNA_RELEASE_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+          echo "release_signing=signed" >> "$GITHUB_OUTPUT"
+          echo "Release signing keystore prepared in runner temporary storage."
+
       - name: Build debug APK
         working-directory: tamanna-ai-app
         run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleDebug
@@ -68,6 +103,14 @@ jobs:
         if: always()
         working-directory: tamanna-ai-app
         run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleRelease
+
+      - name: Verify release APK signature
+        if: success() && steps.signing.outputs.release_signing == 'signed'
+        run: |
+          set -euo pipefail
+          apk="$(find tamanna-ai-app/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$apk"
+          apksigner verify --verbose "$apk"
 
       - name: Locate and package APK files
         run: |
@@ -95,7 +138,7 @@ jobs:
         if: always() && hashFiles('packaged-apk/release/*.apk') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-apk-release-${{ github.run_id }}
+          name: tamanna-apk-release-${{ github.run_id }}-${{ steps.signing.outputs.release_signing || 'unsigned' }}
           path: packaged-apk/release/*.apk
           if-no-files-found: error
           retention-days: 30
@@ -104,11 +147,12 @@ jobs:
         if: always()
         env:
           JOB_STATUS: ${{ job.status }}
+          RELEASE_SIGNING: ${{ steps.signing.outputs.release_signing || 'not-determined' }}
         run: |
           {
             echo "## Tamanna APK Build"
             echo "- Debug APK: requested"
-            echo "- Release APK: requested (unsigned unless signing is configured)"
+            echo "- Release APK signing: $RELEASE_SIGNING"
             echo "- Branch: $GITHUB_REF_NAME"
             echo "- Commit: $GITHUB_SHA"
             echo "- Status: $JOB_STATUS"
