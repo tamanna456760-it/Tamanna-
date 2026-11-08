@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import codecs
 import hashlib
+import heapq
 import json
 import re
 from pathlib import Path
@@ -203,26 +204,31 @@ def search_knowledge(
     if not terms:
         return []
     limit = max(1, min(int(limit), 20))
-    # Scan in bounded database batches so retrieval has no fixed 1,000-row ceiling.
-    ranked = []
+    # Restrict SQL rows to one owner (or anonymous imports), then stream in batches.
+    # A bounded min-heap keeps top-k ranking O(n log k), avoiding a full sort per hit.
+    ranked: list[tuple[int, Any, int, str, dict[str, Any]]] = []
     with database.Session() as session:
         statement = select(Memory).order_by(Memory.id)
-        if user_id is not None:
+        if user_id is None:
+            statement = statement.where(Memory.user_id.is_(None))
+        else:
             statement = statement.where(Memory.user_id == user_id)
         for row in session.scalars(statement).yield_per(500):
             metadata = json.loads(row.metadata_json or "{}")
             if metadata.get("kind") != "imported_knowledge":
                 continue
-            haystack = row.content.lower()
+            haystack = row.content.casefold()
             score = sum(1 for term in terms if term in haystack)
             if score:
-                ranked.append((score, row.created_at, row.content, metadata))
-                ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
-                if len(ranked) > limit:
-                    ranked.pop()
+                item = (score, row.created_at, row.id, row.content, metadata)
+                if len(ranked) < limit:
+                    heapq.heappush(ranked, item)
+                elif item[:3] > ranked[0][:3]:
+                    heapq.heapreplace(ranked, item)
+    ranked.sort(key=lambda item: (item[0], item[1], item[2]), reverse=True)
     return [
         {"content": content, "source": str(metadata.get("source", "unknown")), "title": str(metadata.get("title", ""))}
-        for _, _, content, metadata in ranked
+        for _, _, _, content, metadata in ranked
     ]
 
 
