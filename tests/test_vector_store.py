@@ -33,3 +33,30 @@ def test_vector_store_requires_owner_and_limits_document_size(tmp_path):
         store.index_text("private content", owner_id="", source="a.txt")
     with pytest.raises(ValueError):
         store.index_text("x" * 2048, owner_id="user-1", source="large.txt")
+
+
+
+def test_local_feature_embedder_is_deterministic_and_normalized():
+    from tamanna_ai.knowledge import LocalFeatureEmbedder
+
+    embedder = LocalFeatureEmbedder()
+    first = embedder("Tamanna local memory security")
+    second = embedder("Tamanna local memory security")
+    assert len(first) == 384
+    assert first == second
+    assert abs(sum(value * value for value in first) - 1.0) < 1e-9
+
+
+def test_vector_store_uses_local_embedder_without_api_configuration(tmp_path, monkeypatch):
+    from tamanna_ai.knowledge import LocalFeatureEmbedder
+
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    store = VectorKnowledgeStore(db_path=tmp_path / "local.sqlite3")
+    assert isinstance(store.embedder, LocalFeatureEmbedder)
+    assert store.index_text(
+        "Tamanna local security memory", owner_id="owner-a",
+        source="local.txt", title="Local notes",
+    ) == 1
+    matches = store.search("security memory", owner_id="owner-a")
+    assert matches
+    assert matches[0]["source"] == "local.txt"
