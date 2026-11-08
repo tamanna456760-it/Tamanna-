@@ -226,3 +226,38 @@ def test_cors_allows_only_exact_configured_origin(monkeypatch):
     )
     assert denied.status_code == 400
     assert "access-control-allow-origin" not in denied.headers
+
+def test_unknown_login_email_performs_dummy_pbkdf2_verification(monkeypatch, tmp_path):
+    from fastapi import Response
+    from tamanna_ai.authentication.router import Login, login
+    from unittest.mock import patch
+
+    monkeypatch.setattr(auth, "DB", tmp_path / "dummy-login.sqlite3")
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
+    request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.25"), headers={})
+    with patch.object(auth, "password_ok", wraps=auth.password_ok) as verify:
+        with pytest.raises(Exception) as exc:
+            login(Login(email="unknown@example.test", password="wrong-password"),
+                  request=request, response=Response())
+    assert getattr(exc.value, "status_code", None) == 401
+    verify.assert_called_once()
+    assert verify.call_args.args[1] == auth._DUMMY_PASSWORD_HASH
+
+
+def test_unknown_and_wrong_password_login_errors_are_indistinguishable(monkeypatch, tmp_path):
+    from fastapi import Response
+    from tamanna_ai.authentication.router import Login, Signup, login, signup
+
+    monkeypatch.setattr(auth, "DB", tmp_path / "generic-login.sqlite3")
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
+    request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.26"), headers={})
+    signup(Signup(email="member@example.test", name="Member",
+                  password="correct horse battery"), request=request, response=Response())
+    failures = []
+    for email in ("missing@example.test", "member@example.test"):
+        with pytest.raises(Exception) as exc:
+            login(Login(email=email, password="wrong-password"), request=request, response=Response())
+        failures.append(exc.value)
+    assert [getattr(error, "status_code", None) for error in failures] == [401, 401]
+    assert [str(error.detail) for error in failures] == [str(failures[0].detail)] * 2
+
