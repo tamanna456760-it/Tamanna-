@@ -1,6 +1,7 @@
 """FastAPI routes for the Tamanna AI API package."""
 
 import json
+import os
 import uuid
 from pathlib import Path
 
@@ -24,6 +25,16 @@ from tamanna_ai.integrations.provider import (
 )
 
 api_router = APIRouter(prefix="/tamanna-ai", tags=["tamanna-ai"])
+
+def _require_model_admin(token: str | None):
+    user = require_user(token)
+    admin_email = os.getenv(
+        "TAMANNA_ADMIN_EMAIL", "Tamanna456760@gmail.com"
+    ).strip().lower()
+    if not admin_email or user.get("email", "").strip().lower() != admin_email:
+        raise HTTPException(status_code=403, detail="শুধু Tamanna AI admin model পরিচালনা করতে পারবেন।")
+    return user
+
 
 
 class ChatRequest(BaseModel):
@@ -130,7 +141,7 @@ async def pull_model(
 ):
     """Download a named model only after an authenticated user explicitly requests it."""
     check_origin(request)
-    require_user(token)
+    _require_model_admin(token)
     model_name = payload.model.strip()
     if not model_name or len(model_name) > 200:
         raise HTTPException(status_code=422, detail="Invalid model name.")
