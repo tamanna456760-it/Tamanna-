@@ -53,7 +53,9 @@ CHAT_FILE = DATA_DIR / "chat_history.json"
 # ============================================================
 
 app = FastAPI(
-
+    title="Tamanna AI",
+    version="1.0.0"
+)
 
 
 def _require_feature_access(request: Request, *, admin: bool = False, write: bool = False):
@@ -73,9 +75,6 @@ def _require_feature_access(request: Request, *, admin: bool = False, write: boo
         if user.get("email", "").strip().lower() not in allowed:
             raise HTTPException(status_code=403, detail="Admin access required.")
     return user
-    title="Tamanna AI",
-    version="1.0.0"
-)
 
 
 @app.on_event("startup")
