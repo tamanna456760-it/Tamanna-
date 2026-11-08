@@ -162,6 +162,44 @@ class Database:
             raise
         return target_path
 
+    @staticmethod
+    def restore_backup_to(backup: str | Path, destination: str | Path) -> Path:
+        """Restore a validated SQLite backup into a new, non-existing database file."""
+        backup_path = Path(backup).expanduser().resolve()
+        target_path = Path(destination).expanduser().resolve()
+        if not backup_path.is_file():
+            raise FileNotFoundError(f"Backup file not found: {backup_path}")
+        if backup_path == target_path:
+            raise ValueError("Restore destination must differ from the backup file")
+        if target_path.exists():
+            raise FileExistsError(f"Restore destination already exists: {target_path}")
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with sqlite3.connect(f"file:{backup_path}?mode=ro", uri=True) as source:
+                integrity = source.execute("PRAGMA integrity_check").fetchone()
+                if not integrity or integrity[0] != "ok":
+                    raise ValueError("Backup failed SQLite integrity check")
+                tables = {
+                    row[0]
+                    for row in source.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table'"
+                    )
+                }
+                if not {"users", "memories"}.issubset(tables):
+                    raise ValueError("Backup is missing required Tamanna database tables")
+                with sqlite3.connect(str(target_path)) as target:
+                    source.backup(target)
+                    restored_integrity = target.execute(
+                        "PRAGMA integrity_check"
+                    ).fetchone()
+                    if not restored_integrity or restored_integrity[0] != "ok":
+                        raise ValueError("Restored database failed integrity check")
+        except Exception:
+            target_path.unlink(missing_ok=True)
+            raise
+        return target_path
+
     def ping(self) -> bool:
         with self.engine.connect() as connection:
             connection.exec_driver_sql("SELECT 1")
