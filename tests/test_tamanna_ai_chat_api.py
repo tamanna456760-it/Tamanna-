@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
 
 from tamanna_ai.api.routes import (
-    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, chat, delete_conversation,
+    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, model_benchmark, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
@@ -94,6 +94,40 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 use_knowledge=False, remember=False,
             ))
         add.assert_not_called()
+
+    async def test_model_benchmark_is_admin_only_and_returns_real_provider_metrics(self):
+        expected = {
+            "model": "qwen2.5:7b",
+            "wall_time_ms": 120.5,
+            "prompt_tokens": 20,
+            "output_tokens": 35,
+            "prompt_tokens_per_second": 100.0,
+            "generation_tokens_per_second": 29.0,
+            "total_duration_ms": 110.0,
+            "model_load_ms": 10.0,
+        }
+        class BenchmarkProvider:
+            name = "ollama"
+
+            async def benchmark(self):
+                return expected
+
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user",
+            return_value={"id": 1, "email": "Tamanna456760@gmail.com"},
+        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=BenchmarkProvider()):
+            result = await model_benchmark(request=object(), token="admin-session")
+        self.assertEqual(result, {"ok": True, "benchmark": expected})
+
+    async def test_model_benchmark_denies_non_admin(self):
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user",
+            return_value={"id": 2, "email": "member@example.test"},
+        ), patch("tamanna_ai.api.routes.get_model_provider") as get_provider:
+            with self.assertRaises(HTTPException) as raised:
+                await model_benchmark(request=object(), token="member-session")
+        self.assertEqual(raised.exception.status_code, 403)
+        get_provider.assert_not_called()
 
     async def test_system_metrics_requires_admin_and_returns_host_metrics(self):
         expected = {
