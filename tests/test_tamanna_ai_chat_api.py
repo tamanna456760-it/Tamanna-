@@ -52,7 +52,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_chat_reuses_conversation_and_includes_prior_turns(self):
         provider = FakeProvider()
-        auth, ensure, _, save = self.auth_patches(9)
+        auth, ensure, _, save, memories = self.auth_patches(9)
         with auth, ensure, patch("tamanna_ai.api.routes.database.load_history", return_value=[{"user": "My name is Ali", "assistant": "Hello Ali"}]), save, memories, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider):
             result = await chat(ChatRequest(prompt="What is my name?", use_knowledge=False, conversation_id="thread-9"))
         sent = provider.generate.await_args.args[0]
