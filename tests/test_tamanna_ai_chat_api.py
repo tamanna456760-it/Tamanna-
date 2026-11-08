@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 
 from fastapi import HTTPException
 
-from tamanna_ai.api.routes import (
+from tamanna_ai.api.routes import (, model_resources
     ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, model_benchmark, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, model_benchmark_history, MemoryRequest, create_memory, list_memories,
@@ -126,6 +126,33 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             result = await model_benchmark(request=object(), token="admin-session")
         self.assertEqual(result, {"ok": True, "benchmark": expected, "scope": "single_local_inference"})
         save_run.assert_called_once_with(model="qwen2.5:7b", result=expected)
+
+    async def test_model_resources_is_admin_only_and_returns_loaded_models(self):
+        expected = [{
+            "name": "qwen2.5:7b", "size_bytes": 4200000000,
+            "memory_bytes": 3900000000, "expires_at": None,
+            "context_length": 8192,
+        }]
+        class ResourceProvider:
+            name = "ollama"
+
+            async def list_running_models(self):
+                return expected
+
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 1, "email": "Tamanna456760@gmail.com"
+        }), patch("tamanna_ai.api.routes.get_model_provider", return_value=ResourceProvider()):
+            result = await model_resources(token="admin-session")
+        self.assertEqual(result, {"ok": True, "models": expected, "count": 1})
+
+    async def test_model_resources_denies_non_admin(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 2, "email": "member@example.test"
+        }), patch("tamanna_ai.api.routes.get_model_provider") as get_provider:
+            with self.assertRaises(HTTPException) as raised:
+                await model_resources(token="member-session")
+        self.assertEqual(raised.exception.status_code, 403)
+        get_provider.assert_not_called()
 
     async def test_benchmark_history_is_admin_only(self):
         expected = [{"id": 3, "model": "qwen2.5:7b", "result": {"passed_checks": 2}}]
