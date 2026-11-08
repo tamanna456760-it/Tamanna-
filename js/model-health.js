@@ -47,13 +47,12 @@
 
   async function refreshMetrics() {
     const user = window.TamannaAuth?.getUser();
-    const adminEmail = "tamanna456760@gmail.com";
-    if (!user || String(user.email || "").toLowerCase() !== adminEmail) {
-      set("metricCpu", "Admin only");
-      set("metricRam", "Admin only");
-      set("metricDisk", "Admin only");
-      set("metricGpu", "Admin only");
-      set("metricsUpdated", "এই তথ্য শুধু configured Tamanna AI admin দেখতে পারবেন।");
+    if (!user) {
+      set("metricCpu", "লগইন প্রয়োজন");
+      set("metricRam", "লগইন প্রয়োজন");
+      set("metricDisk", "লগইন প্রয়োজন");
+      set("metricGpu", "লগইন প্রয়োজন");
+      set("metricsUpdated", "Metrics দেখতে account-এ লগইন করুন।");
       return;
     }
     try {
@@ -80,7 +79,9 @@
       set("metricsUpdated", "সর্বশেষ metrics: " + new Date().toLocaleString());
     } catch (error) {
       ["metricCpu", "metricRam", "metricDisk", "metricGpu"].forEach((id) => set(id, "Unavailable"));
-      set("metricsUpdated", "Metrics সংগ্রহ করা যায়নি: " + error.message);
+      const denied = /403|admin/i.test(error.message);
+      set("metricsUpdated", denied ? "এই তথ্য শুধু configured Tamanna AI admin দেখতে পারবেন।" : "Metrics সংগ্রহ করা যায়নি: " + error.message);
+      if (denied) ["metricCpu", "metricRam", "metricDisk", "metricGpu"].forEach((id) => set(id, "Admin only"));
     }
   }
 
