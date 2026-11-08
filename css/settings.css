@@ -228,3 +228,18 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 }
 .model-benchmark h4 { margin:0; color:var(--text); font-size:.98rem; }
 .model-benchmark button:disabled { opacity:.55; cursor:wait; }
+
+.benchmark-comparison { display:grid; gap:9px; margin-top:10px; }
+.benchmark-comparison h5 { margin:0; color:var(--text); font-size:.92rem; }
+.benchmark-comparison-list { display:grid; gap:9px; }
+.benchmark-comparison-item {
+  display:grid; gap:5px; min-width:0; padding:10px;
+  border:1px solid var(--border); border-radius:10px; background:var(--surface, var(--panel));
+}
+.benchmark-comparison-item strong { overflow-wrap:anywhere; color:var(--text); }
+.benchmark-comparison-item small { color:var(--muted); font-size:.78rem; }
+.benchmark-comparison-item span { color:var(--text); font-size:.86rem; }
+.benchmark-bar-track { height:9px; overflow:hidden; border-radius:99px; background:var(--border); }
+.benchmark-bar { height:100%; border-radius:inherit; background:var(--accent, #7c83ff); transition:width .25s ease; }
+.benchmark-history ol { display:grid; gap:7px; padding-left:22px; }
+.benchmark-history li { overflow-wrap:anywhere; color:var(--text); font-size:.82rem; }
