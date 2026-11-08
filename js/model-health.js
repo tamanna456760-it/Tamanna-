@@ -95,9 +95,12 @@
       try {
         const history = await getJson("/tamanna-ai/model/benchmark/history?limit=100");
         const rows = Array.isArray(history.runs) ? history.runs : [];
-        const selected = modelSelect?.value;
-        const previous = rows.find((row) => row.model === selected) ||
-          rows.find((row) => row.model);
+        let selected = modelSelect?.value;
+        if (!selected) {
+          const status = await getJson("/tamanna-ai/model/status");
+          selected = status.selected_model || "";
+        }
+        const previous = selected ? rows.find((row) => row.model === selected) : null;
         baseline = previous?.result || null;
       } catch (_) {
         // Benchmark still runs when history is unavailable; no automatic retry without a baseline.
