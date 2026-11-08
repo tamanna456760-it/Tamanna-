@@ -42,7 +42,7 @@ def test_safe_tool_execution_requires_authenticated_session(monkeypatch, tmp_pat
     monkeypatch.setattr(auth_router, "DB", tmp_path / "tool-auth.sqlite3")
     import Main
 
-    with TestClient(Main.app) as client:
+    with TestClient(Main.app, base_url="https://testserver") as client:
         payload = {"name": "not-allow-listed", "arguments": {}}
         unauthenticated = client.post("/api/tools/execute", json=payload)
         assert unauthenticated.status_code == 401
