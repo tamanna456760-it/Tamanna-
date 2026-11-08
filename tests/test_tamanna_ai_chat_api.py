@@ -26,6 +26,8 @@ def _with_test_request(route):
         request = kwargs.get("request")
         if request is None or not hasattr(request, "headers"):
             kwargs["request"] = SimpleNamespace(headers={})
+        if "token" in inspect.signature(route).parameters and "token" not in kwargs:
+            kwargs["token"] = None
         return await route(*args, **kwargs)
 
     return invoke
@@ -333,7 +335,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_select_model_rejects_model_not_installed(self):
         with patch("tamanna_ai.api.routes.check_origin"), patch(
-            "tamanna_ai.api.routes.require_user", return_value={"id": 12}
+            "tamanna_ai.api.routes.require_user", return_value={"id": 12, "email": "tamanna456760@gmail.com"}
         ), patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()), patch(
             "tamanna_ai.api.routes.set_selected_model"
         ) as save:
