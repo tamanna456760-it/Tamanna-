@@ -113,6 +113,11 @@
             <p id="benchmarkComparisonStatus" class="settings-note">কমপক্ষে একটি benchmark হলে তুলনা দেখা যাবে।</p>
             <div id="benchmarkComparisonList" class="benchmark-comparison-list" aria-live="polite"></div>
             <small class="settings-note">প্রতি model-এর সর্বশেষ ৫টি saved run-এর গড় ব্যবহার করা হয়; এটি model quality বা GPT/Gemini সমমানের প্রমাণ নয়।</small>
+            <div class="benchmark-regression">
+              <h5>Automatic Regression Watch</h5>
+              <p id="benchmarkRegressionStatus" class="settings-note" role="status" aria-live="polite">আগের benchmark-এর সঙ্গে তুলনা অপেক্ষমাণ।</p>
+              <ul id="benchmarkRegressionList"></ul>
+            </div>
           </div>
           <div class="benchmark-history">
             <h5>Benchmark History</h5>
