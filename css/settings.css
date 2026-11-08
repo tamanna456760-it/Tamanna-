@@ -210,3 +210,12 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 }
 .model-download progress { width:100%; height:10px; accent-color:var(--accent); }
 .model-download button:disabled { opacity:.55; cursor:wait; }
+
+
+/* Admin host performance monitor */
+.system-metrics {
+  display:grid; gap:8px; margin-top:14px; padding:12px;
+  border:1px solid var(--border); border-radius:12px; background:var(--panel);
+}
+.system-metrics h4 { margin:0; color:var(--text); font-size:.98rem; }
+.system-metrics .health-grid { margin-top:2px; }
