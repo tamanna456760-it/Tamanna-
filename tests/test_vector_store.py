@@ -131,3 +131,25 @@ def test_embedding_provider_selection_is_local_and_configurable(tmp_path, monkey
     monkeypatch.setenv("TAMANNA_EMBEDDING_MODEL", "nomic-embed-text")
     assert isinstance(VectorKnowledgeStore(db_path=tmp_path / "ollama.sqlite").embedder,
                       OllamaEmbeddingProvider)
+
+
+def test_reindex_recomputes_existing_vectors_without_deleting_documents(tmp_path):
+    old_embedder = lambda text, task_type="RETRIEVAL_DOCUMENT": [1.0, 0.0]
+    new_embedder = lambda text, task_type="RETRIEVAL_DOCUMENT": [0.0, 1.0]
+    db_path = tmp_path / "reindex.sqlite3"
+    old_store = VectorKnowledgeStore(old_embedder, db_path)
+    old_store.index_text(
+        "Tamanna local semantic retrieval guide",
+        owner_id="user-1", source="guide.md", title="Guide",
+    )
+
+    new_store = VectorKnowledgeStore(new_embedder, db_path)
+    assert new_store.reindex(owner_id="user-1") == {
+        "documents": 1, "chunks_reindexed": 1,
+    }
+    assert new_store.search("Tamanna local semantic retrieval guide",
+                            owner_id="user-1")
+    assert new_store.list_sources(owner_id="user-1")[0]["source"] == "guide.md"
+    assert new_store.reindex(owner_id="user-2") == {
+        "documents": 0, "chunks_reindexed": 0,
+    }
