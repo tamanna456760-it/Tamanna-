@@ -59,3 +59,22 @@ def test_safe_tool_execution_requires_authenticated_session(monkeypatch, tmp_pat
 
         authenticated = client.post("/api/tools/execute", json=payload)
         assert authenticated.status_code == 422
+
+
+def test_skills_and_code_builder_routes_reject_anonymous_access(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.test")
+    monkeypatch.setenv("TAMANNA_COOKIE_SECURE", "0")
+
+    import tamanna_ai.authentication.router as auth_router
+
+    monkeypatch.setattr(auth_router, "DB", tmp_path / "feature-access.sqlite3")
+    import Main
+
+    with TestClient(Main.app) as client:
+        assert client.get("/api/skills").status_code == 401
+        assert client.get("/api/code-builder/status").status_code == 401
+        assert client.get("/api/code-builder/scan").status_code == 401
