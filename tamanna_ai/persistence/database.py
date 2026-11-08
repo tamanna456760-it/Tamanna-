@@ -187,7 +187,16 @@ class Database:
                         "SELECT name FROM sqlite_master WHERE type='table'"
                     )
                 }
-                required_tables = {"users", "conversations", "messages", "memories"}
+                required_tables = {
+                    "users",
+                    "conversations",
+                    "messages",
+                    "memories",
+                    "user_settings",
+                    "knowledge_fingerprints",
+                    "benchmark_runs",
+                    "schema_migrations",
+                }
                 if not required_tables.issubset(tables):
                     missing = ", ".join(sorted(required_tables - tables))
                     raise ValueError(
