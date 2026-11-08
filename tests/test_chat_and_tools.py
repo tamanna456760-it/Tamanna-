@@ -7,12 +7,11 @@ from tamanna_ai.integrations.provider import ModelConfigurationError, get_model_
 from tamanna_ai.tools import safe_tools
 
 
-def test_gemini_is_default_and_requires_key(monkeypatch):
+def test_ollama_is_default_without_api_key(monkeypatch):
     monkeypatch.delenv("TAMANNA_MODEL_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("TAMANNA_MODEL_PROVIDER", raising=False)
-    with pytest.raises(ModelConfigurationError, match="not configured"):
-        get_model_provider()
+    assert get_model_provider().name == "ollama"
 
 
 def test_mock_provider_is_restricted_to_test_environment(monkeypatch):
@@ -62,7 +61,7 @@ def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch, tmp_path):
         assert history.json()["history"][-1]["user"] == "hello"
 
 
-def test_chat_api_returns_503_without_model_key(monkeypatch, tmp_path):
+def test_chat_api_rejects_gemini_provider(monkeypatch, tmp_path):
     monkeypatch.setenv("TAMANNA_MODEL_PROVIDER", "gemini")
     monkeypatch.delenv("TAMANNA_MODEL_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
@@ -72,7 +71,7 @@ def test_chat_api_returns_503_without_model_key(monkeypatch, tmp_path):
         _create_chat_test_user(client)
         response = client.post("/api/chat", json={"message": "hello"})
         assert response.status_code == 503
-        assert "not configured" in response.json()["detail"]
+        assert "Unsupported model provider" in response.json()["detail"]
 
 
 def test_read_doc_is_confined_to_docs_and_logs_calls(tmp_path, monkeypatch):
