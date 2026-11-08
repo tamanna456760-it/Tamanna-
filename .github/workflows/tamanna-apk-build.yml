@@ -100,7 +100,7 @@ jobs:
         run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleDebug
 
       - name: Build release APK
-        if: always()
+        if: steps.signing.outcome == 'success'
         working-directory: tamanna-ai-app
         run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleRelease
 
