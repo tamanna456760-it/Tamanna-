@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 
 from fastapi import HTTPException
 
-from tamanna_ai.api.routes import ChatRequest, chat, model_status
+from tamanna_ai.api.routes import (\n    ChatRequest, KnowledgeImportRequest, chat, delete_knowledge,\n    import_knowledge, list_knowledge, model_status,\n)
 
 
 class FakeProvider:
@@ -103,7 +103,52 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("/api/auth/login", paths)
         self.assertIn("/tamanna-ai/chat", paths)
 
-    async def test_blank_prompt_is_rejected(self):
+
+    async def test_private_knowledge_import_uses_authenticated_owner(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}), \\
+             patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            result = await import_knowledge(KnowledgeImportRequest(
+                filename="notes.md", content="# Private notes"
+            ))
+        self.assertEqual(result["chunks_indexed"], store.return_value.index_text.return_value)
+        store.return_value.index_text.assert_called_once_with(
+            "# Private notes", owner_id="user:7", source="notes.md", title="notes"
+        )
+
+    async def test_private_knowledge_import_rejects_path_traversal(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}):
+            with self.assertRaises(HTTPException) as raised:
+                await import_knowledge(KnowledgeImportRequest(
+                    filename="../private.md", content="text"
+                ))
+        self.assertEqual(raised.exception.status_code, 422)
+
+    async def test_private_knowledge_import_rejects_invalid_json(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}):
+            with self.assertRaises(HTTPException) as raised:
+                await import_knowledge(KnowledgeImportRequest(
+                    filename="data.json", content="{bad json"
+                ))
+        self.assertEqual(raised.exception.status_code, 422)
+
+    async def test_list_knowledge_is_scoped_to_signed_in_user(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 12}), \\
+             patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            store.return_value.list_sources.return_value = [{"source": "mine.md"}]
+            result = await list_knowledge()
+        store.return_value.list_sources.assert_called_once_with(owner_id="user:12")
+        self.assertEqual(result["documents"], [{"source": "mine.md"}])
+
+    async def test_delete_knowledge_is_scoped_to_signed_in_user(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 12}), \\
+             patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            store.return_value.delete_source.return_value = 2
+            result = await delete_knowledge("mine.md")
+        store.return_value.delete_source.assert_called_once_with(
+            "mine.md", owner_id="user:12"
+        )
+        self.assertEqual(result["chunks_deleted"], 2)
+\n    async def test_blank_prompt_is_rejected(self):
         with self.assertRaises(HTTPException) as raised:
             await chat(ChatRequest(prompt="   "))
         self.assertEqual(raised.exception.status_code, 422)
