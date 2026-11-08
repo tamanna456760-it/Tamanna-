@@ -141,6 +141,31 @@ async def system_metrics(
 async def model_resources(
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
+    """Expose admin-only loaded and installed model resource information."""
+    _require_model_admin(token)
+    try:
+        provider = get_model_provider()
+        list_running = getattr(provider, "list_running_models", None)
+        list_details = getattr(provider, "list_model_details", None)
+        if provider.name != "ollama" or list_running is None or list_details is None:
+            raise HTTPException(status_code=409, detail="Resource inspection requires local Ollama.")
+        models = await list_running()
+        installed = await list_details()
+        host = await collect_system_metrics()
+    except ModelConfigurationError as exc:
+        raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
+    except ModelProviderError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {
+        "ok": True, "models": models, "count": len(models),
+        "installed_models": installed, "host": host,
+    }
+
+
+@api_router.get("/model/resources")
+async def model_resources(
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
     """Expose loaded local model resource usage to the configured admin."""
     _require_model_admin(token)
     try:
