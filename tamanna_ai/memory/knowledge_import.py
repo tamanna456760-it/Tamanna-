@@ -5,6 +5,7 @@ It does not connect to or copy private datasets from other AI providers.
 """
 from __future__ import annotations
 
+import codecs
 import hashlib
 import json
 import re
@@ -85,6 +86,7 @@ def _read_bounded_text(path: Path, max_file_bytes: int) -> str:
         raise ValueError("max_file_bytes must be positive")
     if path.stat().st_size > max_file_bytes:
         raise ValueError("Import exceeds the configured file size limit")
+    decoder = codecs.getincrementaldecoder("utf-8")(errors="strict")
     parts: list[str] = []
     total = 0
     with path.open("rb") as stream:
@@ -95,7 +97,8 @@ def _read_bounded_text(path: Path, max_file_bytes: int) -> str:
             total += len(block)
             if total > max_file_bytes:
                 raise ValueError("Import exceeds the configured file size limit")
-            parts.append(block.decode("utf-8", errors="strict"))
+            parts.append(decoder.decode(block))
+    parts.append(decoder.decode(b"", final=True))
     return "".join(parts)
 
 
