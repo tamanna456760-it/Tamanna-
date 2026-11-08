@@ -60,3 +60,25 @@ def test_vector_store_uses_local_embedder_without_api_configuration(tmp_path, mo
     matches = store.search("security memory", owner_id="owner-a")
     assert matches
     assert matches[0]["source"] == "local.txt"
+
+
+def test_hybrid_search_ranks_documents_with_more_query_context_first(tmp_path):
+    store = VectorKnowledgeStore(fake_embedder, tmp_path / "hybrid.sqlite3")
+    store.index_text(
+        "Security controls protect the application and database.",
+        owner_id="user-1", source="security.md", title="Security",
+    )
+    store.index_text(
+        "Memory persistence stores private conversation memory securely.",
+        owner_id="user-1", source="memory.md", title="Memory",
+    )
+    store.index_text(
+        "Security and memory are both covered by this combined guide.",
+        owner_id="user-1", source="combined.md", title="Combined",
+    )
+
+    results = store.search("security memory", owner_id="user-1", limit=3)
+
+    assert results[0]["source"] == "combined.md"
+    assert results[0]["score"] > results[1]["score"]
+    assert all(0.0 <= result["score"] <= 1.0 for result in results)
