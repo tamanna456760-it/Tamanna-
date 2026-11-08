@@ -24,12 +24,15 @@ class FakeModelManager:
 class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_chat_uses_configured_local_provider(self):
         provider = FakeProvider()
-        with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \\
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \
              patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             result = await chat(ChatRequest(prompt="Explain photosynthesis"))
         self.assertEqual(result.response, "Local model response")
         self.assertEqual(result.provider, "ollama")
-        provider.generate.assert_awaited_once_with("Explain photosynthesis")\n        store.return_value.search.assert_called_once_with(\n            "Explain photosynthesis", owner_id="tamanna-public", limit=4\n        )
+        provider.generate.assert_awaited_once_with("Explain photosynthesis")
+        store.return_value.search.assert_called_once_with(
+            "Explain photosynthesis", owner_id="tamanna-public", limit=4
+        )
 
     async def test_model_status_lists_installed_models(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()):
@@ -38,10 +41,9 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["selected_model"], "qwen2.5:7b")
         self.assertIn("llama3.2:3b", result["installed_models"])
 
-
     async def test_chat_includes_retrieved_context_as_untrusted_reference(self):
         provider = FakeProvider()
-        with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \\
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \
              patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             store.return_value.search.return_value = [{
                 "source": "guide.md",
@@ -57,12 +59,13 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_chat_can_disable_knowledge_retrieval(self):
         provider = FakeProvider()
-        with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \\
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), \
              patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             await chat(ChatRequest(prompt="Hello", use_knowledge=False))
         store.assert_not_called()
         provider.generate.assert_awaited_once_with("Hello")
-\n    async def test_blank_prompt_is_rejected(self):
+
+    async def test_blank_prompt_is_rejected(self):
         with self.assertRaises(HTTPException) as raised:
             await chat(ChatRequest(prompt="   "))
         self.assertEqual(raised.exception.status_code, 422)
