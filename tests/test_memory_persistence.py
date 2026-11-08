@@ -25,6 +25,19 @@ class PersistentMemoryTests(unittest.TestCase):
         self.assertEqual(self.db.list_memories(user_id=self.user_b), ["B private preference"])
         self.assertEqual(self.db.list_memories(user_id=None), [])
 
+
+    def test_memory_records_include_ids_and_metadata_for_owner_only(self):
+        first_id = self.db.add_memory(
+            "Remember Bengali preference", user_id=self.user_a,
+            metadata={"source": "user"},
+        )
+        self.db.add_memory("Other user's private memory", user_id=self.user_b)
+        records = self.db.list_memory_records(user_id=self.user_a)
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["id"], first_id)
+        self.assertEqual(records[0]["metadata"], {"source": "user"})
+        self.assertEqual(records[0]["content"], "Remember Bengali preference")
+
     def test_memory_update_and_delete_require_owner(self):
         memory_id = self.db.add_memory("Original", user_id=self.user_a)
         self.assertFalse(self.db.update_memory(memory_id, "Intrusion", user_id=self.user_b))
