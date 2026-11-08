@@ -19,7 +19,7 @@ import uvicorn
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=False)
 
-from tamanna_ai.authentication.router import COOKIE, current_user
+from tamanna_ai.authentication.router import COOKIE, check_origin, current_user
 
 from tamanna_ai.persistence.database import (
     database,
@@ -715,7 +715,10 @@ async def chat_history(http_request: Request):
 
 
 @app.post("/api/tools/execute")
-async def execute_safe_tool(payload: ToolRequest):
+async def execute_safe_tool(payload: ToolRequest, request: Request):
+    check_origin(request)
+    if not current_user(request.cookies.get(COOKIE)):
+        raise HTTPException(status_code=401, detail="Sign in required.")
     try:
         return await execute_tool(payload.name, payload.arguments or {})
     except ToolInputError as exc:
