@@ -4,10 +4,10 @@ import json
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Cookie, HTTPException
+from fastapi import APIRouter, Cookie, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from tamanna_ai.authentication.router import COOKIE, require_user
+from tamanna_ai.authentication.router import COOKIE, check_origin, require_user
 from tamanna_ai.knowledge.vector_store import VectorKnowledgeStore
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
@@ -85,27 +85,29 @@ async def model_status():
 
 @api_router.post("/knowledge/import")
 async def import_knowledge(
-    request: KnowledgeImportRequest,
+    request: Request,
+    payload: KnowledgeImportRequest,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Index a bounded text document in the authenticated user's private corpus."""
+    check_origin(request)
     user = require_user(token)
-    filename = request.filename.strip()
+    filename = payload.filename.strip()
     if Path(filename).name != filename or filename in {".", ".."}:
         raise HTTPException(status_code=422, detail="Filename must not contain a path.")
     suffix = Path(filename).suffix.lower()
     if suffix not in {".txt", ".md", ".markdown", ".json"}:
         raise HTTPException(status_code=415, detail="Only TXT, Markdown, and JSON files are supported.")
-    if not request.content.strip():
+    if not payload.content.strip():
         raise HTTPException(status_code=422, detail="Document content cannot be blank.")
     if suffix == ".json":
         try:
-            json.loads(request.content)
+            json.loads(payload.content)
         except json.JSONDecodeError as exc:
             raise HTTPException(status_code=422, detail="JSON document is invalid.") from exc
     try:
         chunks = VectorKnowledgeStore().index_text(
-            request.content,
+            payload.content,
             owner_id=f"user:{user['id']}",
             source=filename,
             title=Path(filename).stem,
@@ -127,9 +129,11 @@ async def list_knowledge(token: str | None = Cookie(default=None, alias=COOKIE))
 @api_router.delete("/knowledge/{filename}")
 async def delete_knowledge(
     filename: str,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Delete one source only from the signed-in user's private corpus."""
+    check_origin(request)
     user = require_user(token)
     deleted = VectorKnowledgeStore().delete_source(
         filename, owner_id=f"user:{user['id']}"
@@ -141,18 +145,20 @@ async def delete_knowledge(
 
 @api_router.post("/memories")
 async def create_memory(
-    request: MemoryRequest,
+    payload: MemoryRequest,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Create a private memory for the authenticated account."""
+    check_origin(request)
     user = require_user(token)
-    if not request.content.strip():
+    if not payload.content.strip():
         raise HTTPException(status_code=422, detail="Memory content cannot be blank.")
     persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
     memory_id = database.add_memory(
-        request.content, user_id=persistent_user_id, metadata={"source": "user"}
+        payload.content, user_id=persistent_user_id, metadata={"source": "user"}
     )
-    return {"ok": True, "memory": {"id": memory_id, "content": request.content.strip()}}
+    return {"ok": True, "memory": {"id": memory_id, "content": payload.content.strip()}}
 
 
 @api_router.get("/memories")
@@ -168,17 +174,18 @@ async def list_memories(token: str | None = Cookie(default=None, alias=COOKIE)):
 @api_router.patch("/memories/{memory_id}")
 async def update_memory(
     memory_id: int,
-    request: MemoryRequest,
+    payload: MemoryRequest,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Update a memory only when it belongs to the authenticated account."""
     user = require_user(token)
-    if not request.content.strip():
+    if not payload.content.strip():
         raise HTTPException(status_code=422, detail="Memory content cannot be blank.")
     persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
     try:
         updated = database.update_memory(
-            memory_id, request.content, user_id=persistent_user_id
+            memory_id, payload.content, user_id=persistent_user_id
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -190,9 +197,11 @@ async def update_memory(
 @api_router.delete("/memories/{memory_id}")
 async def delete_memory(
     memory_id: int,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Delete a memory only when it belongs to the authenticated account."""
+    check_origin(request)
     user = require_user(token)
     persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
     deleted = database.delete_memory(memory_id, user_id=persistent_user_id)
@@ -230,9 +239,11 @@ async def get_conversation(
 @api_router.delete("/conversations/{conversation_id}")
 async def delete_conversation(
     conversation_id: str,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Delete a conversation only from the authenticated user's account."""
+    check_origin(request)
     user = require_user(token)
     persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
     deleted = database.delete_conversation(
@@ -244,14 +255,15 @@ async def delete_conversation(
 
 
 @api_router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, token: str | None = Cookie(default=None, alias=COOKIE)):
+async def chat(payload: ChatRequest, request: Request, token: str | None = Cookie(default=None, alias=COOKIE)):
     """Generate and persist a reply in the signed-in user's conversation."""
-    prompt = request.prompt.strip()
+    check_origin(request)
+    prompt = payload.prompt.strip()
     if not prompt:
         raise HTTPException(status_code=422, detail="Prompt cannot be blank.")
     user = require_user(token)
     persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
-    conversation_id = request.conversation_id or uuid.uuid4().hex
+    conversation_id = payload.conversation_id or uuid.uuid4().hex
     if len(conversation_id) > 64:
         raise HTTPException(status_code=422, detail="Invalid conversation ID.")
 
@@ -272,7 +284,7 @@ async def chat(request: ChatRequest, token: str | None = Cookie(default=None, al
                 f"<conversation_history>\n{history_text}\n</conversation_history>\n\n"
                 f"Current user message: {prompt}"
             )
-        if request.remember:
+        if payload.remember:
             # Save only text the user explicitly marks with a clear remember request.
             import re
             match = re.match(
@@ -286,7 +298,7 @@ async def chat(request: ChatRequest, token: str | None = Cookie(default=None, al
                         memory_text, user_id=persistent_user_id,
                         metadata={"source": "explicit_chat_request", "kind": "user_memory"},
                     )
-        if request.use_knowledge:
+        if payload.use_knowledge:
             # User-saved memories are private, bounded, and treated as untrusted context.
             saved_memories = database.list_memories(
                 user_id=persistent_user_id, limit=10
