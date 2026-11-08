@@ -1,5 +1,4 @@
-
-name: "Tamanna AI Real AI Debugger"
+name: "Tamanna Offline Repository Scanner"
 
 on:
   workflow_dispatch:
@@ -8,75 +7,58 @@ permissions:
   contents: read
 
 concurrency:
-  group: tamanna-ai-debug-${{ github.workflow }}-${{ github.ref }}
+  group: tamanna-offline-scan-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ai-debug:
-    name: Scan and Review
+  scan:
+    name: Local static scan (no external AI API)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
-      - name: Install dependencies
+      - name: Validate scanner
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install openai
+          test -s scripts/scan.py
+          python -m py_compile scripts/scan.py
 
-      - name: Validate required files
-        run: |
-          test -f scripts/scan.py || {
-            echo "ERROR: scripts/scan.py not found"
-            exit 1
-          }
-          test -f scripts/ai_debugger.py || {
-            echo "ERROR: scripts/ai_debugger.py not found"
-            exit 1
-          }
-
-      - name: Run static code scanner
+      - name: Run offline static scan
         run: python scripts/scan.py
 
-      - name: Run AI debugger
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-4o-mini
-        run: python scripts/ai_debugger.py
-
-      - name: Show scanner report
+      - name: Publish scan summary
         if: always()
+        shell: bash
         run: |
-          if [ -f report.txt ]; then
-            cat report.txt
-          else
-            echo "Scanner report was not generated."
-          fi
+          {
+            echo "## Tamanna offline repository scan"
+            echo
+            echo "This workflow performs local static checks only."
+            echo "It does not call OpenAI, Gemini, or any hosted AI API."
+            echo
+            if [ -s report.txt ]; then
+              echo '~~~text'
+              cat report.txt
+              echo '~~~'
+            else
+              echo "No report was generated. Check the scanner step."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Show AI report status
-        if: always()
-        run: |
-          if [ -f ai_debugger_report.txt ]; then
-            echo "AI debugger report generated."
-          else
-            echo "AI debugger report was not generated."
-          fi
-
-      - name: Upload debug reports
+      - name: Upload static scan report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tamanna-ai-debug-reports
-          path: |
-            report.txt
-            ai_debugger_report.txt
-          if-no-files-found: ignore
+          name: tamanna-offline-scan-report
+          path: report.txt
+          if-no-files-found: warn
           retention-days: 7
