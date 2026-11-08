@@ -96,6 +96,19 @@
           <article class="health-card"><span>NVIDIA GPU</span><strong id="metricGpu">পরীক্ষা হচ্ছে…</strong><small id="metricGpuDetail">Optional GPU telemetry</small></article>
         </div>
         <p id="metricsUpdated" class="settings-note" role="status" aria-live="polite">Metrics এখনো সংগ্রহ করা হয়নি।</p>
+        <div class="model-benchmark">
+          <h4>Local AI Model Benchmark</h4>
+          <p class="settings-note">একটি ছোট inference test চালিয়ে বাস্তব speed metrics মাপুন।</p>
+          <button id="runModelBenchmark" class="settings-secondary" type="button">Run Model Benchmark</button>
+          <p id="benchmarkStatus" class="settings-note" role="status" aria-live="polite">Benchmark এখনো চালানো হয়নি।</p>
+          <div class="health-grid">
+            <article class="health-card"><span>Response Latency</span><strong id="benchmarkLatency">—</strong></article>
+            <article class="health-card"><span>Generation Speed</span><strong id="benchmarkGeneration">—</strong></article>
+            <article class="health-card"><span>Prompt Speed</span><strong id="benchmarkPrompt">—</strong></article>
+            <article class="health-card"><span>Output Tokens</span><strong id="benchmarkTokens">—</strong></article>
+          </div>
+          <small id="benchmarkDetails" class="settings-note">Metrics Ollama runtime থেকে আসবে; benchmark-এর সময় model load delay latency-তে অন্তর্ভুক্ত।</small>
+        </div>
       </div>
       <div class="model-manager">
         <label for="localModelSelect">Installed local Chat Model</label>
@@ -177,6 +190,6 @@
   <script src="/js/auth.js?v=20261106_account_security"></script>
   <script src="/js/chat.js?v=20261108_conversations"></script>
   <script src="/js/settings.js?v=20261106_preferences2"></script>
-  <script src="/js/memories.js?v=20261108_memory_dashboard"></script>\n  <script src="/js/knowledge.js?v=20261108_knowledge_dashboard"><script src="/js/model-health.js?v=20261108_performance_monitor"></script>
+  <script src="/js/memories.js?v=20261108_memory_dashboard"></script>\n  <script src="/js/knowledge.js?v=20261108_knowledge_dashboard"><script src="/js/model-health.js?v=20261108_model_benchmark"></script>
 </body>
 </html>
