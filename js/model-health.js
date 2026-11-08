@@ -333,6 +333,58 @@
       : "বর্তমান metrics-এ নির্ধারিত high-resource threshold অতিক্রম করেনি।");
   }
 
+  function renderModelRecommendations(data) {
+    const advice = $("modelResourceAdvice");
+    if (!advice) return;
+    advice.replaceChildren();
+    const host = data.host || {};
+    const memory = host.memory || {};
+    const gpu = host.gpu || {};
+    const total = memory.total_bytes;
+    const used = memory.used_bytes;
+    const free = Number.isFinite(total) && Number.isFinite(used) ? Math.max(0, total - used) : null;
+    const gpuFree = Number.isFinite(gpu.memory_total_mb) && Number.isFinite(gpu.memory_used_mb)
+      ? Math.max(0, gpu.memory_total_mb - gpu.memory_used_mb) * 1024 * 1024 : null;
+    const installed = Array.isArray(data.installed_models) ? data.installed_models : [];
+    const loaded = Array.isArray(data.models) ? data.models : [];
+    const loadedNames = new Set(loaded.map((item) => item.name));
+    const recommendations = [];
+    installed.forEach((model) => {
+      const size = model.size_bytes;
+      if (!Number.isFinite(size) || size <= 0) return;
+      // Model file size is only a rough lower-bound proxy, not a runtime memory guarantee.
+      const estimated = size * 1.35;
+      const fitsRam = Number.isFinite(free) && estimated <= free * 0.70;
+      const fitsGpu = Number.isFinite(gpuFree) && estimated <= gpuFree * 0.70;
+      const status = loadedNames.has(model.name) ? "ইতিমধ্যে loaded"
+        : fitsGpu ? "GPU memory headroom অনুযায়ী সম্ভাব্য candidate"
+        : fitsRam ? "System RAM headroom অনুযায়ী সম্ভাব্য candidate"
+        : "বর্তমান free memory অনুযায়ী সুপারিশ নয়";
+      const item = document.createElement("li");
+      const name = document.createElement("strong");
+      name.textContent = model.name;
+      const detail = document.createElement("span");
+      detail.textContent = "Model file " + formatBytes(size) +
+        " · আনুমানিক planning footprint " + formatBytes(estimated) + " · " + status;
+      item.append(name, detail);
+      advice.append(item);
+      recommendations.push({ fitsRam, fitsGpu, loaded: loadedNames.has(model.name) });
+    });
+    set("modelResourceAdviceStatus", installed.length
+      ? "Installed model size ও বর্তমান free RAM/GPU memory দিয়ে conservative shortlist তৈরি হয়েছে।"
+      : "Installed model size পাওয়া যায়নি; recommendation করা সম্ভব নয়।");
+    if (!Number.isFinite(free)) {
+      const note = document.createElement("li");
+      note.textContent = "Host RAM availability পাওয়া যায়নি; RAM-based fit নির্ধারণ করা হয়নি।";
+      advice.append(note);
+    }
+    if (!Number.isFinite(gpuFree)) {
+      const note = document.createElement("li");
+      note.textContent = "GPU free memory telemetry পাওয়া যায়নি; GPU suitability যাচাই করা যায়নি।";
+      advice.append(note);
+    }
+  }
+
   async function refreshModelResources() {
     const list = $("modelResourceList");
     const button = $("refreshModelResources");
@@ -344,7 +396,7 @@
       return;
     }
     if (button) button.disabled = true;
-    set("modelResourceStatus", "Loaded model resource পরীক্ষা হচ্ছে…");
+    set("modelResourceStatus", "Loaded ও installed model resource পরীক্ষা হচ্ছে…");
     try {
       const data = await getJson("/tamanna-ai/model/resources");
       const models = Array.isArray(data.models) ? data.models : [];
@@ -364,10 +416,13 @@
       });
       set("modelResourceStatus", models.length
         ? models.length + "টি model বর্তমানে memory-তে loaded আছে।"
-        : "এখন কোনো model memory-তে loaded নেই; Ollama request এলে model load করতে পারে।");
+        : "এখন কোনো model memory-তে loaded নেই।");
+      renderModelRecommendations(data);
     } catch (error) {
       list.replaceChildren();
       set("modelResourceStatus", "Resource তথ্য পাওয়া যায়নি: " + error.message);
+      set("modelResourceAdviceStatus", "Resource তথ্য ছাড়া model recommendation তৈরি করা হয়নি।");
+      $("modelResourceAdvice")?.replaceChildren();
     } finally {
       if (button) button.disabled = false;
     }
