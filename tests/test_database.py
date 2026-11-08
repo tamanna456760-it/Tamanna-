@@ -72,3 +72,37 @@ def test_conversation_history_is_scoped_to_user_and_rejects_cross_user_write(tmp
     assert [row["user"] for row in db.load_history(user_id=second)] == ["second question"]
     with pytest.raises(PermissionError):
         db.save_chat_pair("intrusion", "no", f"user-{first}", second)
+
+
+def test_benchmark_history_persists_recent_model_metrics_without_prompt_content(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "benchmark.sqlite3").as_posix())
+    first = {
+        "wall_time_ms": 321.5,
+        "passed_checks": 2,
+        "total_checks": 3,
+        "generation_tokens_per_second": 18.4,
+    }
+    second = {
+        "wall_time_ms": 280.0,
+        "passed_checks": 3,
+        "total_checks": 3,
+        "generation_tokens_per_second": 21.2,
+    }
+
+    first_id = db.save_benchmark_run(model="qwen2.5:7b", result=first)
+    second_id = db.save_benchmark_run(model="llama3.2:3b", result=second)
+    history = db.list_benchmark_runs(limit=1)
+    assert len(history) == 1
+    assert history[0]["id"] == second_id
+    assert history[0]["model"] == "llama3.2:3b"
+    assert history[0]["result"] == second
+    assert second_id > first_id
+    assert "prompt" not in str(history[0]).lower()
+
+
+def test_benchmark_history_limit_is_bounded(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "benchmark-limit.sqlite3").as_posix())
+    for index in range(3):
+        db.save_benchmark_run(model="local-test", result={"index": index})
+    assert len(db.list_benchmark_runs(limit=0)) == 1
+    assert len(db.list_benchmark_runs(limit=1000)) == 3
