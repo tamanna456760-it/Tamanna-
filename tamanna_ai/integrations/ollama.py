@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import os
+import re
+from typing import AsyncIterator
 from urllib.parse import urlsplit
 
 import httpx
@@ -60,6 +62,41 @@ class OllamaClient:
         except (ValueError, KeyError, TypeError) as exc:
             raise OllamaError("Local model runtime returned an invalid model list.") from exc
         return sorted(set(names))
+
+    async def pull_model(self, model: str) -> AsyncIterator[dict]:
+        """Stream Ollama model-pull progress as validated NDJSON events."""
+        model = model.strip() if isinstance(model, str) else ""
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}", model):
+            raise ValueError("Invalid local model name")
+        try:
+            async with httpx.AsyncClient(timeout=None) as client:
+                async with client.stream(
+                    "POST",
+                    f"{self.base_url}/api/pull",
+                    json={"name": model, "stream": True},
+                    timeout=None,
+                ) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if not line:
+                            continue
+                        try:
+                            event = response_event = __import__("json").loads(line)
+                        except (ValueError, TypeError) as exc:
+                            raise OllamaError("Ollama returned invalid pull progress data.") from exc
+                        if not isinstance(response_event, dict):
+                            raise OllamaError("Ollama returned an invalid pull event.")
+                        if response_event.get("error"):
+                            raise OllamaError(str(response_event["error"])[:300])
+                        yield response_event
+        except httpx.HTTPStatusError as exc:
+            raise OllamaError(
+                f"Local model runtime returned HTTP {exc.response.status_code} while downloading."
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise OllamaError(
+                f"Model download connection failed ({type(exc).__name__})."
+            ) from exc
 
     async def generate(self, prompt: str, *, temperature: float = 0.2,
                        max_output_tokens: int = 2048) -> str:
