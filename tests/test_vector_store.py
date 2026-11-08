@@ -217,4 +217,7 @@ def test_bilingual_retrieval_benchmark_reports_ranking_metrics(tmp_path):
     assert 0.0 <= report["hit_rate"] <= 1.0
     assert 0.0 <= report["mean_reciprocal_rank"] <= 1.0
     assert len(report["results"]) == len(DOCUMENTS)
-    assert all("latency_ms" in result for result in report["results"])
+    assert set(report["by_language"]) == {"bn", "en", "mixed"}
+    assert report["by_language"]["bn"]["cases"] == 1
+    assert report["by_language"]["en"]["cases"] == 3
+    assert all("language" in result and "latency_ms" in result for result in report["results"])
