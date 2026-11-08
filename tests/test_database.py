@@ -10,8 +10,9 @@ from tamanna_ai.persistence.database import Database, Memory, User
 def test_database_creates_required_tables_and_saves_chat(tmp_path):
     db = Database("sqlite:///" + (tmp_path / "chat.sqlite3").as_posix())
     db.init()
-    db.save_chat_pair("hello", "hi there")
-    history = db.load_history()
+    user_id = db.ensure_user("chat-owner@example.test", "Chat Owner")
+    db.save_chat_pair("hello", "hi there", user_id=user_id)
+    history = db.load_history(user_id=user_id)
     assert len(history) == 1
     assert history[0]["user"] == "hello"
     assert history[0]["assistant"] == "hi there"
@@ -35,7 +36,8 @@ def test_legacy_json_is_backed_up_before_import(tmp_path):
     assert result["imported"] == 1
     backup = result["backup"]
     assert backup and Path(backup).read_text(encoding="utf-8") == old.read_text(encoding="utf-8")
-    assert db.load_history("legacy-import")[0]["user"] == "old question"
+    # Legacy imports have no verified account owner and must stay private.
+    assert db.load_history("legacy-import", user_id=None) == []
     assert db.migrate_legacy_json(old)["status"] == "already_migrated"
 
 
@@ -55,9 +57,11 @@ def test_memory_table_accepts_persistent_records(tmp_path):
 
 def test_database_memory_api_persists_and_lists_memories(tmp_path):
     db = Database("sqlite:///" + (tmp_path / "persistent-memory.sqlite3").as_posix())
-    memory_id = db.add_memory("keep this", metadata={"source": "test"})
+    user_id = db.ensure_user("memory-owner@example.test", "Memory Owner")
+    memory_id = db.add_memory("keep this", user_id=user_id, metadata={"source": "test"})
     assert memory_id > 0
-    assert db.list_memories() == ["keep this"]
+    assert db.list_memories(user_id=user_id) == ["keep this"]
+    assert db.list_memories(user_id=None) == []
 
 
 
