@@ -143,6 +143,13 @@
         <ul id="modelResourceList"></ul>
         <button id="refreshModelResources" class="settings-secondary" type="button">Refresh Loaded Models</button>
       </section>
+      <section class="model-recovery-advisor" aria-labelledby="modelRecoveryTitle">
+        <h4 id="modelRecoveryTitle">Local Model Recovery Assistant</h4>
+        <p id="modelRecoveryStatus" class="settings-note" role="status" aria-live="polite">Runtime diagnostics অপেক্ষমাণ।</p>
+        <ul id="modelRecoveryActions"></ul>
+        <small class="settings-note">Read-only guidance: এটি নিজে থেকে service restart, model load/download বা configuration পরিবর্তন করে না।</small>
+        <button id="refreshModelRecovery" class="settings-secondary" type="button">Run Recovery Check</button>
+      </section>
       <div class="model-manager">
         <label for="localModelSelect">Installed local Chat Model</label>
         <select id="localModelSelect" disabled><option value="">প্রথমে status refresh করুন</option></select>
@@ -225,6 +232,6 @@
   <script src="/js/settings.js?v=20261106_preferences2"></script>
   <script src="/js/memories.js?v=20261108_memory_dashboard"></script>
   <script src="/js/knowledge.js?v=20261108_knowledge_dashboard"></script>
-  <script src="/js/model-health.js?v=20261108_instruction_checks"></script>
+  <script src="/js/model-health.js?v=20261108_recovery_advisor"></script>
 </body>
 </html>
