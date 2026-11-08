@@ -105,10 +105,75 @@
         list.append(item);
       });
       set("benchmarkHistoryStatus", runs.length ? runs.length + "টি সাম্প্রতিক benchmark" : "এখনো কোনো benchmark সংরক্ষিত নেই।");
+      renderBenchmarkComparison(runs);
     } catch (error) {
       list.replaceChildren();
+      renderBenchmarkComparison([]);
       set("benchmarkHistoryStatus", "History unavailable: " + error.message);
     }
+  }
+
+  function renderBenchmarkComparison(runs) {
+    const container = $("benchmarkComparisonList");
+    if (!container) return;
+    container.replaceChildren();
+    const grouped = new Map();
+    runs.forEach((run) => {
+      const model = String(run.model || "Unknown model");
+      const result = run.result || {};
+      if (!grouped.has(model)) grouped.set(model, []);
+      const bucket = grouped.get(model);
+      if (bucket.length < 5) bucket.push(result);
+    });
+    const summaries = Array.from(grouped, ([model, results]) => {
+      const average = (key) => {
+        const values = results.map((item) => item[key]).filter(
+          (value) => typeof value === "number" && Number.isFinite(value) && value >= 0
+        );
+        return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+      };
+      return {
+        model,
+        samples: results.length,
+        latency: average("wall_time_ms"),
+        speed: average("generation_tokens_per_second"),
+        checks: average("instruction_following_percent")
+      };
+    }).sort((a, b) => (b.speed ?? -1) - (a.speed ?? -1));
+    const maxSpeed = Math.max(0, ...summaries.map((item) => item.speed || 0));
+    summaries.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "benchmark-comparison-item";
+      const heading = document.createElement("strong");
+      heading.textContent = item.model;
+      const sample = document.createElement("small");
+      sample.textContent = item.samples + " recent run(s)";
+      const speedLabel = document.createElement("span");
+      speedLabel.textContent = "Generation speed: " +
+        (item.speed === null ? "Unavailable" : item.speed.toFixed(2) + " tok/s");
+      const track = document.createElement("div");
+      track.className = "benchmark-bar-track";
+      track.setAttribute("role", "img");
+      track.setAttribute("aria-label", item.speed === null
+        ? "Generation speed unavailable"
+        : "Generation speed relative to fastest listed model");
+      const bar = document.createElement("div");
+      bar.className = "benchmark-bar";
+      bar.style.width = maxSpeed > 0 && item.speed !== null
+        ? Math.max(0, Math.min(100, item.speed / maxSpeed * 100)) + "%"
+        : "0%";
+      track.append(bar);
+      const details = document.createElement("small");
+      details.textContent = "Average latency: " +
+        (item.latency === null ? "Unavailable" : Math.round(item.latency) + " ms") +
+        " · Instruction checks: " +
+        (item.checks === null ? "Unavailable" : item.checks.toFixed(1) + "%");
+      card.append(heading, sample, speedLabel, track, details);
+      container.append(card);
+    });
+    set("benchmarkComparisonStatus", summaries.length
+      ? summaries.length + "টি local model-এর তুলনা · দ্রুততম generation speed উপরে"
+      : "তুলনার জন্য benchmark history নেই।");
   }
 
   function formatBytes(value) {
