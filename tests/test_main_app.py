@@ -90,3 +90,32 @@ def test_skills_and_code_builder_routes_reject_anonymous_access(monkeypatch, tmp
         assert client.get("/api/skills").status_code == 401
         assert client.get("/api/code-builder/status").status_code == 401
         assert client.get("/api/code-builder/scan").status_code == 401
+
+def test_legacy_code_builder_and_unified_routes_are_not_public(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.test")
+    monkeypatch.setenv("TAMANNA_COOKIE_SECURE", "0")
+
+    import tamanna_ai.authentication.router as auth_router
+
+    monkeypatch.setattr(auth_router, "DB", tmp_path / "legacy-builder-auth.sqlite3")
+    import Main
+
+    with TestClient(Main.app) as client:
+        # Read/planning endpoints are private even when a duplicate legacy
+        # code-builder implementation is registered later in Main.py.
+        assert client.get("/api/code-builder/project").status_code == 401
+        assert client.post(
+            "/api/code-builder/plan", json={"request": "inspect project"}
+        ).status_code == 401
+        assert client.get("/api/unified/status").status_code == 401
+        assert client.get("/api/unified/project").status_code == 401
+
+        # Execution endpoints remain deliberately disabled, not merely hidden.
+        assert client.post(
+            "/api/code-builder/build", json={"files": []}
+        ).status_code == 410
+        assert client.post("/api/code-builder/compile").status_code == 410
