@@ -129,9 +129,12 @@ class Database:
         Base.metadata.create_all(self.engine)
         # create_all() does not add indexes to tables that already exist.
         # Create this additive index explicitly so upgraded databases benefit too.
-        Index("ix_memories_user_id_id", Memory.user_id, Memory.id).create(
-            self.engine, checkfirst=True
+        memory_index = next(
+            index
+            for index in Memory.__table__.indexes
+            if index.name == "ix_memories_user_id_id"
         )
+        memory_index.create(self.engine, checkfirst=True)
 
     def ping(self) -> bool:
         with self.engine.connect() as connection:
