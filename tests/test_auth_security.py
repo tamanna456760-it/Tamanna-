@@ -345,3 +345,34 @@ def test_password_change_revokes_all_existing_sessions(monkeypatch, tmp_path):
         ).fetchone()["password_hash"]
     assert auth.password_ok("a much stronger replacement password", stored)
     assert not auth.password_ok("correct horse battery", stored)
+
+
+def test_auth_schema_initialization_is_idempotent_and_preserves_accounts(monkeypatch, tmp_path):
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "schema-idempotent.sqlite3")
+    token = auth.issue_session(user_id)
+
+    auth.init_db()
+    auth.init_db()
+
+    assert auth.current_user(token)["id"] == user_id
+    with auth.db() as conn:
+        assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
+        assert conn.execute(
+            "SELECT COUNT(*) FROM preferences WHERE user_id=?", (user_id,)
+        ).fetchone()[0] == 1
+
+
+def test_auth_user_foreign_keys_cascade_preferences_and_sessions(monkeypatch, tmp_path):
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "schema-cascade.sqlite3")
+    auth.issue_session(user_id)
+
+    with auth.db() as conn:
+        assert conn.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        conn.execute("DELETE FROM users WHERE id=?", (user_id,))
+        assert conn.execute(
+            "SELECT COUNT(*) FROM preferences WHERE user_id=?", (user_id,)
+        ).fetchone()[0] == 0
+        assert conn.execute(
+            "SELECT COUNT(*) FROM sessions WHERE user_id=?", (user_id,)
+        ).fetchone()[0] == 0
+        assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
