@@ -86,6 +86,22 @@
     }
   }
 
+  const reindexButton = $("reindexKnowledgeButton");
+  reindexButton?.addEventListener("click", async () => {
+    if (!window.TamannaAuth?.getUser()) return setStatus("প্রথমে লগইন করুন।", true);
+    reindexButton.disabled = true;
+    setStatus("আপনার Knowledge Base-এর embedding পুনরায় তৈরি হচ্ছে…");
+    try {
+      const result = await api("/reindex", { method: "POST", body: JSON.stringify({}) });
+      setStatus("Reindex সম্পন্ন: " + result.documents + " documents, " + result.chunks_reindexed + " chunks।");
+      await load();
+    } catch (error) {
+      setStatus("Reindex ব্যর্থ: " + error.message, true);
+    } finally {
+      reindexButton.disabled = false;
+    }
+  });
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!window.TamannaAuth?.getUser()) return setStatus("প্রথমে লগইন করুন।", true);
