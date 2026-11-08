@@ -368,7 +368,12 @@ class Database:
         self, conversation_id: str | None = None, user_id: int | None = None,
         limit_pairs: int | None = None,
     ) -> list[dict[str, str]]:
-        """Load recent complete user/assistant pairs, scoped to the owner when supplied."""
+        """Load recent complete message pairs for one authenticated owner.
+
+        A missing user_id must never expose legacy or unassigned conversations.
+        """
+        if user_id is None:
+            return []
         with self.Session() as session:
             statement = select(Message).join(Conversation).order_by(Message.created_at.desc(), Message.id.desc())
             if conversation_id:
