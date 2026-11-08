@@ -3,6 +3,18 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def releaseSigningEnv = [
+    storeFile: System.getenv("TAMANNA_RELEASE_STORE_FILE"),
+    storePassword: System.getenv("TAMANNA_RELEASE_STORE_PASSWORD"),
+    keyAlias: System.getenv("TAMANNA_RELEASE_KEY_ALIAS"),
+    keyPassword: System.getenv("TAMANNA_RELEASE_KEY_PASSWORD")
+]
+def configuredSigningValues = releaseSigningEnv.values().count { it != null && !it.trim().isEmpty() }
+if (configuredSigningValues != 0 && configuredSigningValues != releaseSigningEnv.size()) {
+    throw new GradleException("Release signing is partially configured. Set all four TAMANNA_RELEASE_* variables or none.")
+}
+def hasReleaseSigning = configuredSigningValues == releaseSigningEnv.size()
+
 android {
     namespace "com.tamanna.ai"
     compileSdk 34
@@ -30,6 +42,25 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+    }
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(releaseSigningEnv.storeFile)
+                storePassword releaseSigningEnv.storePassword
+                keyAlias releaseSigningEnv.keyAlias
+                keyPassword releaseSigningEnv.keyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
     }
 }
 
