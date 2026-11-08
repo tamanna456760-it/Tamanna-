@@ -169,3 +169,30 @@ def test_bengali_unicode_tokens_preserve_combining_marks_and_match_search(tmp_pa
     assert results
     assert results[0]["source"] == "bengali.txt"
     assert results[0]["score"] > 0.5
+
+
+
+def test_vector_store_rejects_invalid_embedding_vectors(tmp_path):
+    import pytest
+    from tamanna_ai.knowledge.vector_store import EmbeddingError
+
+    for invalid in ([], [0.0, 0.0], [float("nan")], [float("inf")]):
+        store = VectorKnowledgeStore(
+            lambda text, task_type="RETRIEVAL_DOCUMENT": invalid,
+            tmp_path / f"invalid-{len(invalid)}-{str(invalid[0] if invalid else 0)}.sqlite3",
+        )
+        with pytest.raises(EmbeddingError):
+            store.index_text("private knowledge", owner_id="user-1", source="bad.txt")
+        assert store.list_sources(owner_id="user-1") == []
+
+
+def test_vector_store_rejects_invalid_query_embedding(tmp_path):
+    import pytest
+    from tamanna_ai.knowledge.vector_store import EmbeddingError
+
+    store = VectorKnowledgeStore(
+        lambda text, task_type="RETRIEVAL_DOCUMENT": [float("nan")],
+        tmp_path / "invalid-query.sqlite3",
+    )
+    with pytest.raises(EmbeddingError):
+        store.search("বাংলা প্রশ্ন", owner_id="user-1")
