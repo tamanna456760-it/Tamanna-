@@ -1,4 +1,4 @@
-"""Local SQLite vector store and Gemini embedding adapter for RAG.
+"""Local SQLite vector store and API-free retrieval embeddings for RAG.
 
 Only explicitly imported, user-scoped text is indexed. Original documents are
 never modified. The SQLite file should live on private server storage.
@@ -44,7 +44,7 @@ class LocalFeatureEmbedder:
         if not isinstance(text, str) or not text.strip():
             return [0.0] * self.dimensions
 
-        tokens = re.findall(r"[^\\W_]+", text.casefold(), flags=re.UNICODE)
+        tokens = re.findall(r"[^\W_]+", text.casefold(), flags=re.UNICODE)
         features: list[tuple[str, float]] = []
         for token in tokens:
             if len(token) < 2:
