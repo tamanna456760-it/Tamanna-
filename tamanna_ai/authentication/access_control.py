@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from tamanna_ai.authentication.router import COOKIE, current_user
 
 USER_ROUTES = {
-    "/api/chat", "/api/chat/master", "/api/history",
+    "/api/chat", "/api/chat/master", *READ_ROUTES,
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
     "/api/code-builder/propose", "/api/code-builder/inspect", "/api/code-builder/plan",
     "/api/self-improvement/analyze", "/api/self-healing/diagnose", "/api/autonomous/plan",
@@ -15,7 +15,30 @@ USER_ROUTES = {
     "/api/linux/run", "/api/linux/shell", "/api/command",
     "/api/tamanna/echo", "/api/tools/execute",
 }
-READ_ROUTES = {"/api/history"}
+READ_ROUTES = {
+    "/api/history",
+    "/api/admin/overview",
+    "/api/code-builder/status",
+    "/api/code-builder/scan",
+    "/api/code-builder/project",
+    "/api/linux/tools",
+    "/api/linux/status",
+    "/api/linux/shell/status",
+    "/api/security/tools",
+    "/api/self-improvement/status",
+    "/api/self-healing/status",
+    "/api/tamanna/system",
+    "/api/autonomous/think",
+    "/api/autonomous/files",
+    "/api/autonomous/startup",
+    "/api/autonomous/plans",
+    "/api/autonomous/repair/status",
+    "/api/autonomous/repair/history",
+    "/api/autonomous/status",
+    "/api/unified/status",
+    "/api/unified/project",
+}
+ADMIN_READ_ROUTES = READ_ROUTES - {"/api/history"}
 
 BLOCKED_EXECUTION_ROUTES = {
     "/api/linux/run",
@@ -31,6 +54,7 @@ BLOCKED_EXECUTION_ROUTES = {
 ADMIN_ROUTES = {
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
     "/api/code-builder/propose", "/api/code-builder/inspect", "/api/self-healing/cycle", "/api/autonomous/plan", "/api/autonomous/build",
+    *ADMIN_READ_ROUTES,
     "/api/autonomous/repair", "/api/code-builder/apply",
     "/api/code-builder/build", "/api/code-builder/compile",
     "/api/linux/run", "/api/linux/shell", "/api/command",
