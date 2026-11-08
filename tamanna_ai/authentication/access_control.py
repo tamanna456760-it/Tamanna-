@@ -54,7 +54,9 @@ BLOCKED_EXECUTION_ROUTES = {
 
 ADMIN_ROUTES = {
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
-    "/api/code-builder/propose", "/api/code-builder/inspect", "/api/self-healing/cycle", "/api/autonomous/plan", "/api/autonomous/build",
+    "/api/code-builder/propose", "/api/code-builder/inspect", "/api/code-builder/plan",
+    "/api/self-improvement/analyze", "/api/self-healing/diagnose",
+    "/api/self-healing/cycle", "/api/autonomous/plan", "/api/autonomous/build",
     *ADMIN_READ_ROUTES,
     "/api/autonomous/repair", "/api/code-builder/apply",
     "/api/code-builder/build", "/api/code-builder/compile",
