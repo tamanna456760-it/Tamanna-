@@ -44,3 +44,31 @@ def test_owner_scoped_ordered_memory_query_uses_composite_index(tmp_path):
 
     plan_text = " ".join(str(row[-1]) for row in plan)
     assert "ix_memories_user_id_id" in plan_text
+
+
+def test_init_adds_index_to_existing_legacy_memory_table(tmp_path):
+    database = Database(f"sqlite:///{tmp_path / 'legacy-knowledge.sqlite3'}")
+
+    # Simulate a database created before the composite index was introduced.
+    with database.engine.begin() as connection:
+        connection.exec_driver_sql(
+            """
+            CREATE TABLE memories (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                conversation_id VARCHAR(64),
+                content TEXT NOT NULL,
+                metadata_json TEXT NOT NULL,
+                created_at DATETIME NOT NULL
+            )
+            """
+        )
+
+    database.init()
+
+    indexes = inspect(database.engine).get_indexes("memories")
+    indexed_columns = {
+        tuple(index["column_names"])
+        for index in indexes
+    }
+    assert ("user_id", "id") in indexed_columns
