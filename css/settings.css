@@ -228,6 +228,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 
 .model-resource-manager { display:grid; gap:8px; margin-top:12px; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--panel); }
 .model-resource-manager h4 { margin:0; color:var(--text); font-size:.98rem; }
+.model-resource-manager h5 { margin:8px 0 0; color:var(--text); font-size:.9rem; }
 .model-resource-manager ul { display:grid; gap:8px; margin:0; padding-left:20px; }
 .model-resource-manager li { overflow-wrap:anywhere; color:var(--text); font-size:.84rem; }
 .model-resource-manager li strong { display:block; }
