@@ -485,7 +485,7 @@ async def admin_overview(request: Request):
         "system": {
             "status": "online",
             "assistant": "Tamanna AI",
-            "model_provider": os.getenv("TAMANNA_MODEL_PROVIDER", "gemini"),
+            "model_provider": os.getenv("TAMANNA_MODEL_PROVIDER", "ollama"),
             "database": os.getenv("TAMANNA_DATABASE_URL", "sqlite:///data/tamanna.sqlite3"),
             "environment": os.getenv("TAMANNA_ENV", "production"),
         },
