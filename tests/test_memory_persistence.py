@@ -55,6 +55,16 @@ class PersistentMemoryTests(unittest.TestCase):
         self.assertEqual(other["language"], "auto")
         self.assertEqual(other["custom_instructions"], "")
 
+
+    def test_conversation_list_and_delete_are_owner_scoped(self):
+        self.db.save_chat_pair("A question", "A reply", "conversation-a", self.user_a)
+        self.db.save_chat_pair("B question", "B reply", "conversation-b", self.user_b)
+        own = self.db.list_conversations(user_id=self.user_a)
+        self.assertEqual([item["id"] for item in own], ["conversation-a"])
+        self.assertFalse(self.db.delete_conversation("conversation-b", user_id=self.user_a))
+        self.assertTrue(self.db.delete_conversation("conversation-a", user_id=self.user_a))
+        self.assertEqual(self.db.load_history("conversation-a", user_id=self.user_a), [])
+
     def test_custom_settings_validate_language_and_length(self):
         with self.assertRaises(ValueError):
             self.db.update_user_settings(user_id=self.user_a, language="xx")
