@@ -64,6 +64,37 @@ class OllamaClient:
             raise OllamaError("Local model runtime returned an invalid model list.") from exc
         return sorted(set(names))
 
+    async def list_model_details(self) -> list[dict]:
+        """Return installed Ollama model sizes for conservative resource guidance."""
+        try:
+            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0)) as client:
+                response = await client.get(f"{self.base_url}/api/tags")
+                response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            raise OllamaError(f"Local model runtime returned HTTP {exc.response.status_code}") from exc
+        except httpx.HTTPError as exc:
+            raise OllamaError(f"Cannot inspect installed models ({type(exc).__name__}).") from exc
+        try:
+            raw_models = response.json()["models"]
+            if not isinstance(raw_models, list):
+                raise TypeError("models must be a list")
+            details = []
+            for item in raw_models:
+                if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+                    continue
+                size = item.get("size")
+                details.append({
+                    "name": item["name"][:200],
+                    "size_bytes": size if isinstance(size, int) and not isinstance(size, bool) and size >= 0 else None,
+                    "parameter_size": str(item.get("details", {}).get("parameter_size", ""))[:40]
+                        if isinstance(item.get("details"), dict) else "",
+                    "quantization": str(item.get("details", {}).get("quantization_level", ""))[:40]
+                        if isinstance(item.get("details"), dict) else "",
+                })
+            return sorted(details, key=lambda item: item["name"])
+        except (ValueError, KeyError, TypeError) as exc:
+            raise OllamaError("Local model runtime returned invalid installed-model data.") from exc
+
     async def list_running_models(self) -> list[dict]:
         """Return loaded model names and runtime memory footprints from Ollama."""
         try:
