@@ -34,6 +34,54 @@
   }
 
   const benchmarkButton = $("runModelBenchmark");
+
+  async function requestBenchmark() {
+    const response = await fetch("/tamanna-ai/model/benchmark", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { Accept: "application/json" }
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const detail = result.detail;
+      throw new Error(typeof detail === "string" ? detail : detail?.message || "HTTP " + response.status);
+    }
+    return result.benchmark || {};
+  }
+
+  function benchmarkRegressed(current, baseline) {
+    if (!current || !baseline) return false;
+    const speedNow = current.generation_tokens_per_second;
+    const speedBefore = baseline.generation_tokens_per_second;
+    if (Number.isFinite(speedNow) && Number.isFinite(speedBefore) && speedBefore > 0 &&
+        (speedBefore - speedNow) / speedBefore >= 0.20) return true;
+    const latencyNow = current.wall_time_ms;
+    const latencyBefore = baseline.wall_time_ms;
+    if (Number.isFinite(latencyNow) && Number.isFinite(latencyBefore) && latencyBefore > 0 &&
+        (latencyNow - latencyBefore) / latencyBefore >= 0.25) return true;
+    return Number.isFinite(current.passed_checks) && Number.isFinite(baseline.passed_checks) &&
+      current.passed_checks < baseline.passed_checks;
+  }
+
+  function displayBenchmark(metrics, prefix) {
+    const display = (value, suffix) => Number.isFinite(value) ? value + suffix : "Unavailable";
+    set("benchmarkLatency", display(metrics.wall_time_ms, " ms"));
+    set("benchmarkGeneration", display(metrics.generation_tokens_per_second, " tok/s"));
+    set("benchmarkPrompt", display(metrics.prompt_tokens_per_second, " tok/s"));
+    set("benchmarkTokens", display(metrics.output_tokens, ""));
+    const checks = Array.isArray(metrics.checks) ? metrics.checks : [];
+    const checkSummary = checks.length
+      ? " · Instruction checks: " + (metrics.passed_checks ?? 0) + "/" + (metrics.total_checks ?? checks.length)
+      : "";
+    set("benchmarkDetails", "Model: " + (metrics.model || "Unknown") +
+      " · Prompt: " + (metrics.prompt_tokens ?? "—") + " tokens" +
+      " · Ollama total: " + display(metrics.total_duration_ms, " ms") +
+      " · Model load: " + display(metrics.model_load_ms, " ms") + checkSummary);
+    set("benchmarkStatus", (prefix || "Benchmark সম্পন্ন") + " · " +
+      (metrics.passed_checks ?? "—") + "/" + (metrics.total_checks ?? "—") +
+      " basic instruction checks pass · " + new Date().toLocaleString());
+  }
+
   benchmarkButton?.addEventListener("click", async () => {
     if (!window.TamannaAuth?.getUser()) {
       set("benchmarkStatus", "Benchmark চালাতে প্রথমে লগইন করুন।");
@@ -43,33 +91,38 @@
     set("benchmarkStatus", "Local model benchmark চলছে… প্রথমবার model load হতে সময় লাগতে পারে।");
     ["benchmarkLatency", "benchmarkGeneration", "benchmarkPrompt", "benchmarkTokens"].forEach((id) => set(id, "পরীক্ষা হচ্ছে…"));
     try {
-      const response = await fetch("/tamanna-ai/model/benchmark", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { Accept: "application/json" }
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const detail = result.detail;
-        throw new Error(typeof detail === "string" ? detail : detail?.message || "HTTP " + response.status);
+      let baseline = null;
+      try {
+        const history = await getJson("/tamanna-ai/model/benchmark/history?limit=100");
+        const rows = Array.isArray(history.runs) ? history.runs : [];
+        const selected = modelSelect?.value;
+        const previous = rows.find((row) => row.model === selected) ||
+          rows.find((row) => row.model);
+        baseline = previous?.result || null;
+      } catch (_) {
+        // Benchmark still runs when history is unavailable; no automatic retry without a baseline.
       }
-      const metrics = result.benchmark || {};
-      const display = (value, suffix) => Number.isFinite(value) ? value + suffix : "Unavailable";
-      set("benchmarkLatency", display(metrics.wall_time_ms, " ms"));
-      set("benchmarkGeneration", display(metrics.generation_tokens_per_second, " tok/s"));
-      set("benchmarkPrompt", display(metrics.prompt_tokens_per_second, " tok/s"));
-      set("benchmarkTokens", display(metrics.output_tokens, ""));
-      const checks = Array.isArray(metrics.checks) ? metrics.checks : [];
-      const checkSummary = checks.length
-        ? " · Instruction checks: " + (metrics.passed_checks ?? 0) + "/" + (metrics.total_checks ?? checks.length)
-        : "";
-      set("benchmarkDetails", "Model: " + (metrics.model || "Unknown") +
-        " · Prompt: " + (metrics.prompt_tokens ?? "—") + " tokens" +
-        " · Ollama total: " + display(metrics.total_duration_ms, " ms") +
-        " · Model load: " + display(metrics.model_load_ms, " ms") + checkSummary);
-      set("benchmarkStatus", "Benchmark সম্পন্ন · " +
-        (metrics.passed_checks ?? "—") + "/" + (metrics.total_checks ?? "—") +
-        " basic instruction checks pass · " + new Date().toLocaleString());
+
+      let metrics = await requestBenchmark();
+      displayBenchmark(metrics);
+      if (baseline && benchmarkRegressed(metrics, baseline)) {
+        set("benchmarkStatus", "সম্ভাব্য regression শনাক্ত · একবার confirmation benchmark চলছে…");
+        try {
+          const confirmation = await requestBenchmark();
+          const persistent = benchmarkRegressed(confirmation, baseline);
+          metrics = confirmation;
+          displayBenchmark(metrics, persistent
+            ? "দ্বিতীয় পরীক্ষাতেও regression নিশ্চিত"
+            : "পুনরায় পরীক্ষায় regression নিশ্চিত হয়নি");
+          if (persistent) {
+            set("benchmarkRegressionStatus", "দুটি ধারাবাহিক run-এ baseline-এর তুলনায় regression রয়ে গেছে। Model, resource load ও runtime পরীক্ষা করুন।");
+          } else {
+            set("benchmarkRegressionStatus", "প্রথম regression signal পুনরায় benchmark-এ নিশ্চিত হয়নি; সাময়িক variation হতে পারে।");
+          }
+        } catch (retryError) {
+          set("benchmarkStatus", "প্রথম benchmark সফল; confirmation ব্যর্থ: " + retryError.message);
+        }
+      }
       await refreshBenchmarkHistory();
     } catch (error) {
       ["benchmarkLatency", "benchmarkGeneration", "benchmarkPrompt", "benchmarkTokens"].forEach((id) => set(id, "—"));
