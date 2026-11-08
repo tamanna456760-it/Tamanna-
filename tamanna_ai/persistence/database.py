@@ -187,8 +187,12 @@ class Database:
                         "SELECT name FROM sqlite_master WHERE type='table'"
                     )
                 }
-                if not {"users", "memories"}.issubset(tables):
-                    raise ValueError("Backup is missing required Tamanna database tables")
+                required_tables = {"users", "conversations", "messages", "memories"}
+                if not required_tables.issubset(tables):
+                    missing = ", ".join(sorted(required_tables - tables))
+                    raise ValueError(
+                        f"Backup is missing required Tamanna database tables: {missing}"
+                    )
                 with sqlite3.connect(str(target_path)) as target:
                     source.backup(target)
                     restored_integrity = target.execute(
