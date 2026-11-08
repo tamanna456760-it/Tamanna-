@@ -377,11 +377,11 @@ async def select_model(
 @api_router.post("/knowledge/import")
 async def import_knowledge(
     payload: KnowledgeImportRequest,
-    request: Request | None = None,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Index a bounded text document in the authenticated user's private corpus."""
-    check_origin(request) if request is not None else None
+    check_origin(request)
     user = require_user(token)
     filename = payload.filename.strip()
     if Path(filename).name != filename or filename in {".", ".."}:
@@ -443,7 +443,7 @@ async def reindex_knowledge(
 @api_router.delete("/knowledge/{filename}")
 async def delete_knowledge(
     filename: str,
-    request: Request | None = None,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Delete one source only from the signed-in user's private corpus."""
@@ -460,7 +460,7 @@ async def delete_knowledge(
 @api_router.post("/memories")
 async def create_memory(
     payload: MemoryRequest,
-    request: Request | None = None,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Create a private memory for the authenticated account."""
@@ -512,7 +512,7 @@ async def update_memory(
 @api_router.delete("/memories/{memory_id}")
 async def delete_memory(
     memory_id: int,
-    request: Request | None = None,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Delete a memory only when it belongs to the authenticated account."""
@@ -554,7 +554,7 @@ async def get_conversation(
 @api_router.delete("/conversations/{conversation_id}")
 async def delete_conversation(
     conversation_id: str,
-    request: Request | None = None,
+    request: Request,
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Delete a conversation only from the authenticated user's account."""
@@ -570,7 +570,7 @@ async def delete_conversation(
 
 
 @api_router.post("/chat", response_model=ChatResponse)
-async def chat(payload: ChatRequest, request: Request | None = None, token: str | None = Cookie(default=None, alias=COOKIE)):
+async def chat(payload: ChatRequest, request: Request, token: str | None = Cookie(default=None, alias=COOKIE)):
     """Generate and persist a reply in the signed-in user's conversation."""
     check_origin(request)
     prompt = payload.prompt.strip()
