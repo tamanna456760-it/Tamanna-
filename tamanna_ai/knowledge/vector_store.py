@@ -1,42 +1,49 @@
 """Local SQLite vector store and API-free retrieval embeddings for RAG.
-
 Only explicitly imported, user-scoped text is indexed. Original documents are
 never modified. The SQLite file should live on private server storage.
 """
 from __future__ import annotations
-
 import hashlib
 import json
 import math
 import re
 import sqlite3
 import os
-
 import httpx
 from pathlib import Path
 from contextlib import contextmanager
 from typing import Iterator
 from typing import Callable, Sequence
-
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = ROOT / "data" / "knowledge_vectors.sqlite3"
 class EmbeddingError(RuntimeError):
     """Local embedding or vector-store error."""
-
-
+def _unicode_tokens(text: str) -> list[str]:
+    """Tokenize Unicode letters, numbers, and combining marks (including Bengali)."""
+    import unicodedata
+    normalized = unicodedata.normalize("NFC", str(text)).casefold()
+    tokens: list[str] = []
+    current: list[str] = []
+    for character in normalized:
+        category = unicodedata.category(character)
+        if category[0] in {"L", "N"} or (category[0] == "M" and current):
+            current.append(character)
+        elif current:
+            tokens.append("".join(current))
+            current = []
+    if current:
+        tokens.append("".join(current))
+    return tokens
 class LocalFeatureEmbedder:
     """Deterministic, API-free feature-hashing embedder for local retrieval.
-
     This is a lightweight lexical retrieval baseline, not a trained neural
     embedding model. It hashes words and character n-grams into a fixed vector
     so the knowledge store works without hosted APIs or downloaded weights.
     """
-
     def __init__(self, dimensions: int = 384):
         self.dimensions = int(dimensions)
         if not 64 <= self.dimensions <= 8192:
             raise ValueError("dimensions must be between 64 and 8192")
-
     def __call__(
         self,
         text: str,
@@ -46,8 +53,7 @@ class LocalFeatureEmbedder:
             raise ValueError("Unsupported embedding task type")
         if not isinstance(text, str) or not text.strip():
             return [0.0] * self.dimensions
-
-        tokens = re.findall(r"[^\W_]+", text.casefold(), flags=re.UNICODE)
+        tokens = _unicode_tokens(text)
         features: list[tuple[str, float]] = []
         for token in tokens:
             if len(token) < 2:
@@ -59,7 +65,6 @@ class LocalFeatureEmbedder:
                     ("c:" + padded[i:i + 3], 0.35)
                     for i in range(len(padded) - 2)
                 )
-
         vector = [0.0] * self.dimensions
         for feature, weight in features:
             digest = hashlib.blake2b(
@@ -69,19 +74,15 @@ class LocalFeatureEmbedder:
             index = value % self.dimensions
             sign = 1.0 if (value >> 63) == 0 else -1.0
             vector[index] += sign * weight
-
         norm = math.sqrt(sum(value * value for value in vector))
         if norm:
             vector = [value / norm for value in vector]
         return vector
-
 class OllamaEmbeddingProvider:
     """Synchronous embeddings from a locally running Ollama server.
-
     No hosted API or API key is used. The embedding model must already be
     installed in the local Ollama runtime (for example: nomic-embed-text).
     """
-
     def __init__(
         self,
         base_url: str | None = None,
@@ -99,7 +100,6 @@ class OllamaEmbeddingProvider:
             raise ValueError("A valid local embedding model name is required")
         if self.timeout <= 0:
             raise ValueError("Embedding timeout must be positive")
-
     def __call__(
         self, text: str, task_type: str = "RETRIEVAL_DOCUMENT"
     ) -> list[float]:
@@ -133,8 +133,6 @@ class OllamaEmbeddingProvider:
         if not norm:
             raise EmbeddingError("Local Ollama returned a zero-length vector.")
         return [value / norm for value in values]
-
-
 def get_default_embedder():
     """Select local neural embeddings only when explicitly configured."""
     provider = os.getenv("TAMANNA_EMBEDDING_PROVIDER", "local-feature").strip().lower()
@@ -143,8 +141,6 @@ def get_default_embedder():
     if provider in {"local-feature", "feature", ""}:
         return LocalFeatureEmbedder()
     raise ValueError("Unsupported TAMANNA_EMBEDDING_PROVIDER setting")
-
-
 def chunk_text(text: str, *, max_chars: int = 1200, overlap: int = 150) -> list[str]:
     """Split text into bounded overlapping chunks, preferring paragraph boundaries."""
     if not isinstance(text, str) or not text.strip():
@@ -170,8 +166,6 @@ def chunk_text(text: str, *, max_chars: int = 1200, overlap: int = 150) -> list[
     if current:
         chunks.append(current)
     return chunks
-
-
 def _cosine(left: Sequence[float], right: Sequence[float]) -> float:
     if len(left) != len(right) or not left:
         return -1.0
@@ -179,11 +173,8 @@ def _cosine(left: Sequence[float], right: Sequence[float]) -> float:
     left_norm = math.sqrt(sum(a * a for a in left))
     right_norm = math.sqrt(sum(b * b for b in right))
     return dot / (left_norm * right_norm) if left_norm and right_norm else -1.0
-
-
 class VectorKnowledgeStore:
     """Persistent, owner-isolated vector index using SQLite and an embedder callable."""
-
     def __init__(
         self,
         embedder: Callable[..., list[float]] | None = None,
@@ -210,7 +201,6 @@ class VectorKnowledgeStore:
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_knowledge_owner ON knowledge_chunks(owner_id)"
             )
-
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.db_path, timeout=15)
@@ -223,7 +213,6 @@ class VectorKnowledgeStore:
             raise
         finally:
             connection.close()
-
     def index_text(self, text: str, *, owner_id: str, source: str, title: str = "") -> int:
         owner = str(owner_id).strip()
         if not owner:
@@ -263,17 +252,14 @@ class VectorKnowledgeStore:
                     embedding_json=excluded.embedding_json
             """, prepared)
         return len(prepared)
-
     def index_document(self, file_path: str | Path, *, owner_id: str) -> int:
         """Extract text from an approved local document and add its chunks."""
         from .document_loader import load_document_text
-
         path = Path(file_path)
         text = load_document_text(path, max_bytes=self.max_file_bytes)
         return self.index_text(
             text, owner_id=owner_id, source=path.name, title=path.stem
         )
-
     def search(self, query: str, *, owner_id: str, limit: int = 5) -> list[dict[str, object]]:
         owner = str(owner_id).strip()
         if not owner:
@@ -290,11 +276,10 @@ class VectorKnowledgeStore:
         # Hybrid local ranking: hashed-vector similarity plus token relevance,
         # inverse document frequency, and exact phrase coverage. This improves
         # lexical/context matching without pretending to be a trained semantic model.
-        token_pattern = re.compile(r"[^\W_]+", flags=re.UNICODE)
-        query_tokens = [token for token in token_pattern.findall(query.casefold()) if len(token) > 1]
+        query_tokens = [token for token in _unicode_tokens(query) if len(token) > 1]
         query_terms = set(query_tokens)
         document_tokens = [
-            set(token_pattern.findall(str(row[2]).casefold()))
+            set(_unicode_tokens(str(row[2])))
             for row in rows
         ]
         document_frequency = {
@@ -333,7 +318,6 @@ class VectorKnowledgeStore:
             {"score": score, "source": source, "title": title, "content": chunk}
             for score, source, title, chunk in ranked[:limit]
         ]
-
     def list_sources(self, *, owner_id: str) -> list[dict[str, object]]:
         """List document-level metadata for one owner without exposing chunk contents."""
         owner = str(owner_id).strip()
@@ -349,7 +333,6 @@ class VectorKnowledgeStore:
             {"source": source, "title": title, "chunks": chunks, "indexed_at": indexed_at}
             for source, title, chunks, indexed_at in rows
         ]
-
     def reindex(self, *, owner_id: str) -> dict[str, int]:
         """Recompute every stored chunk vector for one owner, preserving source text."""
         owner = str(owner_id).strip()
@@ -374,14 +357,12 @@ class VectorKnowledgeStore:
             )
         return {"documents": len({row[0] for row in self._source_rows(owner)}),
                 "chunks_reindexed": len(prepared)}
-
     def _source_rows(self, owner: str) -> list[tuple[str]]:
         with self._connect() as connection:
             return connection.execute(
                 "SELECT DISTINCT source FROM knowledge_chunks WHERE owner_id = ?",
                 (owner,),
             ).fetchall()
-
     def delete_source(self, source: str, *, owner_id: str) -> int:
         owner = str(owner_id).strip()
         if not owner:
@@ -392,8 +373,6 @@ class VectorKnowledgeStore:
                 (owner, str(source)),
             )
             return cursor.rowcount
-
-
 __all__ = [
     "EmbeddingError",
     "LocalFeatureEmbedder",
