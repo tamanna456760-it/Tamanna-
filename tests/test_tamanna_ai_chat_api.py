@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi import HTTPException
 
 from tamanna_ai.api.routes import (
-    ChatRequest, KnowledgeImportRequest, chat, delete_conversation,
+    ChatRequest, KnowledgeImportRequest, ModelSelectRequest, select_model, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
@@ -94,6 +94,34 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 use_knowledge=False, remember=False,
             ))
         add.assert_not_called()
+
+    async def test_select_model_persists_only_an_installed_local_model(self):
+        manager = FakeModelManager()
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user", return_value={"id": 12}
+        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=manager), patch(
+            "tamanna_ai.api.routes.set_selected_model", return_value="llama3.2:3b"
+        ) as save:
+            result = await select_model(
+                ModelSelectRequest(model="llama3.2:3b"), request=object(), token="session"
+            )
+        self.assertEqual(result["selected_model"], "llama3.2:3b")
+        self.assertFalse(result["restart_required"])
+        save.assert_called_once_with("llama3.2:3b")
+
+    async def test_select_model_rejects_model_not_installed(self):
+        with patch("tamanna_ai.api.routes.check_origin"), patch(
+            "tamanna_ai.api.routes.require_user", return_value={"id": 12}
+        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()), patch(
+            "tamanna_ai.api.routes.set_selected_model"
+        ) as save:
+            with self.assertRaises(HTTPException) as raised:
+                await select_model(
+                    ModelSelectRequest(model="not-installed:latest"),
+                    request=object(), token="session",
+                )
+        self.assertEqual(raised.exception.status_code, 422)
+        save.assert_not_called()
 
     async def test_model_status_lists_installed_models(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()):
