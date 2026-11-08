@@ -59,11 +59,17 @@
       set("benchmarkGeneration", display(metrics.generation_tokens_per_second, " tok/s"));
       set("benchmarkPrompt", display(metrics.prompt_tokens_per_second, " tok/s"));
       set("benchmarkTokens", display(metrics.output_tokens, ""));
+      const checks = Array.isArray(metrics.checks) ? metrics.checks : [];
+      const checkSummary = checks.length
+        ? " · Instruction checks: " + (metrics.passed_checks ?? 0) + "/" + (metrics.total_checks ?? checks.length)
+        : "";
       set("benchmarkDetails", "Model: " + (metrics.model || "Unknown") +
         " · Prompt: " + (metrics.prompt_tokens ?? "—") + " tokens" +
         " · Ollama total: " + display(metrics.total_duration_ms, " ms") +
-        " · Model load: " + display(metrics.model_load_ms, " ms"));
-      set("benchmarkStatus", "Benchmark সফল · " + new Date().toLocaleString());
+        " · Model load: " + display(metrics.model_load_ms, " ms") + checkSummary);
+      set("benchmarkStatus", "Benchmark সম্পন্ন · " +
+        (metrics.passed_checks ?? "—") + "/" + (metrics.total_checks ?? "—") +
+        " basic instruction checks pass · " + new Date().toLocaleString());
     } catch (error) {
       ["benchmarkLatency", "benchmarkGeneration", "benchmarkPrompt", "benchmarkTokens"].forEach((id) => set(id, "—"));
       set("benchmarkStatus", "Benchmark ব্যর্থ: " + error.message);
