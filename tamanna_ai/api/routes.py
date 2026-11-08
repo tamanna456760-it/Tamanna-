@@ -60,11 +60,6 @@ async def model_status():
         if list_models is None:
             raise ModelProviderError("Configured provider does not expose model discovery.")
         models = await list_models()
-    except EmbeddingError as exc:
-        raise HTTPException(
-            status_code=503,
-            detail="Local knowledge embedding model is unavailable. Check Ollama and the configured model.",
-        ) from exc
     except (ModelConfigurationError, ModelProviderError) as exc:
         raise HTTPException(
             status_code=503,
@@ -134,6 +129,24 @@ async def list_knowledge(token: str | None = Cookie(default=None, alias=COOKIE))
     user = require_user(token)
     documents = VectorKnowledgeStore().list_sources(owner_id=f"user:{user['id']}")
     return {"ok": True, "documents": documents}
+
+
+@api_router.post("/knowledge/reindex")
+async def reindex_knowledge(
+    request: Request,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Recompute local embedding vectors for only the signed-in user's documents."""
+    check_origin(request)
+    user = require_user(token)
+    try:
+        result = VectorKnowledgeStore().reindex(owner_id=f"user:{user['id']}")
+    except EmbeddingError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Local embedding model is unavailable. Check Ollama and the configured model.",
+        ) from exc
+    return {"ok": True, **result}
 
 
 @api_router.delete("/knowledge/{filename}")
