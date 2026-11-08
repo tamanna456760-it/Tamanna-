@@ -333,6 +333,48 @@
       : "বর্তমান metrics-এ নির্ধারিত high-resource threshold অতিক্রম করেনি।");
   }
 
+  async function refreshModelResources() {
+    const list = $("modelResourceList");
+    const button = $("refreshModelResources");
+    if (!list) return;
+    if (!window.TamannaAuth?.getUser()) {
+      list.replaceChildren();
+      set("modelResourceStatus", "Resource তথ্য দেখতে admin account-এ লগইন করুন।");
+      if (button) button.disabled = true;
+      return;
+    }
+    if (button) button.disabled = true;
+    set("modelResourceStatus", "Loaded model resource পরীক্ষা হচ্ছে…");
+    try {
+      const data = await getJson("/tamanna-ai/model/resources");
+      const models = Array.isArray(data.models) ? data.models : [];
+      list.replaceChildren();
+      models.forEach((model) => {
+        const item = document.createElement("li");
+        const name = document.createElement("strong");
+        name.textContent = model.name || "Unknown model";
+        const details = document.createElement("span");
+        const format = (value) => Number.isFinite(value) && value >= 0 ? formatBytes(value) : "Unavailable";
+        const parts = ["Model size: " + format(model.size_bytes), "Runtime memory: " + format(model.memory_bytes)];
+        if (Number.isFinite(model.context_length)) parts.push("Context: " + model.context_length);
+        if (model.expires_at) parts.push("Expires: " + model.expires_at);
+        details.textContent = " · " + parts.join(" · ");
+        item.append(name, details);
+        list.append(item);
+      });
+      set("modelResourceStatus", models.length
+        ? models.length + "টি model বর্তমানে memory-তে loaded আছে।"
+        : "এখন কোনো model memory-তে loaded নেই; Ollama request এলে model load করতে পারে।");
+    } catch (error) {
+      list.replaceChildren();
+      set("modelResourceStatus", "Resource তথ্য পাওয়া যায়নি: " + error.message);
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  $("refreshModelResources")?.addEventListener("click", refreshModelResources);
+
   async function refreshMetrics() {
     const user = window.TamannaAuth?.getUser();
     if (!user) {
@@ -429,6 +471,7 @@
       }
       updated.textContent = "সর্বশেষ পরীক্ষা: " + new Date().toLocaleString();
       await refreshMetrics();
+      await refreshModelResources();
     } catch (error) {
       set("healthChatStatus", "Unavailable");
       set("healthChatDetail", error.message);
