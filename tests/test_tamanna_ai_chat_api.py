@@ -71,6 +71,30 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("<user_memories>", sent)
         self.assertIn("User prefers Bengali responses", sent)
 
+
+    async def test_chat_saves_only_explicit_remember_request_when_opted_in(self):
+        provider = FakeProvider()
+        auth, ensure, history, save, memories = self.auth_patches(22)
+        with auth, ensure, history, save, memories, patch("tamanna_ai.api.routes.database.add_memory", return_value=88) as add, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider), patch("tamanna_ai.api.routes.VectorKnowledgeStore"):
+            await chat(ChatRequest(
+                prompt="Please remember that I prefer short Bengali answers",
+                use_knowledge=False, remember=True,
+            ))
+        add.assert_called_once_with(
+            "I prefer short Bengali answers", user_id=22,
+            metadata={"source": "explicit_chat_request", "kind": "user_memory"},
+        )
+
+    async def test_chat_does_not_auto_save_without_explicit_opt_in(self):
+        provider = FakeProvider()
+        auth, ensure, history, save, memories = self.auth_patches(23)
+        with auth, ensure, history, save, memories, patch("tamanna_ai.api.routes.database.add_memory") as add, patch("tamanna_ai.api.routes.get_model_provider", return_value=provider):
+            await chat(ChatRequest(
+                prompt="Remember that I prefer concise answers",
+                use_knowledge=False, remember=False,
+            ))
+        add.assert_not_called()
+
     async def test_model_status_lists_installed_models(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()):
             result = await model_status()
