@@ -127,6 +127,23 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result, {"ok": True, "benchmark": expected, "scope": "single_local_inference"})
         save_run.assert_called_once_with(model="qwen2.5:7b", result=expected)
 
+    async def test_model_resources_includes_installed_sizes_and_host_metrics(self):
+        class ResourceProvider:
+            name = "ollama"
+            async def list_running_models(self):
+                return []
+            async def list_model_details(self):
+                return [{"name": "qwen2.5:7b", "size_bytes": 4200}]
+        host = {"memory": {"total_bytes": 16000, "used_bytes": 4000}, "gpu": {"available": False}}
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 1, "email": "Tamanna456760@gmail.com"
+        }), patch("tamanna_ai.api.routes.get_model_provider", return_value=ResourceProvider()), patch(
+            "tamanna_ai.api.routes.collect_system_metrics", new=AsyncMock(return_value=host)
+        ):
+            result = await model_resources(token="admin-session")
+        self.assertEqual(result["installed_models"][0]["name"], "qwen2.5:7b")
+        self.assertEqual(result["host"], host)
+
     async def test_model_resources_is_admin_only_and_returns_loaded_models(self):
         expected = [{
             "name": "qwen2.5:7b", "size_bytes": 4200000000,
