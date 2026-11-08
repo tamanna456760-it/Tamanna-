@@ -9,6 +9,7 @@ from tamanna_ai.integrations.ollama import OllamaClient, OllamaError
 class FakeAsyncClient:
     response = None
     posted = None
+    responses = []
 
     def __init__(self, timeout=None):
         self.timeout = timeout
@@ -21,6 +22,8 @@ class FakeAsyncClient:
 
     async def post(self, url, json):
         type(self).posted = (url, json)
+        if type(self).responses:
+            return type(self).responses.pop(0)
         return type(self).response
 
     async def get(self, url):
@@ -58,6 +61,51 @@ class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
             models = await client.list_models()
         self.assertEqual(models, ["llama3.2:3b", "qwen2.5:7b"])
         self.assertEqual(FakeAsyncClient.requested_url, "http://127.0.0.1:11434/api/tags")
+
+
+    async def test_benchmark_runs_english_bengali_and_json_checks(self):
+        def response(content):
+            return httpx.Response(
+                200,
+                json={
+                    "message": {"content": content},
+                    "prompt_eval_count": 10,
+                    "eval_count": 5,
+                    "prompt_eval_duration": 100000000,
+                    "eval_duration": 200000000,
+                    "total_duration": 300000000,
+                    "load_duration": 10000000,
+                },
+                request=httpx.Request("POST", "http://127.0.0.1:11434/api/chat"),
+            )
+
+        FakeAsyncClient.responses = [
+            response("42"),
+            response("৪২"),
+            response('{"ok": true, "count": 3}'),
+        ]
+        client = OllamaClient(
+            base_url="http://127.0.0.1:11434",
+            model="qwen2.5:7b",
+        )
+        with patch("tamanna_ai.integrations.ollama.httpx.AsyncClient", FakeAsyncClient):
+            result = await client.benchmark()
+
+        self.assertEqual(result["passed_checks"], 3)
+        self.assertEqual(result["total_checks"], 3)
+        self.assertEqual(result["instruction_following_percent"], 100.0)
+        self.assertEqual(
+            [item["id"] for item in result["checks"]],
+            ["english_arithmetic", "bengali_arithmetic", "json_format"],
+        )
+        self.assertEqual(result["output_tokens"], 15)
+        self.assertIn("not a general accuracy", result["accuracy_note"])
+        self.assertEqual(FakeAsyncClient.responses, [])
+
+    async def test_benchmark_json_check_rejects_wrong_shape_and_boolean_count(self):
+        self.assertFalse(OllamaClient._valid_benchmark_json('{"ok": true, "count": 4}'))
+        self.assertFalse(OllamaClient._valid_benchmark_json('{"ok": true, "count": true}'))
+        self.assertFalse(OllamaClient._valid_benchmark_json('not json'))
 
     async def test_rejects_empty_prompt(self):
         with self.assertRaises(ValueError):
