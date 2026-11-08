@@ -33,6 +33,57 @@
     return data;
   }
 
+  function formatBytes(value) {
+    if (!Number.isFinite(value) || value < 0) return "Unavailable";
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let size = value;
+    let unit = 0;
+    while (size >= 1024 && unit < units.length - 1) {
+      size /= 1024;
+      unit += 1;
+    }
+    return size.toFixed(unit >= 3 ? 2 : 1) + " " + units[unit];
+  }
+
+  async function refreshMetrics() {
+    const user = window.TamannaAuth?.getUser();
+    const adminEmail = "tamanna456760@gmail.com";
+    if (!user || String(user.email || "").toLowerCase() !== adminEmail) {
+      set("metricCpu", "Admin only");
+      set("metricRam", "Admin only");
+      set("metricDisk", "Admin only");
+      set("metricGpu", "Admin only");
+      set("metricsUpdated", "এই তথ্য শুধু configured Tamanna AI admin দেখতে পারবেন।");
+      return;
+    }
+    try {
+      const metrics = await getJson("/tamanna-ai/system/metrics");
+      const cpu = metrics.cpu || {};
+      const memory = metrics.memory || {};
+      const disk = metrics.disk || {};
+      const gpu = metrics.gpu || {};
+      set("metricCpu", Number.isFinite(cpu.usage_percent) ? cpu.usage_percent + "%" : "Unavailable");
+      set("metricCpuDetail", (cpu.logical_cores || "—") + " logical CPU core(s)");
+      set("metricRam", Number.isFinite(memory.usage_percent) ? memory.usage_percent + "%" : "Unavailable");
+      set("metricRamDetail", formatBytes(memory.used_bytes) + " / " + formatBytes(memory.total_bytes));
+      set("metricDisk", Number.isFinite(disk.usage_percent) ? disk.usage_percent + "%" : "Unavailable");
+      set("metricDiskDetail", formatBytes(disk.used_bytes) + " used · " + formatBytes(disk.free_bytes) + " free");
+      if (gpu.available) {
+        set("metricGpu", Number.isFinite(gpu.utilization_percent) ? gpu.utilization_percent + "%" : "Detected");
+        set("metricGpuDetail", (gpu.name || "NVIDIA GPU") + " · " +
+          formatBytes((gpu.memory_used_mb || 0) * 1048576) + " / " +
+          formatBytes((gpu.memory_total_mb || 0) * 1048576));
+      } else {
+        set("metricGpu", "Not detected");
+        set("metricGpuDetail", gpu.vendor === "NVIDIA" ? "NVIDIA telemetry unavailable" : "No NVIDIA nvidia-smi found");
+      }
+      set("metricsUpdated", "সর্বশেষ metrics: " + new Date().toLocaleString());
+    } catch (error) {
+      ["metricCpu", "metricRam", "metricDisk", "metricGpu"].forEach((id) => set(id, "Unavailable"));
+      set("metricsUpdated", "Metrics সংগ্রহ করা যায়নি: " + error.message);
+    }
+  }
+
   async function refresh() {
     refreshButton.disabled = true;
     updated.textContent = "System status পরীক্ষা হচ্ছে…";
@@ -87,6 +138,7 @@
         set("healthKnowledgeDetail", "Private index শুধু account owner দেখতে পারবেন");
       }
       updated.textContent = "সর্বশেষ পরীক্ষা: " + new Date().toLocaleString();
+      await refreshMetrics();
     } catch (error) {
       set("healthChatStatus", "Unavailable");
       set("healthChatDetail", error.message);
@@ -198,6 +250,9 @@
 
   refreshButton.addEventListener("click", refresh);
   $("openSettings")?.addEventListener("click", refresh);
+  window.setInterval(() => {
+    if (document.visibilityState === "visible") refreshMetrics();
+  }, 15000);
   window.addEventListener("tamanna:authenticated", refresh);
   window.addEventListener("tamanna:loggedout", () => {
     set("healthKnowledgeStatus", "লগইন প্রয়োজন");
