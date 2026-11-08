@@ -153,3 +153,19 @@ def test_reindex_recomputes_existing_vectors_without_deleting_documents(tmp_path
     assert new_store.reindex(owner_id="user-2") == {
         "documents": 0, "chunks_reindexed": 0,
     }
+
+
+
+def test_bengali_unicode_tokens_preserve_combining_marks_and_match_search(tmp_path):
+    from tamanna_ai.knowledge.vector_store import LocalFeatureEmbedder
+
+    store = VectorKnowledgeStore(LocalFeatureEmbedder(), tmp_path / "bengali.sqlite3")
+    composed = "বাংলা ভাষার জ্ঞানভান্ডার"
+    decomposed = "বা\u0982লা ভাষার জ্ঞানভান্ডার"
+    assert store.index_text(
+        composed, owner_id="user-bn", source="bengali.txt", title="বাংলা"
+    ) == 1
+    results = store.search(decomposed, owner_id="user-bn")
+    assert results
+    assert results[0]["source"] == "bengali.txt"
+    assert results[0]["score"] > 0.5
