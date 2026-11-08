@@ -140,3 +140,60 @@ def test_sqlite_backup_rejects_live_database_as_destination(tmp_path):
 
     with pytest.raises(ValueError, match="differ"):
         database.backup_to(database_path)
+
+
+def test_restore_backup_creates_separate_database_with_knowledge(tmp_path):
+    live_path = tmp_path / "live.sqlite3"
+    backup_path = tmp_path / "backup.sqlite3"
+    restore_path = tmp_path / "recovered" / "restored.sqlite3"
+    database = Database(f"sqlite:///{live_path}")
+    database.init()
+    owner_id = database.ensure_user("restore-owner@example.test", "Restore Owner")
+
+    with database.Session.begin() as session:
+        session.add(
+            Memory(
+                user_id=owner_id,
+                content="recoverable knowledge",
+                metadata_json='{"source":"restore-test"}',
+            )
+        )
+
+    database.backup_to(backup_path)
+    restored_path = Database.restore_backup_to(backup_path, restore_path)
+    assert restored_path == restore_path.resolve()
+
+    recovered = Database(f"sqlite:///{restored_path}")
+    with recovered.Session() as session:
+        record = session.query(Memory).filter_by(
+            content="recoverable knowledge"
+        ).one()
+        assert record.user_id == owner_id
+
+
+def test_restore_refuses_to_overwrite_existing_destination(tmp_path):
+    backup_database = Database(f"sqlite:///{tmp_path / 'backup-source.sqlite3'}")
+    backup_database.init()
+    backup_path = backup_database.backup_to(tmp_path / "backup.sqlite3")
+    destination = tmp_path / "existing.sqlite3"
+    destination.write_text("preserve this file", encoding="utf-8")
+
+    import pytest
+
+    with pytest.raises(FileExistsError):
+        Database.restore_backup_to(backup_path, destination)
+
+    assert destination.read_text(encoding="utf-8") == "preserve this file"
+
+
+def test_restore_rejects_corrupt_backup(tmp_path):
+    corrupt_backup = tmp_path / "corrupt.sqlite3"
+    corrupt_backup.write_bytes(b"not a sqlite database")
+    destination = tmp_path / "restored.sqlite3"
+
+    import pytest
+
+    with pytest.raises(Exception):
+        Database.restore_backup_to(corrupt_backup, destination)
+
+    assert not destination.exists()
