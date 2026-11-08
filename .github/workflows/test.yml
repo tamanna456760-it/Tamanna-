@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   test:
-    name: Python syntax and tests
+    name: Python syntax, tests and retrieval benchmark
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -49,3 +49,44 @@ jobs:
         run: |
           set -euo pipefail
           pytest -q
+
+      - name: Run API-free retrieval benchmark
+        run: |
+          set -euo pipefail
+          python scripts/benchmark_vector_retrieval.py --top-k 3 > benchmark-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("benchmark-report.json").read_text(encoding="utf-8"))
+          lines = [
+              "## Tamanna local retrieval benchmark",
+              "",
+              f"- Cases: {report['cases']}",
+              f"- Top K: {report['top_k']}",
+              f"- Hit rate: {report['hit_rate']:.2%}",
+              f"- Mean reciprocal rank: {report['mean_reciprocal_rank']:.4f}",
+              f"- Embedder: {report['embedding_provider']}",
+              "",
+              "| Language | Cases | Hit rate | MRR |",
+              "|---|---:|---:|---:|",
+          ]
+          for language, stats in report["by_language"].items():
+              lines.append(
+                  f"| {language} | {stats['cases']} | {stats['hit_rate']:.2%} | "
+                  f"{stats['mean_reciprocal_rank']:.4f} |"
+              )
+          Path("benchmark-summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("\n".join(lines) + "\n")
+          PY
+
+      - name: Upload retrieval benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-retrieval-benchmark
+          path: |
+            benchmark-report.json
+            benchmark-summary.md
+          if-no-files-found: error
+          retention-days: 14
