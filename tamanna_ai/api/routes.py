@@ -79,6 +79,30 @@ async def health():
     return {"status": "healthy"}
 
 
+@api_router.post("/model/benchmark")
+async def model_benchmark(
+    request: Request,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Run a short, explicit benchmark against the configured local model."""
+    check_origin(request)
+    _require_model_admin(token)
+    try:
+        provider = get_model_provider()
+        benchmark = getattr(provider, "benchmark", None)
+        if benchmark is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Benchmark is supported only by the local Ollama provider.",
+            )
+        result = await benchmark()
+    except ModelConfigurationError as exc:
+        raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
+    except ModelProviderError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"ok": True, "benchmark": result}
+
+
 @api_router.get("/system/metrics")
 async def system_metrics(
     token: str | None = Cookie(default=None, alias=COOKIE),
