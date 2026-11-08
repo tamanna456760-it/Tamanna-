@@ -61,6 +61,8 @@ def benchmark_size(row_count: int, repeats: int) -> dict[str, float | int]:
             "records": row_count,
             "seed_seconds": round(seed_seconds, 3),
             "median_search_ms": round(statistics.median(timings) * 1000, 3),
+            "p95_search_ms": round(sorted(timings)[max(0, int(0.95 * len(timings) + 0.999999) - 1)] * 1000, 3),
+            "max_search_ms": round(max(timings) * 1000, 3),
             "search_repeats": repeats,
             "returned_results": result_count,
         }
