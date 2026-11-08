@@ -200,7 +200,9 @@ def test_vector_store_rejects_invalid_query_embedding(tmp_path):
 
 
 def test_bilingual_retrieval_benchmark_reports_ranking_metrics(tmp_path):
-    from scripts.benchmark_vector_retrieval import DOCUMENTS, evaluate
+    from collections import Counter
+
+    from scripts.benchmark_vector_retrieval import CASES, DOCUMENTS, evaluate
     from tamanna_ai.knowledge.vector_store import LocalFeatureEmbedder
 
     store = VectorKnowledgeStore(
@@ -217,7 +219,8 @@ def test_bilingual_retrieval_benchmark_reports_ranking_metrics(tmp_path):
     assert 0.0 <= report["hit_rate"] <= 1.0
     assert 0.0 <= report["mean_reciprocal_rank"] <= 1.0
     assert len(report["results"]) == len(DOCUMENTS)
-    assert set(report["by_language"]) == {"bn", "en", "mixed"}
-    assert report["by_language"]["bn"]["cases"] == 1
-    assert report["by_language"]["en"]["cases"] == 3
+    expected_language_counts = Counter(case["language"] for case in CASES)
+    assert set(report["by_language"]) == set(expected_language_counts)
+    for language, expected_count in expected_language_counts.items():
+        assert report["by_language"][language]["cases"] == expected_count
     assert all("language" in result and "latency_ms" in result for result in report["results"])
