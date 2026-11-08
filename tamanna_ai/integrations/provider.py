@@ -26,6 +26,12 @@ class OllamaProvider:
     def __init__(self, base_url: str | None = None, model: str | None = None):
         self.client = OllamaClient(base_url=base_url, model=model)
 
+    async def list_models(self) -> list[str]:
+        try:
+            return await self.client.list_models()
+        except OllamaError as exc:
+            raise ModelProviderError(str(exc)) from exc
+
     async def generate(self, prompt: str) -> str:
         try:
             return await self.client.generate(prompt)
