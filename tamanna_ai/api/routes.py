@@ -14,6 +14,7 @@ from tamanna_ai.knowledge.vector_store import (
     VectorKnowledgeStore,
     get_default_embedder,
 )
+from tamanna_ai.integrations.model_settings import set_selected_model
 from tamanna_ai.persistence.database import database
 from tamanna_ai.integrations.provider import (
     ModelConfigurationError,
@@ -35,6 +36,10 @@ class ChatResponse(BaseModel):
     response: str
     provider: str
     conversation_id: str | None = None
+
+
+class ModelSelectRequest(BaseModel):
+    model: str = Field(min_length=1, max_length=200)
 
 
 class KnowledgeImportRequest(BaseModel):
@@ -110,6 +115,44 @@ async def model_status():
         "installed_models": models,
         "embedding": embedding_status,
     }
+
+
+@api_router.post("/model/select")
+async def select_model(
+    payload: ModelSelectRequest,
+    request: Request,
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Select an already-installed local Ollama model and persist its name."""
+    check_origin(request)
+    require_user(token)
+    model_name = payload.model.strip()
+    try:
+        provider = get_model_provider()
+        if provider.name != "ollama" or not hasattr(provider, "list_models"):
+            raise HTTPException(
+                status_code=409,
+                detail="Model selection is supported only by the local Ollama provider.",
+            )
+        installed = await provider.list_models()
+    except (ModelConfigurationError, ModelProviderError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Local Ollama runtime is unavailable; model selection was not changed.",
+        ) from exc
+    if model_name not in installed:
+        raise HTTPException(
+            status_code=422,
+            detail="এই modelটি local Ollama-তে installed নেই। আগে model install করুন।",
+        )
+    try:
+        set_selected_model(model_name)
+    except (OSError, ValueError) as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Model selection সংরক্ষণ করা যায়নি।",
+        ) from exc
+    return {"ok": True, "selected_model": model_name, "restart_required": False}
 
 
 @api_router.post("/knowledge/import")
