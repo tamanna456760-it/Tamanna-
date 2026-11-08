@@ -56,6 +56,9 @@ def test_safe_tool_execution_requires_authenticated_session(monkeypatch, tmp_pat
             },
         )
         assert signup.status_code == 201
+        # Signup deliberately authenticates the new account; clear its cookie
+        # to test the anonymous boundary independently.
+        client.cookies.delete(auth_router.COOKIE)
 
         still_anonymous = client.post("/api/tools/execute", json=payload)
         assert still_anonymous.status_code == 401
