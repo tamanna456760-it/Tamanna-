@@ -90,6 +90,21 @@ class PersistentMemoryTests(unittest.TestCase):
                 user_id=self.user_a, name="Alice", email="b@example.test"
             )
 
+    def test_unscoped_history_reads_fail_closed(self):
+        self.db.save_chat_pair("Private question", "Private answer", "private-chat", self.user_a)
+        self.assertEqual(self.db.load_history("private-chat", user_id=None), [])
+        self.assertEqual(self.db.load_history(user_id=None), [])
+
+    def test_conversation_id_cannot_be_reused_by_another_user(self):
+        self.db.save_chat_pair("A question", "A reply", "shared-id", self.user_a)
+        with self.assertRaises(PermissionError):
+            self.db.save_chat_pair("B question", "B reply", "shared-id", self.user_b)
+        self.assertEqual(
+            self.db.load_history("shared-id", user_id=self.user_a)[0]["user"],
+            "A question",
+        )
+        self.assertEqual(self.db.load_history("shared-id", user_id=self.user_b), [])
+
     def test_history_is_scoped_and_bounded(self):
         self.db.save_chat_pair("first question", "first answer", "chat-a", self.user_a)
         self.db.save_chat_pair("second question", "second answer", "chat-a", self.user_a)
