@@ -173,7 +173,7 @@ def test_sqlite_restore_rejects_backup_missing_core_tables(tmp_path):
         connection.execute("CREATE TABLE users (id INTEGER PRIMARY KEY)")
         connection.execute("CREATE TABLE memories (id INTEGER PRIMARY KEY)")
 
-    with pytest.raises(ValueError, match="conversations, messages"):
+    with pytest.raises(ValueError, match="benchmark_runs.*conversations.*knowledge_fingerprints"):
         Database.restore_backup_to(incomplete, destination)
     assert not destination.exists()
 
