@@ -236,6 +236,38 @@ class Database:
             ])
         return conversation_id
 
+    def list_conversations(self, *, user_id: int, limit: int = 50) -> list[dict[str, object]]:
+        """List recent conversations owned by one authenticated user."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        self.init()
+        limit = max(1, min(int(limit), 100))
+        with self.Session() as session:
+            rows = session.scalars(
+                select(Conversation).where(Conversation.user_id == user_id)
+                .order_by(Conversation.updated_at.desc()).limit(limit)
+            )
+            return [
+                {"id": item.id, "title": item.title,
+                 "created_at": item.created_at.isoformat(),
+                 "updated_at": item.updated_at.isoformat()}
+                for item in rows
+            ]
+
+    def delete_conversation(self, conversation_id: str, *, user_id: int) -> bool:
+        """Delete a conversation only when it belongs to the supplied user."""
+        if user_id is None:
+            raise ValueError("user_id is required")
+        self.init()
+        with self.Session.begin() as session:
+            conversation = session.scalar(select(Conversation).where(
+                Conversation.id == conversation_id, Conversation.user_id == user_id
+            ))
+            if conversation is None:
+                return False
+            session.delete(conversation)
+        return True
+
     def load_history(
         self, conversation_id: str | None = None, user_id: int | None = None,
         limit_pairs: int | None = None,
