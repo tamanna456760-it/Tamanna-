@@ -112,3 +112,14 @@ def test_concurrent_duplicate_imports_store_only_one_record(tmp_path):
     assert sum(result["imported"] for result in results) == 1
     assert sum(result["skipped"] for result in results) == 3
     assert len(search_knowledge("remain idempotent", database=db)) == 1
+
+def test_anonymous_retrieval_cannot_read_user_scoped_knowledge(tmp_path):
+    path = tmp_path / "owner-only.txt"
+    path.write_text("Owner private retrieval boundary marker.", encoding="utf-8")
+    db = Database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
+    owner_id = db.ensure_user("owner@example.test", "Owner")
+
+    import_knowledge_file(path, database=db, user_id=owner_id)
+
+    assert search_knowledge("boundary marker", database=db, user_id=owner_id)
+    assert search_knowledge("boundary marker", database=db) == []
