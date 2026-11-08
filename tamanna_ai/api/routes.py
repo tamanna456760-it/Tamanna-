@@ -348,6 +348,11 @@ async def chat(payload: ChatRequest, request: Request | None = None, token: str 
                     f"<retrieved_context>\n{context}\n</retrieved_context>"
                 )
         answer = await provider.generate(model_prompt)
+    except EmbeddingError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Local knowledge embedding model is unavailable. Check Ollama and the configured model.",
+        ) from exc
     except (ModelConfigurationError, ModelProviderError) as exc:
         raise HTTPException(
             status_code=503,
