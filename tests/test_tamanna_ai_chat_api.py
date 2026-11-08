@@ -1,4 +1,7 @@
+import inspect
 import unittest
+from functools import wraps
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from fastapi import HTTPException
@@ -9,6 +12,31 @@ from tamanna_ai.api.routes import (
     list_knowledge, model_status, model_benchmark_history, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
 )
+
+
+# These tests call FastAPI endpoint functions directly rather than through ASGI.
+# Supply the Request object that FastAPI normally injects; an empty Origin header
+# represents a same-origin request and keeps the production origin check active.
+def _with_test_request(route):
+    if "request" not in inspect.signature(route).parameters:
+        return route
+
+    @wraps(route)
+    async def invoke(*args, **kwargs):
+        request = kwargs.get("request")
+        if request is None or not hasattr(request, "headers"):
+            kwargs["request"] = SimpleNamespace(headers={})
+        return await route(*args, **kwargs)
+
+    return invoke
+
+
+for _route_name in (
+    "pull_model", "select_model", "model_benchmark", "chat",
+    "delete_conversation", "delete_knowledge", "import_knowledge",
+    "create_memory", "update_memory", "delete_memory",
+):
+    globals()[_route_name] = _with_test_request(globals()[_route_name])
 
 
 class FakeProvider:
@@ -292,7 +320,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_select_model_persists_only_an_installed_local_model(self):
         manager = FakeModelManager()
         with patch("tamanna_ai.api.routes.check_origin"), patch(
-            "tamanna_ai.api.routes.require_user", return_value={"id": 12}
+            "tamanna_ai.api.routes.require_user", return_value={"id": 12, "email": "tamanna456760@gmail.com"}
         ), patch("tamanna_ai.api.routes.get_model_provider", return_value=manager), patch(
             "tamanna_ai.api.routes.set_selected_model", return_value="llama3.2:3b"
         ) as save:
@@ -410,7 +438,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_package_app_mounts_auth_chat_and_conversation_routes(self):
         from tamanna_ai.api.server import create_app
-        paths = {route.path for route in create_app().routes}
+        paths = set(create_app().openapi()["paths"])
         self.assertIn("/api/auth/signup", paths)
         self.assertIn("/api/auth/login", paths)
         self.assertIn("/tamanna-ai/chat", paths)
