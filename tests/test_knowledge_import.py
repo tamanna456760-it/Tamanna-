@@ -94,3 +94,21 @@ def test_import_rejects_invalid_utf8_without_persisting(tmp_path):
         import_knowledge_file(path, database=db)
 
     assert search_knowledge("valid prefix", database=db) == []
+
+def test_concurrent_duplicate_imports_store_only_one_record(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    path = tmp_path / "concurrent.txt"
+    path.write_text("Concurrent imports must remain idempotent.", encoding="utf-8")
+    db = Database(f"sqlite:///{tmp_path / 'concurrent.sqlite3'}")
+    db.init()
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = list(executor.map(
+            lambda _: import_knowledge_file(path, database=db),
+            range(4),
+        ))
+
+    assert sum(result["imported"] for result in results) == 1
+    assert sum(result["skipped"] for result in results) == 3
+    assert len(search_knowledge("remain idempotent", database=db)) == 1
