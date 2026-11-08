@@ -290,7 +290,7 @@ class VectorKnowledgeStore:
         # Hybrid local ranking: hashed-vector similarity plus token relevance,
         # inverse document frequency, and exact phrase coverage. This improves
         # lexical/context matching without pretending to be a trained semantic model.
-        token_pattern = re.compile(r"[^\\W_]+", flags=re.UNICODE)
+        token_pattern = re.compile(r"[^\W_]+", flags=re.UNICODE)
         query_tokens = [token for token in token_pattern.findall(query.casefold()) if len(token) > 1]
         query_terms = set(query_tokens)
         document_tokens = [
@@ -349,6 +349,38 @@ class VectorKnowledgeStore:
             {"source": source, "title": title, "chunks": chunks, "indexed_at": indexed_at}
             for source, title, chunks, indexed_at in rows
         ]
+
+    def reindex(self, *, owner_id: str) -> dict[str, int]:
+        """Recompute every stored chunk vector for one owner, preserving source text."""
+        owner = str(owner_id).strip()
+        if not owner:
+            raise ValueError("owner_id is required to reindex private knowledge")
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT chunk_id, chunk_text FROM knowledge_chunks WHERE owner_id = ?",
+                (owner,),
+            ).fetchall()
+            prepared = []
+            for chunk_id, chunk in rows:
+                vector = self.embedder(chunk, task_type="RETRIEVAL_DOCUMENT")
+                if not vector:
+                    raise EmbeddingError("Embedder returned an empty vector")
+                prepared.append((
+                    json.dumps(vector, separators=(",", ":")), chunk_id
+                ))
+            connection.executemany(
+                "UPDATE knowledge_chunks SET embedding_json = ? WHERE chunk_id = ?",
+                prepared,
+            )
+        return {"documents": len({row[0] for row in self._source_rows(owner)}),
+                "chunks_reindexed": len(prepared)}
+
+    def _source_rows(self, owner: str) -> list[tuple[str]]:
+        with self._connect() as connection:
+            return connection.execute(
+                "SELECT DISTINCT source FROM knowledge_chunks WHERE owner_id = ?",
+                (owner,),
+            ).fetchall()
 
     def delete_source(self, source: str, *, owner_id: str) -> int:
         owner = str(owner_id).strip()
