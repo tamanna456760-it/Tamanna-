@@ -57,6 +57,19 @@ class FakeModelManager:
 
 
 class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._admin_email_patch = patch.dict(
+            "os.environ", {"TAMANNA_ADMIN_EMAIL": "tamanna456760@gmail.com"}
+        )
+        cls._admin_email_patch.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._admin_email_patch.stop()
+        super().tearDownClass()
+
     def auth_patches(self, user_id=42):
         user = {"id": user_id, "email": f"user{user_id}@example.test", "name": f"User {user_id}"}
         return (
