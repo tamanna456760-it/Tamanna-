@@ -13,7 +13,11 @@ def _memory_bytes() -> tuple[int | None, int | None]:
     meminfo = Path("/proc/meminfo")
     if meminfo.exists():
         values: dict[str, int] = {}
-        for line in meminfo.read_text(encoding="ascii").splitlines():
+        try:
+            lines = meminfo.read_text(encoding="ascii").splitlines()
+        except OSError:
+            lines = []
+        for line in lines:
             parts = line.split()
             if len(parts) >= 2 and parts[0].endswith(":"):
                 try:
