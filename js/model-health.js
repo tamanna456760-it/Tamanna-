@@ -7,6 +7,10 @@
   const modelSelect = $("localModelSelect");
   const saveModelButton = $("saveLocalModel");
   const modelSelectStatus = $("modelSelectStatus");
+  const downloadButton = $("downloadLocalModel");
+  const downloadInput = $("downloadModelName");
+  const downloadProgress = $("modelDownloadProgress");
+  const downloadStatus = $("modelDownloadStatus");
   if (!refreshButton || !updated) return;
 
   function set(id, value) {
@@ -95,6 +99,72 @@
       refreshButton.disabled = false;
     }
   }
+
+  downloadButton?.addEventListener("click", async () => {
+    if (!window.TamannaAuth?.getUser()) {
+      if (downloadStatus) downloadStatus.textContent = "Model download করতে প্রথমে লগইন করুন।";
+      return;
+    }
+    const model = downloadInput?.value.trim();
+    if (!model || !/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/.test(model)) {
+      if (downloadStatus) downloadStatus.textContent = "সঠিক Ollama model নাম লিখুন, যেমন qwen2.5:7b।";
+      return;
+    }
+    downloadButton.disabled = true;
+    if (downloadProgress) downloadProgress.value = 0;
+    if (downloadStatus) downloadStatus.textContent = "Download request পাঠানো হচ্ছে…";
+    try {
+      const response = await fetch("/tamanna-ai/model/pull", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/x-ndjson", "Content-Type": "application/json" },
+        body: JSON.stringify({ model })
+      });
+      if (!response.ok || !response.body) {
+        const failure = await response.json().catch(() => ({}));
+        const detail = failure.detail;
+        throw new Error(typeof detail === "string" ? detail : detail?.message || "HTTP " + response.status);
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let completed = false;
+      const processLine = (line) => {
+        if (!line.trim()) return;
+        const event = JSON.parse(line);
+        if (event.error) throw new Error(event.error);
+        if (typeof event.total === "number" && event.total > 0 && typeof event.completed === "number") {
+          const percent = Math.min(100, Math.floor((event.completed / event.total) * 100));
+          if (downloadProgress) downloadProgress.value = percent;
+          if (downloadStatus) downloadStatus.textContent =
+            (event.status || "Downloading") + " · " + percent + "% (" +
+            Math.round(event.completed / 1048576) + " / " +
+            Math.round(event.total / 1048576) + " MB)";
+        } else if (event.status && downloadStatus) {
+          downloadStatus.textContent = event.status;
+        }
+        if (event.done === true || event.status === "success") completed = true;
+      };
+      while (true) {
+        const part = await reader.read();
+        buffer += decoder.decode(part.value || new Uint8Array(), { stream: !part.done });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        lines.forEach(processLine);
+        if (part.done) break;
+      }
+      if (buffer.trim()) processLine(buffer);
+      if (!completed) throw new Error("Download stream ended before Ollama confirmed completion.");
+      if (downloadProgress) downloadProgress.value = 100;
+      if (downloadStatus) downloadStatus.textContent = "Download complete: " + model;
+      if (downloadInput) downloadInput.value = "";
+      await refresh();
+    } catch (error) {
+      if (downloadStatus) downloadStatus.textContent = "Download failed: " + error.message;
+    } finally {
+      downloadButton.disabled = false;
+    }
+  });
 
   saveModelButton?.addEventListener("click", async () => {
     if (!window.TamannaAuth?.getUser()) {
