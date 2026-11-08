@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Evaluate local Tamanna knowledge retrieval on a small bilingual fixture.
+"""Evaluate local Tamanna knowledge retrieval on a multilingual fixture.
 
 Run from the repository root:
     python scripts/benchmark_vector_retrieval.py --top-k 3
 
-This measures retrieval ranking only, not answer correctness or GPT/Gemini
+This 15-case fixture measures retrieval ranking only, not answer correctness or GPT/Gemini
 equivalence. The default embedder is API-free; set
 TAMANNA_EMBEDDING_PROVIDER=ollama to evaluate a local Ollama embedding model.
 """
@@ -51,6 +51,66 @@ DOCUMENTS = [
         "Build and test the Android application APK. Debug and release artifacts "
         "are produced by the Android CI workflow.",
     ),
+    (
+        "api-security.md",
+        "API security controls",
+        "Protect API endpoints with authentication, authorization, input validation, "
+        "secure headers, and audit logging. Never commit passwords or API secrets.",
+    ),
+    (
+        "rate-limits.md",
+        "Rate limiting",
+        "Rate limiting controls request volume per client and endpoint. Return HTTP 429 "
+        "when a client exceeds the configured request quota.",
+    ),
+    (
+        "dns-deployment.md",
+        "DNS and website deployment",
+        "Website deployment requires correct DNS records, domain ownership, TLS "
+        "certificates, and a successful hosting build.",
+    ),
+    (
+        "voice-interface.md",
+        "Voice interface",
+        "A voice interface converts speech to text and can synthesize spoken responses. "
+        "Microphone permission is required before recording.",
+    ),
+    (
+        "rag-pipeline.md",
+        "Retrieval augmented generation",
+        "A RAG pipeline retrieves relevant knowledge chunks, adds grounded context, "
+        "and then generates an answer with source references.",
+    ),
+    (
+        "backup-schedule.md",
+        "Scheduled backup",
+        "Automated database backups should run on a schedule, retain multiple recovery "
+        "points, and verify integrity before restore.",
+    ),
+    (
+        "bengali-unicode.md",
+        "বাংলা ইউনিকোড ও যুক্তাক্ষর",
+        "বাংলা ইউনিকোড টেক্সট স্বাভাবিকীকরণ, কারচিহ্ন এবং যুক্তাক্ষর ঠিকভাবে "
+        "সংরক্ষণ করতে হবে। অনুসন্ধানে combining mark বাদ দেওয়া যাবে না।",
+    ),
+    (
+        "user-isolation.md",
+        "ব্যবহারকারীভিত্তিক তথ্য বিচ্ছিন্নতা",
+        "প্রতিটি ব্যবহারকারীর ব্যক্তিগত নথি, কথোপকথন এবং স্মৃতি আলাদা রাখতে হবে। "
+        "একজন ব্যবহারকারী অন্যের গোপন তথ্য দেখতে পারবে না।",
+    ),
+    (
+        "ollama-memory.md",
+        "Ollama RAM requirements",
+        "Local Ollama model loading depends on model size, available system RAM, "
+        "GPU memory, context length, and concurrent requests.",
+    ),
+    (
+        "ci-workflow.md",
+        "Continuous integration",
+        "Continuous integration runs automated tests, static checks, security scans, "
+        "and build validation for every relevant commit.",
+    ),
 ]
 
 CASES = [
@@ -59,6 +119,16 @@ CASES = [
     {"query": "ব্যক্তিগত স্মৃতি এবং user data নিরাপত্তা", "relevant": "privacy-memory.md", "language": "mixed"},
     {"query": "local Ollama model without GPT Gemini API", "relevant": "local-model.md", "language": "en"},
     {"query": "Android APK release build test", "relevant": "android-build.md", "language": "en"},
+    {"query": "API authentication secret নিরাপত্তা audit log", "relevant": "api-security.md", "language": "mixed"},
+    {"query": "HTTP 429 request quota rate limit", "relevant": "rate-limits.md", "language": "en"},
+    {"query": "ডোমেইন DNS record TLS website deployment", "relevant": "dns-deployment.md", "language": "bn"},
+    {"query": "microphone speech to text voice response", "relevant": "voice-interface.md", "language": "en"},
+    {"query": "RAG retrieve knowledge chunks grounded context", "relevant": "rag-pipeline.md", "language": "en"},
+    {"query": "database scheduled backup recovery integrity", "relevant": "backup-schedule.md", "language": "en"},
+    {"query": "বাংলা ইউনিকোড কারচিহ্ন যুক্তাক্ষর অনুসন্ধান", "relevant": "bengali-unicode.md", "language": "bn"},
+    {"query": "ব্যবহারকারীর ব্যক্তিগত নথি এবং memory isolation", "relevant": "user-isolation.md", "language": "mixed"},
+    {"query": "Ollama model RAM GPU context length", "relevant": "ollama-memory.md", "language": "en"},
+    {"query": "CI automated tests security scan build validation", "relevant": "ci-workflow.md", "language": "en"},
 ]
 
 
