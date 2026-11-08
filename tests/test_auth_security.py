@@ -263,3 +263,18 @@ def test_unknown_and_wrong_password_login_errors_are_indistinguishable(monkeypat
     assert [getattr(error, "status_code", None) for error in failures] == [401, 401]
     assert [str(error.detail) for error in failures] == [str(failures[0].detail)] * 2
 
+
+def test_auth_rate_limit_blocks_eleventh_attempt_and_is_action_scoped(monkeypatch, tmp_path):
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
+    monkeypatch.setattr(auth, "DB", tmp_path / "rate-limit.sqlite3")
+    auth.init_db()
+    request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.80"))
+
+    for _ in range(10):
+        auth.rate_limit_auth(request, "login")
+    with pytest.raises(Exception) as exc:
+        auth.rate_limit_auth(request, "login")
+    assert getattr(exc.value, "status_code", None) == 429
+
+    # Signup has its own action bucket and must not inherit login failures.
+    auth.rate_limit_auth(request, "signup")
