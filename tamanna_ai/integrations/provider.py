@@ -40,6 +40,12 @@ class OllamaProvider:
         except (OllamaError, ValueError) as exc:
             raise ModelProviderError(str(exc)) from exc
 
+    async def benchmark(self) -> dict:
+        try:
+            return await self.client.benchmark()
+        except OllamaError as exc:
+            raise ModelProviderError(str(exc)) from exc
+
     async def generate(self, prompt: str) -> str:
         try:
             return await self.client.generate(prompt)
