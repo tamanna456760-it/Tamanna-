@@ -86,6 +86,12 @@
         <article class="health-card"><span>Ollama Runtime</span><strong id="healthOllamaStatus">যাচাই হচ্ছে…</strong><small id="healthOllamaDetail">Local model connection</small></article>
         <article class="health-card"><span>Knowledge Index</span><strong id="healthKnowledgeStatus">লগইন প্রয়োজন</strong><small id="healthKnowledgeDetail">Private indexed documents</small></article>
       </div>
+      <div class="model-manager">
+        <label for="localModelSelect">Installed local Chat Model</label>
+        <select id="localModelSelect" disabled><option value="">প্রথমে status refresh করুন</option></select>
+        <button id="saveLocalModel" class="settings-secondary" type="button" disabled>এই Model নির্বাচন করুন</button>
+        <p id="modelSelectStatus" class="settings-note" role="status" aria-live="polite">শুধু আগে থেকে installed local model নির্বাচন করা যাবে।</p>
+      </div>
       <div class="settings-actions"><button id="refreshModelHealth" class="settings-secondary" type="button">Status আবার পরীক্ষা করুন</button></div>
       <p id="modelHealthUpdated" class="settings-note" role="status" aria-live="polite">Status এখনো পরীক্ষা করা হয়নি।</p>
     </section>
