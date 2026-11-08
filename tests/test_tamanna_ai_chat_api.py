@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from tamanna_ai.api.routes import (
     ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, model_benchmark, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
-    list_knowledge, model_status, MemoryRequest, create_memory, list_memories,
+    list_knowledge, model_status, model_benchmark_history, MemoryRequest, create_memory, list_memories,
     update_memory, delete_memory,
 )
 
@@ -120,9 +120,30 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         with patch("tamanna_ai.api.routes.check_origin"), patch(
             "tamanna_ai.api.routes.require_user",
             return_value={"id": 1, "email": "Tamanna456760@gmail.com"},
-        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=BenchmarkProvider()):
+        ), patch("tamanna_ai.api.routes.get_model_provider", return_value=BenchmarkProvider()), patch(
+            "tamanna_ai.api.routes.database.save_benchmark_run"
+        ) as save_run:
             result = await model_benchmark(request=object(), token="admin-session")
         self.assertEqual(result, {"ok": True, "benchmark": expected, "scope": "single_local_inference"})
+        save_run.assert_called_once_with(model="qwen2.5:7b", result=expected)
+
+    async def test_benchmark_history_is_admin_only(self):
+        expected = [{"id": 3, "model": "qwen2.5:7b", "result": {"passed_checks": 2}}]
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 1, "email": "Tamanna456760@gmail.com"
+        }), patch("tamanna_ai.api.routes.database.list_benchmark_runs", return_value=expected) as history:
+            result = await model_benchmark_history(limit=10, token="admin-session")
+        self.assertEqual(result, {"runs": expected})
+        history.assert_called_once_with(limit=10)
+
+    async def test_benchmark_history_denies_non_admin(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={
+            "id": 2, "email": "member@example.test"
+        }), patch("tamanna_ai.api.routes.database.list_benchmark_runs") as history:
+            with self.assertRaises(HTTPException) as raised:
+                await model_benchmark_history(token="member-session")
+        self.assertEqual(raised.exception.status_code, 403)
+        history.assert_not_called()
 
     async def test_model_benchmark_denies_non_admin(self):
         with patch("tamanna_ai.api.routes.check_origin"), patch(
