@@ -69,6 +69,10 @@ def password_ok(password, stored):
         return hmac.compare_digest(actual, base64.urlsafe_b64decode(digest))
     except (ValueError, TypeError): return False
 
+# Perform equivalent PBKDF2 work for unknown accounts to reduce email enumeration.
+_DUMMY_PASSWORD_HASH = password_hash("tamanna-invalid-account-dummy-password")
+
+
 def sign(payload):
     return base64.urlsafe_b64encode(hmac.new(secret(), payload.encode(), hashlib.sha256).digest()).rstrip(b"=").decode()
 
@@ -181,7 +185,9 @@ def login(data: Login, request: Request, response: Response):
     rate_limit_auth(request, "login")
     with db() as c:
         row = c.execute("SELECT * FROM users WHERE email=? COLLATE NOCASE", (data.email.strip().lower(),)).fetchone()
-    if not row or not password_ok(data.password, row["password_hash"]):
+    stored_hash = row["password_hash"] if row else _DUMMY_PASSWORD_HASH
+    password_matches = password_ok(data.password, stored_hash)
+    if not row or not password_matches:
         raise HTTPException(401, "Email or password is incorrect.")
     set_cookie(response, issue_session(row["id"]))
     return {"ok": True, "user": {"id": row["id"], "email": row["email"], "name": row["name"]}}
