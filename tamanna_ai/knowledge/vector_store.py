@@ -18,6 +18,19 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = ROOT / "data" / "knowledge_vectors.sqlite3"
 class EmbeddingError(RuntimeError):
     """Local embedding or vector-store error."""
+def _validated_embedding(vector: Sequence[float]) -> list[float]:
+    """Reject malformed vectors before they enter SQLite or cosine scoring."""
+    try:
+        values = [float(value) for value in vector]
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise EmbeddingError("Embedder returned a malformed vector") from exc
+    if not values or not all(math.isfinite(value) for value in values):
+        raise EmbeddingError("Embedder returned an empty or non-finite vector")
+    if not any(value != 0.0 for value in values):
+        raise EmbeddingError("Embedder returned a zero-length vector")
+    return values
+
+
 def _unicode_tokens(text: str) -> list[str]:
     """Tokenize Unicode letters, numbers, and combining marks (including Bengali)."""
     import unicodedata
@@ -227,9 +240,9 @@ class VectorKnowledgeStore:
         pieces = chunk_text(text)
         prepared = []
         for index, piece in enumerate(pieces):
-            vector = self.embedder(piece, task_type="RETRIEVAL_DOCUMENT")
-            if not vector:
-                raise EmbeddingError("Embedder returned an empty vector")
+            vector = _validated_embedding(
+                self.embedder(piece, task_type="RETRIEVAL_DOCUMENT")
+            )
             chunk_id = hashlib.sha256(
                 f"{owner}\0{safe_source}\0{index}\0{piece}".encode("utf-8")
             ).hexdigest()
@@ -267,7 +280,9 @@ class VectorKnowledgeStore:
         if not isinstance(query, str) or not query.strip():
             return []
         limit = max(1, min(int(limit), 20))
-        query_vector = self.embedder(query.strip()[:10000], task_type="RETRIEVAL_QUERY")
+        query_vector = _validated_embedding(
+            self.embedder(query.strip()[:10000], task_type="RETRIEVAL_QUERY")
+        )
         with self._connect() as connection:
             rows = connection.execute("""
                 SELECT source, title, chunk_text, embedding_json
@@ -345,9 +360,9 @@ class VectorKnowledgeStore:
             ).fetchall()
             prepared = []
             for chunk_id, chunk in rows:
-                vector = self.embedder(chunk, task_type="RETRIEVAL_DOCUMENT")
-                if not vector:
-                    raise EmbeddingError("Embedder returned an empty vector")
+                vector = _validated_embedding(
+                    self.embedder(chunk, task_type="RETRIEVAL_DOCUMENT")
+                )
                 prepared.append((
                     json.dumps(vector, separators=(",", ":")), chunk_id
                 ))
