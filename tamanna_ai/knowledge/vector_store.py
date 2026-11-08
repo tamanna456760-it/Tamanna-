@@ -395,5 +395,10 @@ class VectorKnowledgeStore:
 
 
 __all__ = [
-    "EmbeddingError", "LocalFeatureEmbedder", "OllamaEmbeddingProvider",\n    "VectorKnowledgeStore", "chunk_text", "get_default_embedder",
+    "EmbeddingError",
+    "LocalFeatureEmbedder",
+    "OllamaEmbeddingProvider",
+    "VectorKnowledgeStore",
+    "chunk_text",
+    "get_default_embedder",
 ]
