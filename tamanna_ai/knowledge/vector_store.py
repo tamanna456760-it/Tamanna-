@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import os
 import re
 import sqlite3
 from pathlib import Path
@@ -16,58 +15,62 @@ from contextlib import contextmanager
 from typing import Iterator
 from typing import Callable, Sequence
 
-import httpx
-
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = ROOT / "data" / "knowledge_vectors.sqlite3"
-EMBEDDING_MODEL = "gemini-embedding-001"
-EMBEDDING_URL = (
-    "https://generativelanguage.googleapis.com/v1beta/models/"
-    + EMBEDDING_MODEL + ":embedContent"
-)
-
-
 class EmbeddingError(RuntimeError):
-    """Embedding provider configuration or request failed."""
+    """Local embedding or vector-store error."""
 
 
-class GeminiEmbedder:
-    """Generate retrieval embeddings with Google's Gemini embedding API."""
+class LocalFeatureEmbedder:
+    """Deterministic, API-free feature-hashing embedder for local retrieval.
 
-    def __init__(self, api_key: str | None = None, timeout: float = 20.0):
-        self.api_key = (api_key or os.getenv("GEMINI_API_KEY", "")).strip()
-        self.timeout = float(timeout)
-        if self.timeout <= 0:
-            raise ValueError("timeout must be positive")
+    This is a lightweight lexical retrieval baseline, not a trained neural
+    embedding model. It hashes words and character n-grams into a fixed vector
+    so the knowledge store works without hosted APIs or downloaded weights.
+    """
 
-    def __call__(self, text: str, task_type: str = "RETRIEVAL_DOCUMENT") -> list[float]:
-        if not self.api_key:
-            raise EmbeddingError("GEMINI_API_KEY is not configured")
+    def __init__(self, dimensions: int = 384):
+        self.dimensions = int(dimensions)
+        if not 64 <= self.dimensions <= 8192:
+            raise ValueError("dimensions must be between 64 and 8192")
+
+    def __call__(
+        self,
+        text: str,
+        task_type: str = "RETRIEVAL_DOCUMENT",
+    ) -> list[float]:
         if task_type not in {"RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"}:
             raise ValueError("Unsupported embedding task type")
-        payload = {
-            "model": "models/" + EMBEDDING_MODEL,
-            "content": {"parts": [{"text": text[:10000]}]},
-            "taskType": task_type,
-        }
-        try:
-            response = httpx.post(
-                EMBEDDING_URL,
-                headers={"x-goog-api-key": self.api_key},
-                json=payload,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            values = response.json()["embedding"]["values"]
-        except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
-            raise EmbeddingError("Gemini embedding request failed") from exc
-        if not isinstance(values, list) or not values or any(
-            not isinstance(value, (int, float)) or not math.isfinite(value)
-            for value in values
-        ):
-            raise EmbeddingError("Gemini returned an invalid embedding vector")
-        return [float(value) for value in values]
+        if not isinstance(text, str) or not text.strip():
+            return [0.0] * self.dimensions
 
+        tokens = re.findall(r"[^\\W_]+", text.casefold(), flags=re.UNICODE)
+        features: list[tuple[str, float]] = []
+        for token in tokens:
+            if len(token) < 2:
+                continue
+            features.append(("w:" + token, 1.0))
+            padded = "^" + token + "$"
+            if len(padded) >= 3:
+                features.extend(
+                    ("c:" + padded[i:i + 3], 0.35)
+                    for i in range(len(padded) - 2)
+                )
+
+        vector = [0.0] * self.dimensions
+        for feature, weight in features:
+            digest = hashlib.blake2b(
+                feature.encode("utf-8"), digest_size=8
+            ).digest()
+            value = int.from_bytes(digest, "big")
+            index = value % self.dimensions
+            sign = 1.0 if (value >> 63) == 0 else -1.0
+            vector[index] += sign * weight
+
+        norm = math.sqrt(sum(value * value for value in vector))
+        if norm:
+            vector = [value / norm for value in vector]
+        return vector
 
 def chunk_text(text: str, *, max_chars: int = 1200, overlap: int = 150) -> list[str]:
     """Split text into bounded overlapping chunks, preferring paragraph boundaries."""
@@ -110,12 +113,12 @@ class VectorKnowledgeStore:
 
     def __init__(
         self,
-        embedder: Callable[..., list[float]],
+        embedder: Callable[..., list[float]] | None = None,
         db_path: str | Path = DEFAULT_DB,
         *,
         max_file_bytes: int = 10 * 1024 * 1024,
     ):
-        self.embedder = embedder
+        self.embedder = embedder or LocalFeatureEmbedder()
         self.db_path = Path(db_path)
         self.max_file_bytes = max(1024, int(max_file_bytes))
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -235,5 +238,5 @@ class VectorKnowledgeStore:
 
 
 __all__ = [
-    "EmbeddingError", "GeminiEmbedder", "VectorKnowledgeStore", "chunk_text",
+    "EmbeddingError", "LocalFeatureEmbedder", "VectorKnowledgeStore", "chunk_text",
 ]
