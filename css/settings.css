@@ -154,3 +154,27 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 #knowledgeFilename, #knowledgeContent { box-sizing:border-box; width:100%; max-width:100%; padding:10px; color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:9px; font:inherit; }
 #knowledgeContent { resize:vertical; }
 @media(max-width:420px) { .knowledge-item { flex-direction:column; } }
+
+
+/* Local model health dashboard */
+.health-grid {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px; margin-top:14px;
+}
+.health-card {
+  min-width:0; padding:12px; border:1px solid var(--border);
+  border-radius:12px; background:var(--panel);
+}
+.health-card span { display:block; color:var(--muted); font-size:.78rem; }
+.health-card strong {
+  display:block; margin-top:6px; color:var(--text);
+  font-size:1rem; overflow-wrap:anywhere;
+}
+.health-card small {
+  display:block; margin-top:5px; color:var(--muted);
+  font-size:.76rem; overflow-wrap:anywhere;
+}
+#refreshModelHealth:disabled { opacity:.55; cursor:wait; }
+@media(max-width:420px) {
+  .health-grid { grid-template-columns:1fr; }
+}
