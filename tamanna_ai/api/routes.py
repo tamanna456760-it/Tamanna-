@@ -179,6 +179,7 @@ async def update_memory(
     token: str | None = Cookie(default=None, alias=COOKIE),
 ):
     """Update a memory only when it belongs to the authenticated account."""
+    check_origin(request)
     user = require_user(token)
     if not payload.content.strip():
         raise HTTPException(status_code=422, detail="Memory content cannot be blank.")
