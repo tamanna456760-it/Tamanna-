@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, create_engine, event, select
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, create_engine, event, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -59,6 +59,7 @@ class Message(Base):
 
 class Memory(Base):
     __tablename__ = "memories"
+    __table_args__ = (Index("ix_memories_user_id_id", "user_id", "id"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     conversation_id: Mapped[str | None] = mapped_column(
