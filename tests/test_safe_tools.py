@@ -223,12 +223,12 @@ def test_search_result_extractor_rejects_invalid_shapes(payload, provider):
 
 
 def test_search_result_extractor_limits_results_to_five():
-    payload = {"results": [{"title": str(index)} for index in range(8)]}
+    payload = {"results": [{"title": str(index), "url": f"https://example.com/{index}"} for index in range(8)]}
     assert len(safe_tools._extract_search_results(payload, "tavily")) == 5
 
 
 def test_search_result_extractor_accepts_brave_response():
-    payload = {"web": {"results": [{"title": "safe"}]}}
+    payload = {"web": {"results": [{"title": "safe", "url": "https://example.com/safe"}]}}
     assert safe_tools._extract_search_results(payload, "brave") == [{"title": "safe"}]
 
 
@@ -281,3 +281,46 @@ def test_web_search_rejects_query_outside_supported_length():
 
     with pytest.raises(safe_tools.ToolInputError, match="1 to 500"):
         asyncio.run(safe_tools.web_search("x" * 501))
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "javascript:alert(1)",
+        "data:text/html,unsafe",
+        "ftp://example.com/file",
+        "https://user:password@example.com/private",
+        "https:///missing-host",
+        "not-a-url",
+    ],
+)
+def test_search_result_extractor_drops_unsafe_urls(url):
+    payload = {"results": [{"title": "unsafe", "url": url}]}
+    assert safe_tools._extract_search_results(payload, "tavily") == []
+
+
+def test_search_result_extractor_limits_untrusted_text_lengths():
+    payload = {
+        "results": [{
+            "title": "t" * 400,
+            "url": "https://example.com/" + ("p" * 2100),
+            "content": "c" * 5000,
+            "score": 0.75,
+        }]
+    }
+    result = safe_tools._extract_search_results(payload, "tavily")[0]
+    assert len(result["title"]) == 300
+    assert len(result["url"]) == 2048
+    assert len(result["content"]) == 4000
+    assert result["score"] == 0.75
+
+
+def test_search_result_extractor_omits_non_finite_scores():
+    payload = {
+        "results": [{
+            "title": "safe",
+            "url": "https://example.com",
+            "score": float("nan"),
+        }]
+    }
+    assert "score" not in safe_tools._extract_search_results(payload, "tavily")[0]
