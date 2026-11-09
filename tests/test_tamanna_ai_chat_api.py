@@ -148,7 +148,8 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             await chat(ChatRequest(prompt="hello", use_knowledge=True))
         sent = provider.generate.await_args.args[0]
         self.assertIn(r"\u003c/user_memories_json\u003e", sent)
-        self.assertNotIn("</user_memories_json>", sent)
+        # The only literal closing tag must be the trusted wrapper terminator.
+        self.assertEqual(sent.count("</user_memories_json>"), 1)
 
     async def test_chat_saves_only_explicit_remember_request_when_opted_in(self):
         provider = FakeProvider()
