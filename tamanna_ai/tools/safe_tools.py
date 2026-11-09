@@ -1,6 +1,8 @@
 """Allow-listed, read-only tools for Tamanna AI."""
 from __future__ import annotations
 import json
+import re
+from html.parser import HTMLParser
 import os
 import math
 from urllib.parse import urlsplit
@@ -102,6 +104,39 @@ async def _read_limited_json(response: httpx.Response) -> Any:
         raise ToolExecutionError("Search provider returned invalid JSON") from exc
 
 
+class _SearchTextParser(HTMLParser):
+    """Collect visible text while discarding markup and script/style contents."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self._hidden_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() in {"script", "style"}:
+            self._hidden_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() in {"script", "style"} and self._hidden_depth:
+            self._hidden_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if not self._hidden_depth:
+            self.parts.append(data)
+
+
+def _sanitize_search_text(value: str, limit: int) -> str:
+    parser = _SearchTextParser()
+    try:
+        parser.feed(value)
+        parser.close()
+        text = " ".join(parser.parts)
+    except Exception:
+        text = value
+    text = re.sub(r"[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]", "", text)
+    return " ".join(text.split())[:limit]
+
+
 def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
     if not isinstance(data, dict):
         raise ToolExecutionError("Search provider returned an unexpected response shape")
@@ -137,12 +172,12 @@ def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
             continue
 
         safe_item: dict[str, Any] = {
-            "title": title[:300],
+            "title": _sanitize_search_text(title, 300),
             "url": url[:2048],
         }
         text_field = item.get("content", item.get("description"))
         if isinstance(text_field, str):
-            safe_item["content"] = text_field[:4000]
+            safe_item["content"] = _sanitize_search_text(text_field, 4000)
         score = item.get("score")
         if isinstance(score, (int, float)) and not isinstance(score, bool) and math.isfinite(score):
             safe_item["score"] = score
