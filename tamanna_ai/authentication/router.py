@@ -256,6 +256,7 @@ def update_profile(data: Profile, request: Request, token: Optional[str] = Cooki
 def change_password(data: ChangePassword, request: Request, token: Optional[str] = Cookie(default=None, alias=COOKIE)):
     check_origin(request)
     user = require_user(token)
+    rate_limit_user_action(user["id"], "password_change", limit=5, window_seconds=900)
     with db() as c:
         row = c.execute("SELECT password_hash FROM users WHERE id=?", (user["id"],)).fetchone()
         if not row or not password_ok(data.current_password, row["password_hash"]):
