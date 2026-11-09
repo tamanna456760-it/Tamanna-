@@ -314,6 +314,8 @@ class Database:
         self, user_message: str, assistant_reply: str,
         conversation_id: str = "default", user_id: int | None = None,
     ) -> str:
+        if user_id is None:
+            raise ValueError("user_id is required to persist chat conversations")
         if not isinstance(user_message, str) or not isinstance(assistant_reply, str):
             raise TypeError("Chat messages must be strings")
         conversation_id = (conversation_id or "default")[:64]
