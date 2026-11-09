@@ -58,3 +58,27 @@ def test_read_doc_rejects_empty_and_missing_paths(tmp_path, monkeypatch):
         safe_tools.read_doc(" ")
     with pytest.raises(safe_tools.ToolInputError):
         safe_tools.read_doc("missing.md")
+
+
+def test_tool_audit_log_redacts_search_queries_and_secret_fields(tmp_path, monkeypatch):
+    import json
+
+    log_path = tmp_path / "tool_calls.jsonl"
+    monkeypatch.setattr(safe_tools, "LOG_PATH", log_path)
+
+    safe_tools._log_call(
+        "web_search",
+        {
+            "query": "private medical or account details",
+            "api_key": "do-not-store-this",
+            "limit": 5,
+        },
+        "success",
+    )
+
+    record = json.loads(log_path.read_text(encoding="utf-8"))
+    assert record["arguments"]["query"] == "[REDACTED]"
+    assert record["arguments"]["api_key"] == "[REDACTED]"
+    assert record["arguments"]["limit"] == 5
+    assert "private medical or account details" not in log_path.read_text(encoding="utf-8")
+    assert "do-not-store-this" not in log_path.read_text(encoding="utf-8")
