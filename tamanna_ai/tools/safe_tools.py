@@ -127,8 +127,8 @@ class _SearchTextParser(HTMLParser):
 
 
 def _sanitize_search_text(value: str, limit: int) -> str:
-    parser = _SearchTextParser()
     try:
+        parser = _SearchTextParser()
         parser.feed(value)
         parser.close()
         text = " ".join(parser.parts)
