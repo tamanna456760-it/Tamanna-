@@ -174,6 +174,7 @@ def signup(data: Signup, request: Request, response: Response):
     rate_limit_auth(request, "signup")
     email, name = data.email.strip().lower(), data.name.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(422, "Enter a valid email address.")
+    if len(name) < 2: raise HTTPException(422, "Name must contain at least 2 non-whitespace characters.")
     try:
         with db() as c:
             cur = c.execute("INSERT INTO users(email,name,password_hash,created_at,updated_at) VALUES(?,?,?,?,?)",
