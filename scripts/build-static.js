@@ -31,11 +31,9 @@ for (const relative of requiredFiles) {
 // A project-site deployment must not publish CNAME: that file binds a
 // custom domain and conflicts with the /<repository>/ GitHub Pages URL.
 const isProjectPagesBuild = Boolean((process.env.GITHUB_PAGES_BASE_PATH || '').trim());
-if (!isProjectPagesBuild) {
-  const hostname = fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim();
-  if (hostname !== 'www.bd-king-r7.com') {
-    fail('CNAME must contain exactly www.bd-king-r7.com');
-  }
+const hostname = fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim();
+if (!isProjectPagesBuild && hostname !== 'www.bd-king-r7.com') {
+  fail('CNAME must contain exactly www.bd-king-r7.com');
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -107,12 +105,17 @@ if (basePath) {
 }
 
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
-for (const relative of ['index.html', 'admin.html', 'admin/index.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js']) {
+const outputRequiredFiles = ['index.html', 'admin.html', 'admin/index.html', '404.html', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js'];
+if (!basePath) outputRequiredFiles.push('CNAME');
+for (const relative of outputRequiredFiles) {
   if (!fs.existsSync(path.join(output, relative))) {
     fail(`Build output is incomplete: dist/${relative}`);
   }
 }
+if (basePath && fs.existsSync(path.join(output, 'CNAME'))) {
+  fail('Project-site deployment must not contain dist/CNAME.');
+}
 
 console.log('PASS: Static website build completed.');
 console.log('Output: dist/');
-console.log(`Domain: ${hostname}`);
+console.log(`Target: ${basePath ? 'GitHub Pages project site' : hostname}`);
