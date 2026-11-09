@@ -137,9 +137,12 @@ def check_origin(request):
     # Fetch Metadata protects cookie-authenticated mutations when a browser
     # omits Origin but explicitly identifies the request as cross-site.
     fetch_site = request.headers.get("sec-fetch-site", "").strip().lower()
-    if fetch_site == "cross-site":
-        raise HTTPException(403, "Cross-site requests are not allowed.")
     origin = request.headers.get("origin")
+    # Same-site is not necessarily same-origin: a hostile sibling subdomain
+    # can still cause cookie-authenticated requests. Require an explicit
+    # allowlisted Origin whenever the browser reports same-site without one.
+    if fetch_site == "cross-site" or (fetch_site == "same-site" and not origin):
+        raise HTTPException(403, "Unverified cross-origin browser requests are not allowed.")
     if origin:
         allowed = [x.strip().rstrip("/") for x in os.getenv("TAMANNA_CORS_ORIGINS",
           "https://www.bd-king-r7.com").split(",") if x.strip()]
