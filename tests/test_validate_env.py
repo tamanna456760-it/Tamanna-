@@ -42,6 +42,21 @@ class ValidateEnvTests(unittest.TestCase):
         self.assertEqual(report["status"], "FAIL")
         self.assertIn("session_secret", report["missing"])
 
+    def test_production_rejects_insecure_cookie_or_http_cors_origin(self):
+        values = {
+            "TAMANNA_ENV": "production",
+            "TAMANNA_MODEL_PROVIDER": "ollama",
+            "TAMANNA_OLLAMA_URL": "http://127.0.0.1:11434",
+            "TAMANNA_OLLAMA_MODEL": "qwen2.5:7b",
+            "TAMANNA_SESSION_SECRET": "s" * 48,
+            "TAMANNA_CORS_ORIGINS": "https://www.bd-king-r7.com,http://localhost:8001",
+            "TAMANNA_COOKIE_SECURE": "0",
+        }
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            report = validate_env(self.write_env(directory, values), strict=True)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertIn("production_transport_security", report["missing"])
+
     def test_mock_provider_is_allowed_only_in_test_environment(self):
         base = {
             "TAMANNA_MODEL_PROVIDER": "mock",
