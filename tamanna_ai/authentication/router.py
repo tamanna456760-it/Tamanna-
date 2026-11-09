@@ -133,6 +133,35 @@ def rate_limit_auth(request, action):
         )
 
 
+
+def rate_limit_user_action(user_id, action, limit=30, window_seconds=60):
+    """Persistently throttle authenticated actions per account without storing user IDs."""
+    try:
+        session_secret = secret()
+    except RuntimeError as exc:
+        raise HTTPException(
+            503,
+            "Authentication is not configured. Set TAMANNA_SESSION_SECRET in the private .env file.",
+        ) from exc
+    subject = "{}:{}".format(action, user_id).encode("utf-8")
+    subject_hash = hmac.new(session_secret, subject, hashlib.sha256).hexdigest()
+    current = int(time.time())
+    window_start = current - window_seconds
+    with db() as c:
+        c.execute("BEGIN IMMEDIATE")
+        c.execute("DELETE FROM auth_attempts WHERE attempted_at < ?", (current - 3600,))
+        count = c.execute(
+            "SELECT COUNT(*) FROM auth_attempts WHERE ip_hash=? AND action=? AND attempted_at>=?",
+            (subject_hash, action, window_start),
+        ).fetchone()[0]
+        if count >= limit:
+            raise HTTPException(429, "Too many requests. Please wait before trying again.")
+        c.execute(
+            "INSERT INTO auth_attempts(ip_hash,action,attempted_at) VALUES(?,?,?)",
+            (subject_hash, action, current),
+        )
+
+
 def check_origin(request):
     # Fetch Metadata protects cookie-authenticated mutations when a browser
     # omits Origin but explicitly identifies the request as cross-site.
