@@ -622,7 +622,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         store.assert_not_called()
 
     async def test_private_knowledge_import_rejects_reserved_and_control_filenames(self):
-        invalid_names = ("CON.txt", "LPT1.log", "report.md.", "report.md ", "bad\\x7f.md")
+        invalid_names = ("CON.txt", "LPT1.log", "CON.backup.md", "COM¹.txt", "COM².log", "COM³.json", "LPT¹.md", "LPT².txt", "LPT³.json", "report.md.", "report.md ", "bad\\x7f.md")
         with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             for filename in invalid_names:
                 with self.subTest(filename=repr(filename)):
