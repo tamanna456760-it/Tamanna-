@@ -114,3 +114,33 @@ def test_tool_audit_log_redacts_nested_queries_and_secret_key_variants(tmp_path,
     assert "private nested search" not in raw
     assert "secret-api-key" not in raw
     assert "secret-session" not in raw
+
+
+def test_search_response_reader_rejects_payload_over_limit():
+    import asyncio
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        async def aiter_bytes(self):
+            yield b'{"results":'
+            yield b'"' + (b"x" * safe_tools.MAX_SEARCH_RESPONSE_BYTES) + b'"}'
+
+    with pytest.raises(safe_tools.ToolExecutionError, match="1 MB limit"):
+        asyncio.run(safe_tools._read_limited_json(FakeResponse()))
+
+
+def test_search_response_reader_parses_bounded_json():
+    import asyncio
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        async def aiter_bytes(self):
+            yield b'{"results":[{"title":"safe"}]}'
+
+    assert asyncio.run(safe_tools._read_limited_json(FakeResponse())) == {
+        "results": [{"title": "safe"}]
+    }
