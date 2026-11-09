@@ -612,6 +612,20 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 await import_knowledge(KnowledgeImportRequest(filename="data.json", content="{bad json"))
         self.assertEqual(raised.exception.status_code, 422)
 
+    async def test_private_knowledge_import_rejects_unsupported_file_type(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            with self.assertRaises(HTTPException) as raised:
+                await import_knowledge(KnowledgeImportRequest(filename="script.py", content="print('unsafe')"))
+        self.assertEqual(raised.exception.status_code, 415)
+        store.assert_not_called()
+
+    async def test_private_knowledge_import_rejects_blank_content(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            with self.assertRaises(HTTPException) as raised:
+                await import_knowledge(KnowledgeImportRequest(filename="empty.md", content="  \n"))
+        self.assertEqual(raised.exception.status_code, 422)
+        store.assert_not_called()
+
     async def test_list_knowledge_is_user_scoped(self):
         with patch("tamanna_ai.api.routes.require_user", return_value={"id": 12}), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
             store.return_value.list_sources.return_value = [{"source": "mine.md"}]
