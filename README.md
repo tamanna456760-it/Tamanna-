@@ -8,12 +8,22 @@
 
 > AI chat application with a separate administrator workspace. The static interface can be opened without live APIs; live account data, privileged actions and AI responses require their respective backend services.
 
+## Open Tamanna AI
+
+**Live GitHub Pages preview links**
+
+- **[🚀 Open Tamanna AI](https://tamanna456760-it.github.io/Tamanna-/)**
+- **[🛡️ Open Tamanna Admin](https://tamanna456760-it.github.io/Tamanna-/admin/)**
+
+These GitHub Pages URLs are the project-site preview. The custom domain `www.bd-king-r7.com` can be used after its domain and DNS are configured.
+
 ## Project dashboard
 
 | Area | Open |
 |---|---|
-| User Chat | [Open Tamanna AI chat](https://www.bd-king-r7.com/) |
-| Admin Control Center | [Open Admin Dashboard](https://www.bd-king-r7.com/admin/) |
+| User Chat | [Open Tamanna AI](https://tamanna456760-it.github.io/Tamanna-/) |
+| Admin Control Center | [Open Tamanna Admin](https://tamanna456760-it.github.io/Tamanna-/admin/) |
+| Custom domain (when configured) | [www.bd-king-r7.com](https://www.bd-king-r7.com/) |
 | Source repository | [GitHub main branch](https://github.com/tamanna456760-it/Tamanna-/tree/main) |
 | Build and CI status | [GitHub Actions](https://github.com/tamanna456760-it/Tamanna-/actions) |
 | Server CI | [Tamanna AI Server CI](https://github.com/tamanna456760-it/Tamanna-/actions/workflows/Build.yml) |
