@@ -404,8 +404,14 @@ async def import_knowledge(
     check_origin(request)
     user = require_user(token)
     filename = payload.filename.strip()
-    if Path(filename).name != filename or filename in {".", ".."}:
-        raise HTTPException(status_code=422, detail="Filename must not contain a path.")
+    if (
+        Path(filename).name != filename
+        or "/" in filename
+        or "\\" in filename
+        or filename in {".", ".."}
+        or any(ord(char) < 32 for char in filename)
+    ):
+        raise HTTPException(status_code=422, detail="Filename must be a plain name without path separators or control characters.")
     suffix = Path(filename).suffix.lower()
     if suffix not in {".txt", ".md", ".markdown", ".json"}:
         raise HTTPException(status_code=415, detail="Only TXT, Markdown, and JSON files are supported.")
