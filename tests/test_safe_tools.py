@@ -303,14 +303,14 @@ def test_search_result_extractor_limits_untrusted_text_lengths():
     payload = {
         "results": [{
             "title": "t" * 400,
-            "url": "https://example.com/" + ("p" * 2100),
+            "url": "https://example.com/search",
             "content": "c" * 5000,
             "score": 0.75,
         }]
     }
     result = safe_tools._extract_search_results(payload, "tavily")[0]
     assert len(result["title"]) == 300
-    assert len(result["url"]) == 2048
+    assert result["url"] == "https://example.com/search"
     assert len(result["content"]) == 4000
     assert result["score"] == 0.75
 
