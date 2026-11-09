@@ -229,7 +229,7 @@ def test_search_result_extractor_limits_results_to_five():
 
 def test_search_result_extractor_accepts_brave_response():
     payload = {"web": {"results": [{"title": "safe", "url": "https://example.com/safe"}]}}
-    assert safe_tools._extract_search_results(payload, "brave") == [{"title": "safe"}]
+    assert safe_tools._extract_search_results(payload, "brave") == [{"title": "safe", "url": "https://example.com/safe"}]
 
 
 @pytest.mark.parametrize("failure_type", ["read_timeout", "connect_error"])
