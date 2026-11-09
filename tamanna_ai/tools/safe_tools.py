@@ -21,30 +21,37 @@ class ToolConfigurationError(RuntimeError):
 class ToolExecutionError(RuntimeError):
     pass
 
-def _safe_log_value(value: Any) -> Any:
+def _is_sensitive_log_key(key: Any) -> bool:
+    normalized = str(key).lower().replace("-", "").replace("_", "").replace(" ", "")
+    return any(marker in normalized for marker in (
+        "password", "passwd", "secret", "token", "apikey", "authorization",
+        "credential", "cookie", "session", "query",
+    ))
+
+
+def _safe_log_value(value: Any, key: Any = None) -> Any:
+    if key is not None and _is_sensitive_log_key(key):
+        return "[REDACTED]"
     if isinstance(value, str):
         return value[:240]
     if isinstance(value, (int, float, bool)) or value is None:
         return value
     if isinstance(value, dict):
-        return {str(k)[:60]: _safe_log_value(v) for k, v in list(value.items())[:20]}
+        return {
+            str(k)[:60]: _safe_log_value(v, k)
+            for k, v in list(value.items())[:20]
+        }
     if isinstance(value, list):
-        return [_safe_log_value(v) for v in value[:20]]
+        return [_safe_log_value(item) for item in value[:20]]
     return type(value).__name__
 
 def _log_call(name: str, arguments: dict[str, Any], status: str, error: str | None = None) -> None:
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    safe_arguments = dict(arguments)
-    # Search queries may contain private user data; never persist their contents.
-    if name == "web_search" and "query" in safe_arguments:
-        safe_arguments["query"] = "[REDACTED]"
-    for key in list(safe_arguments):
-        if any(marker in str(key).lower() for marker in ("password", "secret", "token", "api_key", "authorization")):
-            safe_arguments[key] = "[REDACTED]"
+    safe_arguments = _safe_log_value(arguments)
     record = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "tool": name,
-        "arguments": _safe_log_value(safe_arguments),
+        "arguments": safe_arguments,
         "status": status,
     }
     if error:
