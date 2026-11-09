@@ -392,6 +392,21 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 await model_recovery(token="member-session")
         self.assertEqual(raised.exception.status_code, 403)
 
+    async def test_model_status_does_not_expose_provider_exception_details(self):
+        class BrokenProvider:
+            name = "ollama"
+            async def list_models(self):
+                raise ModelProviderError("private host 10.0.0.4:11434 auth token=secret")
+
+        with patch("tamanna_ai.api.routes.get_model_provider", return_value=BrokenProvider()):
+            with self.assertRaises(HTTPException) as raised:
+                await model_status()
+        self.assertEqual(raised.exception.status_code, 503)
+        detail = raised.exception.detail
+        self.assertEqual(detail["reason"], "provider_unavailable")
+        self.assertNotIn("10.0.0.4", str(detail))
+        self.assertNotIn("secret", str(detail))
+
     async def test_model_status_lists_installed_models(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()):
             result = await model_status()
@@ -447,7 +462,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             store.return_value.search.return_value = [{"source": "guide.md", "content": "Tamanna AI uses local inference.", "score": 0.9}]
             await chat(ChatRequest(prompt="How does Tamanna work?"))
         sent = provider.generate.await_args.args[0]
-        self.assertIn("<retrieved_context>", sent)
+        self.assertIn("<retrieved_context_json>", sent)
         self.assertIn("untrusted", sent)
         self.assertIn("How does Tamanna work?", sent)
 
