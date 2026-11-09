@@ -34,10 +34,17 @@ def _safe_log_value(value: Any) -> Any:
 
 def _log_call(name: str, arguments: dict[str, Any], status: str, error: str | None = None) -> None:
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    safe_arguments = dict(arguments)
+    # Search queries may contain private user data; never persist their contents.
+    if name == "web_search" and "query" in safe_arguments:
+        safe_arguments["query"] = "[REDACTED]"
+    for key in list(safe_arguments):
+        if any(marker in str(key).lower() for marker in ("password", "secret", "token", "api_key", "authorization")):
+            safe_arguments[key] = "[REDACTED]"
     record = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "tool": name,
-        "arguments": _safe_log_value(arguments),
+        "arguments": _safe_log_value(safe_arguments),
         "status": status,
     }
     if error:
