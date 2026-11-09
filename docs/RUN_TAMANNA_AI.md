@@ -7,7 +7,7 @@ This guide starts the FastAPI application from the repository root. It does not 
 - Python 3.11 or newer (Python 3.12 is used by the Docker image)
 - Git
 - Internet access for installing Python packages
-- A Gemini API key only if you want Gemini-powered chat; the local fallback pipeline can run without it
+- Ollama installed locally, with the selected model already pulled (for example, `qwen2.5:7b`)
 
 ## 2. Get the current source
 
@@ -45,8 +45,9 @@ Open `.env` in a text editor. Set these values for local HTTP development (repla
 
 ```dotenv
 TAMANNA_CORS_ORIGINS=http://127.0.0.1:3000,http://localhost:3000
-GEMINI_API_KEY=
-TAMANNA_GEMINI_CHAT=1
+TAMANNA_MODEL_PROVIDER=ollama
+TAMANNA_OLLAMA_URL=http://127.0.0.1:11434
+TAMANNA_OLLAMA_MODEL=qwen2.5:7b
 TAMANNA_SESSION_SECRET=PASTE_YOUR_GENERATED_RANDOM_VALUE_HERE
 TAMANNA_SESSION_SECONDS=604800
 TAMANNA_COOKIE_SECURE=0
@@ -56,7 +57,7 @@ TAMANNA_ADMIN_EMAIL=your-admin-email@example.com
 
 Keep `.env` private. It is ignored by Git. Never paste its contents into GitHub, logs, or chat. If you do not have a frontend running on port 3000, the API can still be tested directly; the CORS origins are for browser-based local frontends.
 
-For Gemini chat, add your own key to `GEMINI_API_KEY`. Without it, the app attempts its existing non-Gemini response pipeline. Never put an API key in source code.
+Chat uses the local Ollama runtime. No Gemini/GPT API key is required or used by the primary FastAPI provider. If Ollama is unavailable, chat should return a service-unavailable response; it must not silently switch to a hosted model.
 
 **Important:** the current signup API does not verify email ownership. Keep this development instance private; do not expose public signup or privileged server/code operations to the internet until email verification and production access controls have been reviewed. The admin email is a privilege selector, not proof that the mailbox belongs to you.
 
