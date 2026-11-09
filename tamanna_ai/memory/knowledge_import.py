@@ -236,7 +236,13 @@ def search_knowledge(
         else:
             statement = statement.where(Memory.user_id == user_id)
         for row in session.scalars(statement).yield_per(500):
-            metadata = json.loads(row.metadata_json or "{}")
+            try:
+                metadata = json.loads(row.metadata_json or "{}")
+            except (TypeError, json.JSONDecodeError):
+                # Ignore malformed legacy metadata rather than failing all retrieval.
+                continue
+            if not isinstance(metadata, dict):
+                continue
             if metadata.get("kind") != "imported_knowledge":
                 continue
             haystack = row.content.casefold()
