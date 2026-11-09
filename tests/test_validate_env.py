@@ -36,7 +36,7 @@ class ValidateEnvTests(unittest.TestCase):
             "TAMANNA_MODEL_PROVIDER": "ollama",
             "TAMANNA_OLLAMA_URL": "http://127.0.0.1:11434",
             "TAMANNA_OLLAMA_MODEL": "qwen2.5:7b",
-            "TAMANNA_SESSION_SECRET": "V3ry-R4nd0m-S3ssion-Key-For-Tests-2026",
+            "TAMANNA_SESSION_SECRET": "s" * 48,
             "TAMANNA_DATABASE_URL": "sqlite:///data/tamanna.sqlite3",
             "TAMANNA_CORS_ORIGINS": "https://www.bd-king-r7.com",
         }
