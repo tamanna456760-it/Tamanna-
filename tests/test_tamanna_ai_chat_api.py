@@ -156,7 +156,7 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             await chat(ChatRequest(prompt="summarize notes", use_knowledge=True))
 
         sent = provider.generate.await_args.args[0]
-        self.assertIn(r"\\u003c/retrieved_context_json\\u003e", sent)
+        self.assertIn(r"\u003c/retrieved_context_json\u003e", sent)
         self.assertEqual(sent.count("</retrieved_context_json>"), 1)
 
     async def test_chat_reuses_conversation_and_includes_prior_turns(self):
