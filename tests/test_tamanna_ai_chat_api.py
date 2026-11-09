@@ -57,6 +57,13 @@ class FakeModelManager:
 
 
 class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self._chat_limit_patch = patch("tamanna_ai.api.routes.rate_limit_user_action")
+        self._chat_limit_patch.start()
+
+    def tearDown(self):
+        self._chat_limit_patch.stop()
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
