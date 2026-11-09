@@ -204,3 +204,29 @@ def test_search_response_reader_checks_http_status_before_reading():
 
     with pytest.raises(safe_tools.httpx.HTTPStatusError):
         asyncio.run(safe_tools._read_limited_json(FakeResponse()))
+
+
+@pytest.mark.parametrize(
+    "payload,provider",
+    [
+        (["not", "an", "object"], "tavily"),
+        ({"results": "not-a-list"}, "tavily"),
+        ({"results": ["not-an-object"]}, "tavily"),
+        ({"web": []}, "brave"),
+        ({"web": {"results": "not-a-list"}}, "brave"),
+        ({"web": {"results": ["not-an-object"]}}, "brave"),
+    ],
+)
+def test_search_result_extractor_rejects_invalid_shapes(payload, provider):
+    with pytest.raises(safe_tools.ToolExecutionError, match="response shape"):
+        safe_tools._extract_search_results(payload, provider)
+
+
+def test_search_result_extractor_limits_results_to_five():
+    payload = {"results": [{"title": str(index)} for index in range(8)]}
+    assert len(safe_tools._extract_search_results(payload, "tavily")) == 5
+
+
+def test_search_result_extractor_accepts_brave_response():
+    payload = {"web": {"results": [{"title": "safe"}]}}
+    assert safe_tools._extract_search_results(payload, "brave") == [{"title": "safe"}]
