@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DOCS_DIR = ROOT / "data" / "docs"
 LOG_PATH = ROOT / "logs" / "tool_calls.jsonl"
 MAX_DOC_BYTES = 64 * 1024
+MAX_SEARCH_RESPONSE_BYTES = 1024 * 1024
 
 class ToolInputError(ValueError):
     pass
@@ -84,6 +85,21 @@ def read_doc(relative_path: str) -> dict[str, str]:
     except (OSError, UnicodeError) as exc:
         raise ToolExecutionError("Document could not be read as UTF-8 text") from exc
 
+async def _read_limited_json(response: httpx.Response) -> Any:
+    response.raise_for_status()
+    chunks: list[bytes] = []
+    total = 0
+    async for chunk in response.aiter_bytes():
+        total += len(chunk)
+        if total > MAX_SEARCH_RESPONSE_BYTES:
+            raise ToolExecutionError("Search provider response exceeds the 1 MB limit")
+        chunks.append(chunk)
+    try:
+        return json.loads(b"".join(chunks))
+    except (ValueError, TypeError) as exc:
+        raise ToolExecutionError("Search provider returned invalid JSON") from exc
+
+
 async def web_search(query: str) -> dict[str, Any]:
     if not isinstance(query, str) or not query.strip() or len(query) > 500:
         raise ToolInputError("query must contain 1 to 500 characters")
@@ -95,24 +111,24 @@ async def web_search(query: str) -> dict[str, Any]:
                 key = os.getenv("TAVILY_API_KEY", "").strip()
                 if not key:
                     raise ToolConfigurationError("TAVILY_API_KEY is not configured")
-                response = await client.post(
+                async with client.stream(
+                    "POST",
                     "https://api.tavily.com/search",
                     json={"api_key": key, "query": query, "max_results": 5, "search_depth": "basic"},
-                )
-                response.raise_for_status()
-                data = response.json()
+                ) as response:
+                    data = await _read_limited_json(response)
                 return {"provider": "tavily", "results": data.get("results", [])[:5]}
             if provider == "brave":
                 key = os.getenv("BRAVE_SEARCH_API_KEY", "").strip()
                 if not key:
                     raise ToolConfigurationError("BRAVE_SEARCH_API_KEY is not configured")
-                response = await client.get(
+                async with client.stream(
+                    "GET",
                     "https://api.search.brave.com/res/v1/web/search",
                     params={"q": query, "count": 5},
                     headers={"X-Subscription-Token": key, "Accept": "application/json"},
-                )
-                response.raise_for_status()
-                data = response.json()
+                ) as response:
+                    data = await _read_limited_json(response)
                 return {"provider": "brave", "results": data.get("web", {}).get("results", [])[:5]}
     except ToolConfigurationError:
         raise
