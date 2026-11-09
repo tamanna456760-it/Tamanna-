@@ -154,7 +154,8 @@ async def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         status = "success"
         return {"ok": True, "tool": name, "result": result}
     except (ToolInputError, ToolConfigurationError, ToolExecutionError) as exc:
-        error = str(exc)
+        # Error messages can include user input or provider details; logs keep only the class.
+        error = type(exc).__name__
         raise
     finally:
         _log_call(name, arguments if isinstance(arguments, dict) else {}, status, error)
