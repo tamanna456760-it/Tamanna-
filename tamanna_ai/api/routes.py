@@ -404,6 +404,7 @@ async def import_knowledge(
     """Index a bounded text document in the authenticated user's private corpus."""
     check_origin(request)
     user = require_user(token)
+    rate_limit_user_action(user["id"], "knowledge_import", limit=10, window_seconds=60)
     filename = payload.filename.strip()
     if (
         Path(filename).name != filename
@@ -464,6 +465,7 @@ async def reindex_knowledge(
     """Recompute local embedding vectors for only the signed-in user's documents."""
     check_origin(request)
     user = require_user(token)
+    rate_limit_user_action(user["id"], "knowledge_reindex", limit=3, window_seconds=60)
     try:
         result = VectorKnowledgeStore().reindex(owner_id=f"user:{user['id']}")
     except EmbeddingError as exc:
@@ -483,6 +485,7 @@ async def delete_knowledge(
     """Delete one source only from the signed-in user's private corpus."""
     check_origin(request)
     user = require_user(token)
+    rate_limit_user_action(user["id"], "knowledge_delete", limit=20, window_seconds=60)
     deleted = VectorKnowledgeStore().delete_source(
         filename, owner_id=f"user:{user['id']}"
     )
