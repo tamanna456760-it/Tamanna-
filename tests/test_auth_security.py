@@ -739,3 +739,16 @@ def test_concurrent_auth_attempts_never_exceed_rate_limit(monkeypatch, tmp_path)
             ("login",),
         ).fetchone()[0]
     assert stored == 10
+
+def test_session_cookie_has_secure_browser_attributes(monkeypatch):
+    from fastapi import Response
+
+    monkeypatch.setattr(auth, "COOKIE_SECURE", True)
+    response = Response()
+    auth.set_cookie(response, "test-session-token")
+
+    cookie = response.headers.get("set-cookie", "").lower()
+    assert "httponly" in cookie
+    assert "secure" in cookie
+    assert "samesite=lax" in cookie
+    assert "path=/" in cookie
