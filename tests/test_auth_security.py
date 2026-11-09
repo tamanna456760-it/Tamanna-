@@ -797,3 +797,19 @@ def test_signup_rejects_whitespace_only_name_without_creating_account(monkeypatc
             "SELECT COUNT(*) FROM users WHERE email=?",
             ("blank-name@example.test",),
         ).fetchone()[0] == 0
+
+
+def test_same_site_fetch_metadata_without_origin_is_rejected():
+    request = SimpleNamespace(headers={"sec-fetch-site": "same-site"})
+    with pytest.raises(Exception) as exc:
+        auth.check_origin(request)
+    assert getattr(exc.value, "status_code", None) == 403
+
+
+def test_same_site_fetch_metadata_with_allowlisted_origin_is_allowed(monkeypatch):
+    monkeypatch.setenv("TAMANNA_CORS_ORIGINS", "https://www.bd-king-r7.com")
+    request = SimpleNamespace(headers={
+        "sec-fetch-site": "same-site",
+        "origin": "https://www.bd-king-r7.com",
+    })
+    assert auth.check_origin(request) is None
