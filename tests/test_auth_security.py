@@ -709,3 +709,33 @@ def test_concurrent_duplicate_signup_creates_exactly_one_account(monkeypatch, tm
             "SELECT COUNT(*) FROM users WHERE email=? COLLATE NOCASE",
             ("race@example.test",),
         ).fetchone()[0] == 1
+
+def test_concurrent_auth_attempts_never_exceed_rate_limit(monkeypatch, tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "concurrent-rate-limit.sqlite3")
+    auth.init_db()
+    request = SimpleNamespace(client=SimpleNamespace(host="198.51.100.93"))
+
+    def attempt(_):
+        try:
+            auth.rate_limit_auth(request, "login")
+            return "allowed"
+        except Exception as exc:
+            return getattr(exc, "status_code", None)
+
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        results = list(pool.map(attempt, range(16)))
+
+    assert results.count("allowed") == 10
+    assert results.count(429) == 6
+    with auth.db() as connection:
+        stored = connection.execute(
+            "SELECT COUNT(*) FROM auth_attempts WHERE action=?",
+            ("login",),
+        ).fetchone()[0]
+    assert stored == 10
