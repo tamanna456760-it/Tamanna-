@@ -438,6 +438,9 @@ class Database:
             ]
 
     def list_memories(self, *, user_id: int | None = None, limit: int = 100) -> list[str]:
+        """Return memories only for an authenticated owner; never expose unassigned rows."""
+        if user_id is None:
+            return []
         self.init()
         limit = max(1, min(int(limit), 500))
         with self.Session() as session:
