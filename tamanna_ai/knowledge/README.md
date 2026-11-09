@@ -92,6 +92,7 @@ included). The default file limit is 20 MiB, with at most 100,000 rows and
 `pypdf`.
 
 This helper is not yet connected to an authenticated upload/chat API or a
-visual chart renderer. Large-document semantic retrieval remains available
-through the vector knowledge store, but indexing/search still needs to be
-wired into the public chat flow and protected by authenticated ownership.
+visual chart renderer. It is a separate read-only analysis utility; it does
+not imply that spreadsheet analysis or chart rendering is available in chat.
+The authenticated document knowledge import/search flow described above is
+implemented separately and remains subject to the local-model requirement.
