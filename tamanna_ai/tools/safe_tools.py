@@ -100,6 +100,23 @@ async def _read_limited_json(response: httpx.Response) -> Any:
         raise ToolExecutionError("Search provider returned invalid JSON") from exc
 
 
+def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
+    if not isinstance(data, dict):
+        raise ToolExecutionError("Search provider returned an unexpected response shape")
+    if provider == "tavily":
+        results = data.get("results", [])
+    elif provider == "brave":
+        web_data = data.get("web", {})
+        if not isinstance(web_data, dict):
+            raise ToolExecutionError("Search provider returned an unexpected response shape")
+        results = web_data.get("results", [])
+    else:
+        raise ToolConfigurationError("Unsupported search provider")
+    if not isinstance(results, list) or any(not isinstance(item, dict) for item in results):
+        raise ToolExecutionError("Search provider returned an unexpected response shape")
+    return results[:5]
+
+
 async def web_search(query: str) -> dict[str, Any]:
     if not isinstance(query, str) or not query.strip() or len(query) > 500:
         raise ToolInputError("query must contain 1 to 500 characters")
@@ -117,9 +134,7 @@ async def web_search(query: str) -> dict[str, Any]:
                     json={"api_key": key, "query": query, "max_results": 5, "search_depth": "basic"},
                 ) as response:
                     data = await _read_limited_json(response)
-                if not isinstance(data, dict) or not isinstance(data.get("results", []), list):
-                    raise ToolExecutionError("Search provider returned an unexpected response shape")
-                return {"provider": "tavily", "results": data.get("results", [])[:5]}
+                return {"provider": "tavily", "results": _extract_search_results(data, "tavily")}
             if provider == "brave":
                 key = os.getenv("BRAVE_SEARCH_API_KEY", "").strip()
                 if not key:
@@ -131,10 +146,7 @@ async def web_search(query: str) -> dict[str, Any]:
                     headers={"X-Subscription-Token": key, "Accept": "application/json"},
                 ) as response:
                     data = await _read_limited_json(response)
-                web_data = data.get("web", {}) if isinstance(data, dict) else None
-                if not isinstance(web_data, dict) or not isinstance(web_data.get("results", []), list):
-                    raise ToolExecutionError("Search provider returned an unexpected response shape")
-                return {"provider": "brave", "results": web_data.get("results", [])[:5]}
+                return {"provider": "brave", "results": _extract_search_results(data, "brave")}
     except ToolConfigurationError:
         raise
     except httpx.HTTPError as exc:
