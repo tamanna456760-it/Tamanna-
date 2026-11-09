@@ -133,7 +133,7 @@ def _sanitize_search_text(value: str, limit: int) -> str:
         text = " ".join(parser.parts)
     except Exception:
         text = value
-    text = re.sub(r"[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]", "", text)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
     return " ".join(text.split())[:limit]
 
 
