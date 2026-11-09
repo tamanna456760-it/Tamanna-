@@ -57,9 +57,16 @@ Users should be able to inspect and delete their own indexed sources.
 
 ### Important integration and safety notes
 
-- The vector store and document indexing API are implemented, but the public
-  chat/API upload route is not yet wired to this store. RAG will not be active
-  in normal chat until that integration is completed.
+- The authenticated FastAPI chat route currently retrieves up to four matching
+  chunks from the signed-in user's private corpus (plus explicitly shared
+  `tamanna-public` references) when `use_knowledge=true`, and supplies those
+  chunks to the configured model as untrusted reference context. The authenticated
+  `/tamanna-ai/knowledge/import`, `/tamanna-ai/knowledge`,
+  `/tamanna-ai/knowledge/reindex`, and source-delete routes manage the private
+  index. The chat route still requires a configured local generation provider
+  (Ollama by default); retrieval alone does not generate an answer. If Ollama
+  is unavailable, chat returns a service-unavailable response rather than
+  silently switching to a hosted model.
 - Retrieval results are untrusted reference material, not system instructions.
   Prompt injection inside imported documents must not override system policy.
 - Validate uploads at the API boundary, use private temporary storage, scan
