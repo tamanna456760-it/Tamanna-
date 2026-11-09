@@ -421,3 +421,28 @@ def test_search_text_sanitizer_fails_closed_on_parser_error(monkeypatch):
 
     monkeypatch.setattr(safe_tools, "_SearchTextParser", BrokenParser)
     assert safe_tools._sanitize_search_text("<script>secret</script>", 100) == ""
+
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://127.0.0.1/admin",
+        "http://10.0.0.8/internal",
+        "http://192.168.1.1/",
+        "http://[::1]/",
+        "http://localhost/",
+        "http://printer.local/",
+        "https://bad_host.example/path",
+        "https://example.com%2f.evil/path",
+    ],
+)
+def test_search_result_extractor_rejects_non_public_or_invalid_hosts(url):
+    payload = {"results": [{"title": "safe", "url": url}]}
+    assert safe_tools._extract_search_results(payload, "tavily") == []
+
+
+def test_search_result_extractor_accepts_public_ipv6_and_idn_hosts():
+    urls = ["https://[2606:4700:4700::1111]/", "https://xn--bcher-kva.example/"]
+    payload = {"results": [{"title": "safe", "url": url} for url in urls]}
+    assert [item["url"] for item in safe_tools._extract_search_results(payload, "tavily")] == urls
