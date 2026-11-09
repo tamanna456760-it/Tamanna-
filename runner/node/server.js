@@ -92,7 +92,9 @@ app.get('/api/status', (req, res) => {
         server: 'Tamanna Server',
         status: 'running',
         clients: clients.size,
-        aiEnabled: false,\n        aiMode: 'local-runtime-not-configured',\n        externalProviders: 'disabled',
+        aiEnabled: false,
+        aiMode: 'local-runtime-not-configured',
+        externalProviders: 'disabled',
         timestamp: new Date().toISOString()
     });
 });
