@@ -134,6 +134,11 @@ def rate_limit_auth(request, action):
 
 
 def check_origin(request):
+    # Fetch Metadata protects cookie-authenticated mutations when a browser
+    # omits Origin but explicitly identifies the request as cross-site.
+    fetch_site = request.headers.get("sec-fetch-site", "").strip().lower()
+    if fetch_site == "cross-site":
+        raise HTTPException(403, "Cross-site requests are not allowed.")
     origin = request.headers.get("origin")
     if origin:
         allowed = [x.strip().rstrip("/") for x in os.getenv("TAMANNA_CORS_ORIGINS",
