@@ -763,3 +763,37 @@ def test_cross_site_fetch_metadata_is_rejected_even_without_origin():
 def test_same_origin_fetch_metadata_is_allowed_without_origin():
     request = SimpleNamespace(headers={"sec-fetch-site": "same-origin"})
     assert auth.check_origin(request) is None
+
+
+def test_signup_rejects_whitespace_only_name_without_creating_account(monkeypatch, tmp_path):
+    from fastapi import Response
+    from tamanna_ai.authentication.router import Signup, signup
+
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "blank-signup-name.sqlite3")
+    auth.init_db()
+    request = SimpleNamespace(
+        client=SimpleNamespace(host="198.51.100.94"),
+        headers={},
+    )
+
+    with pytest.raises(Exception) as exc:
+        signup(
+            Signup(
+                email="blank-name@example.test",
+                name="   ",
+                password="correct horse battery",
+            ),
+            request=request,
+            response=Response(),
+        )
+
+    assert getattr(exc.value, "status_code", None) == 422
+    with auth.db() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM users WHERE email=?",
+            ("blank-name@example.test",),
+        ).fetchone()[0] == 0
