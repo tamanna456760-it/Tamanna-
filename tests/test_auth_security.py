@@ -283,6 +283,39 @@ def test_auth_rate_limit_blocks_eleventh_attempt_and_is_action_scoped(monkeypatc
     auth.rate_limit_auth(request, "signup")
 
 
+
+def test_user_action_rate_limit_is_account_and_action_scoped(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "user-action-rate-limit.sqlite3")
+    auth.init_db()
+
+    # Two accounts use the same action independently.
+    auth.rate_limit_user_action(user_id=101, action="knowledge_import", limit=2)
+    auth.rate_limit_user_action(user_id=101, action="knowledge_import", limit=2)
+    with pytest.raises(Exception) as exc:
+        auth.rate_limit_user_action(
+            user_id=101, action="knowledge_import", limit=2
+        )
+    assert getattr(exc.value, "status_code", None) == 429
+
+    # Another account and another action have independent buckets.
+    auth.rate_limit_user_action(user_id=202, action="knowledge_import", limit=2)
+    auth.rate_limit_user_action(user_id=101, action="knowledge_reindex", limit=1)
+
+
+def test_user_action_rate_limit_fails_closed_without_session_secret(monkeypatch, tmp_path):
+    monkeypatch.delenv("TAMANNA_SESSION_SECRET", raising=False)
+    monkeypatch.setattr(auth, "DB", tmp_path / "user-action-no-secret.sqlite3")
+    auth.init_db()
+
+    with pytest.raises(Exception) as exc:
+        auth.rate_limit_user_action(user_id=7, action="knowledge_import")
+    assert getattr(exc.value, "status_code", None) == 503
+
+
 def _create_auth_test_user(monkeypatch, tmp_path, filename="sessions.sqlite3"):
     monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-session-secret-with-more-than-32-characters")
     monkeypatch.setattr(auth, "DB", tmp_path / filename)
