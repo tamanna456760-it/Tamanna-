@@ -412,7 +412,7 @@ async def import_knowledge(
         or ":" in filename
         or filename in {".", ".."}
         or filename.endswith((".", " "))
-        or Path(filename).stem.upper() in {
+        or filename.split('.', 1)[0].upper() in {
             "CON", "PRN", "AUX", "NUL",
             *(f"COM{number}" for number in range(1, 10)),
             *(f"LPT{number}" for number in range(1, 10)),
