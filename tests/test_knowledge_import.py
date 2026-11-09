@@ -134,6 +134,28 @@ def test_concurrent_duplicate_imports_store_only_one_record(tmp_path):
     assert sum(result["skipped"] for result in results) == 3
     assert len(search_knowledge("remain idempotent", database=db)) == 1
 
+def test_retrieval_skips_malformed_legacy_metadata(tmp_path):
+    from tamanna_ai.persistence.database import Memory
+
+    db = Database(f"sqlite:///{tmp_path / 'malformed-metadata.sqlite3'}")
+    owner_id = db.ensure_user("metadata-owner@example.test", "Metadata Owner")
+    with db.Session.begin() as session:
+        session.add(Memory(
+            user_id=owner_id,
+            content="broken metadata should not break retrieval",
+            metadata_json="{not valid json",
+        ))
+        session.add(Memory(
+            user_id=owner_id,
+            content="valid imported knowledge remains searchable",
+            metadata_json=json.dumps({"kind": "imported_knowledge", "title": "valid"}),
+        ))
+
+    results = search_knowledge("valid imported knowledge", database=db, user_id=owner_id)
+    assert len(results) == 1
+    assert results[0]["title"] == "valid"
+
+
 def test_anonymous_retrieval_cannot_read_user_scoped_knowledge(tmp_path):
     path = tmp_path / "owner-only.txt"
     path.write_text("Owner private retrieval boundary marker.", encoding="utf-8")
