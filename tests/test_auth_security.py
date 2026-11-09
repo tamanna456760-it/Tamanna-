@@ -532,3 +532,38 @@ def test_profile_cannot_change_email_and_wrong_password_preserves_sessions(monke
             "SELECT password_hash FROM users WHERE id=?", (user_id,)
         ).fetchone()["password_hash"]
     assert auth.password_ok("correct horse battery", stored)
+
+
+def test_session_cookie_has_http_only_secure_and_samesite_policy(monkeypatch):
+    from fastapi import Response
+
+    monkeypatch.setattr(auth, "COOKIE_SECURE", True)
+    response = Response()
+    auth.set_cookie(response, "test-session-token")
+    cookie = response.headers.get("set-cookie", "").lower()
+
+    assert "httponly" in cookie
+    assert "secure" in cookie
+    assert "samesite=lax" in cookie
+    assert "path=/" in cookie
+    assert f"max-age={auth.LIFETIME}" in cookie
+
+
+def test_expired_database_session_is_rejected_even_with_valid_signature(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "expired-session.sqlite3")
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "expired-session.sqlite3")
+
+    payload = f"{user_id}.{int(time.time()) - 1}.expired-session-nonce"
+    token = payload + "." + auth.sign(payload)
+    token_hash = __import__("hashlib").sha256(token.encode()).hexdigest()
+    with auth.db() as connection:
+        connection.execute(
+            "INSERT INTO sessions(token_hash,user_id,expires,created_at) VALUES(?,?,?,?)",
+            (token_hash, user_id, int(time.time()) - 1, auth.now()),
+        )
+
+    assert auth.current_user(token) is None
