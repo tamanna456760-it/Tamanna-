@@ -344,15 +344,14 @@ def test_search_result_extractor_removes_html_and_hidden_script_content():
 def test_search_result_extractor_removes_control_characters_from_text():
     payload = {
         "results": [{
-            "title": "Safe\\x00 title",
+            "title": "Safe\x00 title",
             "url": "https://example.com",
-            "content": "line\\x01 one\\nline two",
+            "content": "line\x01 one\nline two",
         }]
     }
     result = safe_tools._extract_search_results(payload, "tavily")[0]
     assert result["title"] == "Safe title"
     assert result["content"] == "line one line two"
-
 
 def test_execute_tool_returns_sanitized_search_results(tmp_path, monkeypatch):
     import asyncio
