@@ -117,6 +117,8 @@ async def web_search(query: str) -> dict[str, Any]:
                     json={"api_key": key, "query": query, "max_results": 5, "search_depth": "basic"},
                 ) as response:
                     data = await _read_limited_json(response)
+                if not isinstance(data, dict) or not isinstance(data.get("results", []), list):
+                    raise ToolExecutionError("Search provider returned an unexpected response shape")
                 return {"provider": "tavily", "results": data.get("results", [])[:5]}
             if provider == "brave":
                 key = os.getenv("BRAVE_SEARCH_API_KEY", "").strip()
@@ -129,7 +131,10 @@ async def web_search(query: str) -> dict[str, Any]:
                     headers={"X-Subscription-Token": key, "Accept": "application/json"},
                 ) as response:
                     data = await _read_limited_json(response)
-                return {"provider": "brave", "results": data.get("web", {}).get("results", [])[:5]}
+                web_data = data.get("web", {}) if isinstance(data, dict) else None
+                if not isinstance(web_data, dict) or not isinstance(web_data.get("results", []), list):
+                    raise ToolExecutionError("Search provider returned an unexpected response shape")
+                return {"provider": "brave", "results": web_data.get("results", [])[:5]}
     except ToolConfigurationError:
         raise
     except httpx.HTTPError as exc:
