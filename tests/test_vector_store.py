@@ -26,6 +26,54 @@ def test_vector_store_persists_and_isolates_owners(tmp_path):
     assert store.delete_source("guide.txt", owner_id="user-1") == 1
 
 
+
+def test_same_source_name_remains_isolated_across_owners_for_listing_and_deletion(tmp_path):
+    store = VectorKnowledgeStore(fake_embedder, tmp_path / "tenant-sources.sqlite3")
+    store.index_text(
+        "Tamanna private security notes for account one",
+        owner_id="user-1", source="notes.txt", title="Private notes one",
+    )
+    store.index_text(
+        "Tamanna private database notes for account two",
+        owner_id="user-2", source="notes.txt", title="Private notes two",
+    )
+
+    user_one_sources = store.list_sources(owner_id="user-1")
+    user_two_sources = store.list_sources(owner_id="user-2")
+    assert [item["title"] for item in user_one_sources] == ["Private notes one"]
+    assert [item["title"] for item in user_two_sources] == ["Private notes two"]
+    assert "chunk_text" not in user_one_sources[0]
+    assert store.delete_source("notes.txt", owner_id="user-1") == 1
+    assert store.search("database notes", owner_id="user-2")
+    assert store.list_sources(owner_id="user-2")[0]["title"] == "Private notes two"
+
+
+def test_reindex_only_recomputes_the_requested_owner(tmp_path):
+    calls = []
+
+    def tracking_embedder(text, task_type="RETRIEVAL_DOCUMENT"):
+        calls.append(text)
+        return fake_embedder(text, task_type)
+
+    store = VectorKnowledgeStore(tracking_embedder, tmp_path / "tenant-reindex.sqlite3")
+    store.index_text(
+        "Tamanna security information for first user",
+        owner_id="user-1", source="shared-name.txt",
+    )
+    store.index_text(
+        "Tamanna database information for second user",
+        owner_id="user-2", source="shared-name.txt",
+    )
+    calls.clear()
+
+    result = store.reindex(owner_id="user-1")
+    assert result == {"documents": 1, "chunks_reindexed": 1}
+    assert len(calls) == 1
+    assert "first user" in calls[0]
+    assert "second user" not in calls[0]
+    assert store.search("database information", owner_id="user-2")
+
+
 def test_vector_store_requires_owner_and_limits_document_size(tmp_path):
     store = VectorKnowledgeStore(fake_embedder, tmp_path / "vectors.sqlite3", max_file_bytes=1024)
     import pytest
