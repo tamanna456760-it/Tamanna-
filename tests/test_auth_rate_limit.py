@@ -60,4 +60,34 @@ def test_authenticated_action_rate_limit_is_per_account_and_persistent(tmp_path,
             "SELECT ip_hash, action FROM auth_attempts WHERE action='chat'"
         ).fetchall()
     assert len(rows) == 31
+    assert all(len(row["ip_hash"]) == 64 for row in rows)
+    assert all(
+        all(character in "0123456789abcdef" for character in row["ip_hash"])
+        for row in rows
+    )
     assert all(str(42) not in row["ip_hash"] for row in rows)
+
+
+def test_authenticated_action_rate_limit_expires_after_window(tmp_path, monkeypatch):
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-only-session-secret-which-is-long-enough")
+    monkeypatch.setattr(auth, "DB", tmp_path / "auth.sqlite3")
+    auth.init_db()
+    clock = [1_800_000_000]
+    monkeypatch.setattr(auth.time, "time", lambda: clock[0])
+
+    auth.rate_limit_user_action(42, "chat", limit=2, window_seconds=60)
+    auth.rate_limit_user_action(42, "chat", limit=2, window_seconds=60)
+    with pytest.raises(HTTPException) as exc:
+        auth.rate_limit_user_action(42, "chat", limit=2, window_seconds=60)
+    assert exc.value.status_code == 429
+
+    # At the exact 60-second boundary, the previous requests are outside the window.
+    clock[0] += 60
+    auth.rate_limit_user_action(42, "chat", limit=2, window_seconds=60)
+
+    with auth.db() as connection:
+        count = connection.execute(
+            "SELECT COUNT(*) FROM auth_attempts WHERE action='chat' AND attempted_at>=?",
+            (clock[0] - 60,),
+        ).fetchone()[0]
+    assert count == 1
