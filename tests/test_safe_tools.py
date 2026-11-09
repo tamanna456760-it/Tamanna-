@@ -352,3 +352,25 @@ def test_search_result_extractor_removes_control_characters_from_text():
     result = safe_tools._extract_search_results(payload, "tavily")[0]
     assert result["title"] == "Safe title"
     assert result["content"] == "line one line two"
+
+
+def test_execute_tool_returns_sanitized_search_results(tmp_path, monkeypatch):
+    import asyncio
+
+    async def fake_search(query):
+        return {
+            "provider": "tavily",
+            "results": [{
+                "title": "Trusted <img src=x onerror=alert(1)> result",
+                "url": "https://example.com/result",
+                "content": "<p>Useful text</p><script>steal()</script>",
+            }],
+        }
+
+    monkeypatch.setattr(safe_tools, "web_search", fake_search)
+    monkeypatch.setattr(safe_tools, "LOG_PATH", tmp_path / "tool_calls.jsonl")
+    result = asyncio.run(safe_tools.execute_tool("web_search", {"query": "safe query"}))
+    item = result["result"]["results"][0]
+    assert item["title"] == "Trusted result"
+    assert item["content"] == "Useful text"
+    assert "<" not in item["title"] + item["content"]
