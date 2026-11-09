@@ -63,3 +63,44 @@ class RequestSizeLimitMiddleware:
             return {"type": "http.disconnect"}
 
         await self.app(scope, replay_receive, send)
+
+
+class SecurityHeadersMiddleware:
+    """Add baseline browser security headers to every HTTP response."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_security_headers(message):
+            if message["type"] == "http.response.start":
+                headers = [
+                    (name, value)
+                    for name, value in message.get("headers", [])
+                    if name.lower() not in {
+                        b"x-content-type-options",
+                        b"x-frame-options",
+                        b"referrer-policy",
+                        b"permissions-policy",
+                        b"strict-transport-security",
+                    }
+                ]
+                headers.extend([
+                    (b"x-content-type-options", b"nosniff"),
+                    (b"x-frame-options", b"DENY"),
+                    (b"referrer-policy", b"strict-origin-when-cross-origin"),
+                    (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
+                ])
+                if scope.get("scheme") == "https":
+                    headers.append((
+                        b"strict-transport-security",
+                        b"max-age=31536000; includeSubDomains",
+                    ))
+                message = {**message, "headers": headers}
+            await send(message)
+
+        await self.app(scope, receive, send_with_security_headers)
