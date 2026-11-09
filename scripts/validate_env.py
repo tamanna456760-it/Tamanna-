@@ -56,8 +56,17 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
         )
     )
 
+    session_secret = value("TAMANNA_SESSION_SECRET")
+    # Length alone accepts predictable values such as 48 repeated characters.
+    # Require a reasonably varied secret while keeping the value itself private.
+    session_secret_configured = (
+        len(session_secret) >= 32
+        and len(set(session_secret)) >= 12
+        and session_secret.lower() not in {"changeme", "change-me", "your-secret", "replace-me", "placeholder"}
+    )
+
     checks = {
-        "session_secret": len(value("TAMANNA_SESSION_SECRET")) >= 32,
+        "session_secret": session_secret_configured,
         "model_provider": provider_configured,
         "database_url": bool(value("TAMANNA_DATABASE_URL", "sqlite:///data/tamanna.sqlite3")),
         "cors_origins": bool(cors_origins),
@@ -66,7 +75,7 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
     missing = [name for name, ok in checks.items() if not ok]
     warnings = []
     if not checks["session_secret"]:
-        warnings.append("Set TAMANNA_SESSION_SECRET to a unique value of at least 32 characters.")
+        warnings.append("Set TAMANNA_SESSION_SECRET to a random, varied value of at least 32 characters; avoid placeholders or repeated characters.")
     if not checks["model_provider"]:
         warnings.append(
             "Use TAMANNA_MODEL_PROVIDER=ollama with a valid local Ollama URL/model; "
