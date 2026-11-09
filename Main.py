@@ -3008,8 +3008,12 @@ except Exception as tamanna_access_error:
 
 
 # Request body limit is applied outside authentication and route handlers.
-from tamanna_ai.security.request_limits import RequestSizeLimitMiddleware
+from tamanna_ai.security.request_limits import (
+    RequestSizeLimitMiddleware,
+    SecurityHeadersMiddleware,
+)
 app.add_middleware(RequestSizeLimitMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 # CORS is outermost so even auth and request-limit errors receive the correct headers.
 app.add_middleware(
