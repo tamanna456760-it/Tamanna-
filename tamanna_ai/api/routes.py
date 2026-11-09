@@ -408,6 +408,7 @@ async def import_knowledge(
         Path(filename).name != filename
         or "/" in filename
         or "\\" in filename
+        or ":" in filename
         or filename in {".", ".."}
         or any(ord(char) < 32 for char in filename)
     ):
