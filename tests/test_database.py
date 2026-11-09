@@ -237,3 +237,19 @@ def test_user_cannot_reuse_another_users_conversation_id(tmp_path):
     assert len(history) == 1
     assert history[0]["user"] == "Original owner message"
 
+
+
+def test_chat_persistence_requires_an_authenticated_owner(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "owner-required.sqlite3").as_posix())
+    db.init()
+
+    with pytest.raises(ValueError, match="user_id is required"):
+        db.save_chat_pair(
+            "anonymous question", "must not be persisted",
+            conversation_id="anonymous-thread", user_id=None,
+        )
+
+    assert db.load_history(
+        conversation_id="anonymous-thread", user_id=None
+    ) == []
+    assert db.list_conversations(user_id=1) == []
