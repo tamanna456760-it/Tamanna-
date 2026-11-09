@@ -134,6 +134,14 @@ def test_concurrent_duplicate_imports_store_only_one_record(tmp_path):
     assert sum(result["skipped"] for result in results) == 3
     assert len(search_knowledge("remain idempotent", database=db)) == 1
 
+def test_search_rejects_invalid_or_oversized_queries(tmp_path):
+    db = Database(f"sqlite:///{tmp_path / 'query-limits.sqlite3'}")
+
+    assert search_knowledge(None, database=db) == []
+    assert search_knowledge(123, database=db) == []
+    assert search_knowledge("x" * 2001, database=db) == []
+
+
 def test_retrieval_skips_malformed_legacy_metadata(tmp_path):
     from tamanna_ai.persistence.database import Memory
 
