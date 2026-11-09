@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07152F"/>
+      <stop offset="100%" stop-color="#351064"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#20E7FF"/>
+      <stop offset="50%" stop-color="#9275FF"/>
+      <stop offset="100%" stop-color="#FF52DF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <circle cx="256" cy="205" r="143"
+          fill="#0B1735" stroke="url(#neon)" stroke-width="5"/>
+  <circle cx="256" cy="205" r="121"
+          fill="none" stroke="#344B87" stroke-width="2"/>
+
+  <g fill="none" stroke="url(#neon)" stroke-width="12"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M145 145 H245 M195 145 V270"/>
+    <path d="M267 145 V270 M267 145 H367 M317 145 V270"/>
+  </g>
+
+  <g font-family="Arial,sans-serif" font-weight="bold"
+     text-anchor="middle">
+    <text x="256" y="345" font-size="37"
+          letter-spacing="3" fill="#FFFFFF">TAMANNA</text>
+    <text x="256" y="387" font-size="27"
+          letter-spacing="8" fill="#40E5FF">AI</text>
+  </g>
+
+  <path d="M170 416 H342" stroke="url(#neon)"
+        stroke-width="4" stroke-linecap="round"/>
+</svg>
