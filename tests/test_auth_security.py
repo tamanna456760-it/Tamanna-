@@ -384,6 +384,27 @@ def test_password_change_revokes_all_existing_sessions(monkeypatch, tmp_path):
 
 
 
+def test_password_change_attempts_are_rate_limited(monkeypatch, tmp_path):
+    from tamanna_ai.authentication.router import ChangePassword, change_password
+
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "password-change-rate-limit.sqlite3")
+    token = auth.issue_session(user_id)
+    request = SimpleNamespace(headers={})
+    payload = ChangePassword(
+        current_password="incorrect password",
+        new_password="a much stronger replacement password",
+    )
+
+    for _ in range(5):
+        with pytest.raises(Exception) as exc:
+            change_password(payload, request=request, token=token)
+        assert getattr(exc.value, "status_code", None) == 400
+
+    with pytest.raises(Exception) as exc:
+        change_password(payload, request=request, token=token)
+    assert getattr(exc.value, "status_code", None) == 429
+
+
 def test_profile_and_preferences_are_isolated_between_accounts(monkeypatch, tmp_path):
     from fastapi import FastAPI
 
