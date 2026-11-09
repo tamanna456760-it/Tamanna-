@@ -64,6 +64,15 @@ def test_database_memory_api_persists_and_lists_memories(tmp_path):
     assert db.list_memories(user_id=None) == []
 
 
+def test_unassigned_legacy_memories_are_not_visible_without_owner(tmp_path):
+    db = Database("sqlite:///" + (tmp_path / "unassigned-memory.sqlite3").as_posix())
+    db.init()
+    with db.Session.begin() as session:
+        session.add(Memory(user_id=None, content="private legacy data", metadata_json="{}"))
+
+    assert db.list_memories(user_id=None) == []
+
+
 
 def test_conversation_history_is_scoped_to_user_and_rejects_cross_user_write(tmp_path):
     db = Database("sqlite:///" + (tmp_path / "user-history.sqlite3").as_posix())
