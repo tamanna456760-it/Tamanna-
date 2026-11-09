@@ -599,3 +599,34 @@ def test_missing_origin_is_accepted_for_non_browser_client_compatibility(monkeyp
     # cross-site requests still carry an untrusted Origin and are rejected.
     request = SimpleNamespace(headers={})
     assert auth.check_origin(request) is None
+
+def test_auth_database_enables_wal_foreign_keys_and_busy_timeout(monkeypatch, tmp_path):
+    monkeypatch.setattr(auth, "DB", tmp_path / "database-pragmas.sqlite3")
+    auth.init_db()
+
+    with auth.db() as connection:
+        assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        assert connection.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal"
+        assert connection.execute("PRAGMA busy_timeout").fetchone()[0] >= 10000
+
+
+def test_session_cleanup_removes_expired_rows_when_issuing_new_session(monkeypatch, tmp_path):
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "session-cleanup.sqlite3")
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "session-cleanup.sqlite3")
+    with auth.db() as connection:
+        connection.execute(
+            "INSERT INTO sessions(token_hash,user_id,expires,created_at) VALUES(?,?,?,?)",
+            ("expired-placeholder-hash", user_id, int(time.time()) - 5, auth.now()),
+        )
+
+    token = auth.issue_session(user_id)
+    assert auth.current_user(token)["id"] == user_id
+    with auth.db() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM sessions WHERE token_hash=?",
+            ("expired-placeholder-hash",),
+        ).fetchone()[0] == 0
