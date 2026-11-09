@@ -1,4 +1,6 @@
-# Tamanna AI — Cloudflare Python API
+# Tamanna AI — Cloudflare Python API prototype
+
+> **Not approved for deployment:** this separate prototype currently depends on the hosted Gemini API and does not use the primary local Ollama backend. Tamanna's selected architecture is local-first/API-free. Do not run its manual deployment workflow or configure a Gemini secret unless the owner explicitly changes that requirement. The static GitHub Pages preview and the root FastAPI/Ollama backend are separate systems.
 
 A separate API Worker; it does not replace the existing static Worker `titamanna`
 or its `dist/` deployment.
@@ -7,7 +9,7 @@ or its `dist/` deployment.
 
 - Python Worker + FastAPI ASGI adapter.
 - D1 stores accounts, hashed sessions, preferences, and chat history.
-- Gemini API key is stored as a Worker secret.
+- This prototype calls the hosted Gemini API; it is not compatible with the current local-only model requirement.
 - Route: `https://www.bd-king-r7.com/api/*`.
 - Existing frontend paths `/api/chat` and `/api/auth/*` remain same-origin.
 
