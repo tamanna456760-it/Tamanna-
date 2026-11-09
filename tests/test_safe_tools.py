@@ -230,3 +230,54 @@ def test_search_result_extractor_limits_results_to_five():
 def test_search_result_extractor_accepts_brave_response():
     payload = {"web": {"results": [{"title": "safe"}]}}
     assert safe_tools._extract_search_results(payload, "brave") == [{"title": "safe"}]
+
+
+@pytest.mark.parametrize("failure_type", ["read_timeout", "connect_error"])
+def test_web_search_translates_network_failures_without_leaking_details(
+    monkeypatch, failure_type
+):
+    import asyncio
+
+    request = safe_tools.httpx.Request("POST", "https://api.tavily.com/search")
+    if failure_type == "read_timeout":
+        failure = safe_tools.httpx.ReadTimeout("private-provider-detail", request=request)
+    else:
+        failure = safe_tools.httpx.ConnectError("private-provider-detail", request=request)
+
+    class FailingStream:
+        async def __aenter__(self):
+            raise failure
+
+        async def __aexit__(self, exc_type, exc, traceback):
+            return False
+
+    class FakeAsyncClient:
+        def __init__(self, timeout):
+            self.timeout = timeout
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, traceback):
+            return False
+
+        def stream(self, *args, **kwargs):
+            return FailingStream()
+
+    monkeypatch.setenv("TAMANNA_SEARCH_PROVIDER", "tavily")
+    monkeypatch.setenv("TAVILY_API_KEY", "test-key-not-real")
+    monkeypatch.setattr(safe_tools.httpx, "AsyncClient", FakeAsyncClient)
+
+    with pytest.raises(safe_tools.ToolExecutionError) as exc_info:
+        asyncio.run(safe_tools.web_search("test query"))
+
+    assert failure_type.replace("_", "").lower() in type(failure).__name__.replace("_", "").lower()
+    assert type(failure).__name__ in str(exc_info.value)
+    assert "private-provider-detail" not in str(exc_info.value)
+
+
+def test_web_search_rejects_query_outside_supported_length():
+    import asyncio
+
+    with pytest.raises(safe_tools.ToolInputError, match="1 to 500"):
+        asyncio.run(safe_tools.web_search("x" * 501))
