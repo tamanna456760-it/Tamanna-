@@ -9,7 +9,10 @@ from starlette.requests import Request
 
 from tamanna_ai.authentication import router as auth
 from tamanna_ai.authentication import access_control
-from tamanna_ai.security.request_limits import RequestSizeLimitMiddleware
+from tamanna_ai.security.request_limits import (
+    RequestSizeLimitMiddleware,
+    SecurityHeadersMiddleware,
+)
 
 
 def _request_with_origin(origin: str) -> Request:
@@ -884,3 +887,27 @@ def test_every_admin_read_route_fails_closed_without_admin_configuration(monkeyp
             cookies={auth.COOKIE: "test-session"},
         )
         assert response.status_code == 503, (path, response.status_code)
+
+
+def test_security_headers_are_present_and_hsts_is_https_only():
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/headers")
+    async def headers():
+        return {"ok": True}
+
+    https_response = TestClient(app).get("/headers")
+    assert https_response.headers["x-content-type-options"] == "nosniff"
+    assert https_response.headers["x-frame-options"] == "DENY"
+    assert https_response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
+    assert https_response.headers["permissions-policy"] == (
+        "camera=(), microphone=(), geolocation=()"
+    )
+    assert https_response.headers["strict-transport-security"] == (
+        "max-age=31536000; includeSubDomains"
+    )
+
+    http_response = TestClient(app).get("/headers", base_url="http://testserver")
+    assert "strict-transport-security" not in http_response.headers
+    assert http_response.headers["x-content-type-options"] == "nosniff"
