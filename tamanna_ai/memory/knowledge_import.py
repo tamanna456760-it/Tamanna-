@@ -204,6 +204,9 @@ def search_knowledge(
     limit: int = 5,
 ) -> list[dict[str, str]]:
     """Small dependency-free lexical retrieval; callers must enforce user auth."""
+    # Bound untrusted input before tokenization to keep retrieval predictable.
+    if not isinstance(query, str) or len(query) > 2000:
+        return []
     # Python's default \w is not Unicode-letter complete (for example, it
     # misses Bengali letters). Tokenize by Unicode character categories.
     tokens: list[str] = []
