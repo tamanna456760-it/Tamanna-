@@ -252,13 +252,18 @@ async def model_status():
             "configured": False,
             "installed": False,
         }
+    # This endpoint is intentionally public for lightweight UI health checks.
+    # Do not disclose the host's installed model inventory or configured model name.
     return {
         "status": "ready" if models else "no_models_installed",
         "provider": provider.name,
-        "selected_model": selected_model,
         "selected_model_installed": selected_model_installed,
-        "installed_models": models,
-        "embedding": embedding_status,
+        "installed_model_count": len(models),
+        "embedding": {
+            "provider": embedding_status["provider"],
+            "configured": embedding_status["configured"],
+            "installed": embedding_status["installed"],
+        },
     }
 
 
