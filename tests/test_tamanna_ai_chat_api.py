@@ -80,6 +80,24 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             patch("tamanna_ai.api.routes.database.list_memories", return_value=[]),
         )
 
+    async def test_chat_does_not_expose_provider_exception_details(self):
+        from tamanna_ai.integrations.provider import ModelProviderError
+
+        class BrokenProvider:
+            async def generate(self, prompt):
+                raise ModelProviderError("private host 10.0.0.4:11434 auth token=secret")
+
+        auth, ensure, history, save, memories = self.auth_patches()
+        with auth, ensure, history, save, memories, patch(
+            "tamanna_ai.api.routes.get_model_provider", return_value=BrokenProvider()
+        ):
+            with self.assertRaises(HTTPException) as raised:
+                await chat(ChatRequest(prompt="Hello"))
+        self.assertEqual(raised.exception.status_code, 503)
+        self.assertEqual(raised.exception.detail["reason"], "provider_unavailable")
+        self.assertNotIn("10.0.0.4", str(raised.exception.detail))
+        self.assertNotIn("secret", str(raised.exception.detail))
+
     async def test_chat_uses_configured_local_provider_and_persists(self):
         provider = FakeProvider()
         auth, ensure, history, save, memories = self.auth_patches()
