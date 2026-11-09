@@ -174,3 +174,19 @@ def test_anonymous_retrieval_cannot_read_user_scoped_knowledge(tmp_path):
 
     assert search_knowledge("boundary marker", database=db, user_id=owner_id)
     assert search_knowledge("boundary marker", database=db) == []
+
+def test_export_ignores_non_string_roles(tmp_path):
+    export = {"conversations": [{"title": "Role validation", "messages": [
+        {"role": ["user"], "text": "invalid role content"},
+        {"role": "user", "text": "valid role content"},
+    ]}]}
+    path = tmp_path / "roles.json"
+    path.write_text(json.dumps(export), encoding="utf-8")
+    db = Database(f"sqlite:///{tmp_path / 'roles.sqlite3'}")
+
+    result = import_knowledge_file(path, database=db)
+
+    assert result["imported"] == 1
+    found = search_knowledge("valid role content", database=db)
+    assert found
+    assert "invalid role content" not in found[0]["content"]
