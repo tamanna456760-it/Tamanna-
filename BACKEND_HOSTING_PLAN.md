@@ -1,8 +1,8 @@
 # Tamanna AI Backend Hosting Plan
 
-Status: **HOSTING NOT DECIDED — NO PRODUCTION BACKEND DEPLOYMENT AUTHORIZED**
+Status: **TARGET: OWN VPS — NOT PURCHASED — NO PRODUCTION BACKEND DEPLOYMENT AUTHORIZED**
 
-This document keeps the backend portable while the hosting provider is undecided.
+The intended backend host is a privately managed VPS. The VPS and domain have not been purchased, so deployment, DNS changes, and production cutover remain blocked.
 
 ## Current repository baseline
 
@@ -39,7 +39,7 @@ Best for a deliberately redesigned, lightweight serverless API.
 - It is a separate implementation, not a deployment of root `Main.py`.
 - D1 is a new database; SQLite accounts/history are not migrated automatically.
 - Local filesystem project tools and code-execution features are not included.
-- Validate Python Worker runtime compatibility, outbound Gemini calls, cookies, D1 bindings, migrations, and load/security tests before considering production.
+- This prototype currently calls hosted Gemini and does not use the primary local Ollama model. It is not approved for the local-only architecture; do not deploy it.
 
 Official references:
 - https://developers.cloudflare.com/workers/languages/python/packages/fastapi/
@@ -68,7 +68,7 @@ Browser
   -> https://www.bd-king-r7.com/api/*
   -> Cloudflare edge / API router
   -> selected FastAPI backend
-  -> Gemini API and persistent database
+  -> private local Ollama runtime and persistent database
 ```
 
 Do not point the frontend directly at a temporary `workers.dev` URL. Prefer the same-origin `/api/*` path so cookies remain first-party and the frontend does not need a provider-specific URL.
@@ -82,7 +82,7 @@ Before enabling the route, verify that the selected backend supports:
 
 ## Security baseline
 
-1. Store Gemini keys and session secrets only in the hosting provider's secret manager or a private `.env` file outside Git.
+1. Store the session secret and other required credentials only in the VPS secret manager or a private `.env` file outside Git. The primary AI path must use private local Ollama, not a hosted Gemini/GPT API.
 2. Generate a unique `TAMANNA_SESSION_SECRET` with at least 32 random bytes.
 3. Use HTTPS end-to-end; enable secure, HttpOnly, SameSite cookies.
 4. Keep CORS restricted to `https://www.bd-king-r7.com`; same-origin routing is preferred.
@@ -95,7 +95,7 @@ Before enabling the route, verify that the selected backend supports:
 
 ## Required secrets (only after a host is selected)
 
-- `GEMINI_API_KEY` or `TAMANNA_MODEL_API_KEY`
+- Local Ollama runtime and selected model installed on the VPS (no hosted AI API key)
 - `TAMANNA_SESSION_SECRET`
 - Optional search keys only if search is enabled: `TAVILY_API_KEY`, `BRAVE_SEARCH_API_KEY`
 - Provider-specific deployment token only in CI secret storage, with least privilege.
