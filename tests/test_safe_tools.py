@@ -169,3 +169,38 @@ def test_execute_tool_audit_log_does_not_store_raw_error_details(tmp_path, monke
     assert record["error"] == "ToolExecutionError"
     assert "provider echoed private-query-and-token" not in raw
     assert "private-query-and-token" not in raw
+
+
+def test_search_response_reader_rejects_malformed_json():
+    import asyncio
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        async def aiter_bytes(self):
+            yield b'{"results": [invalid]}'
+
+    with pytest.raises(safe_tools.ToolExecutionError, match="invalid JSON"):
+        asyncio.run(safe_tools._read_limited_json(FakeResponse()))
+
+
+def test_search_response_reader_checks_http_status_before_reading():
+    import asyncio
+
+    class FakeResponse:
+        def raise_for_status(self):
+            raise safe_tools.httpx.HTTPStatusError(
+                "upstream failure",
+                request=safe_tools.httpx.Request("GET", "https://provider.invalid"),
+                response=safe_tools.httpx.Response(
+                    503, request=safe_tools.httpx.Request("GET", "https://provider.invalid")
+                ),
+            )
+
+        async def aiter_bytes(self):
+            raise AssertionError("Body must not be read after an HTTP error")
+            yield b""
+
+    with pytest.raises(safe_tools.httpx.HTTPStatusError):
+        asyncio.run(safe_tools._read_limited_json(FakeResponse()))
