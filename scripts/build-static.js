@@ -64,6 +64,36 @@ for (const directory of ['css', 'js', 'assets', 'static']) {
   }
 }
 
+// GitHub project Pages is hosted below /<repository>/, unlike a custom domain.
+// Keep the normal root paths for Cloudflare, but prefix static paths for Pages.
+const rawBasePath = (process.env.GITHUB_PAGES_BASE_PATH || '').trim();
+const basePath = rawBasePath ? `/${rawBasePath.replace(/^\\/+|\\/+$/g, '')}` : '';
+if (basePath && !/^\\/[A-Za-z0-9._-]+$/.test(basePath)) {
+  fail('GITHUB_PAGES_BASE_PATH must be one safe repository path segment, e.g. /Tamanna-.');
+}
+if (basePath) {
+  const htmlFiles = ['index.html', 'admin.html', '404.html', 'admin/index.html'];
+  const staticPrefixes = ['/css/', '/js/', '/assets/', '/static/', '/admin/'];
+  for (const relative of htmlFiles) {
+    const target = path.join(output, relative);
+    if (!fs.existsSync(target)) continue;
+    let page = fs.readFileSync(target, 'utf8');
+    for (const prefix of staticPrefixes) {
+      page = page.split(`="${prefix}`).join(`="${basePath}${prefix}`);
+      page = page.split(`='${prefix}`).join(`='${basePath}${prefix}`);
+    }
+    page = page.split('="/admin.html').join(`="${basePath}/admin.html`);
+    page = page.split('="/404.html').join(`="${basePath}/404.html`);
+    fs.writeFileSync(target, page);
+  }
+  const manifestPath = path.join(output, 'assets', 'site.webmanifest');
+  if (fs.existsSync(manifestPath)) {
+    let manifest = fs.readFileSync(manifestPath, 'utf8');
+    manifest = manifest.replace(/"start_url"\\s*:\\s*"\\/"/, `"start_url": "${basePath}/"`);
+    fs.writeFileSync(manifestPath, manifest);
+  }
+}
+
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
 for (const relative of ['index.html', 'admin.html', 'admin/index.html', '404.html', 'CNAME', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js']) {
   if (!fs.existsSync(path.join(output, relative))) {
