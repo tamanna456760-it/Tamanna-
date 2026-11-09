@@ -16,4 +16,4 @@ umask 077
 cp .env.example .env
 chmod 600 .env
 echo "Created private .env from .env.example."
-echo "Add your real GEMINI_API_KEY and a unique TAMANNA_SESSION_SECRET locally."
+echo "Configure the local Ollama model and a unique TAMANNA_SESSION_SECRET in .env."
