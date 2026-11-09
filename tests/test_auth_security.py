@@ -897,7 +897,7 @@ def test_security_headers_are_present_and_hsts_is_https_only():
     async def headers():
         return {"ok": True}
 
-    https_response = TestClient(app).get("/headers")
+    https_response = TestClient(app, base_url="https://testserver").get("/headers")
     assert https_response.headers["x-content-type-options"] == "nosniff"
     assert https_response.headers["x-frame-options"] == "DENY"
     assert https_response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
