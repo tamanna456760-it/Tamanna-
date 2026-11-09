@@ -620,6 +620,16 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(raised.exception.status_code, 422)
         store.assert_not_called()
 
+    async def test_private_knowledge_import_rejects_reserved_and_control_filenames(self):
+        invalid_names = ("CON.txt", "LPT1.log", "report.md.", "report.md ", "bad\\x7f.md")
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            for filename in invalid_names:
+                with self.subTest(filename=repr(filename)):
+                    with self.assertRaises(HTTPException) as raised:
+                        await import_knowledge(KnowledgeImportRequest(filename=filename, content="text"))
+                    self.assertEqual(raised.exception.status_code, 422)
+        store.assert_not_called()
+
     async def test_private_knowledge_import_rejects_invalid_json(self):
         with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}):
             with self.assertRaises(HTTPException) as raised:
