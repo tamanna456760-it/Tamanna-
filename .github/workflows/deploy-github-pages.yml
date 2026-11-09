@@ -1,0 +1,68 @@
+name: Deploy Tamanna website to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate project
+        run: npm run check
+
+      - name: Build project-site assets
+        env:
+          GITHUB_PAGES_BASE_PATH: /Tamanna-
+        run: npm run build
+
+      - name: Verify GitHub Pages output
+        run: |
+          test -s dist/index.html
+          test -s dist/admin/index.html
+          test -s dist/css/style.css
+          test -s dist/js/chat.js
+          grep -q '="/Tamanna-/css/' dist/index.html
+          grep -q '="/Tamanna-/js/' dist/index.html
+          echo "PASS: project-site paths and static assets"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
