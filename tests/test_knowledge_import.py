@@ -45,6 +45,27 @@ def test_import_is_idempotent_and_redacts_secrets(tmp_path):
     assert "[REDACTED_SECRET]" in rows[0]["content"]
 
 
+def test_import_redacts_bearer_jwt_and_aws_credentials(tmp_path):
+    path = tmp_path / "credentials.txt"
+    bearer = "Bearer " + "b" * 32
+    jwt = "eyJ" + "a" * 8 + "." + "b" * 8 + "." + "c" * 8
+    aws = "AKIA" + "A" * 16
+    path.write_text(
+        f"Authorization: {bearer} JWT={jwt} AWS={aws}",
+        encoding="utf-8",
+    )
+    db = Database(f"sqlite:///{tmp_path / 'credentials.sqlite3'}")
+
+    result = import_knowledge_file(path, database=db)
+    assert result["imported"] == 1
+    rows = search_knowledge("Authorization JWT AWS", database=db)
+    assert rows
+    assert bearer not in rows[0]["content"]
+    assert jwt not in rows[0]["content"]
+    assert aws not in rows[0]["content"]
+    assert rows[0]["content"].count("[REDACTED_SECRET]") == 3
+
+
 def test_reject_unsupported_or_oversized_file(tmp_path):
     db = Database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
     unsupported = tmp_path / "dump.bin"
