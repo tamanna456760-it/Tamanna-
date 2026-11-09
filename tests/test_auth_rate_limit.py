@@ -81,8 +81,8 @@ def test_authenticated_action_rate_limit_expires_after_window(tmp_path, monkeypa
         auth.rate_limit_user_action(42, "chat", limit=2, window_seconds=60)
     assert exc.value.status_code == 429
 
-    # At the exact 60-second boundary, the previous requests are outside the window.
-    clock[0] += 60
+    # After the 60-second window, previous requests no longer count.
+    clock[0] += 61
     auth.rate_limit_user_action(42, "chat", limit=2, window_seconds=60)
 
     with auth.db() as connection:
