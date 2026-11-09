@@ -752,3 +752,14 @@ def test_session_cookie_has_secure_browser_attributes(monkeypatch):
     assert "secure" in cookie
     assert "samesite=lax" in cookie
     assert "path=/" in cookie
+
+def test_cross_site_fetch_metadata_is_rejected_even_without_origin():
+    request = SimpleNamespace(headers={"sec-fetch-site": "cross-site"})
+    with pytest.raises(Exception) as exc:
+        auth.check_origin(request)
+    assert getattr(exc.value, "status_code", None) == 403
+
+
+def test_same_origin_fetch_metadata_is_allowed_without_origin():
+    request = SimpleNamespace(headers={"sec-fetch-site": "same-origin"})
+    assert auth.check_origin(request) is None
