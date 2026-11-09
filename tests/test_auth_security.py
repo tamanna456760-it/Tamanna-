@@ -388,7 +388,7 @@ def test_profile_and_preferences_are_isolated_between_accounts(monkeypatch, tmp_
     assert response.status_code == 200
 
     assert client_a.get("/api/auth/me").json()["user"]["name"] == "Updated A"
-    assert client_b.get("/api/auth/me").json()["user"]["name"] == "Session User"
+    assert client_b.get("/api/auth/me").json()["user"]["name"] == "Second User"
     assert client_a.get("/api/auth/preferences").json()["preferences"] == {
         "theme": "dark", "language": "bn"
     }
