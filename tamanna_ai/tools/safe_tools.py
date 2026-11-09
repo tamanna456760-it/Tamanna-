@@ -158,6 +158,12 @@ def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
         title = item.get("title")
         if not isinstance(url, str) or not isinstance(title, str):
             continue
+        # Reject ambiguous raw URL characters before parsing. Encoded spaces remain valid.
+        if len(url) > 2048 or any(
+            character.isspace() or ord(character) < 0x20 or ord(character) == 0x7F
+            for character in url
+        ) or "\\" in url:
+            continue
         try:
             parsed_url = urlsplit(url)
             valid_url = (
@@ -173,7 +179,7 @@ def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
 
         safe_item: dict[str, Any] = {
             "title": _sanitize_search_text(title, 300),
-            "url": url[:2048],
+            "url": url,
         }
         text_field = item.get("content", item.get("description"))
         if isinstance(text_field, str):
