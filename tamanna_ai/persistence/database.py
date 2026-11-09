@@ -404,6 +404,8 @@ class Database:
         self, content: str, *, user_id: int | None = None,
         metadata: dict[str, object] | None = None,
     ) -> int:
+        if user_id is None:
+            raise ValueError("user_id is required to persist private memories")
         if not isinstance(content, str) or not content.strip():
             raise ValueError("Memory content must be non-empty text")
         self.init()
