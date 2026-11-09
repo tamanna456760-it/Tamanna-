@@ -498,3 +498,37 @@ def test_model_admin_controls_support_configured_admin_allowlist(monkeypatch):
     with pytest.raises(Exception) as exc:
         api_routes._require_model_admin("session")
     assert getattr(exc.value, "status_code", None) == 403
+
+
+def test_profile_cannot_change_email_and_wrong_password_preserves_sessions(monkeypatch, tmp_path):
+    from fastapi import FastAPI
+
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "profile-password-guards.sqlite3")
+    app = FastAPI()
+    app.include_router(auth.router)
+    token = auth.issue_session(user_id)
+    client = TestClient(app)
+    client.cookies.set(auth.COOKIE, token)
+
+    profile = client.patch(
+        "/api/auth/profile",
+        json={"name": "Safe Name", "email": "attacker@example.test"},
+    )
+    assert profile.status_code == 200
+    assert client.get("/api/auth/me").json()["user"]["email"] == "session-user@example.test"
+    assert client.get("/api/auth/me").json()["user"]["name"] == "Safe Name"
+
+    failed = client.post(
+        "/api/auth/change-password",
+        json={
+            "current_password": "not-the-current-password",
+            "new_password": "a much stronger replacement password",
+        },
+    )
+    assert failed.status_code == 400
+    assert auth.current_user(token)["id"] == user_id
+    with auth.db() as connection:
+        stored = connection.execute(
+            "SELECT password_hash FROM users WHERE id=?", (user_id,)
+        ).fetchone()["password_hash"]
+    assert auth.password_ok("correct horse battery", stored)
