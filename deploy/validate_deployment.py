@@ -46,11 +46,16 @@ def validate_deployment(compose_path, nginx_path, require_env=False):
             "app healthcheck": "http://127.0.0.1:8000/health",
             "HTTP public listener": '"80:80"',
             "HTTPS public listener": '"443:443"',
+            "private Ollama service": "image: ollama/ollama:latest",
+            "FastAPI local-model endpoint": 'TAMANNA_OLLAMA_URL: "http://ollama:11434"',
+            "persistent Ollama model volume": "ollama_data:/root/.ollama",
         }
         for label, marker in required_compose.items():
             if marker not in compose_text:
                 findings.append(f"Compose is missing {label}.")
 
+        if '"11434:11434"' in compose_text or '"0.0.0.0:11434:11434"' in compose_text:
+            findings.append("Ollama port 11434 must not be published to the public host.")
         if "condition: service_healthy" not in compose_text:
             findings.append(
                 "Nginx must wait until the app healthcheck succeeds."
