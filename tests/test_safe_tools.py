@@ -358,13 +358,16 @@ def test_execute_tool_returns_sanitized_search_results(tmp_path, monkeypatch):
     import asyncio
 
     async def fake_search(query):
-        return {
-            "provider": "tavily",
+        payload = {
             "results": [{
                 "title": "Trusted <img src=x onerror=alert(1)> result",
                 "url": "https://example.com/result",
                 "content": "<p>Useful text</p><script>steal()</script>",
-            }],
+            }]
+        }
+        return {
+            "provider": "tavily",
+            "results": safe_tools._extract_search_results(payload, "tavily"),
         }
 
     monkeypatch.setattr(safe_tools, "web_search", fake_search)
