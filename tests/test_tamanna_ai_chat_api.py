@@ -10,7 +10,7 @@ from tamanna_ai.api.routes import (
     model_resources, model_recovery, model_preflight, ChatRequest, KnowledgeImportRequest, ModelSelectRequest, ModelPullRequest, pull_model, select_model, system_metrics, model_benchmark, chat, delete_conversation,
     delete_knowledge, get_conversation, import_knowledge, list_conversations,
     list_knowledge, model_status, model_benchmark_history, MemoryRequest, create_memory, list_memories,
-    update_memory, delete_memory, _serialize_untrusted_context,
+    update_memory, delete_memory, reindex_knowledge, _serialize_untrusted_context,
 )
 
 
@@ -54,6 +54,29 @@ for _route_name in (
     "create_memory", "update_memory", "delete_memory",
 ):
     globals()[_route_name] = _with_test_request(globals()[_route_name])
+
+
+class KnowledgeRouteAuthTests(unittest.IsolatedAsyncioTestCase):
+    async def test_list_knowledge_rejects_anonymous_user(self):
+        with patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            with self.assertRaises(HTTPException) as raised:
+                await list_knowledge(token=None)
+        self.assertEqual(raised.exception.status_code, 401)
+        store.assert_not_called()
+
+    async def test_reindex_knowledge_rejects_anonymous_user(self):
+        with patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            with self.assertRaises(HTTPException) as raised:
+                await reindex_knowledge()
+        self.assertEqual(raised.exception.status_code, 401)
+        store.assert_not_called()
+
+    async def test_delete_knowledge_rejects_anonymous_user(self):
+        with patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            with self.assertRaises(HTTPException) as raised:
+                await delete_knowledge("private.txt")
+        self.assertEqual(raised.exception.status_code, 401)
+        store.assert_not_called()
 
 
 class FakeProvider:
