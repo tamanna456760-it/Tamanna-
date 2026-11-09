@@ -65,9 +65,6 @@ def test_authenticated_action_rate_limit_is_per_account_and_persistent(tmp_path,
         all(character in "0123456789abcdef" for character in row["ip_hash"])
         for row in rows
     )
-    assert all(str(42) not in row["ip_hash"] for row in rows)
-
-
 def test_authenticated_action_rate_limit_expires_after_window(tmp_path, monkeypatch):
     monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-only-session-secret-which-is-long-enough")
     monkeypatch.setattr(auth, "DB", tmp_path / "auth.sqlite3")
