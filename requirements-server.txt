@@ -1,6 +1,6 @@
 # Runtime dependencies required to import Main.py and the mandatory tamanna_ai modules.
 # The direct imports in the server entry point use FastAPI, Pydantic, Uvicorn,
-# python-dotenv and httpx. Main.py's Gemini client uses httpx; requests is used
+# python-dotenv and httpx. The local Ollama client uses httpx; requests is used
 # by the shared firewall module. The mandatory tamanna_ai package imports use
 # the Python standard library plus FastAPI/Pydantic. Optional integrations are
 # kept in requirements-optional.txt so the Docker image stays lean.
