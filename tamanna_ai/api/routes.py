@@ -227,7 +227,7 @@ async def model_status():
             detail={
                 "status": "unavailable",
                 "message": "Tamanna AI local model runtime is unavailable.",
-                "reason": str(exc),
+                "reason": "provider_unavailable",
             },
         ) from exc
 
