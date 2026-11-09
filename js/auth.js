@@ -105,6 +105,16 @@
       showStatus("আপনি লগআউট করেছেন।");
     } catch (error) { showStatus(error.message, true); }
   });
-  api("/me").then(result => renderUser(result.user)).catch(() => renderUser(null));
+  const isGitHubPagesPreview = location.hostname.endsWith(".github.io");
+  if (isGitHubPagesPreview) {
+    renderUser(null);
+    showStatus("GitHub Pages Preview Mode: the static website is online, but sign-in needs the private Tamanna backend.");
+    const loginSubmit = $("loginForm")?.querySelector('button[type="submit"]');
+    const signupSubmit = $("signupForm")?.querySelector('button[type="submit"]');
+    if (loginSubmit) loginSubmit.disabled = true;
+    if (signupSubmit) signupSubmit.disabled = true;
+  } else {
+    api("/me").then(result => renderUser(result.user)).catch(() => renderUser(null));
+  }
   window.TamannaAuth = { api, getUser: () => currentUser };
 })();

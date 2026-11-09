@@ -28,9 +28,14 @@ for (const relative of requiredFiles) {
   }
 }
 
-const hostname = fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim();
-if (hostname !== 'www.bd-king-r7.com') {
-  fail('CNAME must contain exactly www.bd-king-r7.com');
+// A project-site deployment must not publish CNAME: that file binds a
+// custom domain and conflicts with the /<repository>/ GitHub Pages URL.
+const isProjectPagesBuild = Boolean((process.env.GITHUB_PAGES_BASE_PATH || '').trim());
+if (!isProjectPagesBuild) {
+  const hostname = fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim();
+  if (hostname !== 'www.bd-king-r7.com') {
+    fail('CNAME must contain exactly www.bd-king-r7.com');
+  }
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -84,12 +89,19 @@ if (basePath) {
     }
     page = page.split('="/admin.html').join(`="${basePath}/admin.html`);
     page = page.split('="/404.html').join(`="${basePath}/404.html`);
+    page = page.split('href="/"').join(`href="${basePath}/"`);
+    page = page.split('action="/"').join(`action="${basePath}/"`);
     fs.writeFileSync(target, page);
   }
+  // Do not let a stale custom-domain CNAME override the GitHub project URL.
+  fs.rmSync(path.join(output, 'CNAME'), { force: true });
   const manifestPath = path.join(output, 'assets', 'site.webmanifest');
   if (fs.existsSync(manifestPath)) {
     let manifest = fs.readFileSync(manifestPath, 'utf8');
     manifest = manifest.replace(/"start_url"\s*:\s*"\/"/, `"start_url": "${basePath}/"`);
+    manifest = manifest.replace('"id": "/"', `"id": "${basePath}/"`);
+    manifest = manifest.replace('"scope": "/"', `"scope": "${basePath}/"`);
+    manifest = manifest.replace(/"src"\s*:\s*"\/assets\//g, `"src": "${basePath}/assets/`);
     fs.writeFileSync(manifestPath, manifest);
   }
 }

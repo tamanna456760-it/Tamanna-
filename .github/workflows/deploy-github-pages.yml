@@ -43,7 +43,10 @@ jobs:
           test -s dist/js/chat.js
           grep -q '="/Tamanna-/css/' dist/index.html
           grep -q '="/Tamanna-/js/' dist/index.html
-          echo "PASS: project-site paths and static assets"
+          grep -q 'href="/Tamanna-/"' dist/admin/index.html
+          grep -q '"start_url": "/Tamanna-/"' dist/assets/site.webmanifest
+          test ! -e dist/CNAME
+          echo "PASS: project-site paths, manifest, admin navigation, and no custom-domain override"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

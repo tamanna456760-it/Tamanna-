@@ -9,6 +9,12 @@
 
   let conversationId = null;
   let busy = false;
+  const isGitHubPagesPreview = location.hostname.endsWith(".github.io");
+
+  if (isGitHubPagesPreview) {
+    input.placeholder = "GitHub Pages Preview — backend সংযুক্ত হলে chat চালু হবে";
+    addMessage("assistant", "GitHub Pages Preview Mode: ওয়েবসাইটের interface চালু আছে। বাস্তব AI উত্তর, login ও chat history চালাতে private FastAPI backend এবং local Ollama server সংযুক্ত করতে হবে।");
+  }
 
   async function api(path, options = {}) {
     const response = await fetch("/tamanna-ai" + path, {
@@ -93,6 +99,10 @@
   async function sendMessage() {
     const prompt = input.value.trim();
     if (!prompt || busy) return;
+    if (isGitHubPagesPreview) {
+      addMessage("assistant", "এই GitHub Pages preview-তে AI request পাঠানো হচ্ছে না। Backend host ও নিরাপদ API route সংযুক্ত হলে chat চালু হবে।");
+      return;
+    }
     if (!window.TamannaAuth?.getUser()) {
       addMessage("assistant", "চ্যাট করতে প্রথমে লগইন করুন। উপরের লগইন বোতাম চাপুন।");
       return;
