@@ -549,6 +549,35 @@ def test_session_cookie_has_http_only_secure_and_samesite_policy(monkeypatch):
     assert f"max-age={auth.LIFETIME}" in cookie
 
 
+
+def test_expired_or_revoked_session_cannot_access_account_endpoints(monkeypatch, tmp_path):
+    from fastapi import FastAPI
+
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "session-endpoints.sqlite3")
+    app = FastAPI()
+    app.include_router(auth.router)
+    client = TestClient(app)
+
+    valid_token = auth.issue_session(user_id)
+    client.cookies.set(auth.COOKIE, valid_token)
+    assert client.get("/api/auth/me").status_code == 200
+    assert client.get("/api/auth/preferences").status_code == 200
+
+    with auth.db() as connection:
+        connection.execute(
+            "DELETE FROM sessions WHERE token_hash=?",
+            (__import__("hashlib").sha256(valid_token.encode()).hexdigest(),),
+        )
+
+    assert client.get("/api/auth/me").status_code == 401
+    assert client.get("/api/auth/preferences").status_code == 401
+
+    expired_payload = f"{user_id}.{int(time.time()) - 1}.expired-endpoint-nonce"
+    expired_token = expired_payload + "." + auth.sign(expired_payload)
+    client.cookies.set(auth.COOKIE, expired_token)
+    assert client.get("/api/auth/me").status_code == 401
+    assert client.get("/api/auth/preferences").status_code == 401
+
 def test_expired_database_session_is_rejected_even_with_valid_signature(monkeypatch, tmp_path):
     monkeypatch.setenv(
         "TAMANNA_SESSION_SECRET",
