@@ -387,6 +387,9 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
             result = await model_status()
         self.assertEqual(result["status"], "ready")
         self.assertTrue(result["selected_model_installed"])
+        self.assertEqual(result["installed_model_count"], 2)
+        self.assertNotIn("installed_models", result)
+        self.assertNotIn("selected_model", result)
 
     async def test_model_status_reports_local_feature_embedding_provider(self):
         with patch("tamanna_ai.api.routes.get_model_provider", return_value=FakeModelManager()), patch(
