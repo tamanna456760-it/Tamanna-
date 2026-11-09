@@ -136,7 +136,7 @@ Validate configuration locally:
     python scripts/validate_env.py
     python scripts/validate_env.py --strict
 
-The strict check is expected to fail until required backend credentials are configured.
+The strict check requires a strong session secret, a supported local model-provider configuration, a database URL, and exact trusted CORS origins. It does not require a Gemini/GPT API key.
 
 ## Safety and access control
 
