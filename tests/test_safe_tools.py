@@ -324,3 +324,31 @@ def test_search_result_extractor_omits_non_finite_scores():
         }]
     }
     assert "score" not in safe_tools._extract_search_results(payload, "tavily")[0]
+
+
+def test_search_result_extractor_removes_html_and_hidden_script_content():
+    payload = {
+        "results": [{
+            "title": "<b>Safe title</b><script>steal()</script>",
+            "url": "https://example.com/result",
+            "content": '<p>Visible <strong>summary</strong></p><script>alert("x")</script><style>.x{}</style>',
+        }]
+    }
+    result = safe_tools._extract_search_results(payload, "tavily")[0]
+    assert result["title"] == "Safe title"
+    assert result["content"] == "Visible summary"
+    assert "<script>" not in result["content"]
+    assert "alert" not in result["content"]
+
+
+def test_search_result_extractor_removes_control_characters_from_text():
+    payload = {
+        "results": [{
+            "title": "Safe\\x00 title",
+            "url": "https://example.com",
+            "content": "line\\x01 one\\nline two",
+        }]
+    }
+    result = safe_tools._extract_search_results(payload, "tavily")[0]
+    assert result["title"] == "Safe title"
+    assert result["content"] == "line one line two"
