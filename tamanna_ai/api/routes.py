@@ -412,11 +412,14 @@ async def import_knowledge(
         or "\\" in filename
         or ":" in filename
         or filename in {".", ".."}
-        or filename.endswith((".", " "))
+        or payload.filename.endswith((" ", "."))
+        or filename.endswith(".")
         or filename.split('.', 1)[0].upper() in {
             "CON", "PRN", "AUX", "NUL",
             *(f"COM{number}" for number in range(1, 10)),
             *(f"LPT{number}" for number in range(1, 10)),
+            *(f"COM{number}" for number in ("¹", "²", "³")),
+            *(f"LPT{number}" for number in ("¹", "²", "³")),
         }
         or any(unicodedata.category(char) == "Cc" for char in filename)
     ):
