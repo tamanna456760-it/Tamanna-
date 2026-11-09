@@ -397,3 +397,27 @@ def test_search_result_extractor_preserves_valid_percent_encoded_url():
     url = "https://example.com/search?q=hello%20world"
     payload = {"results": [{"title": "safe", "url": url}]}
     assert safe_tools._extract_search_results(payload, "tavily")[0]["url"] == url
+
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://example.com:bad/path",
+        "https://example.com:99999/path",
+        "https://example.com:/path",
+        "https://exa mple.com/path",
+    ],
+)
+def test_search_result_extractor_rejects_invalid_authority(url):
+    payload = {"results": [{"title": "safe", "url": url}]}
+    assert safe_tools._extract_search_results(payload, "tavily") == []
+
+
+def test_search_text_sanitizer_fails_closed_on_parser_error(monkeypatch):
+    class BrokenParser:
+        def __init__(self):
+            raise RuntimeError("parser failed")
+
+    monkeypatch.setattr(safe_tools, "_SearchTextParser", BrokenParser)
+    assert safe_tools._sanitize_search_text("<script>secret</script>", 100) == ""
