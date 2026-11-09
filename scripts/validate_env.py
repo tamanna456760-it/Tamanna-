@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import dotenv_values, load_dotenv
 
@@ -19,27 +20,47 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
     else:
         file_values = {}
 
-    def value(name: str) -> str:
-        return str(os.getenv(name) or file_values.get(name) or "").strip()
+    def value(name: str, default: str = "") -> str:
+        return str(os.getenv(name) or file_values.get(name) or default).strip()
+
+    provider = value("TAMANNA_MODEL_PROVIDER", "ollama").lower()
+    environment = value("TAMANNA_ENV", "production").lower()
+    ollama_url = value("TAMANNA_OLLAMA_URL", "http://127.0.0.1:11434")
+    ollama_model = value("TAMANNA_OLLAMA_MODEL", "qwen2.5:7b")
+    parsed_ollama_url = urlparse(ollama_url)
+    ollama_configured = (
+        parsed_ollama_url.scheme in {"http", "https"}
+        and bool(parsed_ollama_url.netloc)
+        and bool(ollama_model)
+        and len(ollama_model) <= 200
+    )
+    provider_configured = (
+        provider == "ollama" and ollama_configured
+    ) or (
+        provider == "mock" and environment == "test"
+    )
 
     checks = {
         "session_secret": len(value("TAMANNA_SESSION_SECRET")) >= 32,
-        "gemini_api_key": bool(value("TAMANNA_MODEL_API_KEY") or value("GEMINI_API_KEY")),
-        "database_url": True,  # SQLite is the supported built-in fallback.
+        "model_provider": provider_configured,
+        "database_url": bool(value("TAMANNA_DATABASE_URL", "sqlite:///data/tamanna.sqlite3")),
         "cors_origins": bool(value("TAMANNA_CORS_ORIGINS")),
     }
     missing = [name for name, ok in checks.items() if not ok]
     warnings = []
-    if not checks["gemini_api_key"]:
-        warnings.append("Gemini chat is unavailable until GEMINI_API_KEY or TAMANNA_MODEL_API_KEY is set.")
     if not checks["session_secret"]:
-        warnings.append("Signup/login is unavailable until TAMANNA_SESSION_SECRET is set to at least 32 characters.")
+        warnings.append("Set TAMANNA_SESSION_SECRET to a unique value of at least 32 characters.")
+    if not checks["model_provider"]:
+        warnings.append(
+            "Use TAMANNA_MODEL_PROVIDER=ollama with a valid local Ollama URL/model; "
+            "mock is allowed only when TAMANNA_ENV=test."
+        )
     if not checks["database_url"]:
         warnings.append("Set TAMANNA_DATABASE_URL or use the built-in SQLite default.")
     if not checks["cors_origins"]:
         warnings.append("Set TAMANNA_CORS_ORIGINS to the exact trusted frontend origins.")
 
-    blocking = ["session_secret", "gemini_api_key"] if strict else []
+    blocking = ["session_secret", "model_provider", "database_url", "cors_origins"] if strict else []
     failed = any(not checks[name] for name in blocking)
     return {
         "status": "FAIL" if failed else ("WARNING" if missing else "PASS"),
@@ -47,6 +68,7 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
         "checks": checks,
         "missing": missing,
         "warnings": warnings,
+        "provider": provider,
         "secrets_printed": False,
     }
 
@@ -54,8 +76,11 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
-    parser.add_argument("--strict", action="store_true",
-                        help="Require both a valid session secret and Gemini API key.")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Require a strong session secret, supported local model provider, database URL, and trusted CORS origins.",
+    )
     args = parser.parse_args()
     report = validate_env(args.env_file, strict=args.strict)
     print(json.dumps(report, indent=2))
