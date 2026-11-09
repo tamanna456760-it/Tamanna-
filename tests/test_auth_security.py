@@ -567,3 +567,35 @@ def test_expired_database_session_is_rejected_even_with_valid_signature(monkeypa
         )
 
     assert auth.current_user(token) is None
+
+def test_cross_site_origin_cannot_mutate_profile_or_revoke_session(monkeypatch, tmp_path):
+    from fastapi import FastAPI
+
+    user_id = _create_auth_test_user(monkeypatch, tmp_path, "csrf-origin.sqlite3")
+    app = FastAPI()
+    app.include_router(auth.router)
+    token = auth.issue_session(user_id)
+    client = TestClient(app)
+    client.cookies.set(auth.COOKIE, token)
+
+    denied_profile = client.patch(
+        "/api/auth/profile",
+        json={"name": "Cross-site Change"},
+        headers={"Origin": "https://attacker.invalid"},
+    )
+    assert denied_profile.status_code == 403
+    assert client.get("/api/auth/me").json()["user"]["name"] == "Session User"
+
+    denied_logout = client.post(
+        "/api/auth/logout",
+        headers={"Origin": "https://attacker.invalid"},
+    )
+    assert denied_logout.status_code == 403
+    assert auth.current_user(token)["id"] == user_id
+
+
+def test_missing_origin_is_accepted_for_non_browser_client_compatibility(monkeypatch):
+    # Native clients and server-to-server callers may omit Origin; browser
+    # cross-site requests still carry an untrusted Origin and are rejected.
+    request = SimpleNamespace(headers={})
+    assert auth.check_origin(request) is None
