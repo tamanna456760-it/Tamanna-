@@ -630,3 +630,40 @@ def test_session_cleanup_removes_expired_rows_when_issuing_new_session(monkeypat
             "SELECT COUNT(*) FROM sessions WHERE token_hash=?",
             ("expired-placeholder-hash",),
         ).fetchone()[0] == 0
+
+def test_signup_duplicate_email_is_case_insensitive_and_does_not_create_second_account(monkeypatch, tmp_path):
+    from fastapi import Response
+    from tamanna_ai.authentication.router import Signup, signup
+
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "duplicate-signup.sqlite3")
+    auth.init_db()
+
+    def request():
+        return SimpleNamespace(
+            client=SimpleNamespace(host="198.51.100.91"),
+            headers={},
+        )
+
+    created = signup(
+        Signup(email="Member@Example.Test", name="Member", password="correct horse battery"),
+        request=request(),
+        response=Response(),
+    )
+    assert created["user"]["email"] == "member@example.test"
+
+    with pytest.raises(Exception) as exc:
+        signup(
+            Signup(email="member@example.test", name="Another", password="another correct password"),
+            request=request(),
+            response=Response(),
+        )
+    assert getattr(exc.value, "status_code", None) == 409
+    with auth.db() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM users WHERE email=? COLLATE NOCASE",
+            ("member@example.test",),
+        ).fetchone()[0] == 1
