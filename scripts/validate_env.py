@@ -40,11 +40,28 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
         provider == "mock" and environment == "test"
     )
 
+    cors_origins = [origin.strip() for origin in value("TAMANNA_CORS_ORIGINS").split(",") if origin.strip()]
+    cookie_secure = value("TAMANNA_COOKIE_SECURE", "1").lower() not in {"0", "false", "no"}
+    production_transport_secure = (
+        environment != "production"
+        or (
+            cookie_secure
+            and bool(cors_origins)
+            and all(
+                urlparse(origin).scheme == "https"
+                and bool(urlparse(origin).netloc)
+                and "*" not in origin
+                for origin in cors_origins
+            )
+        )
+    )
+
     checks = {
         "session_secret": len(value("TAMANNA_SESSION_SECRET")) >= 32,
         "model_provider": provider_configured,
         "database_url": bool(value("TAMANNA_DATABASE_URL", "sqlite:///data/tamanna.sqlite3")),
-        "cors_origins": bool(value("TAMANNA_CORS_ORIGINS")),
+        "cors_origins": bool(cors_origins),
+        "production_transport_security": production_transport_secure,
     }
     missing = [name for name, ok in checks.items() if not ok]
     warnings = []
@@ -59,8 +76,15 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
         warnings.append("Set TAMANNA_DATABASE_URL or use the built-in SQLite default.")
     if not checks["cors_origins"]:
         warnings.append("Set TAMANNA_CORS_ORIGINS to the exact trusted frontend origins.")
+    if not checks["production_transport_security"]:
+        warnings.append(
+            "Production requires TAMANNA_COOKIE_SECURE=1 and HTTPS-only, exact CORS origins."
+        )
 
-    blocking = ["session_secret", "model_provider", "database_url", "cors_origins"] if strict else []
+    blocking = [
+        "session_secret", "model_provider", "database_url",
+        "cors_origins", "production_transport_security",
+    ] if strict else []
     failed = any(not checks[name] for name in blocking)
     return {
         "status": "FAIL" if failed else ("WARNING" if missing else "PASS"),
