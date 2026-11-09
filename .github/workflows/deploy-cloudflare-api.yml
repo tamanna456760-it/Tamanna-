@@ -2,12 +2,19 @@ name: Deploy Tamanna Python API to Cloudflare
 
 on:
   workflow_dispatch:
+    inputs:
+      confirm_legacy_gemini_api:
+        description: "Explicitly authorize deployment of the separate hosted-Gemini prototype (not the local-only production app)."
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   deploy:
+    if: ${{ inputs.confirm_legacy_gemini_api == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
