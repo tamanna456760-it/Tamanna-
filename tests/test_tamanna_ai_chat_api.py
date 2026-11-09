@@ -393,6 +393,8 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(raised.exception.status_code, 403)
 
     async def test_model_status_does_not_expose_provider_exception_details(self):
+        from tamanna_ai.integrations.provider import ModelProviderError
+
         class BrokenProvider:
             name = "ollama"
             async def list_models(self):
