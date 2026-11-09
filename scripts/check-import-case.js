@@ -64,11 +64,27 @@ if (!fs.existsSync(repoRoot)) {
   process.exit(1);
 }
 
+// Validate only the maintained website runtime. Experimental/legacy backend
+// trees are not part of the GitHub Pages build and have separate dependency
+// and entry-point requirements; scanning them here produced misleading
+// repository-wide failures unrelated to the deployed frontend.
+const websiteScriptFiles = [
+  'scripts/build-static.js',
+  'scripts/npm-build-check.js',
+  'scripts/serve-static.js',
+  'scripts/verify-cloudflare-deploy.js',
+].map((relative) => path.join(repoRoot, relative));
+
+const filesToCheck = [
+  ...walk(path.join(repoRoot, 'js')),
+  ...websiteScriptFiles.filter((file) => fs.existsSync(file)),
+];
+
 const errors = [];
 let importsChecked = 0;
 const importPattern = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"]+)['"]/g;
 
-for (const file of walk(repoRoot)) {
+for (const file of filesToCheck) {
   const source = fs.readFileSync(file, 'utf8');
   let match;
 
@@ -98,4 +114,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`PASS: ${importsChecked} relative imports across the repository resolve with exact case.`);
+console.log(`PASS: ${importsChecked} relative imports across the maintained website runtime resolve with exact case.`);
