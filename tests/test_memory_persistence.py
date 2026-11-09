@@ -18,6 +18,14 @@ class PersistentMemoryTests(unittest.TestCase):
         self.db.engine.dispose()
         self.temp_dir.cleanup()
 
+
+    def test_memory_creation_requires_an_authenticated_owner(self):
+        with self.assertRaisesRegex(ValueError, "user_id is required"):
+            self.db.add_memory("orphaned private memory", user_id=None)
+
+        self.assertEqual(self.db.list_memories(user_id=self.user_a), [])
+        self.assertEqual(self.db.list_memories(user_id=self.user_b), [])
+
     def test_memories_are_isolated_by_user(self):
         self.db.add_memory("A private preference", user_id=self.user_a)
         self.db.add_memory("B private preference", user_id=self.user_b)
