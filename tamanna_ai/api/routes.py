@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import unicodedata
 import uuid
 from pathlib import Path
 
@@ -410,7 +411,13 @@ async def import_knowledge(
         or "\\" in filename
         or ":" in filename
         or filename in {".", ".."}
-        or any(ord(char) < 32 for char in filename)
+        or filename.endswith((".", " "))
+        or Path(filename).stem.upper() in {
+            "CON", "PRN", "AUX", "NUL",
+            *(f"COM{number}" for number in range(1, 10)),
+            *(f"LPT{number}" for number in range(1, 10)),
+        }
+        or any(unicodedata.category(char) == "Cc" for char in filename)
     ):
         raise HTTPException(status_code=422, detail="Filename must be a plain name without path separators or control characters.")
     suffix = Path(filename).suffix.lower()
