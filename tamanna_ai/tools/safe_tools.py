@@ -132,7 +132,8 @@ def _sanitize_search_text(value: str, limit: int) -> str:
         parser.close()
         text = " ".join(parser.parts)
     except Exception:
-        text = value
+        # Fail closed: never return unsanitized provider markup on parser errors.
+        text = ""
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
     return " ".join(text.split())[:limit]
 
@@ -166,11 +167,17 @@ def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
             continue
         try:
             parsed_url = urlsplit(url)
+            hostname = parsed_url.hostname
+            # Accessing .port validates its syntax and range (1..65535).
+            port = parsed_url.port
             valid_url = (
                 parsed_url.scheme.lower() in {"http", "https"}
-                and bool(parsed_url.hostname)
+                and bool(hostname)
+                and not any(character.isspace() for character in hostname)
                 and parsed_url.username is None
                 and parsed_url.password is None
+                and not parsed_url.netloc.endswith(":")
+                and (port is None or 1 <= port <= 65535)
             )
         except ValueError:
             valid_url = False
