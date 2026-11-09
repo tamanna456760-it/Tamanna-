@@ -52,7 +52,7 @@ def _with_test_request(route):
 for _route_name in (
     "pull_model", "select_model", "model_benchmark", "chat",
     "delete_conversation", "delete_knowledge", "import_knowledge",
-    "create_memory", "update_memory", "delete_memory",
+    "create_memory", "update_memory", "delete_memory", "reindex_knowledge",
 ):
     globals()[_route_name] = _with_test_request(globals()[_route_name])
 
