@@ -537,6 +537,30 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
         delete.assert_called_once_with(31, user_id=6)
         self.assertTrue(result["ok"])
 
+
+    async def test_get_conversation_hides_other_users_conversation(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 8, "email": "eight@example.test", "name": "Eight"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=8), patch("tamanna_ai.api.routes.database.load_history", return_value=[]) as load:
+            with self.assertRaises(HTTPException) as raised:
+                await get_conversation("someone-elses-thread", token="session")
+        self.assertEqual(raised.exception.status_code, 404)
+        load.assert_called_once_with(
+            conversation_id="someone-elses-thread", user_id=8, limit_pairs=100
+        )
+
+    async def test_update_memory_hides_memory_owned_by_another_user(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 8, "email": "eight@example.test", "name": "Eight"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=8), patch("tamanna_ai.api.routes.database.update_memory", return_value=False) as update:
+            with self.assertRaises(HTTPException) as raised:
+                await update_memory(31, MemoryRequest(content="Attempted overwrite"), token="session")
+        self.assertEqual(raised.exception.status_code, 404)
+        update.assert_called_once_with(31, "Attempted overwrite", user_id=8)
+
+    async def test_delete_memory_hides_memory_owned_by_another_user(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 8, "email": "eight@example.test", "name": "Eight"}), patch("tamanna_ai.api.routes.database.ensure_user", return_value=8), patch("tamanna_ai.api.routes.database.delete_memory", return_value=False) as delete:
+            with self.assertRaises(HTTPException) as raised:
+                await delete_memory(31, token="session")
+        self.assertEqual(raised.exception.status_code, 404)
+        delete.assert_called_once_with(31, user_id=8)
+
     async def test_blank_prompt_is_rejected(self):
         with self.assertRaises(HTTPException) as raised:
             await chat(ChatRequest(prompt="   "))
