@@ -67,8 +67,8 @@ for (const directory of ['css', 'js', 'assets', 'static']) {
 // GitHub project Pages is hosted below /<repository>/, unlike a custom domain.
 // Keep the normal root paths for Cloudflare, but prefix static paths for Pages.
 const rawBasePath = (process.env.GITHUB_PAGES_BASE_PATH || '').trim();
-const basePath = rawBasePath ? `/${rawBasePath.replace(/^\\/+|\\/+$/g, '')}` : '';
-if (basePath && !/^\\/[A-Za-z0-9._-]+$/.test(basePath)) {
+const basePath = rawBasePath ? `/${rawBasePath.replace(/^\/+|\/+$/g, '')}` : '';
+if (basePath && !/^\/[A-Za-z0-9._-]+$/.test(basePath)) {
   fail('GITHUB_PAGES_BASE_PATH must be one safe repository path segment, e.g. /Tamanna-.');
 }
 if (basePath) {
@@ -89,7 +89,7 @@ if (basePath) {
   const manifestPath = path.join(output, 'assets', 'site.webmanifest');
   if (fs.existsSync(manifestPath)) {
     let manifest = fs.readFileSync(manifestPath, 'utf8');
-    manifest = manifest.replace(/"start_url"\\s*:\\s*"\\/"/, `"start_url": "${basePath}/"`);
+    manifest = manifest.replace(/"start_url"\s*:\s*"\/"/, `"start_url": "${basePath}/"`);
     fs.writeFileSync(manifestPath, manifest);
   }
 }
