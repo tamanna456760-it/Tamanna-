@@ -1,4 +1,4 @@
-name: Repository Import Path Case Validation
+name: Frontend Import Path Validation
 
 on:
   push:
@@ -38,5 +38,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Check relative import paths and exact case across repository
+      - name: Check relative imports in maintained website runtime
         run: node scripts/check-import-case.js
