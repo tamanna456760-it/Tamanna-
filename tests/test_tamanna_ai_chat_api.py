@@ -43,7 +43,8 @@ def _with_test_request(route):
             kwargs["request"] = SimpleNamespace(headers={})
         if "token" in inspect.signature(route).parameters and "token" not in kwargs:
             kwargs["token"] = None
-        return await route(*args, **kwargs)
+        with patch("tamanna_ai.api.routes.rate_limit_user_action"):
+            return await route(*args, **kwargs)
 
     return invoke
 
