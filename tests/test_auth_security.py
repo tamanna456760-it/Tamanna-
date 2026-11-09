@@ -813,3 +813,45 @@ def test_same_site_fetch_metadata_with_allowlisted_origin_is_allowed(monkeypatch
         "origin": "https://www.bd-king-r7.com",
     })
     assert auth.check_origin(request) is None
+
+
+def test_every_admin_read_route_rejects_regular_authenticated_user(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "member@example.test", "id": 99,
+    })
+    monkeypatch.setenv("TAMANNA_ADMIN_EMAIL", "admin@example.test")
+    client = TestClient(app)
+
+    for path in sorted(access_control.ADMIN_READ_ROUTES):
+        async def endpoint():
+            return {"ok": True}
+
+        app.add_api_route(path, endpoint, methods=["GET"])
+        response = client.get(
+            path,
+            cookies={auth.COOKIE: "test-session"},
+        )
+        assert response.status_code == 403, (path, response.status_code)
+
+
+def test_every_admin_read_route_fails_closed_without_admin_configuration(monkeypatch):
+    app = FastAPI()
+    app.add_middleware(access_control.TamannaAccessControl)
+    monkeypatch.setattr(access_control, "current_user", lambda token: {
+        "email": "admin@example.test", "id": 100,
+    })
+    monkeypatch.delenv("TAMANNA_ADMIN_EMAIL", raising=False)
+    client = TestClient(app)
+
+    for path in sorted(access_control.ADMIN_READ_ROUTES):
+        async def endpoint():
+            return {"ok": True}
+
+        app.add_api_route(path, endpoint, methods=["GET"])
+        response = client.get(
+            path,
+            cookies={auth.COOKIE: "test-session"},
+        )
+        assert response.status_code == 503, (path, response.status_code)
