@@ -4,20 +4,11 @@ const WebSocket = require('ws');
 const cors = require('cors');
 const http = require('http');
 const url = require('url');
-const Groq = require('groq-sdk');
 
 // ---------- Configuration ----------
 const PORT = process.env.PORT || 3000;
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
-// ---------- AI Setup ----------
-let groq = null;
-if (GROQ_API_KEY) {
-    groq = new Groq({ apiKey: GROQ_API_KEY });
-    console.log('[AI] Groq client initialized');
-} else {
-    console.log('[AI] No API key – running in echo mode');
-}
+// External model providers are disabled; a tested local runtime is not yet configured.
+console.log('[AI] Local-only mode; inference runtime not configured');
 
 // ---------- Express Setup ----------
 const app = express();
@@ -68,36 +59,20 @@ wsServer.on('connection', (socket, request) => {
 });
 
 async function generateReply(userMessage) {
-    if (groq && userMessage.toLowerCase().startsWith('/ai ')) {
-        const query = userMessage.slice(4);
-        try {
-            const completion = await groq.chat.completions.create({
-                messages: [
-                    { role: 'system', content: 'You are Tamanna, a helpful AI assistant. Keep answers short and friendly.' },
-                    { role: 'user', content: query }
-                ],
-                model: 'llama3-70b-8192',
-                temperature: 0.7,
-                max_tokens: 150
-            });
-            return completion.choices[0]?.message?.content || 'Sorry, no reply.';
-        } catch (err) {
-            console.error('Groq API error:', err);
-            return 'AI service temporarily unavailable.';
-        }
-    }
-
     const cmd = userMessage.toLowerCase().trim();
     if (cmd === '/help') {
-        return `Available commands:\n/help – Show help\n/ai <question> – Ask AI\n/echo <text> – Echo\n/server – Server info`;
+        return `Available commands:\n/help – Show help\n/ai <question> – Local AI (currently unavailable)\n/echo <text> – Echo\n/server – Server info`;
     }
     if (cmd === '/server') {
-        return `Tamanna Server v1.0\nActive clients: ${clients.size}\nAI mode: ${groq ? 'enabled' : 'disabled'}`;
+        return `Tamanna Server v1.0\nActive clients: ${clients.size}\nAI mode: local runtime not configured; external providers disabled`;
+    }
+    if (cmd.startsWith('/ai ')) {
+        return 'Local AI is not configured yet. External model APIs are disabled; connect and test a local model or knowledge database first.';
     }
     if (cmd.startsWith('/echo ')) {
         return `Echo: ${userMessage.slice(6)}`;
     }
-    return `🤖 Tamanna: You said “${userMessage}” – try /ai your question!`;
+    return `🤖 Tamanna: You said “${userMessage}” – try /help for available commands.`;
 }
 
 const server = http.createServer(app);
@@ -117,7 +92,7 @@ app.get('/api/status', (req, res) => {
         server: 'Tamanna Server',
         status: 'running',
         clients: clients.size,
-        aiEnabled: !!groq,
+        aiEnabled: false,\n        aiMode: 'local-runtime-not-configured',\n        externalProviders: 'disabled',
         timestamp: new Date().toISOString()
     });
 });
@@ -128,7 +103,7 @@ server.listen(PORT, () => {
 ║      🚀 Tamanna Server Started       ║
 ║   HTTP  : http://localhost:${PORT}     ║
 ║   WS    : ws://localhost:${PORT}/ws    ║
-║   AI    : ${groq ? '✅ enabled' : '❌ disabled'}
+║   AI    : ${'local runtime not configured'}
 ╚══════════════════════════════════════╝
     `);
 });
