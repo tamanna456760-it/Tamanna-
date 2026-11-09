@@ -37,3 +37,27 @@ def test_auth_rate_limit_separates_actions_and_ips(tmp_path, monkeypatch):
 
     auth.rate_limit_auth(first_ip, "signup")
     auth.rate_limit_auth(second_ip, "login")
+
+
+
+def test_authenticated_action_rate_limit_is_per_account_and_persistent(tmp_path, monkeypatch):
+    monkeypatch.setenv("TAMANNA_SESSION_SECRET", "test-only-session-secret-which-is-long-enough")
+    monkeypatch.setattr(auth, "DB", tmp_path / "auth.sqlite3")
+    auth.init_db()
+
+    for _ in range(30):
+        auth.rate_limit_user_action(42, "chat", limit=30, window_seconds=60)
+
+    with pytest.raises(HTTPException) as exc:
+        auth.rate_limit_user_action(42, "chat", limit=30, window_seconds=60)
+    assert exc.value.status_code == 429
+
+    # Another account has an independent quota.
+    auth.rate_limit_user_action(43, "chat", limit=30, window_seconds=60)
+
+    with auth.db() as connection:
+        rows = connection.execute(
+            "SELECT ip_hash, action FROM auth_attempts WHERE action='chat'"
+        ).fetchall()
+    assert len(rows) == 31
+    assert all(str(42) not in row["ip_hash"] for row in rows)
