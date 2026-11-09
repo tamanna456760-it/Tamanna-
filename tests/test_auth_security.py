@@ -667,3 +667,45 @@ def test_signup_duplicate_email_is_case_insensitive_and_does_not_create_second_a
             "SELECT COUNT(*) FROM users WHERE email=? COLLATE NOCASE",
             ("member@example.test",),
         ).fetchone()[0] == 1
+
+def test_concurrent_duplicate_signup_creates_exactly_one_account(monkeypatch, tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from fastapi import Response
+    from tamanna_ai.authentication.router import Signup, signup
+
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-only-session-secret-do-not-use-in-production-123456",
+    )
+    monkeypatch.setattr(auth, "DB", tmp_path / "concurrent-signup.sqlite3")
+    auth.init_db()
+
+    def attempt(name):
+        request = SimpleNamespace(
+            client=SimpleNamespace(host="198.51.100.92"),
+            headers={},
+        )
+        try:
+            signup(
+                Signup(
+                    email="race@example.test",
+                    name=name,
+                    password="correct horse battery",
+                ),
+                request=request,
+                response=Response(),
+            )
+            return "created"
+        except Exception as exc:
+            return getattr(exc, "status_code", None)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(attempt, ("First", "Second")))
+
+    assert results.count("created") == 1
+    assert results.count(409) == 1
+    with auth.db() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM users WHERE email=? COLLATE NOCASE",
+            ("race@example.test",),
+        ).fetchone()[0] == 1
