@@ -2,20 +2,23 @@
   <img src="assets/tamanna-logo.svg" alt="TI Tamanna AI Logo" width="280">
 </p>
 
+<div align="center">
+
 # Tamanna AI
 
 **Owner:** HM INSAN ALI
 
-> AI chat application with a separate administrator workspace. The static interface can be opened without live APIs; live account data, privileged actions and AI responses require their respective backend services.
+**AI chat application with a separate administrator workspace.**
 
-## Open Tamanna AI
+[🌐 Open Tamanna AI](https://tamanna456760-it.github.io/Tamanna-/)
 
-**Live GitHub Pages preview links**
+[🛡️ Open Tamanna Admin](https://tamanna456760-it.github.io/Tamanna-/admin/)
 
-- **[🚀 Open Tamanna AI](https://tamanna456760-it.github.io/Tamanna-/)**
-- **[🛡️ Open Tamanna Admin](https://tamanna456760-it.github.io/Tamanna-/admin/)**
+[Source code](https://github.com/tamanna456760-it/Tamanna-) · [GitHub Actions](https://github.com/tamanna456760-it/Tamanna-/actions)
 
-These GitHub Pages URLs are the project-site preview. The custom domain `www.bd-king-r7.com` can be used after its domain and DNS are configured.
+</div>
+
+> The GitHub Pages links above open the static project preview. Live account data, privileged actions and AI responses require their respective backend services. The custom domain `www.bd-king-r7.com` can be used after its domain and DNS are configured.
 
 ## Project dashboard
 
