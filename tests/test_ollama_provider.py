@@ -179,6 +179,19 @@ class ProviderSelectionTests(unittest.TestCase):
         self.assertIsInstance(provider, OllamaProvider)
         self.assertEqual(provider.name, "ollama")
 
+    def test_hosted_model_providers_are_rejected(self):
+        import os
+        from unittest.mock import patch
+        from tamanna_ai.integrations.provider import ModelConfigurationError, get_model_provider
+
+        for provider_name in ("openai", "gemini", "groq", "anthropic"):
+            with self.subTest(provider=provider_name), patch.dict(os.environ, {
+                "TAMANNA_MODEL_PROVIDER": provider_name,
+                "TAMANNA_ENV": "production",
+            }):
+                with self.assertRaises(ModelConfigurationError):
+                    get_model_provider()
+
     def test_mock_provider_is_test_only(self):
         import os
         from unittest.mock import patch
