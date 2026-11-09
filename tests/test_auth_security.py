@@ -897,7 +897,8 @@ def test_security_headers_are_present_and_hsts_is_https_only():
     async def headers():
         return {"ok": True}
 
-    https_response = TestClient(app, base_url="https://testserver").get("/headers")
+    https_client = TestClient(app, base_url="https://testserver")
+    https_response = https_client.get("/headers")
     assert https_response.headers["x-content-type-options"] == "nosniff"
     assert https_response.headers["x-frame-options"] == "DENY"
     assert https_response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
@@ -908,6 +909,7 @@ def test_security_headers_are_present_and_hsts_is_https_only():
         "max-age=31536000; includeSubDomains"
     )
 
-    http_response = TestClient(app).get("/headers", base_url="http://testserver")
+    http_client = TestClient(app, base_url="http://testserver")
+    http_response = http_client.get("/headers")
     assert "strict-transport-security" not in http_response.headers
     assert http_response.headers["x-content-type-options"] == "nosniff"
