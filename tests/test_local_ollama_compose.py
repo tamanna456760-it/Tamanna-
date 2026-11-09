@@ -2,6 +2,8 @@ from pathlib import Path
 
 import yaml
 
+from deploy.validate_deployment import validate_deployment
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,3 +33,10 @@ def test_development_compose_uses_private_persistent_ollama_service():
     assert ollama["image"] == "ollama/ollama:latest"
     assert ollama["volumes"] == ["tamanna_ollama_data:/root/.ollama"]
     assert "ports" not in ollama
+
+def test_deployment_preflight_accepts_private_ollama_compose():
+    report = validate_deployment(
+        ROOT / "deploy" / "docker-compose.yml",
+        ROOT / "deploy" / "nginx" / "tamanna-https.conf",
+    )
+    assert report["status"] == "PASS", report["findings"]
