@@ -10,7 +10,7 @@ from fastapi import APIRouter, Cookie, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from tamanna_ai.authentication.router import COOKIE, check_origin, require_user
+from tamanna_ai.authentication.router import COOKIE, check_origin, require_user, rate_limit_user_action
 from tamanna_ai.knowledge.vector_store import (
     EmbeddingError,
     OllamaEmbeddingProvider,
@@ -597,6 +597,7 @@ async def chat(payload: ChatRequest, request: Request, token: str | None = Cooki
     if not prompt:
         raise HTTPException(status_code=422, detail="Prompt cannot be blank.")
     user = require_user(token)
+    rate_limit_user_action(user["id"], "chat", limit=30, window_seconds=60)
     persistent_user_id = database.ensure_user(user["email"], user.get("name", ""))
     conversation_id = payload.conversation_id or uuid.uuid4().hex
     if len(conversation_id) > 64:
