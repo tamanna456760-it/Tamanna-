@@ -144,3 +144,28 @@ def test_search_response_reader_parses_bounded_json():
     assert asyncio.run(safe_tools._read_limited_json(FakeResponse())) == {
         "results": [{"title": "safe"}]
     }
+
+
+def test_execute_tool_audit_log_does_not_store_raw_error_details(tmp_path, monkeypatch):
+    import asyncio
+    import json
+
+    log_path = tmp_path / "tool_calls.jsonl"
+    monkeypatch.setattr(safe_tools, "LOG_PATH", log_path)
+
+    async def fail_with_sensitive_detail(query):
+        raise safe_tools.ToolExecutionError("provider echoed private-query-and-token")
+
+    monkeypatch.setattr(safe_tools, "web_search", fail_with_sensitive_detail)
+    with pytest.raises(safe_tools.ToolExecutionError):
+        asyncio.run(safe_tools.execute_tool(
+            "web_search",
+            {"query": "private-query-and-token"},
+        ))
+
+    raw = log_path.read_text(encoding="utf-8")
+    record = json.loads(raw)
+    assert record["status"] == "error"
+    assert record["error"] == "ToolExecutionError"
+    assert "provider echoed private-query-and-token" not in raw
+    assert "private-query-and-token" not in raw
