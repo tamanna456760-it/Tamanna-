@@ -1,6 +1,7 @@
 """Allow-listed, read-only tools for Tamanna AI."""
 from __future__ import annotations
 import json
+import ipaddress
 import re
 from html.parser import HTMLParser
 import os
@@ -170,10 +171,29 @@ def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
             hostname = parsed_url.hostname
             # Accessing .port validates its syntax and range (1..65535).
             port = parsed_url.port
+            host_is_public = False
+            if hostname:
+                try:
+                    address = ipaddress.ip_address(hostname)
+                    host_is_public = address.is_global
+                except ValueError:
+                    try:
+                        ascii_host = hostname.encode("idna").decode("ascii").lower()
+                        labels = ascii_host.rstrip(".").split(".")
+                        host_is_public = (
+                            ascii_host not in {"localhost", "localhost.localdomain"}
+                            and not ascii_host.endswith(".local")
+                            and all(
+                                label and len(label) <= 63
+                                and re.fullmatch(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", label)
+                                for label in labels
+                            )
+                        )
+                    except UnicodeError:
+                        host_is_public = False
             valid_url = (
                 parsed_url.scheme.lower() in {"http", "https"}
-                and bool(hostname)
-                and not any(character.isspace() for character in hostname)
+                and host_is_public
                 and parsed_url.username is None
                 and parsed_url.password is None
                 and not parsed_url.netloc.endswith(":")
