@@ -71,14 +71,14 @@ def _chatgpt_export_records(data: Any) -> list[tuple[str, str]]:
                 author = message.get("author") or {}
                 role = author.get("role", "unknown") if isinstance(author, dict) else "unknown"
                 text = _plain_text(message.get("content"))
-                if role in {"user", "assistant"} and text.strip():
+                if isinstance(role, str) and role in {"user", "assistant"} and text.strip():
                     messages.append(f"{role}: {text.strip()}")
         if not messages and isinstance(conversation.get("messages"), list):
             for message in conversation["messages"]:
                 if isinstance(message, dict):
                     role = message.get("role", "unknown")
                     text = _plain_text(message.get("content") or message.get("text"))
-                    if role in {"user", "assistant"} and text.strip():
+                    if isinstance(role, str) and role in {"user", "assistant"} and text.strip():
                         messages.append(f"{role}: {text.strip()}")
         if messages:
             records.append((title, "\n\n".join(messages)))
