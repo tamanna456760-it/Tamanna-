@@ -45,6 +45,20 @@ class ValidateEnvTests(unittest.TestCase):
         self.assertEqual(report["status"], "FAIL")
         self.assertIn("session_secret", report["missing"])
 
+    def test_strict_mode_rejects_predictable_repeated_session_secret(self):
+        values = {
+            "TAMANNA_ENV": "production",
+            "TAMANNA_MODEL_PROVIDER": "ollama",
+            "TAMANNA_OLLAMA_URL": "http://127.0.0.1:11434",
+            "TAMANNA_OLLAMA_MODEL": "qwen2.5:7b",
+            "TAMANNA_SESSION_SECRET": "s" * 48,
+            "TAMANNA_CORS_ORIGINS": "https://www.bd-king-r7.com",
+        }
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            report = validate_env(self.write_env(directory, values), strict=True)
+        self.assertEqual(report["status"], "FAIL")
+        self.assertIn("session_secret", report["missing"])
+
     def test_strict_mode_requires_session_secret(self):
         values = {
             "TAMANNA_MODEL_PROVIDER": "ollama",
