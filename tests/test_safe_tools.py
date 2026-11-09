@@ -376,3 +376,24 @@ def test_execute_tool_returns_sanitized_search_results(tmp_path, monkeypatch):
     assert item["title"] == "Trusted result"
     assert item["content"] == "Useful text"
     assert "<" not in item["title"] + item["content"]
+
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://example.com/path\nHeader: injected",
+        "https://example.com/path with spaces",
+        "https://example.com\\@evil.example/path",
+        "https://example.com/" + ("x" * 2048),
+    ],
+)
+def test_search_result_extractor_drops_ambiguous_or_oversized_urls(url):
+    payload = {"results": [{"title": "safe", "url": url}]}
+    assert safe_tools._extract_search_results(payload, "tavily") == []
+
+
+def test_search_result_extractor_preserves_valid_percent_encoded_url():
+    url = "https://example.com/search?q=hello%20world"
+    payload = {"results": [{"title": "safe", "url": url}]}
+    assert safe_tools._extract_search_results(payload, "tavily")[0]["url"] == url
