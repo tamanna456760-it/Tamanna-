@@ -129,7 +129,7 @@ async def model_benchmark(
         except ModelConfigurationError as exc:
             raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
         except ModelProviderError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+            raise HTTPException(status_code=503, detail="Local model runtime is unavailable.") from exc
     database.save_benchmark_run(model=str(result.get("model") or selected), result=result)
     return {"ok": True, "benchmark": result, "scope": "single_local_inference"}
 
@@ -171,7 +171,7 @@ async def model_resources(
     except ModelConfigurationError as exc:
         raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
     except ModelProviderError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(status_code=503, detail="Local model runtime is unavailable.") from exc
     return {
         "ok": True, "models": models, "count": len(models),
         "installed_models": installed, "host": host,
@@ -301,7 +301,7 @@ async def pull_model(
                 yield json.dumps(event, ensure_ascii=False) + "\n"
             yield json.dumps({"status": "success", "done": True}, ensure_ascii=False) + "\n"
         except (ModelProviderError, ValueError) as exc:
-            yield json.dumps({"status": "error", "error": str(exc)[:300]}, ensure_ascii=False) + "\n"
+            yield json.dumps({"status": "error", "error": "Local model operation failed."}, ensure_ascii=False) + "\n"
 
     return StreamingResponse(
         progress_events(),
@@ -331,7 +331,7 @@ async def model_preflight(
     except ModelConfigurationError as exc:
         raise HTTPException(status_code=503, detail="Local model provider is unavailable.") from exc
     except ModelProviderError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(status_code=503, detail="Local model runtime is unavailable.") from exc
 
     size = model.get("size_bytes")
     memory = host.get("memory", {})
@@ -682,7 +682,7 @@ async def chat(payload: ChatRequest, request: Request, token: str | None = Cooki
             status_code=503,
             detail={
                 "message": "Tamanna AI local model is unavailable.",
-                "reason": str(exc),
+                "reason": "provider_unavailable",
             },
         ) from exc
 
