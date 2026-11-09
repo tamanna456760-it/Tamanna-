@@ -2,6 +2,8 @@
 from __future__ import annotations
 import json
 import os
+import math
+from urllib.parse import urlsplit
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -114,7 +116,38 @@ def _extract_search_results(data: Any, provider: str) -> list[dict[str, Any]]:
         raise ToolConfigurationError("Unsupported search provider")
     if not isinstance(results, list) or any(not isinstance(item, dict) for item in results):
         raise ToolExecutionError("Search provider returned an unexpected response shape")
-    return results[:5]
+
+    safe_results: list[dict[str, Any]] = []
+    for item in results[:5]:
+        url = item.get("url")
+        title = item.get("title")
+        if not isinstance(url, str) or not isinstance(title, str):
+            continue
+        try:
+            parsed_url = urlsplit(url)
+            valid_url = (
+                parsed_url.scheme.lower() in {"http", "https"}
+                and bool(parsed_url.hostname)
+                and parsed_url.username is None
+                and parsed_url.password is None
+            )
+        except ValueError:
+            valid_url = False
+        if not valid_url:
+            continue
+
+        safe_item: dict[str, Any] = {
+            "title": title[:300],
+            "url": url[:2048],
+        }
+        text_field = item.get("content", item.get("description"))
+        if isinstance(text_field, str):
+            safe_item["content"] = text_field[:4000]
+        score = item.get("score")
+        if isinstance(score, (int, float)) and not isinstance(score, bool) and math.isfinite(score):
+            safe_item["score"] = score
+        safe_results.append(safe_item)
+    return safe_results
 
 
 async def web_search(query: str) -> dict[str, Any]:
