@@ -35,14 +35,15 @@ python3 -c "import secrets; print(secrets.token_urlsafe(48))"
 
 Edit `.env` on the server only. Set a newly generated
 `TAMANNA_SESSION_SECRET` (at least 32 characters), your administrator email,
-your Gemini API key if required, and the production values:
+the production values:
 
 ```dotenv
 TAMANNA_CORS_ORIGINS=https://www.bd-king-r7.com
 TAMANNA_COOKIE_SECURE=1
 TAMANNA_SESSION_SECRET=REPLACE_WITH_GENERATED_RANDOM_SECRET
-TAMANNA_ADMIN_EMAIL=YOUR_VERIFIED_ADMIN_EMAIL
-GEMINI_API_KEY=YOUR_GEMINI_KEY
+TAMANNA_ADMIN_EMAIL=YOUR_ADMIN_EMAIL
+TAMANNA_MODEL_PROVIDER=ollama
+TAMANNA_OLLAMA_MODEL=qwen2.5:7b
 ```
 
 Do not commit or share `.env`. The current signup flow does not verify email
@@ -92,10 +93,19 @@ curl -fsS https://www.bd-king-r7.com/health
 curl -I https://www.bd-king-r7.com/
 ```
 
+After the stack is healthy, download the configured local model:
+
+```bash
+docker compose -f deploy/docker-compose.yml --env-file .env exec ollama ollama pull qwen2.5:7b
+```
+
+The model is stored in the persistent `ollama_data` volume. Ollama is reachable
+only on the private Compose network; port 11434 is not published publicly.
+
 Then open `https://www.bd-king-r7.com` in a browser and test the chat and account
 flows. A successful `/health` response proves only that the health endpoint
-responds; it does not prove Gemini credentials, every feature, or account
-security is correct.
+responds; it does not prove the local model is installed, every feature works,
+or account security is correct.
 
 ## Updates and certificate renewal
 
