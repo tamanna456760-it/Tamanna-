@@ -38,5 +38,4 @@ jobs:
       - name: Validate required settings using CI-only placeholders
         env:
           TAMANNA_SESSION_SECRET: ci-only-placeholder-session-secret-0123456789
-          GEMINI_API_KEY: ci-only-placeholder-gemini-key
         run: python scripts/validate_env.py --env-file .env.example --strict
