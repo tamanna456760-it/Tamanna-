@@ -606,6 +606,13 @@ class ChatRouteTests(unittest.IsolatedAsyncioTestCase):
                 await import_knowledge(KnowledgeImportRequest(filename="../private.md", content="text"))
         self.assertEqual(raised.exception.status_code, 422)
 
+    async def test_private_knowledge_import_rejects_windows_path_separator(self):
+        with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}), patch("tamanna_ai.api.routes.VectorKnowledgeStore") as store:
+            with self.assertRaises(HTTPException) as raised:
+                await import_knowledge(KnowledgeImportRequest(filename="..\\\\private.md", content="text"))
+        self.assertEqual(raised.exception.status_code, 422)
+        store.assert_not_called()
+
     async def test_private_knowledge_import_rejects_invalid_json(self):
         with patch("tamanna_ai.api.routes.require_user", return_value={"id": 7}):
             with self.assertRaises(HTTPException) as raised:
