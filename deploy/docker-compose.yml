@@ -21,8 +21,14 @@ services:
       TAMANNA_DATABASE_URL: sqlite:////app/data/tamanna.sqlite3
       TAMANNA_AUTH_DB: /app/data/accounts.sqlite3
       TAMANNA_MAX_REQUEST_BYTES: "1048576"
+      TAMANNA_MODEL_PROVIDER: "ollama"
+      TAMANNA_OLLAMA_URL: "http://ollama:11434"
+      TAMANNA_OLLAMA_MODEL: "qwen2.5:7b"
     volumes:
       - tamanna_data:/app/data
+    depends_on:
+      ollama:
+        condition: service_healthy
     init: true
     security_opt:
       - no-new-privileges:true
@@ -38,6 +44,27 @@ services:
       interval: 30s
       timeout: 8s
       retries: 3
+      start_period: 30s
+    networks:
+      - tamanna-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tamanna-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
       start_period: 30s
     networks:
       - tamanna-network
@@ -64,3 +91,4 @@ networks:
 
 volumes:
   tamanna_data:
+  ollama_data:
