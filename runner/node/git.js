@@ -1,5 +1,7 @@
-import simpleGit from "simple-git";
-import path from "node:path";
+"use strict";
+
+const simpleGit = require("simple-git");
+const path = require("node:path");
 
 const git = simpleGit("./project");
 
@@ -24,8 +26,7 @@ function validatePath(file) {
   }
 }
 
-export async function gitPush() {
-  // Safe default: generated code never pushes unless explicitly enabled.
+async function gitPush() {
   if (process.env.TAMANNA_ENABLE_GIT_PUSH !== "1") {
     return { pushed: false, reason: "Git push is disabled; set TAMANNA_ENABLE_GIT_PUSH=1 to opt in." };
   }
@@ -66,3 +67,5 @@ export async function gitPush() {
   await git.push("origin", "main");
   return { pushed: true, paths: changed };
 }
+
+module.exports = { gitPush, validatePath, parseAllowlist };
