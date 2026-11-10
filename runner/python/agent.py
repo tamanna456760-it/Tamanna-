@@ -38,6 +38,13 @@ def command_args(command):
         raise ValueError("Commands must be strings or argument lists")
     if not args or any(item in SHELL_OPERATORS for item in args):
         raise ValueError("Empty commands and shell operators are not allowed")
+    executable = Path(args[0]).name.lower()
+    shell_names = {"sh", "bash", "dash", "zsh", "fish", "cmd", "cmd.exe", "powershell", "pwsh"}
+    if executable in shell_names and any(
+        item.lower() in {"-c", "-lc", "-command", "/c"}
+        for item in args[1:3]
+    ):
+        raise ValueError("Shell command-string execution is not allowed")
     return args
 
 
