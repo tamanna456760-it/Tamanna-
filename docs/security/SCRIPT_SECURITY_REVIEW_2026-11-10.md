@@ -265,3 +265,23 @@ Commits:
 - `13f41bb9c3f00945fd9557f86ce046ba7be73de7` — dedicated Node runtime CI workflow.
 
 The manifest and test file were fetched back from `main` and their content SHAs verified. The CI workflow has just been added; dependency installation and test results remain pending. No local install, Telegram polling, HTTP server, or production deployment was run.
+
+
+## Firewall API hardening — 2026-11-10
+
+Reviewed `runner/node/node_server.js`. The previous `/block` and `/rules` routes accepted unauthenticated requests and trusted unvalidated request bodies. Updated the service to:
+- Require `TAMANNA_FIREWALL_ADMIN_TOKEN` for both administrative routes.
+- Compare token bytes using `crypto.timingSafeEqual` after checking equal lengths.
+- Return 503 when the admin token is not configured and 401 for unauthorized calls.
+- Validate IP addresses with Node's `net.isIP` before adding them to the block list.
+- Restrict JSON body size to 16 KB, reject invalid rules shapes, disable the Express banner, and bind the listener to loopback by default.
+- Export the app without starting a listener when imported by tests.
+
+Added a unit test for the admin token comparison and added this server to the Node CI syntax checks.
+
+Commits:
+- `d0bb2780d778e9e8b8aae91eb2e4bd0c3808b87f` — firewall API hardening.
+- `a9827993c509ffe7d83b98da3fd53e2f02a87e4d` — token comparison test.
+- Node CI workflow updated in the following commit.
+
+The service is not deployed or started. The admin token must be configured privately before administrative endpoints can be used.
