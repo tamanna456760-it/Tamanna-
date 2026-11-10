@@ -5,11 +5,26 @@
   const input = $("messageInput"), sendButton = $("sendButton"), chatBox = $("chatBox");
   const newChatButton = $("newChatButton"), conversationSelect = $("conversationSelect");
   const deleteButton = $("deleteConversationButton");
+  const micButton = $("voiceInputButton"), speakButton = $("speakLatestButton");
+  const voiceStatus = $("voiceStatus");
   if (!input || !sendButton || !chatBox) return;
 
   let conversationId = null;
   let busy = false;
   const isGitHubPagesPreview = location.hostname.endsWith(".github.io");
+  const nativeVoice = window.TamannaNativeVoice;
+  let browserRecognition = null;
+
+  window.TamannaVoice = {
+    onResult(text) {
+      input.value = [input.value.trim(), text].filter(Boolean).join(" ");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      if (voiceStatus) voiceStatus.textContent = "কথা শনাক্ত হয়েছে। পাঠাতে ↑ চাপুন।";
+      input.focus();
+    },
+    onStatus(status) { if (voiceStatus) voiceStatus.textContent = status; },
+    onError(message) { if (voiceStatus) voiceStatus.textContent = message; }
+  };
 
   if (isGitHubPagesPreview) {
     input.placeholder = "GitHub Pages Preview — backend সংযুক্ত হলে chat চালু হবে";
@@ -136,6 +151,42 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
   }
+
+  micButton?.addEventListener("click", () => {
+    if (nativeVoice?.startListening) {
+      nativeVoice.startListening(document.documentElement.lang === "bn" ? "bn-BD" : "en-US");
+      if (voiceStatus) voiceStatus.textContent = "মাইক্রোফোন প্রস্তুত করা হচ্ছে…";
+      return;
+    }
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) {
+      if (voiceStatus) voiceStatus.textContent = "এই browser-এ Speech Recognition সমর্থিত নয়। Android অ্যাপ ব্যবহার করুন।";
+      return;
+    }
+    browserRecognition?.stop();
+    browserRecognition = new Recognition();
+    browserRecognition.lang = document.documentElement.lang === "bn" ? "bn-BD" : "en-US";
+    browserRecognition.onresult = (event) => window.TamannaVoice.onResult(event.results[0][0].transcript);
+    browserRecognition.onerror = () => window.TamannaVoice.onError("কথা শনাক্ত করা যায়নি। আবার চেষ্টা করুন।");
+    browserRecognition.start();
+    if (voiceStatus) voiceStatus.textContent = "বলুন, আমি শুনছি…";
+  });
+
+  speakButton?.addEventListener("click", () => {
+    const latest = [...chatBox.querySelectorAll(".ai-message .message-text")].pop()?.textContent?.trim();
+    if (!latest) {
+      if (voiceStatus) voiceStatus.textContent = "পড়ার মতো কোনো উত্তর নেই।";
+      return;
+    }
+    if (nativeVoice?.speak) {
+      nativeVoice.speak(latest, document.documentElement.lang === "bn" ? "bn-BD" : "en-US");
+      if (voiceStatus) voiceStatus.textContent = "উত্তর পড়া হচ্ছে…";
+    } else if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(latest));
+      if (voiceStatus) voiceStatus.textContent = "উত্তর পড়া হচ্ছে…";
+    } else if (voiceStatus) voiceStatus.textContent = "এই browser-এ Text-to-Speech সমর্থিত নয়।";
+  });
 
   sendButton.addEventListener("click", sendMessage);
   newChatButton?.addEventListener("click", () => {
