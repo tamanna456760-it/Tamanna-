@@ -210,13 +210,17 @@ class Agent:
                     build_ok = False
                     break
 
-            uid = str(uuid.uuid4())
-            (self.repo_path / self.ficar).write_text(
-                f"Updated at: {now_iso()}\nUUID: {uid}\n", encoding="utf-8"
-            )
-            (self.repo_path / self.powersync).write_text(
-                f"Last run: {now_iso()} BUILD_OK={build_ok}\n", encoding="utf-8"
-            )
+            marker_paths = {self.ficar, self.powersync}
+            if self.push_changes and marker_paths.issubset(set(self.sync_paths)):
+                uid = str(uuid.uuid4())
+                (self.repo_path / self.ficar).write_text(
+                    f"Updated at: {now_iso()}\\nUUID: {uid}\\n", encoding="utf-8"
+                )
+                (self.repo_path / self.powersync).write_text(
+                    f"Last run: {now_iso()} BUILD_OK={build_ok}\\n", encoding="utf-8"
+                )
+            else:
+                self._write_log("marker file updates skipped; markers are not in the explicit sync allowlist")
 
             committed = False
             commit_sha = None
