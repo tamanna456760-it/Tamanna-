@@ -220,3 +220,28 @@ A focused review found three additional Node.js sync modules using broad Git ope
 Commits: `189cbdd13292791ea868173f53ec0120159996eb` (central Git push policy), `384d1d110c536ae57a7327a4807cb7c0e0dae706` (`github.js`), `a55a2a1896ed60df3a49dbf54a9012ee10ac4d8a` (`github-sync.js`), `4fa66e46b954e85d1e35fafc70f091bb505780c4` (`ai-sync.js`).
 
 The three files were fetched again from `main` and their content SHAs verified. GitHub Actions for the latest commit were queued/pending at review time; no test-pass claim is made. The allowlist is a path-level safeguard, not content inspection: review staged diffs before enabling any push.
+
+
+## Telegram sync module-format repair — 2026-11-10
+
+The root `package.json` declares CommonJS, but the Telegram sync call path used ES Module syntax. The following three files were converted to CommonJS while preserving the existing safe-push policy:
+
+- `runner/node/git.js`: CommonJS exports; still defaults to no push and requires `TAMANNA_ENABLE_GIT_PUSH=1`, exact `TAMANNA_SYNC_PATHS`, main branch, and origin remote.
+- `runner/node/github.js`: CommonJS wrapper that delegates to the hardened `gitPush()`.
+- `runner/node/bot.js`: CommonJS imports now point to the existing `./ai.js` local-only adapter and `./github.js`; Telegram `/sync` retains the `TAMANNA_TELEGRAM_ADMIN_IDS` sender allowlist.
+
+Commits:
+- `1a273f88a22e25ca99176e617871824c3d4acdcd` — Git module conversion.
+- `1777d4bffcc57a7b86b6941934bbed6f20fd12b7` — GitHub wrapper conversion.
+- `fd3ba391f05ba054ad1e3bac8813cfe576fd4f2a` — Telegram bot import repair.
+
+The three updated files were fetched again from `main` and their blob SHAs verified. GitHub Actions for the latest commit were queued/pending at the time of this report update; no runtime, dependency-install, or test-pass claim is made.
+
+### Remaining blockers
+
+- The `run.js` and `run..js` orchestrators still import multiple absent nested modules; they have not been changed.
+- The repo-level `package.json` currently declares no dependency list in the inspected content. Availability/version compatibility of `simple-git`, `dotenv`, and `node-telegram-bot-api` has not been verified.
+- `runner/node/git.js` targets `./project`; confirm that this directory is the intended Git checkout before enabling any push. Keep push disabled until this and the allowlisted file contents are reviewed.
+- The local AI adapter intentionally returns an unavailable error until a local model or knowledge database is configured. The Telegram bot must not be described as a functioning AI assistant yet.
+
+No secrets were added. No token, bot, local server, or Git push was executed.
