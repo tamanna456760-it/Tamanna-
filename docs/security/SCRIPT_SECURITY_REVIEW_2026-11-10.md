@@ -411,3 +411,19 @@ Commits:
 - `998b3e490d83d0853cf7948be26d5975eb866d6a` — async startup regression test.
 
 Validation remains pending: a fresh GitHub Actions run must complete npm audit, syntax checks, and tests. No Telegram bot was started and no token was accessed. The Telegram SDK migration is not considered runtime-verified until CI passes.
+
+
+## Node runtime CI follow-up — lazy Git client initialization
+
+The Node Runtime CI run `42826326462` verified:
+- Production dependency audit: passed, 0 vulnerabilities.
+- Active CommonJS entrypoint syntax checks: passed.
+- Safety tests initially failed during module import because `runner/node/git.js` eagerly initialized simple-git against a non-existent `./project` directory.
+
+Fix committed on `main` as `2843c5503c8162bb0a21077bae78d63938cddc80`:
+- Git client is now initialized only after the explicit push opt-in is enabled.
+- Default repository path resolves to the actual repository root relative to `git.js`.
+- Deployments can explicitly set `TAMANNA_PROJECT_DIR` to another existing checkout.
+- The default remains push-disabled; allowlist, main-branch, and secret-path protections remain in place.
+
+A new CI run must verify the change. The failed run remains a failure; it is not retroactively marked as passed.
