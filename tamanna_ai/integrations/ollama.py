@@ -42,7 +42,7 @@ class OllamaClient:
     async def list_models(self) -> list[str]:
         """Return installed local model names from the Ollama runtime."""
         try:
-            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0)) as client:
+            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0), trust_env=False) as client:
                 response = await client.get(f"{self.base_url}/api/tags")
                 response.raise_for_status()
         except httpx.HTTPStatusError as exc:
@@ -67,7 +67,7 @@ class OllamaClient:
     async def list_model_details(self) -> list[dict]:
         """Return installed Ollama model sizes for conservative resource guidance."""
         try:
-            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0)) as client:
+            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0), trust_env=False) as client:
                 response = await client.get(f"{self.base_url}/api/tags")
                 response.raise_for_status()
         except httpx.HTTPStatusError as exc:
@@ -98,7 +98,7 @@ class OllamaClient:
     async def list_running_models(self) -> list[dict]:
         """Return loaded model names and runtime memory footprints from Ollama."""
         try:
-            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0)) as client:
+            async with httpx.AsyncClient(timeout=min(self.timeout, 15.0), trust_env=False) as client:
                 response = await client.get(f"{self.base_url}/api/ps")
                 response.raise_for_status()
         except httpx.HTTPStatusError as exc:
@@ -131,7 +131,7 @@ class OllamaClient:
             raise ValueError("Invalid local model name")
         completed = False
         try:
-            async with httpx.AsyncClient(timeout=None) as client:
+            async with httpx.AsyncClient(timeout=None, trust_env=False) as client:
                 async with client.stream(
                     "POST",
                     f"{self.base_url}/api/pull",
@@ -202,7 +202,7 @@ class OllamaClient:
                 payload.pop("format")
             started = time.perf_counter()
             try:
-                async with httpx.AsyncClient(timeout=min(self.timeout, 60.0)) as client:
+                async with httpx.AsyncClient(timeout=min(self.timeout, 60.0), trust_env=False) as client:
                     response = await client.post(f"{self.base_url}/api/chat", json=payload)
                     response.raise_for_status()
             except httpx.HTTPStatusError as exc:
@@ -290,7 +290,7 @@ class OllamaClient:
             },
         }
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, trust_env=False) as client:
                 response = await client.post(
                     f"{self.base_url}/api/chat", json=payload
                 )
