@@ -1,55 +1,64 @@
-export async function securityScan(options = { advanced: false }) {
-    console.log("🔐 Starting Security Scan...\n");
+"use strict";
 
-    // Utility to simulate async checks
-    const delay = (ms) => new Promise(res => setTimeout(res, ms));
-
-    // Utility to print colored status
-    const status = {
-        ok: (msg) => console.log(`🟢 ${msg}`),
-        warn: (msg) => console.log(`🟡 ${msg}`),
-        fail: (msg) => console.log(`🔴 ${msg}`)
-    };
-
-    // Simulated checks
-    const checks = [
-        { name: "Firewall Status", fn: async () => Math.random() > 0.1 },
-        { name: "Port Security", fn: async () => Math.random() > 0.2 },
-        { name: "Malware Scan", fn: async () => Math.random() > 0.15 },
-        { name: "System Integrity", fn: async () => Math.random() > 0.05 },
-    ];
-
-    // Add advanced checks if enabled
-    if (options.advanced) {
-        checks.push(
-            { name: "Rootkit Detection", fn: async () => Math.random() > 0.25 },
-            { name: "Network Intrusion Analysis", fn: async () => Math.random() > 0.3 },
-            { name: "Suspicious Process Scan", fn: async () => Math.random() > 0.2 }
-        );
+// This is a runtime configuration audit, not an OS firewall or malware scanner.
+// Checks that cannot be verified from this Node process are explicitly reported
+// as "not_checked"; the module never fabricates random pass/fail results.
+function securityScan() {
+  const nodeMajor = Number(process.versions.node.split(".")[0]);
+  const checks = [
+    {
+      name: "Node.js supported runtime",
+      status: nodeMajor >= 20 ? "passed" : "failed",
+      detail: nodeMajor >= 20 ? "Node.js 20 or newer is active." : "Node.js 20 or newer is required."
+    },
+    {
+      name: "External AI providers",
+      status: "passed",
+      detail: "External model providers are disabled in this runtime."
+    },
+    {
+      name: "Automatic Git push",
+      status: process.env.TAMANNA_ENABLE_GIT_PUSH === "1" ? "review_required" : "passed",
+      detail: process.env.TAMANNA_ENABLE_GIT_PUSH === "1"
+        ? "Git push opt-in is enabled; verify the exact path allowlist before use."
+        : "Automatic Git push is disabled by default."
+    },
+    {
+      name: "Firewall admin token",
+      status: process.env.TAMANNA_FIREWALL_ADMIN_TOKEN ? "configured" : "not_configured",
+      detail: process.env.TAMANNA_FIREWALL_ADMIN_TOKEN
+        ? "A private firewall admin token is configured (value not displayed)."
+        : "No firewall admin token is configured."
+    },
+    {
+      name: "Operating-system firewall",
+      status: "not_checked",
+      detail: "This Node process does not verify host firewall rules."
+    },
+    {
+      name: "Malware and rootkit scan",
+      status: "not_checked",
+      detail: "No malware or rootkit scanner is integrated."
+    },
+    {
+      name: "Network intrusion detection",
+      status: "not_checked",
+      detail: "No host/network IDS is integrated."
     }
+  ];
 
-    const report = {
-        timestamp: new Date().toISOString(),
-        results: [],
-        passed: true
-    };
+  const failed = checks.some((item) => item.status === "failed");
+  const reviewRequired = checks.some((item) =>
+    ["review_required", "not_configured", "not_checked"].includes(item.status)
+  );
 
-    for (const check of checks) {
-        await delay(500 + Math.random() * 500); // simulate scan time
-        const result = await check.fn();
-
-        if (result) {
-            status.ok(`${check.name}: OK`);
-        } else {
-            status.fail(`${check.name}: FAILED`);
-            report.passed = false;
-        }
-
-        report.results.push({ check: check.name, passed: result });
-    }
-
-    console.log("\n📄 Scan Complete");
-    console.log(`Overall Status: ${report.passed ? "🟢 SAFE" : "🔴 ISSUES DETECTED"}`);
-
-    return report;
+  return {
+    timestamp: new Date().toISOString(),
+    scanType: "node-runtime-configuration-audit",
+    status: failed ? "failed" : reviewRequired ? "partial" : "passed",
+    passed: !failed && !reviewRequired,
+    results: checks
+  };
 }
+
+module.exports = { securityScan };
