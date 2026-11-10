@@ -8,6 +8,7 @@ const path = require("node:path");
 const { validatePath, parseAllowlist } = require("../git.js");
 const { askAI } = require("../ai.js");
 const { safeTokenEqual } = require("../node_server.js");
+const { extractMessage, generateReply } = require("../server.js");
 
 test("Git sync path policy accepts a safe exact relative path", () => {
   assert.equal(validatePath("docs/STATUS.md"), undefined);
@@ -61,4 +62,21 @@ test("firewall admin token comparison rejects missing and mismatched tokens", ()
   assert.equal(safeTokenEqual(undefined, "secret"), false);
   assert.equal(safeTokenEqual("wrong", "secret"), false);
   assert.equal(safeTokenEqual("secret", "secret"), true);
+});
+
+test("WebSocket parser accepts bounded text and structured JSON only", () => {
+  assert.deepEqual(extractMessage(Buffer.from("hello"), false), { text: "hello", json: false });
+  assert.deepEqual(
+    extractMessage(Buffer.from(JSON.stringify({ text: " hello " })), false),
+    { text: "hello", json: true }
+  );
+  assert.throws(() => extractMessage(Buffer.from(""), false), /1–4000/);
+  assert.throws(() => extractMessage(Buffer.from("x".repeat(4001)), false), /1–4000/);
+  assert.throws(() => extractMessage(Buffer.from(JSON.stringify({ text: 123 })), false), /string text field/);
+  assert.throws(() => extractMessage(Buffer.from("{bad json"), false), /Malformed/);
+  assert.throws(() => extractMessage(Buffer.from("binary"), true), /Binary messages/);
+});
+
+test("WebSocket reply never claims an unconfigured local model is running", async () => {
+  assert.match(await generateReply("/ai hello"), /Local AI is not configured/);
 });
