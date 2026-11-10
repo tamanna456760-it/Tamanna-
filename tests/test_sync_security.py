@@ -126,6 +126,31 @@ class SafeSyncTests(unittest.TestCase):
             self.assertEqual(tamanna_sync.sync_once(), 0)
             tamanna_derive_sync.main()
 
+    def test_drive_sync_state_cannot_overwrite_credentials_or_use_symlink(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            upload = root / "uploads"
+            upload.mkdir()
+            credentials = root / "credentials.json"
+            credentials.write_text("{}", encoding="utf-8")
+            state = root / "state.json"
+
+            self.assertEqual(
+                tamanna_sync.validate_state_file(state, upload, credentials),
+                state.resolve(),
+            )
+            with self.assertRaisesRegex(ValueError, "must not overwrite"):
+                tamanna_sync.validate_state_file(credentials, upload, credentials)
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                link = root / "state-link.json"
+                try:
+                    link.symlink_to(state)
+                except (OSError, NotImplementedError):
+                    self.skipTest("Symlinks are not supported on this runner")
+                tamanna_sync.validate_state_file(link, upload, credentials)
+            with self.assertRaisesRegex(ValueError, "outside the upload folder"):
+                tamanna_sync.validate_state_file(upload / "state.json", upload, credentials)
+
     def test_drive_sync_rejects_credential_uploads(self):
         for name in [
             ".env", ".env.production", "credentials.json",
