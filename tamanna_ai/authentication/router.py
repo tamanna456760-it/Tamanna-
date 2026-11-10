@@ -204,6 +204,12 @@ class Preferences(BaseModel):
 def startup():
     init_db()
 
+@router.get("/google-config")
+def google_config():
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    return {"enabled": bool(client_id), "client_id": client_id or None}
+
+
 @router.post("/signup", status_code=201)
 def signup(data: Signup, request: Request, response: Response):
     check_origin(request)
