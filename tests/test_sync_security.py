@@ -102,6 +102,15 @@ class SafeSyncTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     powerhub_agent.command_args(command)
 
+    def test_agent_refuses_dirty_worktree_before_pull(self):
+        agent = object.__new__(powerhub_agent.Agent)
+        agent.git = lambda *args, **kwargs: (0, " M app.py\\n")
+        with self.assertRaisesRegex(RuntimeError, "Working tree is not clean"):
+            agent.ensure_clean_checkout()
+
+        agent.git = lambda *args, **kwargs: (0, "")
+        self.assertIsNone(agent.ensure_clean_checkout())
+
     @patch("agent.subprocess.Popen")
     def test_agent_runs_without_a_shell(self, mocked_popen):
         mocked_popen.return_value = SimpleNamespace(
