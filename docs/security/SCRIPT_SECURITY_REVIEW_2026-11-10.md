@@ -384,3 +384,10 @@ Commits:
 - `8e237b1` — CI validation.
 
 Dependency note: the runtime still needs network-installed packages at deployment time; a dependency lockfile and vulnerability audit remain outstanding. Do not treat npm install with audit disabled as a dependency security audit.
+
+
+## WebSocket Origin allowlist strictness — 2026-11-10
+
+A follow-up review found that the WebSocket upgrade handler accepted a missing `Origin` header even when `TAMANNA_ALLOWED_ORIGINS` was configured. The handler now requires an exact allowlisted Origin whenever the list is non-empty; missing, empty, and unlisted origins are rejected. When no allowlist is configured, the existing non-browser / unrestricted-Origin behavior remains unchanged, so deployments should configure the allowlist for browser-facing use. Origin validation is not authentication and must not replace application-level authorization.
+
+Added a regression test for missing, empty, unlisted, allowed, and disabled-allowlist cases. The Node Runtime Validation workflow is responsible for running this test; its result must complete successfully before this fix is considered CI-verified.
