@@ -136,3 +136,16 @@ The current repository tree contains 59 `.yml/.yaml` files under `.github/workfl
 ### Conclusion and limits
 
 The inspected workflow YAML files do not show direct calls to the identified risky shell scripts. However, Python monitor modules provide independent automatic Git push paths when launched. This is a static search/review, not runtime tracing; dynamic imports, external launchers, cron jobs, user-triggered routes, and other indirect invocations have not all been ruled out. Do not run the scripts or sync monitors on a production checkout until reviewed and constrained.
+
+
+## Remediation applied — 2026-11-10
+
+The following changes were committed on `main` after the static invocation audit:
+
+- `runner/python/synce.py`: removed the duplicate entry point and broken bare function reference. Status monitoring is read-only. Git sync now requires the explicit `--sync` command, `allow_git_push: true`, an explicit non-empty `sync_paths` allowlist, and the `main` branch. It stages only allowlisted paths.
+- `runner/python/auto_sync_monitor.py`: removed automatic file relocation and automatic Git staging/commit/push from the monitor loop. Normal mode only inventories candidate files; a one-shot push requires `--sync`, `TAMANNA_ENABLE_GIT_PUSH=1`, `TAMANNA_SYNC_PATHS`, and the `main` branch.
+- `runner/python/tamannna_master.py`: replaced `shell=True` command strings with argument-list subprocess calls. Backup now uses Python copy/archive operations and no longer invokes `rsync --delete`. Git sync is an explicit CLI action, restricted to `main` and configured `sync_paths`; it no longer stages the entire repository by default or suppresses Git errors.
+- `runner/python/git_sync.py`: removed `os.system`; push now requires explicit `allow_push=True`, a non-empty relative-path allowlist, and the `main` branch.
+- Added `tests/test_sync_security.py` to cover default-deny behavior, path traversal rejection, shell-free command invocation, and removal of the automatic file mover.
+
+These changes reduce accidental execution and broad staging risk. They do not prove that every possible launcher or dynamic call path in the repository has been eliminated. The new regression tests and repository CI must pass before treating the remediation as verified. Existing configurations that relied on implicit automatic pushes will now need deliberate review and explicit opt-in configuration.
