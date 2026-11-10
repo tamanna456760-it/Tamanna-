@@ -35,6 +35,34 @@ def validate_jsonl(path: Path) -> tuple[int, list[int]]:
             f"Cannot read log file ({exc.__class__.__name__})."
         ) from exc
     return valid_count, malformed_lines
+
+def validate_log(path: Path) -> dict[str, Any]:
+    """Return a read-only JSONL validation summary for event-log health checks."""
+    try:
+        valid_count, malformed_lines = validate_jsonl(path)
+    except RuntimeError as exc:
+        return {
+            "valid": False,
+            "healthy": False,
+            "valid_records": 0,
+            "malformed_records": 0,
+            "errors": [str(exc)],
+            "read_only": True,
+        }
+    errors = [
+        f"Invalid JSON object on line {line_number}"
+        for line_number in malformed_lines
+    ]
+    return {
+        "valid": not malformed_lines,
+        "healthy": not malformed_lines,
+        "valid_records": valid_count,
+        "malformed_records": len(malformed_lines),
+        "malformed_lines": malformed_lines,
+        "errors": errors,
+        "read_only": True,
+    }
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate a Tamanna AI Endpoint Security JSONL log."
