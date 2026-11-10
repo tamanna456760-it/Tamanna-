@@ -20,6 +20,7 @@ import agent as powerhub_agent
 import tamanna_sync
 import tamanna_derive_sync
 import enable_auto_sync
+import tamanna_system
 
 
 def load_sync_engine():
@@ -181,6 +182,21 @@ class SafeSyncTests(unittest.TestCase):
     def test_legacy_auto_sync_is_not_activated_by_default(self):
         with patch.dict(os.environ, {}, clear=True):
             enable_auto_sync.main()
+
+    def test_system_ping_uses_shell_free_bounded_subprocess(self):
+        with patch("tamanna_system.subprocess.run") as mocked_run:
+            mocked_run.return_value = SimpleNamespace(returncode=0)
+            self.assertTrue(tamanna_system.ping("example.com"))
+            args, kwargs = mocked_run.call_args
+            self.assertEqual(args[0][-1], "example.com")
+            self.assertIs(kwargs["check"], False)
+            self.assertEqual(kwargs["timeout"], 5)
+            self.assertNotIn("shell", kwargs)
+
+    def test_system_ping_rejects_whitespace_host(self):
+        with patch("tamanna_system.subprocess.run") as mocked_run:
+            self.assertFalse(tamanna_system.ping("example.com; touch /tmp/x"))
+            mocked_run.assert_not_called()
 
     def test_monitor_has_no_automatic_file_mover(self):
         self.assertFalse(hasattr(auto_sync_monitor, "move_file"))
