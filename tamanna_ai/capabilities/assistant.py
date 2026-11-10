@@ -1,4 +1,4 @@
-"""Conversation-aware assistant orchestration over the existing Gemini provider."""
+"""Conversation-aware assistant orchestration over the configured local model provider."""
 
 from __future__ import annotations
 
