@@ -391,3 +391,23 @@ Dependency note: the runtime still needs network-installed packages at deploymen
 A follow-up review found that the WebSocket upgrade handler accepted a missing `Origin` header even when `TAMANNA_ALLOWED_ORIGINS` was configured. The handler now requires an exact allowlisted Origin whenever the list is non-empty; missing, empty, and unlisted origins are rejected. When no allowlist is configured, the existing non-browser / unrestricted-Origin behavior remains unchanged, so deployments should configure the allowlist for browser-facing use. Origin validation is not authentication and must not replace application-level authorization.
 
 Added a regression test for missing, empty, unlisted, allowed, and disabled-allowlist cases. The Node Runtime Validation workflow is responsible for running this test; its result must complete successfully before this fix is considered CI-verified.
+
+
+## Dependency audit remediation — 2026-11-10
+
+The Node Runtime CI run `42817982857` completed with a failed production dependency audit. Its log reported 11 vulnerabilities (7 moderate, 4 critical), including:
+- `simple-git` / `@simple-git/argv-parser` before the patched argv-parser 2.0.1 line (critical).
+- The legacy Telegram SDK dependency chain, including deprecated `request`, vulnerable `form-data`, `qs`, `tough-cookie`, and `uuid`.
+
+Remediation committed on `main`:
+- Upgraded `simple-git` to `^4.0.2`, which includes the patched argv-parser dependency.
+- Upgraded `node-telegram-bot-api` to `^2.4.0` and migrated `runner/node/bot.js` to its v2 `Bot` API. The CommonJS module loads the ESM package lazily via dynamic import; importing the module does not start polling. Polling starts only when explicitly requested.
+- Updated the bot startup regression test for the now-async factory.
+
+Commits:
+- `aa228576329e4c96cbecb1ea11cef491fecaf921` — dependency upgrades.
+- `bc97ba7f569ead34624b9704de8193e6de1894bd` — Telegram SDK v2 migration.
+- `4101ba4919f68346e1c5258bdbd34c86475dcc3a` — admin ID regex correction.
+- `998b3e490d83d0853cf7948be26d5975eb866d6a` — async startup regression test.
+
+Validation remains pending: a fresh GitHub Actions run must complete npm audit, syntax checks, and tests. No Telegram bot was started and no token was accessed. The Telegram SDK migration is not considered runtime-verified until CI passes.
