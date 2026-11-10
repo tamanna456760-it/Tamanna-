@@ -87,3 +87,32 @@ The five script names also appear in `runner/data/manifest.json`, which is a fil
 - `runner/shell/tamanna_ultra_max.sh` blob: `fd2e8df3e8a8e5c4ea32251dc764341b1124578c`
 - `runner/shell/tamanna_autonomous.sh` blob: `c9388afb0896e9392f57553c2ef2a7002171b752`
 - `runner/shell/tamanna_all_in_one.sh` blob: `0855ea1c1601b4351ba8b82bd480c9f5399801fc`
+
+
+## Further inspection — 15 additional scripts
+
+These files were fetched from `main` and inspected for credential URLs, pushes, firewall edits, and destructive sync:
+
+| Path | Confirmed findings |
+|---|---|
+| `runner/shell/tamanna_enterprise.sh` | Token-in-remote URL, push, firewall reset/default DROP, `rsync --delete` |
+| `runner/shell/tamanna_ultra_24x7.sh` | Token-in-remote URL, push, firewall reset/default DROP |
+| `runner/shell/tamanna_full_backup.sh` | Token-in-remote URL and push |
+| `runner/shell/tamanna_ultra_cloud.sh` | Token-in-remote URL, push, firewall reset/default DROP |
+| `runner/shell/tamanna_ultra_secure.sh` | Malformed Git remote URL containing a documentation URL in the credential segment; push |
+| `runner/shell/tamanna_ultra_pro_cli.sh` | Token-in-remote URL, push, firewall reset/default DROP |
+| `runner/shell/tamanna_self_learning.sh` | Token-in-remote URL, push, firewall reset/default DROP, `rsync --delete` |
+| `runner/shell/tamanna_ultra_ai_full.sh` | Token-in-remote URL, push, firewall reset/default DROP, `rsync --delete` |
+| `runner/shell/tamanna_ultra_extreme.sh` | Token-in-remote URL, push, firewall reset/default DROP; Telegram bot token placeholder |
+| `runner/shell/tamanna_ultra_powerhub.sh` | Token-in-remote URL and push |
+| `runner/shell/tamanna_ultra_fileinfo.sh` | Token-in-remote URL and push |
+| `runner/shell/tamanna_ultra_advanced.sh` | Token-in-remote URL, push, firewall reset/default DROP |
+| `runner/shell/tamanna_ultra_firewall.sh` | Firewall reset/default DROP; token-in-remote URL and push |
+| `runner/shell/tamanna_code_auto_comm.sh` | Token-in-remote URL and push |
+| `runner/shell/tamanna_ultimate_cloud.sh` | Token-in-remote URL, push, firewall reset/default DROP, `rsync --delete` |
+
+All 15 were only fetched and statically inspected. None was executed, changed, or moved.
+
+## Current review tally
+
+At least 25 named shell scripts have now been inspected in full or in relevant sections across this report. Common recurring patterns are token-in-remote URLs and automatic pushes; several scripts additionally reset firewall rules and/or use `rsync --delete`. This tally is a scoped review of the identified scripts, not a complete audit of every repository file. Workflow reachability and all callers still require systematic inspection.
