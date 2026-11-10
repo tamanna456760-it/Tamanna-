@@ -10,6 +10,9 @@ const { askAI } = require("../ai.js");
 const { safeTokenEqual } = require("../node_server.js");
 const { extractMessage, generateReply } = require("../server.js");
 const { safeKeyEqual, consumeRateLimit } = require("../ai_server.js");
+const { aiEdit } = require("../ai-github-bot.js");
+const { run: runAgent } = require("../agent.js");
+const { generateProject } = require("../generator.js");
 
 test("Git sync path policy accepts a safe exact relative path", () => {
   assert.equal(validatePath("docs/STATUS.md"), undefined);
@@ -94,4 +97,16 @@ test("AI gateway rate limiter enforces ten requests per minute", () => {
   for (let i = 0; i < 10; i += 1) assert.equal(consumeRateLimit(key, start), true);
   assert.equal(consumeRateLimit(key, start), false);
   assert.equal(consumeRateLimit(key, start + 60_000), true);
+});
+
+test("legacy AI GitHub editor is disabled and performs no Git operations", async () => {
+  await assert.rejects(aiEdit("modify files"), /Legacy AI GitHub bot is disabled/);
+});
+
+test("autonomous agent is disabled instead of writing generated code", async () => {
+  await assert.rejects(runAgent(), /Autonomous code generation is disabled/);
+});
+
+test("project generator reports missing local inference without writing files", async () => {
+  await assert.rejects(generateProject("make a server"), /no tested local inference runtime/);
 });
