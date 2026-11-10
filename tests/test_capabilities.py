@@ -533,6 +533,7 @@ def test_pinned_dns_resolver_rejects_rebinding_to_private_address():
 
 def test_pinned_dns_resolver_rejects_empty_dns_answers():
     import asyncio
+    import pytest
     from tamanna_ai.capabilities.web_fetch import _PinnedPublicResolver
 
     async def empty_lookup(*args, **kwargs):
