@@ -5,7 +5,7 @@ const { githubSync } = require("./github.js");
 
 function parseAdminIds(value = "") {
   return new Set(
-    String(value).split(",").map((id) => id.trim()).filter((id) => /^\d+$/.test(id))
+    String(value).split(",").map((id) => id.trim()).filter((id) => /^\\d+$/.test(id))
   );
 }
 
@@ -16,16 +16,20 @@ function isAdminId(senderId, adminIds) {
 async function createBot({
   token = process.env.BOT_TOKEN,
   adminIds = parseAdminIds(process.env.TAMANNA_TELEGRAM_ADMIN_IDS),
-  polling = false
+  polling = false,
+  BotClass
 } = {}) {
   if (typeof token !== "string" || !token.trim()) {
     throw new Error("BOT_TOKEN is required to start the Telegram bot.");
   }
 
-  const { Bot } = await import("node-telegram-bot-api");
-  const bot = new Bot(token);
+  // grammY's Bot API matches the command/context handlers used below.
+  const TelegramBot = BotClass || (await import("grammy")).Bot;
+  const bot = new TelegramBot(token);
 
-  bot.command("start", (ctx) => ctx.reply("🤖 Tamanna AI Bot Started"));
+  bot.command("start", async (ctx) => {
+    await ctx.reply("🤖 Tamanna AI Bot Started");
+  });
 
   bot.command("sync", async (ctx) => {
     const senderId = String(ctx.from && ctx.from.id ? ctx.from.id : "");
@@ -46,7 +50,7 @@ async function createBot({
     }
   });
 
-  bot.on("message", async (ctx) => {
+  bot.on("message:text", async (ctx) => {
     const msg = ctx.message || {};
     if (typeof msg.text !== "string" || msg.text.startsWith("/") || !msg.text.trim()) return;
     if (msg.text.length > 4000) {
@@ -69,7 +73,8 @@ async function createBot({
     console.error("Telegram bot update failed:", error.message);
   });
 
-  if (polling) await bot.startPolling();
+  // grammY starts long polling with bot.start(); it has no startPolling() API.
+  if (polling) await bot.start();
   return bot;
 }
 
