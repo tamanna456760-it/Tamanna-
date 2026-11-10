@@ -184,12 +184,22 @@ class Agent:
             raise RuntimeError(f"Git command failed: git {args[0]}")
         return rc, output
 
+    def ensure_clean_checkout(self):
+        """Refuse to pull/rebase or run fixers when local changes exist."""
+        rc, status = self.git("status", "--porcelain", check=True)
+        if rc != 0:
+            raise RuntimeError("Unable to inspect Git working tree")
+        if status.strip():
+            raise RuntimeError(
+                "Working tree is not clean; refusing fetch/pull and automated changes"
+            )
+
     def perform_run(self):
         self._write_log("run start")
         if not self.acquire_lock():
             return
         try:
-            rc, _ = self.git("status", "--porcelain", check=True)
+            self.ensure_clean_checkout()
             current_rc, current_branch = self.git("branch", "--show-current", check=True)
             if current_rc != 0 or current_branch.strip() != "main":
                 raise RuntimeError("Agent will only run on the checked-out main branch")
