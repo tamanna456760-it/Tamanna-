@@ -327,3 +327,23 @@ Commits:
 - CI workflow syntax check updated in its own commit.
 
 Validation status: committed to `main`; CI execution is still required. No gateway has been started or deployed.
+
+
+## Legacy Node automation disabled — 2026-11-10
+
+Reviewed legacy files that conflicted with the API-free preference and isolated CommonJS runtime:
+- `runner/node/ai-github-bot.js` previously called OpenAI, pulled the repository, rewrote `index.js`, staged every file, committed, and pushed. Replaced with an explicit disabled stub; no OpenAI dependency or Git operation is performed.
+- `runner/node/agent.js` previously generated code and wrote into a project directory before attempting Git sync. Replaced with a disabled stub that performs no writes or Git operations.
+- `runner/node/generator.js` previously imported a missing AI module and undeclared `fs-extra`; replaced with an API-free unavailable stub that does not write files.
+- `runner/node/github-sync.js` converted to CommonJS and continues to delegate to the guarded Git helper (push remains opt-in and path-allowlisted).
+- Added regression tests for disabled legacy automation and updated Node CI syntax checks for these files.
+
+Commits:
+- `4a2a78e` disable OpenAI auto-editor.
+- `8d182ff` disable autonomous code-writing agent.
+- `ceb56d5` replace broken generator with safe API-free stub.
+- `0b608e9` convert Git sync wrapper to CommonJS.
+- `808864f` add regression tests.
+- `5256dc3` expand CI syntax checks.
+
+These legacy modules were not run. This change does not claim all repository automation is disabled; remaining scripts/workflows still require call-graph and permission review. CI must complete before marking tests passed.
