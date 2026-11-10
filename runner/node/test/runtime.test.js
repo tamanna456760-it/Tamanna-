@@ -13,6 +13,8 @@ const { safeKeyEqual, consumeRateLimit } = require("../ai_server.js");
 const { aiEdit } = require("../ai-github-bot.js");
 const { run: runAgent } = require("../agent.js");
 const { generateProject } = require("../generator.js");
+const { collectSystemMetrics, systemMonitor } = require("../monitor.js");
+const { securityScan } = require("../security.js");
 
 test("Git sync path policy accepts a safe exact relative path", () => {
   assert.equal(validatePath("docs/STATUS.md"), undefined);
@@ -109,4 +111,23 @@ test("autonomous agent is disabled instead of writing generated code", async () 
 
 test("project generator reports missing local inference without writing files", async () => {
   await assert.rejects(generateProject("make a server"), /no tested local inference runtime/);
+});
+
+test("system monitor returns real bounded OS metrics without starting a timer", () => {
+  const metrics = collectSystemMetrics();
+  assert.equal(typeof metrics.platform, "string");
+  assert.equal(typeof metrics.nodeVersion, "string");
+  assert.ok(metrics.cpuCores > 0);
+  assert.ok(metrics.memory.totalBytes > 0);
+  assert.ok(metrics.memory.usedPercent >= 0 && metrics.memory.usedPercent <= 100);
+  assert.equal(typeof systemMonitor({ onMetrics: () => {} }), "function");
+});
+
+test("security audit reports unverified host checks instead of random results", () => {
+  const report = securityScan();
+  assert.equal(report.scanType, "node-runtime-configuration-audit");
+  assert.ok(["partial", "failed", "passed"].includes(report.status));
+  assert.ok(report.results.some((item) => item.name === "Operating-system firewall" && item.status === "not_checked"));
+  assert.ok(report.results.some((item) => item.name === "Malware and rootkit scan" && item.status === "not_checked"));
+  assert.ok(report.results.every((item) => !("passed" in item) || typeof item.passed === "boolean"));
 });
