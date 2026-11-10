@@ -1,5 +1,6 @@
 import os
 import socket
+import subprocess
 import time
 
 # -------------------------
@@ -26,12 +27,21 @@ def check_network(host):
 # Ping Style Check (OS)
 # -------------------------
 def ping(host):
-    if os.name == "nt":  # Windows
-        response = os.system("ping -n 1 " + host + " > nul")
-    else:  # Linux / Mac
-        response = os.system("ping -c 1 " + host + " > /dev/null 2>&1")
-
-    return response == 0
+    """Run one bounded ping without invoking a command shell."""
+    if not isinstance(host, str) or not host or any(ch.isspace() for ch in host):
+        return False
+    command = ["ping", "-n", "1", host] if os.name == "nt" else ["ping", "-c", "1", host]
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
 
 
 # -------------------------
