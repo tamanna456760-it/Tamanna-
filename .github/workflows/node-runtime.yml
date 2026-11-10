@@ -49,6 +49,8 @@ jobs:
           node --check runner/node/git.js
           node --check runner/node/github.js
           node --check runner/node/github-sync.js
+          node --check runner/node/monitor.js
+          node --check runner/node/security.js
           node --check runner/node/generator.js
           node --check runner/node/agent.js
           node --check runner/node/ai-github-bot.js
