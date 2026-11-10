@@ -39,6 +39,23 @@ def load_state(path):
         return {}
 
 
+def validate_state_file(state_value, folder, credentials):
+    """Keep sync metadata outside uploads and never overwrite credentials."""
+    state_path = Path(state_value).expanduser()
+    if state_path.is_symlink():
+        raise ValueError("Sync state file must not be a symlink")
+    state_path = state_path.resolve()
+    folder = Path(folder).resolve()
+    credentials = Path(credentials).resolve()
+    if state_path == credentials:
+        raise ValueError("Sync state file must not overwrite Google credentials")
+    if state_path == folder or state_path in folder.parents or folder in state_path.parents:
+        raise ValueError("Sync state file must be outside the upload folder")
+    if state_path.exists() and not state_path.is_file():
+        raise ValueError("Sync state path must be a regular file")
+    return state_path
+
+
 def authenticate_drive(credentials_path):
     # Import optional dependencies only after the user explicitly enables Drive sync.
     from google.oauth2 import service_account
@@ -80,11 +97,13 @@ def sync_once():
     if folder == credentials or folder in credentials.parents:
         raise ValueError("Credentials file must be outside the upload folder")
 
-    state_file = Path(os.environ.get(
-        "TAMANNA_DRIVE_SYNC_STATE", str(Path.home() / ".tamanna_drive_sync_state.json")
-    )).expanduser().resolve()
-    if state_file.is_relative_to(folder):
-        raise ValueError("Sync state file must be outside the upload folder")
+    state_file = validate_state_file(
+        os.environ.get(
+            "TAMANNA_DRIVE_SYNC_STATE", str(Path.home() / ".tamanna_drive_sync_state.json")
+        ),
+        folder,
+        credentials,
+    )
     state = load_state(state_file)
     service = authenticate_drive(credentials)
     uploaded = 0
