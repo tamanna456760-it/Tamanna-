@@ -109,8 +109,20 @@ def _safe_sync_paths(values):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("sync_paths entries must be non-empty strings")
         path = Path(value)
-        if path.is_absolute() or ".." in path.parts:
-            raise ValueError(f"Unsafe sync path: {value}")
+        parts = path.parts
+        forbidden_names = {"credentials.json", "id_rsa", "id_ed25519", "token", "token.txt"}
+        if (
+            path.is_absolute()
+            or not parts
+            or value.strip() in {".", "./"}
+            or ".." in parts
+            or value.startswith(":")
+            or any(char in value for char in "*?[]")
+            or any(part == ".env" or part.startswith(".env.") for part in parts)
+            or any(part.lower() in forbidden_names for part in parts)
+            or any(Path(part).suffix.lower() in {".pem", ".key", ".p12", ".pfx"} for part in parts)
+        ):
+            raise ValueError(f"Unsafe or overly broad sync path: {value}")
         paths.append(path.as_posix())
     return paths
 
