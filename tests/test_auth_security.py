@@ -967,3 +967,81 @@ def test_security_headers_are_present_and_hsts_is_https_only():
     http_response = http_client.get("/headers")
     assert "strict-transport-security" not in http_response.headers
     assert http_response.headers["x-content-type-options"] == "nosniff"
+
+
+def test_google_signin_verifies_audience_and_verified_email(monkeypatch):
+    import json
+    from tamanna_ai.authentication import router as auth
+    from fastapi import HTTPException
+
+    monkeypatch.setenv("GOOGLE_CLIENT_ID", "test-google-client.apps.googleusercontent.com")
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def read(self, size):
+            return json.dumps({
+                "iss": "https://accounts.google.com",
+                "aud": "test-google-client.apps.googleusercontent.com",
+                "exp": str(int(time.time()) + 300),
+                "email_verified": "true",
+                "sub": "google-subject-123",
+                "email": "member@gmail.com",
+                "name": "Google Member",
+            }).encode()
+
+    monkeypatch.setattr(auth, "urlopen", lambda *args, **kwargs: FakeResponse())
+    assert auth.verify_google_credential("fake-google-id-token") == {
+        "email": "member@gmail.com",
+        "name": "Google Member",
+    }
+
+    class WrongAudienceResponse(FakeResponse):
+        def read(self, size):
+            claims = json.loads(super().read(size))
+            claims["aud"] = "attacker-client"
+            return json.dumps(claims).encode()
+
+    monkeypatch.setattr(auth, "urlopen", lambda *args, **kwargs: WrongAudienceResponse())
+    with pytest.raises(HTTPException) as exc:
+        auth.verify_google_credential("fake-google-id-token")
+    assert exc.value.status_code == 401
+
+
+def test_google_signin_creates_account_and_issues_session(monkeypatch, tmp_path):
+    from fastapi import Response
+    from types import SimpleNamespace
+    from tamanna_ai.authentication import router as auth
+
+    monkeypatch.setattr(auth, "DB", tmp_path / "google-signin.sqlite3")
+    auth.init_db()
+    monkeypatch.setenv(
+        "TAMANNA_SESSION_SECRET",
+        "test-google-session-secret-long-enough-for-testing-only",
+    )
+    monkeypatch.setenv("GOOGLE_CLIENT_ID", "test-google-client.apps.googleusercontent.com")
+    monkeypatch.setattr(auth, "verify_google_credential", lambda credential: {
+        "email": "new.member@gmail.com",
+        "name": "New Member",
+    })
+    request = SimpleNamespace(
+        client=SimpleNamespace(host="198.51.100.91"),
+        headers={},
+    )
+    response = Response()
+    result = auth.google_login(
+        auth.GoogleLogin(credential="x" * 30),
+        request=request,
+        response=response,
+    )
+    assert result["ok"] is True
+    assert result["user"]["email"] == "new.member@gmail.com"
+    assert response.headers.get("set-cookie", "").startswith("tamanna_session=")
+    with auth.db() as connection:
+        row = connection.execute(
+            "SELECT email,name FROM users WHERE email=?",
+            ("new.member@gmail.com",),
+        ).fetchone()
+    assert row["name"] == "New Member"
