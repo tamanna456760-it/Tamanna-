@@ -75,7 +75,7 @@ class _PageText(HTMLParser):
         if tag == "title":
             self.in_title = True
         if tag in {"p", "div", "br", "li", "h1", "h2", "h3", "tr"}:
-            self.parts.append("\\n")
+            self.parts.append("\n")
 
     def handle_endtag(self, tag):
         if tag in {"script", "style", "noscript", "template"} and self.skip:
@@ -83,7 +83,7 @@ class _PageText(HTMLParser):
         if tag == "title":
             self.in_title = False
         if tag in {"p", "div", "br", "li", "h1", "h2", "h3", "tr"}:
-            self.parts.append("\\n")
+            self.parts.append("\n")
 
     def handle_data(self, data):
         if self.skip:
