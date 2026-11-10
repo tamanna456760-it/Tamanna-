@@ -245,3 +245,23 @@ The three updated files were fetched again from `main` and their blob SHAs verif
 - The local AI adapter intentionally returns an unavailable error until a local model or knowledge database is configured. The Telegram bot must not be described as a functioning AI assistant yet.
 
 No secrets were added. No token, bot, local server, or Git push was executed.
+
+
+## Isolated Node runtime manifest and CI tests — 2026-11-10
+
+Added `runner/node/package.json` with a scoped CommonJS runtime (Node.js >=20), start scripts, and explicit dependencies for the existing Express/WebSocket server, Telegram bot, dotenv, and hardened simple-git wrapper. This avoids adding server-only packages to the root static-site package.
+
+Added `runner/node/test/runtime.test.js` covering:
+- Exact relative-path acceptance and secret/traversal/glob rejection in Git sync policy.
+- Allowlist parsing and duplicate removal.
+- Honest local-AI-unavailable behavior (no external model API).
+- Both compatibility launchers targeting only the existing `server.js`.
+
+Added `.github/workflows/node-runtime.yml` to install the scoped dependencies, syntax-check active CommonJS entrypoints, and run the Node safety tests on relevant changes.
+
+Commits:
+- `23a12999263b1056516e34434017c82f64201ec0` — scoped Node runtime manifest.
+- `9f4f379ce059c22157df1dc47c34104b8e7e69a9` — Node runtime safety tests.
+- `13f41bb9c3f00945fd9557f86ce046ba7be73de7` — dedicated Node runtime CI workflow.
+
+The manifest and test file were fetched back from `main` and their content SHAs verified. The CI workflow has just been added; dependency installation and test results remain pending. No local install, Telegram polling, HTTP server, or production deployment was run.
