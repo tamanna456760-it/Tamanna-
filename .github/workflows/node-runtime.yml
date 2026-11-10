@@ -43,6 +43,7 @@ jobs:
           node --check runner/node/run.js
           node --check runner/node/run..js
           node --check runner/node/server.js
+          node --check runner/node/ai_server.js
           node --check runner/node/node_server.js
           node --check runner/node/bot.js
           node --check runner/node/git.js
