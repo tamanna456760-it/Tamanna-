@@ -1,6 +1,7 @@
 "use strict";
 
-const simpleGit = require("simple-git");
+const simpleGitModule = require("simple-git");
+const simpleGit = simpleGitModule.simpleGit || simpleGitModule.default || simpleGitModule;
 const path = require("node:path");
 
 const git = simpleGit("./project");
