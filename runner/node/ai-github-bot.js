@@ -1,41 +1,17 @@
-require("dotenv").config();
-const fs = require("fs");
-const simpleGit = require("simple-git");
-const { OpenAI } = require("openai");
+"use strict";
 
-const git = simpleGit();
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_KEY
-});
-
-async function aiEdit(prompt) {
-
-  console.log("📥 Pulling latest repo...");
-  await git.pull();
-
-  const code = fs.readFileSync("index.js", "utf8"); // change target file
-
-  console.log("🧠 Sending to AI...");
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a coding assistant. Modify the code safely." },
-      { role: "user", content: `Instruction: ${prompt}\n\nCode:\n${code}` }
-    ]
-  });
-
-  const newCode = response.choices[0].message.content;
-
-  fs.writeFileSync("index.js", newCode);
-
-  console.log("📤 Committing changes...");
-  await git.add(".");
-  await git.commit("AI Updated Code");
-  await git.push();
-
-  console.log("✅ Done!");
+// Legacy OpenAI-powered auto-editor intentionally disabled.
+// This module must never pull, rewrite, stage, commit, or push repository files.
+async function aiEdit() {
+  throw new Error(
+    "Legacy AI GitHub bot is disabled. Tamanna uses the API-free local runtime; " +
+    "automated repository editing and Git push require a separately reviewed workflow."
+  );
 }
 
-const userPrompt = process.argv[2];
-aiEdit(userPrompt);
+if (require.main === module) {
+  console.error("Disabled: legacy OpenAI/Git auto-editor is not available.");
+  process.exitCode = 1;
+}
+
+module.exports = { aiEdit };
