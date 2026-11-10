@@ -4,7 +4,6 @@ const simpleGitModule = require("simple-git");
 const simpleGit = simpleGitModule.simpleGit || simpleGitModule.default || simpleGitModule;
 const path = require("node:path");
 
-const git = simpleGit("./project");
 
 const SECRET_PATH = /(^|\/)(\.env(?:\..*)?|.*\.(?:pem|key|p12|pfx|keystore)|id_rsa|id_ed25519|credentials?(?:\.json)?|secrets?(?:\.|\/|$))/i;
 
@@ -31,6 +30,9 @@ async function gitPush() {
   if (process.env.TAMANNA_ENABLE_GIT_PUSH !== "1") {
     return { pushed: false, reason: "Git push is disabled; set TAMANNA_ENABLE_GIT_PUSH=1 to opt in." };
   }
+
+  const projectDir = process.env.TAMANNA_PROJECT_DIR || path.resolve(__dirname, "../..");
+  const git = simpleGit(projectDir);
 
   const allowlist = parseAllowlist(process.env.TAMANNA_SYNC_PATHS);
   if (allowlist.length === 0) {
