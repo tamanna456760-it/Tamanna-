@@ -12,6 +12,8 @@ function errorText(error) {
   return "Request failed. Please try again.";
 }
 
+const GOOGLE_CLIENT_ID = import.meta.env?.VITE_GOOGLE_CLIENT_ID || "";
+
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -24,6 +26,7 @@ const Chat = () => {
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState("");
   const messagesEndRef = useRef(null);
+  const googleButtonRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -37,6 +40,59 @@ const Chat = () => {
       .finally(() => { if (active) setAuthReady(true); });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!authReady || user || !GOOGLE_CLIENT_ID) return undefined;
+    let active = true;
+    const renderGoogleButton = () => {
+      if (!active || !window.google?.accounts?.id || !googleButtonRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (credentialResponse) => {
+          if (!credentialResponse?.credential) {
+            setAuthError("Google did not return a sign-in credential.");
+            return;
+          }
+          setAuthBusy(true);
+          setAuthError("");
+          try {
+            const response = await api.post("/api/auth/google", {
+              credential: credentialResponse.credential,
+            });
+            setUser(response.data.user);
+          } catch (error) {
+            setAuthError(errorText(error));
+          } finally {
+            setAuthBusy(false);
+          }
+        },
+      });
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        type: "standard",
+        theme: "filled_black",
+        size: "large",
+        shape: "rectangular",
+        text: "continue_with",
+        width: 340,
+      });
+    };
+    const existing = document.getElementById("google-identity-services");
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+    } else if (existing) {
+      existing.addEventListener("load", renderGoogleButton, { once: true });
+    } else {
+      const script = document.createElement("script");
+      script.id = "google-identity-services";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = renderGoogleButton;
+      script.onerror = () => setAuthError("Google sign-in could not load. Use email login instead.");
+      document.head.appendChild(script);
+    }
+    return () => { active = false; };
+  }, [authReady, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -164,6 +220,14 @@ const Chat = () => {
             <button type="button" role="tab" aria-selected={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => { setAuthMode("login"); setAuthError(""); }}>Log in</button>
             <button type="button" role="tab" aria-selected={authMode === "signup"} className={authMode === "signup" ? "active" : ""} onClick={() => { setAuthMode("signup"); setAuthError(""); }}>Sign up</button>
           </div>
+          {GOOGLE_CLIENT_ID ? (
+            <div className="chat-google-wrap">
+              <div className="chat-auth-divider"><span>or continue with Google</span></div>
+              <div ref={googleButtonRef} className="chat-google-button" />
+            </div>
+          ) : (
+            <p className="chat-google-setup">Google sign-in needs the same OAuth Client ID in VITE_GOOGLE_CLIENT_ID (frontend) and GOOGLE_CLIENT_ID (server). Email login is ready now.</p>
+          )}
           <form className="chat-auth-form" onSubmit={submitAuth}>
             {authMode === "signup" && (
               <label>
