@@ -65,6 +65,9 @@ jobs:
             exit 1
           fi
 
+      - name: Install isolated Node runtime dependencies for repository tests
+        run: npm install --prefix runner/node --ignore-scripts --no-audit --no-fund
+
       - name: Run Node test suite
         run: npm test --if-present
 
