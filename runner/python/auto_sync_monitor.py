@@ -48,11 +48,25 @@ def _safe_paths(raw_paths):
     paths = [item.strip() for item in raw_paths.split(",") if item.strip()]
     if not paths:
         raise ValueError("TAMANNA_SYNC_PATHS must list one or more relative paths")
+    forbidden_names = {"credentials.json", "id_rsa", "id_ed25519", "token", "token.txt"}
+    safe = []
     for item in paths:
         path = Path(item)
-        if path.is_absolute() or ".." in path.parts:
-            raise ValueError(f"Unsafe sync path: {item}")
-    return [Path(item).as_posix() for item in paths]
+        parts = path.parts
+        if (
+            path.is_absolute()
+            or not parts
+            or item in {".", "./"}
+            or ".." in parts
+            or item.startswith(":")
+            or any(char in item for char in "*?[]")
+            or any(part == ".env" or part.startswith(".env.") for part in parts)
+            or any(part.lower() in forbidden_names for part in parts)
+            or any(Path(part).suffix.lower() in {".pem", ".key", ".p12", ".pfx"} for part in parts)
+        ):
+            raise ValueError(f"Unsafe or overly broad sync path: {item}")
+        safe.append(path.as_posix())
+    return safe
 
 
 def explicit_sync():
