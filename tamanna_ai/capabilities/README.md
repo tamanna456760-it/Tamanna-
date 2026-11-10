@@ -1,17 +1,17 @@
 # Tamanna AI Capabilities
 
-This package provides a conversation-aware orchestration layer over the existing Gemini provider and SQLAlchemy conversation store.
+This package provides conversation-aware orchestration over the configured model provider (local Ollama by default) and the SQLAlchemy conversation store.
 
 - **NLP/chat:** sends language-aware guidance and the current user message to the configured model provider.
 - **Reasoning:** asks the model to explain conclusions clearly, distinguish assumptions, and state uncertainty; it does not guarantee correctness.
 - **Short-term memory:** retrieves only a bounded number of recent complete user/assistant pairs for the active conversation, scoped by the authenticated user (or anonymous conversations) and capped by character budgets.\n- **Long-term memory:** stores persistent user memories in SQL storage; reads are isolated by user ID. Memory update/delete operations require an owner user ID and only affect that user's records. The application must authenticate users and pass the verified user ID; never trust a user ID supplied by the browser.
-- **Multimodal input:** Gemini provider accepts local JPG/JPEG, PNG, WEBP, GIF, MP3, WAV, OGG, MP4, WEBM and PDF files through inline data, with a combined 15 MiB limit. Call `CapabilityAssistant.chat_with_files(...)`. Upload handling, authentication, malware scanning and temporary-file lifecycle remain the responsibility of the API caller.
+- **File input:** file-processing support depends on the selected provider and the actual `CapabilityAssistant.chat_with_files(...)` implementation. Do not assume that local Ollama accepts arbitrary image, audio, video, or PDF uploads through the current chat interface. Upload validation, authentication, malware scanning and temporary-file lifecycle remain the API caller's responsibility.
 
 - **Coding and software development:** supports code generation, explanation, review, debugging, refactoring, optimization, import/dependency investigation, focused test suggestions, and README/API documentation across common programming languages. The model proposes code; this capability layer does not execute arbitrary generated code or shell commands.
 - **Debugging discipline:** distinguishes inspected facts from assumptions and never reports a test as passed unless a real test runner returned a passing result. File modifications and repository writes must go through a separately authorized, constrained application workflow.
 - **Writing and content creation:** drafts original articles, research-based explainers, blog posts, professional emails, proposals, business plans, reports, and strategy summaries; translates between requested languages; and edits spelling, grammar, clarity, tone, and structure. Research claims and citations must be grounded in supplied or actually checked sources—never fabricated.
 - **Translation and editing discipline:** preserves meaning, context, and tone; flags ambiguous wording; and avoids silently changing the author's intent.
-- **Multimodal analysis:** the Gemini integration accepts supported local image, audio, video, and PDF inputs through `CapabilityAssistant.chat_with_files(...)`, subject to provider/model support and the documented combined upload limit. This is input analysis, not an image, voice, or music generation engine.
+- **Multimodal analysis:** the default local Ollama provider is a text-chat integration. Image, audio, video, and PDF analysis must not be advertised unless a selected model and implemented upload path are verified end to end. This is not an image, voice, or music generation engine.
 - **Media generation status:** image generation, text-to-speech/voiceover synthesis, voice cloning, and music generation are not implemented by the current provider interface. The assistant may help draft prompts, scripts, lyrics, and production plans, but must not claim to have generated media files. A separately configured generation provider, authenticated API routes, upload/output validation, consent controls, and storage lifecycle are required.
 - **Media safety:** voice cloning requires explicit authorization from the voice owner; deceptive impersonation is disallowed. Music output should be original and must not reproduce protected songs or lyrics.
 - **Tools:** includes a deliberately restricted arithmetic calculator using Python AST (never `eval`) and an internal indexed project-code search; no shell or arbitrary code execution is exposed.
@@ -32,7 +32,7 @@ The caller must authenticate the user and ensure that the conversation ID belong
 
 ## Important limitations
 
-This is runtime orchestration, not a new foundation model. It does not increase Gemini's native context window, guarantee factual answers, execute a hidden chain-of-thought, train model weights, or provide automatic web browsing. Long documents should be chunked/retrieved under a token budget. Audio/video/PDF availability and accepted formats depend on the selected Gemini model and API support.
+This is runtime orchestration, not a new foundation model. It does not guarantee factual answers, expose hidden chain-of-thought, train model weights, or provide automatic web browsing. Long documents should be chunked/retrieved under a token budget. File-format availability depends on the selected provider and implemented upload pipeline.
 
 ## Memory behavior
 
