@@ -252,6 +252,8 @@ def verify_google_credential(credential: str):
     except Exception as exc:
         raise HTTPException(401, "Google sign-in token could not be verified.") from exc
 
+    if not isinstance(claims, dict):
+        raise HTTPException(401, "Google sign-in returned an invalid token response.")
     issuer = claims.get("iss")
     verified = claims.get("email_verified")
     if isinstance(verified, str):
@@ -272,7 +274,7 @@ def verify_google_credential(credential: str):
         raise HTTPException(401, "Google account verification failed.")
     name = str(claims.get("name") or email.split("@", 1)[0]).strip()[:80]
     if len(name) < 2:
-        name = email.split("@", 1)[0][:80]
+        name = "Google User"
     return {"email": email, "name": name}
 
 
