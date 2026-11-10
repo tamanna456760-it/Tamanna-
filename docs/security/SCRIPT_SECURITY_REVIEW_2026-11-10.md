@@ -306,3 +306,24 @@ Commits:
 - `5d964989cbad55811c9e10165b626288769441b8` — WebSocket safety tests.
 
 Validation status: changes are committed to `main`; GitHub Actions results must complete before this work can be marked CI-passing. The server has not been deployed or started.
+
+
+## Local AI gateway hardening — 2026-11-10
+
+Reviewed and converted `runner/node/ai_server.js` from ESM to the repository's scoped CommonJS runtime:
+- Replaced plain API-key comparison with length-checked `crypto.timingSafeEqual`.
+- Kept the gateway bound to loopback when run directly; importing it in tests does not start a listener.
+- Added Helmet security headers and a strict 16 KB JSON body limit.
+- Disabled browser CORS by default; optional explicit origins use `TAMANNA_AI_ALLOWED_ORIGINS`.
+- Added a bounded in-memory rate limiter (10 requests/minute per IP, maximum 10,000 tracked keys).
+- Validates message type, emptiness, and 4,000-character maximum.
+- Retains honest 503 response while no local model/database adapter exists; external AI providers remain disabled.
+- Added Helmet to the isolated Node runtime dependencies and tests for timing-safe key comparison and rate-limit behavior.
+
+Commits:
+- `2464e679814c984c17053dcd3342a742518d505b` — gateway hardening.
+- `4746978bee40f0cb05c179ffd6a6b6eb74de8780` — Helmet dependency.
+- `776527e004727427736629c967d4282452b57511` — security tests.
+- CI workflow syntax check updated in its own commit.
+
+Validation status: committed to `main`; CI execution is still required. No gateway has been started or deployed.
