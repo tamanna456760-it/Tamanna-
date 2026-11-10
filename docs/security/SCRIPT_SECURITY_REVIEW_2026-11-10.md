@@ -194,3 +194,16 @@ A follow-up review of `runner/python/tamanna_sync.py` found that the configurabl
 Commits: `886cc0284cbf3081adedec6d37bb4b2bcea8f636` (code), `8c9aa25b45f52352012199d5dfc9c0b28c120b51` (tests).
 
 This is a targeted static hardening change. The new CI runs are queued; no test-pass claim is made until GitHub Actions reports completion. Drive sync remains disabled unless explicitly opted in.
+
+
+## Shell-free network diagnostics — 2026-11-10
+
+Two small Python network diagnostic utilities were found constructing ping commands through `os.system`.
+
+- `runner/python/ping.py` now invokes a fixed host with an argument-list subprocess, a five-second timeout, and explicit missing-utility/timeout handling.
+- `runner/python/tamanna_system.py` now validates the host string and uses platform-specific argument arrays with `shell=False` (the subprocess default), a five-second timeout, and a boolean result.
+- Added tests verifying bounded execution, no shell option, and rejection of whitespace/shell-injection host input.
+
+Commits: `f66d97412cdb2ff510f0ef5707b33703a5da53f1` (ping utility), `6d0b287a1e82c73a4b55004fd960943595c02380` (system diagnostic), `858d28dde9b52dcdf0cbbd0a63c21a69a7f066a7` (tests).
+
+The repository-wide search still reports matches in vendored/editor code and other legacy automation. Search matches are not automatically vulnerabilities; inspect ownership and call paths before editing vendor code. CI for these commits is pending at the time of this update.
