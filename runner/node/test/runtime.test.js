@@ -184,7 +184,56 @@ test("security audit reports unverified host checks instead of random results", 
   assert.ok(report.results.every((item) => !("passed" in item) || typeof item.passed === "boolean"));
 });
 
-test("Telegram bot module can be imported without starting polling or requiring a token", async () => {
+
+test("Telegram bot registers grammY handlers and starts long polling with the correct API", async () => {
+  class FakeBot {
+    constructor(token) {
+      this.token = token;
+      this.commands = new Map();
+      this.handlers = new Map();
+      this.started = false;
+      this.errorHandler = null;
+    }
+    command(name, handler) { this.commands.set(name, handler); }
+    on(filter, handler) { this.handlers.set(filter, handler); }
+    catch(handler) { this.errorHandler = handler; }
+    async start() { this.started = true; }
+  }
+
+  const bot = await createBot({
+    token: "test-token",
+    adminIds: new Set(["123"]),
+    polling: true,
+    BotClass: FakeBot
+  });
+  assert.equal(bot.token, "test-token");
+  assert.equal(bot.started, true);
+  assert.equal(typeof bot.errorHandler, "function");
+  assert.deepEqual([...bot.commands.keys()], ["start", "sync"]);
+  assert.equal(bot.handlers.has("message:text"), true);
+
+  const replies = [];
+  await bot.commands.get("start")({ reply: async (message) => replies.push(message) });
+  await bot.commands.get("sync")({
+    from: { id: 999 },
+    reply: async (message) => replies.push(message)
+  });
+  assert.match(replies[0], /Tamanna AI Bot Started/);
+  assert.match(replies[1], /অনুমতি নেই/);
+});
+
+test("Telegram bot can be constructed without polling for safe imports and tests", async () => {
+  class FakeBot {
+    constructor() { this.started = false; }
+    command() {}
+    on() {}
+    catch() {}
+    async start() { this.started = true; }
+  }
+  const bot = await createBot({ token: "test-token", BotClass: FakeBot });
+  assert.equal(bot.started, false);
+});
+\ntest("Telegram bot module validates token and admin IDs", async () => {
   assert.deepEqual([...parseAdminIds("123, bad, 456,123")], ["123", "456"]);
   const admins = parseAdminIds("123,456");
   assert.equal(isAdminId("123", admins), true);
