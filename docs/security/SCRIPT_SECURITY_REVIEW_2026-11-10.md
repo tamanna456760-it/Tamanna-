@@ -168,3 +168,16 @@ Further repository search identified additional shell-based automation paths:
 - Expanded `tests/test_sync_security.py` to cover shell operator rejection, shell command-string rejection, allowlist secret-path rejection, and verification that the agent launches subprocesses with `shell=False`.
 
 These are code changes, not a production rollout. Agent execution remains disabled unless its external YAML configuration explicitly sets `enabled: true`. Review that external configuration before enabling it. CI must complete successfully before these changes can be considered test-verified.
+
+
+## Drive and local mirror safeguards — follow-up
+
+Additional sync-related files were reviewed and hardened:
+
+- `runner/python/tamanna_sync.py`: removed import-time credential loading and the unconditional infinite upload loop. Drive sync now requires `TAMANNA_ENABLE_DRIVE_SYNC=1`, an explicit upload folder and credential-file path, stores a local SHA-256 state file outside the upload folder, ignores symlinks and common secret/key files, and uploads changed PDF files only. Google client dependencies are imported only after explicit opt-in.
+- `runner/python/tamanna_derive_sync.py`: removed unsafe `pickle.load` / `pickle.dump` credential storage. It now uses Google's JSON authorized-user credential format, keeps token/client files outside the PDF source folder, and requires the same explicit Drive-sync opt-in.
+- `runner/python/tamanna_bd-king-r7_sunc.py`: excludes common secret files and symlinks from the local mirror, validates resolved paths remain inside the intended roots, disables mirror deletions unless `TAMANNA_ALLOW_MIRROR_DELETE=1`, and disables build commands unless `TAMANNA_ALLOW_BUILD_COMMANDS=1`. Build commands must be argument arrays and are launched without a shell.
+- `runner/python/enable_auto_sync.py`: no longer activates legacy auto-sync at import time. It requires `TAMANNA_ENABLE_LEGACY_MONITOR=1` and explicitly disables Git auto-commit and cloud backup.
+- `tests/test_sync_security.py`: consolidated duplicate test definitions and added regression coverage for Drive default-deny behavior, credential exclusions, local mirror symlink/secret filtering, and disabled destructive sync behavior.
+
+Google Drive sync remains an optional external integration and is not enabled by these code changes. Configure credentials only in the user's local environment or a secret store; never commit them. The repository CI result remains the final check for syntax, imports, and test compatibility.
