@@ -156,3 +156,15 @@ These changes reduce accidental execution and broad staging risk. They do not pr
 A second review found that the first allowlist implementation still accepted broad pathspecs such as `.` and wildcard patterns, and could accept explicitly named credential files. The sync helpers now reject repository-wide paths, glob/pathspec metacharacters, parent traversal, common secret names (including `.env*`, token files and credential JSON), and private-key/certificate extensions. The master sync helper also validates the configured remote as a simple Git remote name before passing it to Git.
 
 Regression coverage was expanded for repository-wide pathspecs, secret filenames, and wildcard pathspecs. These controls reduce accidental secret staging, but they cannot guarantee that an innocently named file contains no secret; review the actual staged diff before authorizing a push.
+
+
+## Additional Python automation remediation — PowerHub agent and schedulers
+
+Further repository search identified additional shell-based automation paths:
+
+- `runner/python/agent.py` used `shell=True` for configured fix/build commands and Git operations, defaulted to a non-main automation branch, and included hard reset / broad staging behavior. It is now shell-free, restricted to the checked-out `main` branch, refuses shell operators and shell `-c` command strings, removes hard reset/branch creation, and defaults to no command execution or Git push. Running configured commands requires `allow_commands: true`; pushing additionally requires both `push_changes: true` and `allow_git_push: true`, plus explicit safe `sync_paths`. Marker files are updated only when included in that allowlist.
+- `runner/python/auto_sync.py` and `runner/python/cloud_auto_sync.py` no longer use `os.system`; they use argument-list subprocess calls, timeouts, and report missing child scripts. The expected `tamanna_book_sync.py` and `tamanna_drive_sync.py` were not present in the repository tree at review time, so those scheduled jobs will report missing scripts rather than silently succeed.
+- `runner/python/git_clone_update.py` now uses the canonical GitHub clone URL, clones only `main`, refuses to overwrite a dirty checkout or update a non-main branch, and uses `git pull --ff-only` without shell commands or changing the process working directory.
+- Expanded `tests/test_sync_security.py` to cover shell operator rejection, shell command-string rejection, allowlist secret-path rejection, and verification that the agent launches subprocesses with `shell=False`.
+
+These are code changes, not a production rollout. Agent execution remains disabled unless its external YAML configuration explicitly sets `enabled: true`. Review that external configuration before enabling it. CI must complete successfully before these changes can be considered test-verified.
