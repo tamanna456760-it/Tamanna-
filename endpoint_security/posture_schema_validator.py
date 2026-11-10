@@ -6,6 +6,7 @@ Read-only validation. This module does not modify reports.
 from __future__ import annotations
 import argparse
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 try:
@@ -78,6 +79,14 @@ def validate_posture_report(
         }
         for error in validation_errors
     ]
+    timestamp = report.get("generated_at_utc") if isinstance(report, dict) else None
+    if isinstance(timestamp, str):
+        try:
+            parsed_timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            if parsed_timestamp.tzinfo is None or parsed_timestamp.utcoffset() is None:
+                raise ValueError("timezone is required")
+        except ValueError:
+            errors.append({"path": "/generated_at_utc", "message": "must be a valid timezone-aware ISO 8601 timestamp"})
     return {
         "valid": not errors,
         "status": "VALID" if not errors else "INVALID",
