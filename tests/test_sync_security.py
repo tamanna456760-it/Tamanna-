@@ -24,13 +24,33 @@ class SafeSyncTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             synce._safe_paths(["../secrets.env"])
 
-    def test_monitor_rejects_parent_path(self):
+    def test_all_sync_helpers_reject_repository_wide_path(self):
         with self.assertRaises(ValueError):
-            auto_sync_monitor._safe_paths("../secrets.env")
+            synce._safe_paths(["."])
+        with self.assertRaises(ValueError):
+            auto_sync_monitor._safe_paths("./")
+        with self.assertRaises(ValueError):
+            tamannna_master._safe_sync_paths(["."])
+        with self.assertRaises(ValueError):
+            git_sync.git_commit_push(paths=["."], allow_push=True)
 
-    def test_master_rejects_parent_path(self):
+    def test_all_sync_helpers_reject_secret_paths(self):
+        for secret_path in [".env", ".env.production", "config/credentials.json", "keys/server.pem", "api/token.txt"]:
+            with self.subTest(path=secret_path):
+                with self.assertRaises(ValueError):
+                    synce._safe_paths([secret_path])
+                with self.assertRaises(ValueError):
+                    auto_sync_monitor._safe_paths(secret_path)
+                with self.assertRaises(ValueError):
+                    tamannna_master._safe_sync_paths([secret_path])
+                with self.assertRaises(ValueError):
+                    git_sync.git_commit_push(paths=[secret_path], allow_push=True)
+
+    def test_sync_helpers_reject_glob_pathspecs(self):
         with self.assertRaises(ValueError):
-            tamannna_master._safe_sync_paths(["../secrets.env"])
+            synce._safe_paths(["**/*"])
+        with self.assertRaises(ValueError):
+            auto_sync_monitor._safe_paths("*.py")
 
     def test_master_run_requires_argument_list(self):
         with self.assertRaises(ValueError):
