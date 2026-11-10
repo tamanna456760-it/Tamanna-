@@ -48,6 +48,10 @@ jobs:
           node --check runner/node/bot.js
           node --check runner/node/git.js
           node --check runner/node/github.js
+          node --check runner/node/github-sync.js
+          node --check runner/node/generator.js
+          node --check runner/node/agent.js
+          node --check runner/node/ai-github-bot.js
 
       - name: Run Node runtime safety tests
         run: npm test --prefix runner/node
