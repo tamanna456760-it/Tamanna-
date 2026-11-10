@@ -69,6 +69,16 @@
         "additionalProperties": true
       }
     },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks_passed", "checks_failed", "checks_error"],
+      "properties": {
+        "checks_passed": {"type": "integer", "minimum": 0},
+        "checks_failed": {"type": "integer", "minimum": 0},
+        "checks_error": {"type": "integer", "minimum": 0}
+      }
+    },
     "checks_passed": {
       "type": "integer",
       "minimum": 0
