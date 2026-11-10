@@ -9,6 +9,7 @@ const { validatePath, parseAllowlist } = require("../git.js");
 const { askAI } = require("../ai.js");
 const { safeTokenEqual } = require("../node_server.js");
 const { extractMessage, generateReply } = require("../server.js");
+const { safeKeyEqual, consumeRateLimit } = require("../ai_server.js");
 
 test("Git sync path policy accepts a safe exact relative path", () => {
   assert.equal(validatePath("docs/STATUS.md"), undefined);
@@ -79,4 +80,18 @@ test("WebSocket parser accepts bounded text and structured JSON only", () => {
 
 test("WebSocket reply never claims an unconfigured local model is running", async () => {
   assert.match(await generateReply("/ai hello"), /Local AI is not configured/);
+});
+
+test("AI gateway compares private keys safely", () => {
+  assert.equal(safeKeyEqual("same-secret", "same-secret"), true);
+  assert.equal(safeKeyEqual("wrong", "same-secret"), false);
+  assert.equal(safeKeyEqual(undefined, "same-secret"), false);
+});
+
+test("AI gateway rate limiter enforces ten requests per minute", () => {
+  const key = "unit-test-client";
+  const start = 1_800_000_000_000;
+  for (let i = 0; i < 10; i += 1) assert.equal(consumeRateLimit(key, start), true);
+  assert.equal(consumeRateLimit(key, start), false);
+  assert.equal(consumeRateLimit(key, start + 60_000), true);
 });
