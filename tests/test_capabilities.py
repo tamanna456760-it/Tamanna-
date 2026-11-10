@@ -443,3 +443,29 @@ def test_web_fetcher_redirect_target_is_revalidated():
     with pytest.raises(ValueError, match="non-public IP"):
         SafeWebFetcher._validate_url(private_redirect)
 
+def test_web_fetcher_rejects_malformed_and_oversized_urls():
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import SafeWebFetcher
+
+    invalid_urls = [
+        "https://",
+        "ftp://example.com/file",
+        "https://example.com:invalid/",
+        "https://" + ("a" * 2050) + ".example/",
+    ]
+    for url in invalid_urls:
+        with pytest.raises((ValueError, Exception)):
+            SafeWebFetcher._validate_url(url)
+
+
+def test_web_fetcher_reports_dns_resolution_failure(monkeypatch):
+    import socket
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import SafeWebFetcher, WebFetchError
+
+    def fail_resolution(*args, **kwargs):
+        raise socket.gaierror("controlled test DNS failure")
+
+    monkeypatch.setattr(socket, "getaddrinfo", fail_resolution)
+    with pytest.raises(WebFetchError, match="could not be resolved"):
+        SafeWebFetcher._validate_url("https://unresolvable-controlled-test.example/")
