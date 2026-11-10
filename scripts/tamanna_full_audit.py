@@ -138,40 +138,48 @@ def check_python_syntax():
 
 
 def check_dependencies():
-    print("\n[3] Dependency manifest")
+    print("\\n[3] Dependency manifests")
 
-    req = ROOT / "requirements.txt"
+    # requirements.txt is intentionally a lightweight marker for static hosts.
+    # The actual FastAPI runtime and test dependencies live in dedicated files.
+    manifests = {
+        "requirements-server.txt": "HIGH",
+        "requirements-test.txt": "HIGH",
+    }
+    for name, severity in manifests.items():
+        path = ROOT / name
+        if not path.is_file():
+            add(severity, name, "Required dependency manifest is missing")
+            print(f"MISSING  {name}")
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            add(severity, name, f"Cannot read: {exc}")
+            print(f"ERROR    {name}: {exc}")
+            continue
+        packages = [
+            line.strip()
+            for line in lines
+            if line.strip()
+            and not line.lstrip().startswith("#")
+            and not line.lstrip().startswith("-")
+        ]
+        if not packages:
+            add(severity, name, "No dependency entries found")
+            print(f"EMPTY    {name}")
+        else:
+            print(f"OK       {name}: {len(packages)} direct entries")
 
-    if not req.is_file():
-        add("HIGH", "requirements.txt", "Dependency manifest missing")
-        return
+    root_manifest = ROOT / "requirements.txt"
+    if root_manifest.is_file():
+        print("OK       requirements.txt (lightweight static-host marker)")
+    else:
+        add("MEDIUM", "requirements.txt", "Optional root dependency marker is missing")
 
-    try:
-        lines = req.read_text(encoding="utf-8").splitlines()
-    except OSError as exc:
-        add("HIGH", "requirements.txt", f"Cannot read: {exc}")
-        return
-
-    packages = [
-        line.strip()
-        for line in lines
-        if line.strip()
-        and not line.lstrip().startswith("#")
-        and not line.lstrip().startswith("-")
-    ]
-
-    if not packages:
-        add("HIGH", "requirements.txt", "No dependency entries found")
-
-    print(f"Dependency entries: {len(packages)}")
-
-    if (ROOT / "pyproject.toml").exists():
-        print("Found pyproject.toml")
-    if (ROOT / "uv.lock").exists():
-        print("Found uv.lock")
-    if (ROOT / "poetry.lock").exists():
-        print("Found poetry.lock")
-
+    for name in ("pyproject.toml", "uv.lock", "poetry.lock"):
+        if (ROOT / name).exists():
+            print(f"Found {name}")
 
 def check_workflows():
     print("\n[4] GitHub Actions workflow files")
