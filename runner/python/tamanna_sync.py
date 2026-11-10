@@ -75,8 +75,8 @@ def sync_once():
     credentials = Path(credentials_value).expanduser().resolve()
     if not folder.is_dir():
         raise FileNotFoundError(f"Sync folder not found: {folder}")
-    if not credentials.is_file() or not is_safe_upload(credentials):
-        raise ValueError("Google credentials file is missing or unsafe")
+    if not credentials.is_file() or credentials.is_symlink():
+        raise ValueError("Google credentials file is missing or is a symlink")
     if folder == credentials or folder in credentials.parents:
         raise ValueError("Credentials file must be outside the upload folder")
 
@@ -94,7 +94,7 @@ def sync_once():
         dirs[:] = [name for name in dirs if not (root_path / name).is_symlink()]
         for name in files:
             source = root_path / name
-            if not is_safe_upload(source):
+            if not is_safe_upload(source) or source.suffix.lower() != ".pdf":
                 continue
             relative = source.relative_to(folder).as_posix()
             digest = file_hash(source)
