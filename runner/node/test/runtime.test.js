@@ -139,7 +139,7 @@ test("Telegram bot module can be imported without starting polling or requiring 
   assert.equal(isAdminId("123", admins), true);
   assert.equal(isAdminId("789", admins), false);
   assert.equal(isAdminId("123", new Set()), false);
-  assert.throws(() => createBot({ token: "" }), /BOT_TOKEN is required/);
+  assert.rejects(createBot({ token: "" }), /BOT_TOKEN is required/);
 });
 
 test("WebSocket origin allowlist rejects missing and unlisted origins", () => {
