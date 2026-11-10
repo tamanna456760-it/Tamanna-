@@ -2,6 +2,8 @@
 import base64, hashlib, hmac, json, os, re, secrets, sqlite3, time
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlencode
+from urllib.request import urlopen
 from typing import Optional
 from fastapi import APIRouter, Cookie, HTTPException, Request, Response
 from pydantic import BaseModel, Field
@@ -188,6 +190,8 @@ class Signup(BaseModel):
 class Login(BaseModel):
     email: str = Field(min_length=5, max_length=254)
     password: str = Field(min_length=1, max_length=128)
+class GoogleLogin(BaseModel):
+    credential: str = Field(min_length=20, max_length=8192)
 class Profile(BaseModel):
     name: str = Field(min_length=2, max_length=80)
 class ChangePassword(BaseModel):
@@ -229,6 +233,70 @@ def login(data: Login, request: Request, response: Response):
         raise HTTPException(401, "Email or password is incorrect.")
     set_cookie(response, issue_session(row["id"]))
     return {"ok": True, "user": {"id": row["id"], "email": row["email"], "name": row["name"]}}
+
+def verify_google_credential(credential: str):
+    """Verify a Google Identity Services ID token against the configured OAuth client."""
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not client_id:
+        raise HTTPException(503, "Google sign-in is not configured. Set GOOGLE_CLIENT_ID.")
+    try:
+        query = urlencode({"id_token": credential})
+        with urlopen("https://oauth2.googleapis.com/tokeninfo?" + query, timeout=5) as result:
+            claims = json.loads(result.read(16384).decode("utf-8"))
+    except Exception as exc:
+        raise HTTPException(401, "Google sign-in token could not be verified.") from exc
+
+    issuer = claims.get("iss")
+    verified = claims.get("email_verified")
+    if isinstance(verified, str):
+        verified = verified.lower() == "true"
+    try:
+        expires = int(claims.get("exp", "0"))
+    except (TypeError, ValueError):
+        expires = 0
+    email = str(claims.get("email", "")).strip().lower()
+    if (
+        issuer not in ("accounts.google.com", "https://accounts.google.com")
+        or claims.get("aud") != client_id
+        or expires <= int(time.time())
+        or verified is not True
+        or not claims.get("sub")
+        or not EMAIL_RE.fullmatch(email)
+    ):
+        raise HTTPException(401, "Google account verification failed.")
+    name = str(claims.get("name") or email.split("@", 1)[0]).strip()[:80]
+    if len(name) < 2:
+        name = email.split("@", 1)[0][:80]
+    return {"email": email, "name": name}
+
+
+@router.post("/google")
+def google_login(data: GoogleLogin, request: Request, response: Response):
+    check_origin(request)
+    rate_limit_auth(request, "google_login")
+    identity = verify_google_credential(data.credential)
+    with db() as c:
+        row = c.execute(
+            "SELECT id,email,name FROM users WHERE email=? COLLATE NOCASE",
+            (identity["email"],),
+        ).fetchone()
+        if row:
+            user_id = row["id"]
+            user_name = row["name"]
+        else:
+            cur = c.execute(
+                "INSERT INTO users(email,name,password_hash,created_at,updated_at) VALUES(?,?,?,?,?)",
+                (identity["email"], identity["name"], password_hash(secrets.token_urlsafe(48)), now(), now()),
+            )
+            user_id = cur.lastrowid
+            user_name = identity["name"]
+            c.execute(
+                "INSERT INTO preferences(user_id,data,updated_at) VALUES(?,?,?)",
+                (user_id, "{}", now()),
+            )
+    set_cookie(response, issue_session(user_id))
+    return {"ok": True, "user": {"id": user_id, "email": identity["email"], "name": user_name}}
+
 
 @router.get("/me")
 def me(token: Optional[str] = Cookie(default=None, alias=COOKIE)):
