@@ -1,24 +1,15 @@
 #!/usr/bin/env python3
-"""
-bd-king-r7 powerhub agent
-
-- Reads /etc/bdking/agent.yml for configuration
-- Every interval:
-  - Pulls repo, switches/creates automation branch
-  - Runs fixers and build/test commands
-  - Updates 'ficar' and 'power_sync' marker files
-  - Commits and optionally pushes changes
-  - Posts a JSON report to orchestration server
-- Uses lockfile to avoid overlapping runs
-"""
+"""Conservative BD-KING-R7 agent: shell-free commands and opt-in allowlisted sync."""
 import logging
 import os
+import re
+import shlex
 import signal
 import subprocess
 import sys
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -26,75 +17,129 @@ import yaml
 
 LOG = logging.getLogger("bdking_agent")
 LOG.setLevel(logging.INFO)
-LOG.addHandler(logging.StreamHandler(sys.stdout))
+if not LOG.handlers:
+    LOG.addHandler(logging.StreamHandler(sys.stdout))
 
 DEFAULT_CONFIG_PATH = "/etc/bdking/agent.yml"
+SHELL_OPERATORS = {"|", "||", "&&", ";", ">", ">>", "<", "2>", "&"}
 
 
 def now_iso():
-    return datetime.utcnow().isoformat() + "Z"
+    return datetime.now(timezone.utc).isoformat()
 
 
-def run(cmd, cwd=None, timeout=None):
-    LOG.info("RUN: %s (cwd=%s)", cmd, cwd)
-    p = subprocess.Popen(
-        cmd,
-        shell=True,
+def command_args(command):
+    """Parse a configured command without ever invoking a shell."""
+    if isinstance(command, str):
+        args = shlex.split(command)
+    elif isinstance(command, (list, tuple)):
+        args = [str(item) for item in command]
+    else:
+        raise ValueError("Commands must be strings or argument lists")
+    if not args or any(item in SHELL_OPERATORS for item in args):
+        raise ValueError("Empty commands and shell operators are not allowed")
+    return args
+
+
+def safe_relative_paths(values):
+    if not isinstance(values, list) or not values:
+        raise ValueError("sync_paths must be a non-empty list of explicit relative paths")
+    forbidden = {"credentials.json", "id_rsa", "id_ed25519", "token", "token.txt"}
+    result = []
+    for value in values:
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("sync_paths entries must be non-empty strings")
+        path = Path(value)
+        parts = path.parts
+        if (
+            path.is_absolute() or not parts or value.strip() in {".", "./"}
+            or ".." in parts or value.startswith(":")
+            or any(char in value for char in "*?[]")
+            or any(part == ".env" or part.startswith(".env.") for part in parts)
+            or any(part.lower() in forbidden for part in parts)
+            or any(Path(part).suffix.lower() in {".pem", ".key", ".p12", ".pfx"} for part in parts)
+        ):
+            raise ValueError(f"Unsafe or overly broad sync path: {value}")
+        result.append(path.as_posix())
+    return result
+
+
+def run(cmd, cwd=None, timeout=300):
+    args = command_args(cmd)
+    LOG.info("RUN: %s (cwd=%s)", args[0], cwd)
+    process = subprocess.Popen(
+        args,
+        shell=False,
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        bufsize=1,
-        executable="/bin/bash",
     )
-    out_lines = []
     try:
-        for line in p.stdout:
-            out_lines.append(line.rstrip("\n"))
-            LOG.debug(line.rstrip("\n"))
-        p.wait(timeout=timeout)
+        output, _ = process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        p.kill()
+        process.kill()
+        process.communicate()
         raise
-    return p.returncode, "\n".join(out_lines)
+    if output:
+        for line in output.splitlines():
+            LOG.info("%s", line)
+    return process.returncode, output or ""
 
 
 class Agent:
     def __init__(self, cfg):
-        self.repo_path = Path(cfg["repo_path"]).expanduser()
-        self.branch = cfg.get("branch", "powerhub-auto")
+        if not isinstance(cfg, dict):
+            raise ValueError("Agent configuration must be a YAML mapping")
+        self.repo_path = Path(cfg["repo_path"]).expanduser().resolve()
+        self.branch = cfg.get("branch", "main")
         self.remote = cfg.get("remote", "origin")
+        if self.branch != "main":
+            raise ValueError("This agent is restricted to the main branch")
+        if not isinstance(self.remote, str) or not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", self.remote):
+            raise ValueError("remote must be a simple configured Git remote name")
         self.user = cfg.get("user") or os.environ.get("USER", "nobody")
         self.interval = int(cfg.get("interval_seconds", 60))
-        self.push_changes = bool(cfg.get("push_changes", False))
+        if self.interval < 10:
+            raise ValueError("interval_seconds must be at least 10")
+        self.push_changes = cfg.get("push_changes") is True and cfg.get("allow_git_push") is True
+        self.sync_paths = safe_relative_paths(cfg.get("sync_paths", [])) if self.push_changes else []
         self.fix_cmds = cfg.get("fix_cmds", [])
         self.build_cmds = cfg.get("build_cmds", [])
-        self.ficar = cfg.get("ficar", "ficar")
-        self.powersync = cfg.get("power_sync", "power_sync")
-        self.lockfile = Path(
-            cfg.get("lockfile", "/var/lock/bd-king-r7-powerhub.lock"))
-        self.logfile = Path(
-            cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
+        for command in self.fix_cmds + self.build_cmds:
+            command_args(command)
+        self.ficar = self._safe_marker(cfg.get("ficar", "ficar"))
+        self.powersync = self._safe_marker(cfg.get("power_sync", "power_sync"))
+        self.lockfile = Path(cfg.get("lockfile", "/var/lock/bd-king-r7-powerhub.lock"))
+        self.logfile = Path(cfg.get("logfile", "/var/log/bd-king-r7-powerhub.log"))
         self.server_url = cfg.get("server_url", "").rstrip("/")
         self.agent_id = cfg.get("agent_id", str(uuid.uuid4()))
         self.auth_token = cfg.get("auth_token", "")
-        # ensure repo exists
         if not (self.repo_path / ".git").exists():
-            LOG.error("Repo path %s is not a git repository", self.repo_path)
-            raise SystemExit(1)
+            raise ValueError(f"Repo path {self.repo_path} is not a Git repository")
+
+    @staticmethod
+    def _safe_marker(value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Marker filenames must be non-empty relative paths")
+        path = Path(value)
+        if path.is_absolute() or ".." in path.parts or value in {".", "./"}:
+            raise ValueError(f"Unsafe marker path: {value}")
+        return path.as_posix()
 
     def _write_log(self, msg):
-        ts = now_iso()
-        with open(self.logfile, "a") as f:
-            f.write(f"[{ts}] {msg}\n")
+        self.logfile.parent.mkdir(parents=True, exist_ok=True)
+        with self.logfile.open("a", encoding="utf-8") as handle:
+            handle.write(f"[{now_iso()}] {msg}\n")
 
     def acquire_lock(self):
-        # simple lockfile existence + writing PID (works across reboots)
+        self.lockfile.parent.mkdir(parents=True, exist_ok=True)
         try:
-            fd = os.open(str(self.lockfile), os.O_CREAT |
-                         os.O_EXCL | os.O_WRONLY)
-            os.write(fd, str(os.getpid()).encode())
-            os.close(fd)
+            fd = os.open(str(self.lockfile), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            try:
+                os.write(fd, str(os.getpid()).encode())
+            finally:
+                os.close(fd)
             self._write_log("acquired lock")
             return True
         except FileExistsError:
@@ -106,153 +151,128 @@ class Agent:
             if self.lockfile.exists():
                 self.lockfile.unlink()
                 self._write_log("released lock")
-        except Exception as e:
-            LOG.exception("release_lock failed: %s", e)
+        except OSError:
+            LOG.exception("release_lock failed")
 
     def post_report(self, payload):
         if not self.server_url:
-            return
+            return None
         headers = {"Content-Type": "application/json"}
         if self.auth_token:
             headers["Authorization"] = f"Bearer {self.auth_token}"
-        url = f"{self.server_url}/api/report"
         try:
-            r = requests.post(url, json=payload, headers=headers, timeout=15)
-            self._write_log(f"POST {url} => {r.status_code}")
-            return r.status_code, r.text
-        except Exception as e:
-            self._write_log(f"POST {url} failed: {e}")
-            return None, str(e)
+            response = requests.post(
+                f"{self.server_url}/api/report", json=payload, headers=headers, timeout=15
+            )
+            self._write_log(f"Report returned HTTP {response.status_code}")
+            return response.status_code, response.text
+        except requests.RequestException as error:
+            self._write_log(f"Report request failed: {error}")
+            return None, str(error)
 
-    def git(self, cmd, cwd=None, timeout=300):
-        full = f"git {cmd}"
-        rc, out = run(full, cwd=str(cwd or self.repo_path), timeout=timeout)
-        return rc, out
+    def git(self, *args, timeout=300, check=False):
+        rc, output = run(["git", *args], cwd=str(self.repo_path), timeout=timeout)
+        if check and rc != 0:
+            raise RuntimeError(f"Git command failed: git {args[0]}")
+        return rc, output
 
     def perform_run(self):
         self._write_log("run start")
         if not self.acquire_lock():
             return
         try:
-            rc, out = self.git("fetch --all --prune")
-            self._write_log(f"git fetch rc={rc}")
-            # checkout or create branch
-            rc, out = self.git(f"rev-parse --verify {self.branch}")
-            if rc == 0:
-                rc, out = self.git(f"checkout {self.branch}")
-            else:
-                # try create from remote main or from HEAD
-                rc_main, _ = self.git(
-                    f"ls-remote --exit-code {self.remote} main")
-                if rc_main == 0:
-                    rc, out = self.git(
-                        f"checkout -b {self.branch} {self.remote}/main")
-                else:
-                    rc, out = self.git(f"checkout -b {self.branch}")
-            self._write_log("checked out branch")
-            # try reset to remote branch to avoid divergence
-            rc, _ = self.git(
-                f"ls-remote --exit-code {self.remote} {self.branch}")
-            if rc == 0:
-                self.git(f"reset --hard {self.remote}/{self.branch}")
+            rc, _ = self.git("status", "--porcelain", check=True)
+            current_rc, current_branch = self.git("branch", "--show-current", check=True)
+            if current_rc != 0 or current_branch.strip() != "main":
+                raise RuntimeError("Agent will only run on the checked-out main branch")
 
-            # pull latest
-            self.git(f"pull --rebase {self.remote} {self.branch}")
+            fetch_rc, _ = self.git("fetch", self.remote, check=False)
+            if fetch_rc != 0:
+                raise RuntimeError("Git fetch failed; stopping without modifying the checkout")
+            pull_rc, _ = self.git("pull", "--rebase", self.remote, "main", check=False)
+            if pull_rc != 0:
+                raise RuntimeError("Git pull/rebase failed; stopping for manual review")
 
-            # run fixers
             fixer_out = []
-            for cmd in self.fix_cmds:
-                if not cmd:
-                    continue
-                rc, out = run(cmd, cwd=str(self.repo_path))
-                fixer_out.append({"cmd": cmd, "rc": rc, "out": out})
+            for command in self.fix_cmds:
+                rc, output = run(command, cwd=str(self.repo_path))
+                fixer_out.append({"command": command_args(command), "rc": rc, "output": output})
+                if rc != 0:
+                    raise RuntimeError("A configured fixer command failed")
 
-            # stage all changes
-            self.git("add -A")
-
-            # run build/test
             build_ok = True
             build_out = []
-            for cmd in self.build_cmds:
-                if not cmd:
-                    continue
-                rc, out = run(cmd, cwd=str(self.repo_path))
-                build_out.append({"cmd": cmd, "rc": rc, "out": out})
+            for command in self.build_cmds:
+                rc, output = run(command, cwd=str(self.repo_path))
+                build_out.append({"command": command_args(command), "rc": rc, "output": output})
                 if rc != 0:
                     build_ok = False
                     break
 
-            # update marker files
             uid = str(uuid.uuid4())
-            self.repo_path.joinpath(self.ficar).write_text(
-                f"Updated at: {now_iso()}\nUUID: {uid}\n"
+            (self.repo_path / self.ficar).write_text(
+                f"Updated at: {now_iso()}\nUUID: {uid}\n", encoding="utf-8"
             )
-            self.repo_path.joinpath(self.powersync).write_text(
-                f"Last run: {now_iso()} BUILD_OK={build_ok}\n"
+            (self.repo_path / self.powersync).write_text(
+                f"Last run: {now_iso()} BUILD_OK={build_ok}\n", encoding="utf-8"
             )
-            self.git(f'add "{self.ficar}" "{self.powersync}" || true')
 
-            changes_rc, changes_out = self.git("status --porcelain")
-            has_changes = bool(changes_out.strip())
-
-            commit_sha = None
             committed = False
-            if has_changes and build_ok:
-                commit_msg = f"Automated sync/fix/build {now_iso()}"
-                self.git(f'commit -m "{commit_msg}" || true')
-                committed = True
-                # get last commit sha
-                rc, out = self.git("rev-parse --short HEAD")
-                if rc == 0:
-                    commit_sha = out.strip()
-                if self.push_changes:
-                    # push (create upstream if not exists)
-                    rc, out = self.git(
-                        f"push -u {self.remote} {self.branch} || true")
-                    self._write_log(f"push rc={rc}")
-            elif has_changes and not build_ok:
-                # reset staged changes so human can review
-                self.git("reset --mixed || true")
-            # prepare report
+            commit_sha = None
+            if build_ok and self.push_changes:
+                self.git("add", "--", *self.sync_paths, check=True)
+                _, staged = self.git("diff", "--cached", "--quiet", check=False)
+                staged_status, _ = self.git("diff", "--cached", "--quiet", check=False)
+                if staged_status == 1:
+                    commit_rc, _ = self.git(
+                        "commit", "-m", f"Explicit agent sync {now_iso()}", check=False
+                    )
+                    if commit_rc != 0:
+                        raise RuntimeError("Git commit failed")
+                    committed = True
+                    _, sha = self.git("rev-parse", "--short", "HEAD", check=True)
+                    commit_sha = sha.strip()
+                    push_rc, _ = self.git("push", "-u", self.remote, "main", check=False)
+                    if push_rc != 0:
+                        raise RuntimeError("Git push failed")
+                elif staged_status != 0:
+                    raise RuntimeError("Unable to inspect staged changes")
+
+            _, status = self.git("status", "--porcelain", check=True)
             report = {
                 "agent_id": self.agent_id,
                 "timestamp": now_iso(),
                 "repo_path": str(self.repo_path),
-                "branch": self.branch,
+                "branch": "main",
                 "fixer_out": fixer_out,
                 "build_ok": build_ok,
                 "build_out": build_out,
-                "has_changes": has_changes,
+                "has_changes": bool(status.strip()),
                 "committed": committed,
                 "commit_sha": commit_sha,
+                "push_enabled": self.push_changes,
             }
-            # post to orchestrator
             self.post_report(report)
             self._write_log("run finished")
-        except Exception as e:
-            LOG.exception("perform_run failed: %s", e)
-            self._write_log(f"run error: {e}")
+        except Exception as error:
+            LOG.exception("perform_run failed")
+            self._write_log(f"run error: {error}")
         finally:
             self.release_lock()
 
     def run_loop(self):
         self._write_log("agent starting main loop")
-        # signal handling
         stop = False
 
-        def _sig(_s, _f):
+        def handle_signal(_signal, _frame):
             nonlocal stop
             stop = True
 
-        signal.signal(signal.SIGINT, _sig)
-        signal.signal(signal.SIGTERM, _sig)
-
+        signal.signal(signal.SIGINT, handle_signal)
+        signal.signal(signal.SIGTERM, handle_signal)
         while not stop:
-            try:
-                self.perform_run()
-            except Exception:
-                LOG.exception("error during perform_run")
-            for _ in range(int(self.interval)):
+            self.perform_run()
+            for _ in range(self.interval):
                 if stop:
                     break
                 time.sleep(1)
@@ -261,15 +281,20 @@ class Agent:
 
 def load_config(path=DEFAULT_CONFIG_PATH):
     if not os.path.exists(path):
-        LOG.error("Config file not found: %s", path)
-        raise SystemExit(1)
-    with open(path) as f:
-        return yaml.safe_load(f)
+        raise FileNotFoundError(f"Config file not found: {path}")
+    with open(path, encoding="utf-8") as handle:
+        config = yaml.safe_load(handle)
+    if not isinstance(config, dict):
+        raise ValueError("Agent config must be a YAML mapping")
+    return config
 
 
 def main():
-    cfg = load_config()
-    agent = Agent(cfg)
+    config = load_config()
+    if config.get("enabled") is not True:
+        LOG.info("Agent disabled: set enabled: true in /etc/bdking/agent.yml to start")
+        return
+    agent = Agent(config)
     agent.run_loop()
 
 
