@@ -469,3 +469,24 @@ def test_web_fetcher_reports_dns_resolution_failure(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", fail_resolution)
     with pytest.raises(WebFetchError, match="could not be resolved"):
         SafeWebFetcher._validate_url("https://unresolvable-controlled-test.example/")
+
+def test_web_fetcher_html_extraction_omits_non_content_elements():
+    from tamanna_ai.capabilities.web_fetch import _PageText
+
+    parser = _PageText()
+    parser.feed(
+        "<html><head><title>Public guide</title>"
+        "<script>secret_script_marker()</script>"
+        "<style>.private-marker { display:none }</style></head>"
+        "<body><h1>Visible heading</h1><p>Readable paragraph</p>"
+        "<noscript>hidden fallback</noscript></body></html>"
+    )
+    title = " ".join(" ".join(parser.title_parts).split())
+    text = " ".join("".join(parser.parts).split())
+
+    assert title == "Public guide"
+    assert "Visible heading" in text
+    assert "Readable paragraph" in text
+    assert "secret_script_marker" not in text
+    assert "private-marker" not in text
+    assert "hidden fallback" not in text
