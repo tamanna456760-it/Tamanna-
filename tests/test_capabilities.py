@@ -454,7 +454,7 @@ def test_web_fetcher_rejects_malformed_and_oversized_urls():
         "https://" + ("a" * 2050) + ".example/",
     ]
     for url in invalid_urls:
-        with pytest.raises((ValueError, Exception)):
+        with pytest.raises(ValueError):
             SafeWebFetcher._validate_url(url)
 
 
