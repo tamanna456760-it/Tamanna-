@@ -1,209 +1,184 @@
 #!/usr/bin/env python3
+"""Conservative local mirror sync; destructive deletes and build commands are opt-in."""
 import hashlib
 import json
 import os
-import shutil
+import shlex
+import subprocess
 import time
 from datetime import datetime
+from pathlib import Path
 
-# ================= CONFIG: EDIT FOR YOUR SYSTEM =================
-
-# Root of BD KING R7
-BD_KING_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
-# Where to scan for code and power modules
+BD_KING_ROOT = Path(__file__).resolve().parent.parent
 WATCH_PATHS = [
-    os.path.join(BD_KING_ROOT, "code"),
-    os.path.join(BD_KING_ROOT, "engines"),
-    os.path.join(BD_KING_ROOT, "build"),
-    os.path.join(BD_KING_ROOT, "panels")  # if you have this
+    BD_KING_ROOT / "code",
+    BD_KING_ROOT / "engines",
+    BD_KING_ROOT / "build",
+    BD_KING_ROOT / "panels",
 ]
+SYNC_ROOT = BD_KING_ROOT / "sync_root" / "mirror_all"
+LOG_DIR = BD_KING_ROOT / "logs"
+LOG_FILE = LOG_DIR / "tamanna_sync.log"
+STATE_FILE = LOG_DIR / "tamanna_sync_state.json"
+SCAN_INTERVAL = 30
+# Commands must be configured as argument arrays, never shell command strings.
+BUILD_COMMANDS = []
+ALLOW_MIRROR_DELETE = os.environ.get("TAMANNA_ALLOW_MIRROR_DELETE") == "1"
+ALLOW_BUILD_COMMANDS = os.environ.get("TAMANNA_ALLOW_BUILD_COMMANDS") == "1"
 
-# Where to sync (central mirror)
-SYNC_ROOT = os.path.join(BD_KING_ROOT, "sync_root", "mirror_all")
+SECRET_NAMES = {
+    ".env", ".env.local", ".env.production", "credentials.json",
+    "token.json", "token.pickle", "id_rsa", "id_ed25519",
+    "service-account.json", "secrets.json",
+}
+SECRET_SUFFIXES = {".pem", ".key", ".p12", ".pfx"}
 
-# Log + state files
-LOG_DIR = os.path.join(BD_KING_ROOT, "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
 
-LOG_FILE = os.path.join(LOG_DIR, "tamanna_sync.log")
-STATE_FILE = os.path.join(LOG_DIR, "tamanna_sync_state.json")
+def is_safe_file(path):
+    if path.is_symlink() or not path.is_file():
+        return False
+    parts = [part.lower() for part in path.parts]
+    if any(part in SECRET_NAMES or part.startswith(".env.") for part in parts):
+        return False
+    if path.suffix.lower() in SECRET_SUFFIXES:
+        return False
+    return True
 
-# How often to check (seconds)
-SCAN_INTERVAL = 10
-
-# Build commands to run after successful sync (edit as you like)
-BUILD_COMMANDS = [
-    # Example: "bash build/build_all.sh",
-    # Example: "python3 build/build_all.py"
-]
-
-# ================== UTILITY FUNCTIONS ===========================
 
 def log(message):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    line = f"[{timestamp}] TamannaSync :: {message}"
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    line = f"[{datetime.now().isoformat(timespec='seconds')}] TamannaSync :: {message}"
     print(line)
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(line + "\n")
+    with LOG_FILE.open("a", encoding="utf-8") as handle:
+        handle.write(line + "\n")
 
 
 def hash_file(path):
-    """Return hash of a file, or None if cannot read."""
-    try:
-        h = hashlib.sha256()
-        with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(8192), b""):
-                h.update(chunk)
-        return h.hexdigest()
-    except Exception as e:
-        log(f"WARNING: Could not hash {path}: {e}")
-        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8192), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def scan_all_files():
-    """Scan watched paths and return dict: {relative_path: hash}."""
     state = {}
     for base in WATCH_PATHS:
-        if not os.path.exists(base):
+        if not base.is_dir():
             continue
-        for root, dirs, files in os.walk(base):
+        for root, dirs, files in os.walk(base, followlinks=False):
+            dirs[:] = [name for name in dirs if not (Path(root) / name).is_symlink()]
             for name in files:
-                full_path = os.path.join(root, name)
-                rel_path = os.path.relpath(full_path, BD_KING_ROOT)
-                file_hash = hash_file(full_path)
-                if file_hash:
-                    state[rel_path] = file_hash
+                full_path = Path(root) / name
+                if not is_safe_file(full_path):
+                    continue
+                rel_path = full_path.relative_to(BD_KING_ROOT).as_posix()
+                try:
+                    state[rel_path] = hash_file(full_path)
+                except OSError as error:
+                    log(f"WARNING: Could not hash {rel_path}: {error}")
     return state
 
 
 def load_previous_state():
-    if not os.path.exists(STATE_FILE):
+    if not STATE_FILE.exists():
         return {}
     try:
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        log(f"WARNING: Could not load state file: {e}")
+        data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError) as error:
+        log(f"WARNING: Could not load state: {error}")
         return {}
 
 
 def save_state(state):
-    try:
-        with open(STATE_FILE, "w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2)
-    except Exception as e:
-        log(f"WARNING: Could not save state file: {e}")
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    temporary = STATE_FILE.with_suffix(".tmp")
+    temporary.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    temporary.replace(STATE_FILE)
 
 
 def diff_states(old, new):
-    """Compare two states, return added, changed, removed lists of relative paths."""
-    old_keys = set(old.keys())
-    new_keys = set(new.keys())
-
-    added = sorted(list(new_keys - old_keys))
-    removed = sorted(list(old_keys - new_keys))
-
-    changed = []
-    for path in (old_keys & new_keys):
-        if old[path] != new[path]:
-            changed.append(path)
-    changed.sort()
-
+    old_keys, new_keys = set(old), set(new)
+    added = sorted(new_keys - old_keys)
+    removed = sorted(old_keys - new_keys)
+    changed = sorted(key for key in old_keys & new_keys if old[key] != new[key])
     return added, changed, removed
 
 
-def ensure_dir_for_file(full_path):
-    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+def contained_path(root, relative):
+    candidate = (root / relative).resolve()
+    if root.resolve() not in candidate.parents:
+        raise ValueError(f"Path escapes mirror root: {relative}")
+    return candidate
 
 
 def sync_file(rel_path):
-    src = os.path.join(BD_KING_ROOT, rel_path)
-    dest = os.path.join(SYNC_ROOT, rel_path)
-
-    if not os.path.exists(src):
-        # If source is gone, we may want to delete from sync mirror
-        if os.path.exists(dest):
-            os.remove(dest)
-            log(f"SYNC REMOVE :: {rel_path}")
+    source = contained_path(BD_KING_ROOT, rel_path)
+    if not is_safe_file(source):
+        log(f"SKIP unsafe source :: {rel_path}")
         return
-
-    ensure_dir_for_file(dest)
-    shutil.copy2(src, dest)
+    destination = contained_path(SYNC_ROOT, rel_path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(source.read_bytes())
     log(f"SYNC UPDATE :: {rel_path}")
 
 
 def remove_synced_file(rel_path):
-    dest = os.path.join(SYNC_ROOT, rel_path)
-    if os.path.exists(dest):
-        os.remove(dest)
+    if not ALLOW_MIRROR_DELETE:
+        log(f"DELETE SKIPPED (TAMANNA_ALLOW_MIRROR_DELETE not set) :: {rel_path}")
+        return
+    destination = contained_path(SYNC_ROOT, rel_path)
+    if destination.is_file() and not destination.is_symlink():
+        destination.unlink()
         log(f"SYNC REMOVE :: {rel_path}")
 
 
 def run_build_commands():
-    if not BUILD_COMMANDS:
-        log("BUILD :: No BUILD_COMMANDS configured, skipping.")
+    if not ALLOW_BUILD_COMMANDS or not BUILD_COMMANDS:
+        log("BUILD skipped; explicit opt-in and argument-list commands are required")
         return
+    for command in BUILD_COMMANDS:
+        if not isinstance(command, (list, tuple)) or not command:
+            raise ValueError("BUILD_COMMANDS entries must be non-empty argument lists")
+        if any(token in {";", "&&", "||", "|", ">", ">>", "<"} for token in command):
+            raise ValueError("Shell operators are not permitted in build commands")
+        log(f"BUILD CMD :: {command[0]}")
+        result = subprocess.run(
+            [str(part) for part in command],
+            cwd=str(BD_KING_ROOT),
+            check=False,
+            timeout=900,
+        )
+        if result.returncode:
+            raise RuntimeError(f"Build command failed with exit code {result.returncode}")
 
-    log("BUILD :: Starting build sequence...")
-    for cmd in BUILD_COMMANDS:
-        log(f"BUILD CMD :: {cmd}")
-        # Safe: using os.system. You can replace with subprocess if you want more control.
-        exit_code = os.system(cmd)
-        if exit_code == 0:
-            log(f"BUILD OK :: {cmd}")
-        else:
-            log(f"BUILD FAIL ({exit_code}) :: {cmd}")
-    log("BUILD :: Completed build sequence.")
-
-
-# ================== MAIN LOOP ==================================
 
 def main_loop():
-    log("Tamanna Sync Engine for BD KING R7 :: START")
-    os.makedirs(SYNC_ROOT, exist_ok=True)
-
-    prev_state = load_previous_state()
-
+    log("Tamanna Sync Engine started in conservative mode")
+    SYNC_ROOT.mkdir(parents=True, exist_ok=True)
+    previous = load_previous_state()
     while True:
         try:
-            current_state = scan_all_files()
-            added, changed, removed = diff_states(prev_state, current_state)
-
+            current = scan_all_files()
+            added, changed, removed = diff_states(previous, current)
+            for relative in added + changed:
+                sync_file(relative)
+            for relative in removed:
+                remove_synced_file(relative)
             if added or changed or removed:
-                log("CHANGE DETECTED :: Sync and build ritual begins.")
-                if added:
-                    log(f"ADDED   :: {len(added)} file(s)")
-                if changed:
-                    log(f"CHANGED :: {len(changed)} file(s)")
-                if removed:
-                    log(f"REMOVED :: {len(removed)} file(s)")
-
-                # Sync added and changed
-                for rel in added + changed:
-                    sync_file(rel)
-
-                # Remove deleted from sync mirror
-                for rel in removed:
-                    remove_synced_file(rel)
-
-                # Save new state
-                save_state(current_state)
-
-                # Run build ritual
+                save_state(current)
                 run_build_commands()
+                log(f"Cycle complete: added={len(added)}, changed={len(changed)}, removed={len(removed)}")
             else:
-                log("NO CHANGE :: Heartbeat only.")
-
-            prev_state = current_state
+                log("No changes detected")
+            previous = current
             time.sleep(SCAN_INTERVAL)
-
         except KeyboardInterrupt:
-            log("Tamanna Sync Engine :: STOP (KeyboardInterrupt)")
-            break
-
-        except Exception as e:
-            log(f"ERROR in main loop: {e}")
+            log("Sync engine stopped")
+            return
+        except Exception as error:
+            log(f"ERROR: {error}")
             time.sleep(SCAN_INTERVAL)
 
 
