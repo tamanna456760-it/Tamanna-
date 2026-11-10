@@ -4,14 +4,18 @@ Owner: HM INSAN ALI
 Checks selected security defaults without changing configuration.
 """
 from __future__ import annotations
+
 import argparse
 import json
 import sys
 from pathlib import Path
 from typing import Any
+
 DEFAULT_CONFIG = Path("endpoint_security/endpoint_config.json")
-def check_policy(config: Any) -> list[str]:
-    """Return policy violations found in the configuration."""
+
+
+def _policy_violations(config: Any) -> list[str]:
+    """Return policy violations found in an already-loaded configuration."""
     problems: list[str] = []
     if not isinstance(config, dict):
         return ["Configuration root must be a JSON object."]
@@ -23,19 +27,16 @@ def check_policy(config: Any) -> list[str]:
     if not isinstance(enforcement, dict):
         problems.append("enforcement must be a JSON object.")
     else:
-        protected_options = (
+        for option in (
             "kill_processes",
             "quarantine_files",
             "delete_files",
             "modify_system_settings",
-        )
-        for option in protected_options:
+        ):
             if enforcement.get(option) is not False:
                 problems.append(f"enforcement.{option} must be false.")
         if enforcement.get("require_manual_approval") is not True:
-            problems.append(
-                "enforcement.require_manual_approval must be true."
-            )
+            problems.append("enforcement.require_manual_approval must be true.")
     logging_config = config.get("logging")
     if not isinstance(logging_config, dict):
         problems.append("logging must be a JSON object.")
@@ -49,44 +50,54 @@ def check_policy(config: Any) -> list[str]:
         problems.append("process_monitoring must be a JSON object.")
     else:
         if process_config.get("collect_command_line") is not False:
-            problems.append(
-                "process_monitoring.collect_command_line must be false."
-            )
+            problems.append("process_monitoring.collect_command_line must be false.")
         if process_config.get("collect_environment_variables") is not False:
-            problems.append(
-                "process_monitoring.collect_environment_variables must be false."
-            )
+            problems.append("process_monitoring.collect_environment_variables must be false.")
     return problems
+
+
+def check_policy(config_or_path: Any) -> dict[str, Any]:
+    """Validate a config mapping or JSON file and return a stable report."""
+    source = "in_memory"
+    if isinstance(config_or_path, (str, Path)):
+        path = Path(config_or_path)
+        source = str(path)
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                config = json.load(handle)
+        except OSError as exc:
+            return {
+                "valid": False,
+                "source": source,
+                "violations": [f"Cannot read configuration ({exc.__class__.__name__})."],
+            }
+        except json.JSONDecodeError as exc:
+            return {
+                "valid": False,
+                "source": source,
+                "violations": [f"Invalid JSON at line {exc.lineno}, column {exc.colno}."],
+            }
+    else:
+        config = config_or_path
+    violations = _policy_violations(config)
+    return {
+        "valid": not violations,
+        "source": source,
+        "violations": violations,
+        "mode": config.get("mode") if isinstance(config, dict) else None,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Check Tamanna AI Endpoint Security policy defaults."
     )
-    parser.add_argument(
-        "--config",
-        type=Path,
-        default=DEFAULT_CONFIG,
-        help="Configuration JSON path.",
-    )
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args()
-    try:
-        with args.config.open("r", encoding="utf-8") as file:
-            config = json.load(file)
-    except OSError as exc:
-        print(f"ERROR: Cannot read configuration ({exc.__class__.__name__}).")
-        return 2
-    except json.JSONDecodeError as exc:
-        print(f"ERROR: Invalid JSON at line {exc.lineno}, column {exc.colno}.")
-        return 2
-    problems = check_policy(config)
-    if problems:
-        print("POLICY CHECK: FAIL")
-        for problem in problems:
-            print(f"- {problem}")
-        return 1
-    print("POLICY CHECK: PASS")
-    print("Mode: monitor_only")
-    print("Destructive enforcement: disabled")
-    print("Sensitive process details collection: disabled")
-    return 0
+    report = check_policy(args.config)
+    print(json.dumps(report, indent=2, ensure_ascii=False))
+    return 0 if report["valid"] else 1
+
+
 if __name__ == "__main__":
     sys.exit(main())
