@@ -30,6 +30,11 @@ const wsServer = new WebSocket.Server({
   perMessageDeflate: false
 });
 
+function isOriginAllowed(origin, origins = allowedOrigins) {
+  if (!origins.length) return true;
+  return typeof origin === "string" && origins.includes(origin);
+}
+
 function makeError(message) {
   return JSON.stringify({ type: "error", message, timestamp: new Date().toISOString() });
 }
@@ -136,7 +141,7 @@ server.on("upgrade", (req, socket, head) => {
   }
 
   if (pathname !== "/ws" || clients.size >= MAX_CLIENTS ||
-      (allowedOrigins.length && origin && !allowedOrigins.includes(origin))) {
+      !isOriginAllowed(origin)) {
     socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
     socket.destroy();
     return;
@@ -163,4 +168,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, server, wsServer, generateReply, extractMessage };
+module.exports = { app, server, wsServer, generateReply, extractMessage, isOriginAllowed };
