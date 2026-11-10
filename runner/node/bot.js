@@ -5,7 +5,7 @@ const { githubSync } = require("./github.js");
 
 function parseAdminIds(value = "") {
   return new Set(
-    String(value).split(",").map((id) => id.trim()).filter((id) => /^\\d+$/.test(id))
+    String(value).split(",").map((id) => id.trim()).filter((id) => /^\d+$/.test(id))
   );
 }
 
