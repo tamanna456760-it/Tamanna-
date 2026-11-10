@@ -2,6 +2,8 @@
 name: Tamanna Full System Audit
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
