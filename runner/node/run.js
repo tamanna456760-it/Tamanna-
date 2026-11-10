@@ -1,26 +1,8 @@
-import 'dotenv/config'
-import { startAI } from './ai/ai.js'
-import { githubSync } from './github/sync.js'
-import { generateProject } from './generator/generator.js'
-import { startWeb } from './web/server.js'
-import { startBot } from './telegram/bot.js'
-import { monitorSystem } from './monitor/monitor.js'
-import { securityScan } from './security/security.js'
-import { backupSystem } from './backup/backup.js'
+'use strict';
 
-async function main(){
-  console.log("🌸 Tamanna AI Full OS v5 Starting...")
+// Safe compatibility entrypoint for the currently available Node.js server.
+// Legacy AI generation, backup, security simulation, and Git sync modules are
+// intentionally not auto-executed during startup.
+console.warn('[Tamanna] Legacy full-OS launcher is disabled; starting the available server only.');
 
-  await securityScan()
-  await backupSystem()
-  await githubSync()
-  await generateProject("Create full stack AI project with Node.js and Express")
-  await startAI()
-  monitorSystem()
-  startWeb()
-  startBot()
-
-  console.log("✅ Tamanna AI Full OS v5 Ready")
-}
-
-main()
+require('./server.js');
