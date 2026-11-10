@@ -74,6 +74,11 @@ def build_posture_report(
         "checks_passed": passed,
         "checks_failed": failed,
         "checks_error": errors,
+        "counts": {
+            "checks_passed": passed,
+            "checks_failed": failed,
+            "checks_error": errors,
+        },
         "read_only": True,
         "note": (
             "This report summarizes supplied results only. "
