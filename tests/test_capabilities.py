@@ -490,3 +490,53 @@ def test_web_fetcher_html_extraction_omits_non_content_elements():
     assert "secret_script_marker" not in text
     assert "private-marker" not in text
     assert "hidden fallback" not in text
+
+
+
+def test_pinned_dns_resolver_returns_only_validated_ip_literals():
+    import asyncio
+    import socket
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import _PinnedPublicResolver
+
+    async def lookup(*args, **kwargs):
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", ("93.184.216.34", 443)),
+        ]
+
+    result = asyncio.run(_PinnedPublicResolver(lookup).resolve("example.test", 443))
+    assert result == [{
+        "hostname": "example.test",
+        "host": "93.184.216.34",
+        "port": 443,
+        "family": socket.AF_INET,
+        "proto": socket.IPPROTO_TCP,
+        "flags": "",
+    }]
+
+
+def test_pinned_dns_resolver_rejects_rebinding_to_private_address():
+    import asyncio
+    import socket
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import _PinnedPublicResolver
+
+    async def mixed_lookup(*args, **kwargs):
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", ("93.184.216.34", 443)),
+            (socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", ("10.0.0.8", 443)),
+        ]
+
+    with pytest.raises(OSError, match="non-public IP"):
+        asyncio.run(_PinnedPublicResolver(mixed_lookup).resolve("rebinding.test", 443))
+
+
+def test_pinned_dns_resolver_rejects_empty_dns_answers():
+    import asyncio
+    from tamanna_ai.capabilities.web_fetch import _PinnedPublicResolver
+
+    async def empty_lookup(*args, **kwargs):
+        return []
+
+    with pytest.raises(OSError, match="no usable public addresses"):
+        asyncio.run(_PinnedPublicResolver(empty_lookup).resolve("empty.test", 443))
