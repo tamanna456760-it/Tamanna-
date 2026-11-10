@@ -406,3 +406,40 @@ def test_code_completion_prompt_rejects_oversized_prefix():
     import pytest
     with pytest.raises(ValueError):
         build_code_completion_prompt("x" * 20001)
+
+def test_web_fetcher_rejects_mixed_public_and_private_dns_answers(monkeypatch):
+    import socket
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import SafeWebFetcher
+
+    def mixed_answers(*args, **kwargs):
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("93.184.216.34", 443)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 443)),
+        ]
+
+    monkeypatch.setattr(socket, "getaddrinfo", mixed_answers)
+    with pytest.raises(ValueError, match="non-public IP"):
+        SafeWebFetcher._validate_url("https://mixed.example/")
+
+
+def test_web_fetcher_rejects_private_ipv6_and_nonstandard_ports():
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import SafeWebFetcher
+
+    with pytest.raises(ValueError, match="non-public IP"):
+        SafeWebFetcher._validate_url("https://[::1]/")
+    with pytest.raises(ValueError, match="standard HTTPS port"):
+        SafeWebFetcher._validate_url("https://example.com:8443/")
+
+
+def test_web_fetcher_redirect_target_is_revalidated():
+    from urllib.parse import urljoin
+    import pytest
+    from tamanna_ai.capabilities.web_fetch import SafeWebFetcher
+
+    initial = "https://example.com/article"
+    private_redirect = urljoin(initial, "https://127.0.0.1/admin")
+    with pytest.raises(ValueError, match="non-public IP"):
+        SafeWebFetcher._validate_url(private_redirect)
+
