@@ -1,4 +1,5 @@
 # Tamanna AI - Endpoint Security
 # Owner: HM INSAN ALI
-# Running process inventory
 psutil>=5.9,<8.0
+# Required for posture JSON Schema validation
+jsonschema==4.25.1
