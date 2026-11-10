@@ -116,3 +116,23 @@ All 15 were only fetched and statically inspected. None was executed, changed, o
 ## Current review tally
 
 At least 25 named shell scripts have now been inspected in full or in relevant sections across this report. Common recurring patterns are token-in-remote URLs and automatic pushes; several scripts additionally reset firewall rules and/or use `rsync --delete`. This tally is a scoped review of the identified scripts, not a complete audit of every repository file. Workflow reachability and all callers still require systematic inspection.
+
+
+## Invocation audit — workflow and Python call sites
+
+### GitHub Actions workflow files
+
+The current repository tree contains 59 `.yml/.yaml` files under `.github/workflows/`. They were inspected in batches for references to the identified risky script names, `runner/shell/`, `git_sync.py`, and direct shell execution. No direct reference to the identified high-risk script paths was found in those workflow YAML files. Some workflows do enumerate tracked `.sh` files for syntax checks (for example, `bash -n`); syntax checking is not execution. A file named `.github/workflows/tamanna_ultra_defense.sh` exists in that directory, but its `.sh` extension means GitHub Actions does not treat it as a workflow YAML file.
+
+### Python call-site findings
+
+- `runner/python/git_sync.py` defines `git_commit_push()` using `os.system` for `git add .`, `git commit`, and `git push`. Repository code search found no caller of that function by name. This is not proof that it is never invoked dynamically.
+- `runner/python/synce.py` has its own `git_sync` function that calls `subprocess.run` for add/commit/push. It also has a main/monitor path that calls that function. This is an active code path if the module is launched with a configuration that enables it; it should be treated as an automatic repository-write capability.
+- `runner/python/auto_sync_monitor.py` defines a `git_sync()` that runs add/commit/push and calls it from its monitor loop. It is an automatic repository-write capability if that monitor is started.
+- `runner/python/tamannna_master.py` contains a subprocess helper using `shell=True` and a Git sync function. It needs a separate command-injection review and confirmation of its launch path.
+- `runner/python/powerhub_master.py` reports automatic script execution and automatic Git sync as false in its returned status; this alone does not establish all surrounding system paths.
+- `Main.py` includes a legacy Linux shell endpoint whose original implementation calls `tamanna_autonomous.shell(...)`; source comments mark the route disabled. The module path/import and full route registration need further tracing before asserting complete unreachability.
+
+### Conclusion and limits
+
+The inspected workflow YAML files do not show direct calls to the identified risky shell scripts. However, Python monitor modules provide independent automatic Git push paths when launched. This is a static search/review, not runtime tracing; dynamic imports, external launchers, cron jobs, user-triggered routes, and other indirect invocations have not all been ruled out. Do not run the scripts or sync monitors on a production checkout until reviewed and constrained.
