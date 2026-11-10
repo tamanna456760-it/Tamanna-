@@ -1,71 +1,122 @@
+#!/usr/bin/env python3
+"""Optional Google Drive file sync. Disabled unless explicitly configured."""
 import hashlib
+import json
 import os
 import time
+from pathlib import Path
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+SYNC_INTERVAL = 60
+SECRET_NAMES = {
+    ".env", ".env.local", ".env.production", "credentials.json",
+    "token.json", "token.pickle", "service-account.json", "secrets.json",
+    "id_rsa", "id_ed25519",
+}
+SECRET_SUFFIXES = {".pem", ".key", ".p12", ".pfx"}
 
-# ---------------- SETTINGS ----------------
-SYNC_FOLDER = "tamanna"
-LOG_FILE = "sync_log.txt"
-SYNC_INTERVAL = 60  # seconds
-CREDENTIALS_FILE = "credentials.json"
 
-SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+def is_safe_upload(path):
+    if path.is_symlink() or not path.is_file():
+        return False
+    if any(part.lower() in SECRET_NAMES or part.lower().startswith(".env.") for part in path.parts):
+        return False
+    return path.suffix.lower() not in SECRET_SUFFIXES
 
-# ---------------- AUTH ----------------
-creds = service_account.Credentials.from_service_account_file(
-    CREDENTIALS_FILE, scopes=SCOPES
-)
-drive = build("drive", "v3", credentials=creds)
 
-print("☁️ Tamanna Advanced Sync Started")
+def file_hash(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
-# ---------------- HASH SYSTEM ----------------
-file_hashes = {}
 
-def get_hash(path):
-    h = hashlib.md5()
-    with open(path, "rb") as f:
-        h.update(f.read())
-    return h.hexdigest()
-
-# ---------------- LOG ----------------
-def log(msg):
-    with open(LOG_FILE, "a") as f:
-        f.write(msg + "\n")
-    print(msg)
-
-# ---------------- UPLOAD ----------------
-def upload_file(path):
+def load_state(path):
     try:
-        file_name = os.path.basename(path)
-        media = MediaFileUpload(path, resumable=True)
-        drive.files().create(
-            body={"name": file_name},
-            media_body=media,
-            fields="id"
-        ).execute()
+        value = json.loads(path.read_text(encoding="utf-8"))
+        return value if isinstance(value, dict) else {}
+    except (OSError, ValueError):
+        return {}
 
-        log(f"✅ Uploaded: {path}")
-    except Exception as e:
-        log(f"❌ Error uploading {path}: {e}")
 
-# ---------------- SYNC LOOP ----------------
-while True:
-    for root, dirs, files in os.walk(SYNC_FOLDER):
-        for file in files:
-            full_path = os.path.join(root, file)
-            current_hash = get_hash(full_path)
+def authenticate_drive(credentials_path):
+    # Import optional dependencies only after the user explicitly enables Drive sync.
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
 
-            if full_path not in file_hashes:
-                file_hashes[full_path] = current_hash
-                upload_file(full_path)
+    credentials = service_account.Credentials.from_service_account_file(
+        str(credentials_path),
+        scopes=["https://www.googleapis.com/auth/drive.file"],
+    )
+    return build("drive", "v3", credentials=credentials, cache_discovery=False)
 
-            elif file_hashes[full_path] != current_hash:
-                file_hashes[full_path] = current_hash
-                upload_file(full_path)
 
-    log("🔄 Sync cycle complete")
-    time.sleep(SYNC_INTERVAL)
+def upload_file(service, path, relative_name):
+    from googleapiclient.http import MediaFileUpload
+
+    media = MediaFileUpload(str(path), resumable=True)
+    service.files().create(
+        body={"name": relative_name},
+        media_body=media,
+        fields="id",
+    ).execute()
+
+
+def sync_once():
+    if os.environ.get("TAMANNA_ENABLE_DRIVE_SYNC") != "1":
+        print("Drive sync disabled; set TAMANNA_ENABLE_DRIVE_SYNC=1 to opt in")
+        return 0
+
+    folder_value = os.environ.get("TAMANNA_DRIVE_SYNC_FOLDER")
+    credentials_value = os.environ.get("TAMANNA_DRIVE_CREDENTIALS")
+    if not folder_value or not credentials_value:
+        raise RuntimeError("Set TAMANNA_DRIVE_SYNC_FOLDER and TAMANNA_DRIVE_CREDENTIALS")
+    folder = Path(folder_value).expanduser().resolve()
+    credentials = Path(credentials_value).expanduser().resolve()
+    if not folder.is_dir():
+        raise FileNotFoundError(f"Sync folder not found: {folder}")
+    if not credentials.is_file() or not is_safe_upload(credentials):
+        raise ValueError("Google credentials file is missing or unsafe")
+    if folder == credentials or folder in credentials.parents:
+        raise ValueError("Credentials file must be outside the upload folder")
+
+    state_file = Path(os.environ.get(
+        "TAMANNA_DRIVE_SYNC_STATE", str(Path.home() / ".tamanna_drive_sync_state.json")
+    )).expanduser().resolve()
+    if state_file.is_relative_to(folder):
+        raise ValueError("Sync state file must be outside the upload folder")
+    state = load_state(state_file)
+    service = authenticate_drive(credentials)
+    uploaded = 0
+
+    for root, dirs, files in os.walk(folder, followlinks=False):
+        root_path = Path(root)
+        dirs[:] = [name for name in dirs if not (root_path / name).is_symlink()]
+        for name in files:
+            source = root_path / name
+            if not is_safe_upload(source):
+                continue
+            relative = source.relative_to(folder).as_posix()
+            digest = file_hash(source)
+            if state.get(relative) == digest:
+                continue
+            upload_file(service, source, relative)
+            state[relative] = digest
+            uploaded += 1
+
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    temporary = state_file.with_suffix(".tmp")
+    temporary.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    temporary.replace(state_file)
+    print(f"Drive sync completed; uploaded {uploaded} changed file(s)")
+    return uploaded
+
+
+def main():
+    while True:
+        sync_once()
+        time.sleep(SYNC_INTERVAL)
+
+
+if __name__ == "__main__":
+    main()
