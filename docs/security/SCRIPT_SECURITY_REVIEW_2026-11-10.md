@@ -149,3 +149,10 @@ The following changes were committed on `main` after the static invocation audit
 - Added `tests/test_sync_security.py` to cover default-deny behavior, path traversal rejection, shell-free command invocation, and removal of the automatic file mover.
 
 These changes reduce accidental execution and broad staging risk. They do not prove that every possible launcher or dynamic call path in the repository has been eliminated. The new regression tests and repository CI must pass before treating the remediation as verified. Existing configurations that relied on implicit automatic pushes will now need deliberate review and explicit opt-in configuration.
+
+
+### Follow-up hardening — explicit sync path allowlists
+
+A second review found that the first allowlist implementation still accepted broad pathspecs such as `.` and wildcard patterns, and could accept explicitly named credential files. The sync helpers now reject repository-wide paths, glob/pathspec metacharacters, parent traversal, common secret names (including `.env*`, token files and credential JSON), and private-key/certificate extensions. The master sync helper also validates the configured remote as a simple Git remote name before passing it to Git.
+
+Regression coverage was expanded for repository-wide pathspecs, secret filenames, and wildcard pathspecs. These controls reduce accidental secret staging, but they cannot guarantee that an innocently named file contains no secret; review the actual staged diff before authorizing a push.
