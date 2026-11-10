@@ -285,3 +285,24 @@ Commits:
 - Node CI workflow updated in the following commit.
 
 The service is not deployed or started. The admin token must be configured privately before administrative endpoints can be used.
+
+
+## WebSocket server hardening — 2026-11-10
+
+Reviewed and hardened `runner/node/server.js`:
+- Enforced a 16 KB WebSocket frame limit and disabled per-message compression.
+- Added a 100-client cap and a per-client limit of 20 messages per 10 seconds.
+- Validated text/JSON payload shape and limited message text to 4,000 characters.
+- Rejected binary frames and malformed/unsupported JSON payloads.
+- Removed raw incoming message logging; added safe send-state checks and cleanup on close.
+- Added optional explicit origin allowlisting through `TAMANNA_ALLOWED_ORIGINS`; when unset, browser CORS is disabled rather than open to every origin.
+- Kept local AI status truthful: external providers remain disabled and no local inference runtime is configured.
+- Exported server helpers for tests without starting a listener on import.
+
+Added tests for text/JSON parsing, invalid payloads, message length, binary frames, and the local-AI unavailable response.
+
+Commits:
+- `ccc05dc7813a661a876827b4801ad2b764633e39` — WebSocket validation and rate limiting.
+- `5d964989cbad55811c9e10165b626288769441b8` — WebSocket safety tests.
+
+Validation status: changes are committed to `main`; GitHub Actions results must complete before this work can be marked CI-passing. The server has not been deployed or started.
