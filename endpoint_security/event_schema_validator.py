@@ -32,6 +32,21 @@ def validate_event(event: Any) -> list[str]:
         elif severity.lower() not in allowed_severities:
             errors.append("severity is not a recognized value")
     return errors
+def validate_event_log(log_path: Path) -> dict[str, Any]:
+    """Compatibility API used by the event-log health checker."""
+    try:
+        report = validate_log(log_path)
+    except OSError as exc:
+        return {"valid": False, "status": "ERROR", "errors": [f"{type(exc).__name__}: {exc}"]}
+    return {
+        "valid": report["status"] == "PASS",
+        "status": report["status"],
+        "valid_records": report["valid_records"],
+        "invalid_records": report["invalid_records"],
+        "errors": report["issues"],
+        "read_only": True,
+    }
+
 def validate_log(log_path: Path) -> dict[str, Any]:
     valid = 0
     invalid = 0
