@@ -1,37 +1,38 @@
-require("dotenv").config();
-const fetch = require("node-fetch");
+// API-free, read-only repository monitor.
+// This script never pulls, stages, commits, or pushes files.
 const simpleGit = require("simple-git");
 const git = simpleGit();
+const POLL_INTERVAL_MS = Math.max(
+  60_000,
+  Number.parseInt(process.env.TAMANNA_SYNC_POLL_MS || "60000", 10) || 60_000
+);
 
-async function syncRepo() {
-  console.log("📥 Pulling latest code...");
-  await git.pull();
+let checking = false;
 
-  console.log("🧠 Sending code to AI...");
+async function checkRepo() {
+  if (checking) return;
+  checking = true;
+  try {
+    const status = await git.status();
+    if (status.current !== "main") {
+      console.warn(`[Tamanna Sync] Read-only check: expected main, found ${status.current || "detached"}.`);
+      return;
+    }
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.OPENAI_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "user", content: "Check my project for errors and suggest fixes." }
-      ]
-    })
-  });
-
-  const data = await response.json();
-  console.log("AI Suggestion:\n", data.choices[0].message.content);
-
-  console.log("📤 Auto Commit...");
-  await git.add(".");
-  await git.commit("AI Auto Sync Update");
-  await git.push();
-
-  console.log("✅ Sync Complete");
+    const changed = status.files.map((file) => file.path);
+    console.log(JSON.stringify({
+      service: "tamanna-api-free-sync-monitor",
+      mode: "read-only",
+      branch: status.current,
+      clean: changed.length === 0,
+      changedFiles: changed
+    }));
+  } catch (error) {
+    console.error("[Tamanna Sync] Repository check failed:", error.message);
+  } finally {
+    checking = false;
+  }
 }
 
-setInterval(syncRepo, 60000);
+checkRepo();
+setInterval(checkRepo, POLL_INTERVAL_MS);
