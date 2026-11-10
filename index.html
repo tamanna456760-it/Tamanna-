@@ -203,6 +203,10 @@
   <section id="authPanel" class="settings-panel auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
     <div class="settings-heading"><h2 id="authTitle">Tamanna AI Account</h2><button id="closeAuth" class="settings-close" type="button" aria-label="বন্ধ করুন">✕</button></div>
     <p id="authStatus" class="settings-note" role="status" aria-live="polite">অ্যাকাউন্টে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+    <div id="googleSignInWrap" class="google-signin-wrap" hidden>
+      <div id="googleSignInButton" class="google-signin-button"></div>
+      <div class="google-signin-divider"><span>অথবা ইমেইল দিয়ে চালিয়ে যান</span></div>
+    </div>
     <div class="auth-tabs"><button id="showLogin" type="button" class="settings-secondary">লগইন</button><button id="showSignup" type="button" class="settings-secondary">সাইন আপ</button></div>
     <form id="loginForm" class="auth-form">
       <label for="loginEmail">ইমেইল</label><input id="loginEmail" type="email" autocomplete="email" required maxlength="254">
