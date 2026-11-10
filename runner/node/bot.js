@@ -5,7 +5,7 @@ const { githubSync } = require("./github.js");
 
 function parseAdminIds(value = "") {
   return new Set(
-    String(value).split(",").map((id) => id.trim()).filter((id) => /^\d+$/.test(id))
+    String(value).split(",").map((id) => id.trim()).filter((id) => /^\\d+$/.test(id))
   );
 }
 
@@ -22,7 +22,6 @@ async function createBot({
     throw new Error("BOT_TOKEN is required to start the Telegram bot.");
   }
 
-  // v2 is loaded lazily so importing this CommonJS module never starts polling.
   const { Bot } = await import("node-telegram-bot-api");
   const bot = new Bot(token);
 
@@ -66,8 +65,8 @@ async function createBot({
     }
   });
 
-  bot.on("error", (error) => {
-    console.error("Telegram bot error:", error.message);
+  bot.catch((error) => {
+    console.error("Telegram bot update failed:", error.message);
   });
 
   if (polling) await bot.startPolling();
