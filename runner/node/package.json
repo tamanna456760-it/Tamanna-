@@ -1,0 +1,23 @@
+{
+  "name": "tamanna-ai-node-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isolated CommonJS runtime dependencies for Tamanna Node.js server and Telegram bot",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node run.js",
+    "start:bot": "node bot.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "simple-git": "^3.27.0",
+    "ws": "^8.18.0"
+  }
+}
