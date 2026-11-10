@@ -31,6 +31,7 @@
     currentUser = user || null;
     opener.textContent = currentUser ? "অ্যাকাউন্ট" : "লগইন";
     if (currentUser) {
+      if ($("googleSignInWrap")) $("googleSignInWrap").hidden = true;
       $("loginForm").hidden = true; $("signupForm").hidden = true;
       $("accountDetails").hidden = false;
       $("accountIdentity").textContent = currentUser.name + " — " + currentUser.email;
@@ -39,6 +40,7 @@
     } else {
       $("accountDetails").hidden = true;
       showForm("login");
+      if ($("googleSignInWrap") && window.TamannaGoogleSignInReady) $("googleSignInWrap").hidden = false;
     }
   };
   $("openAuth").addEventListener("click", open);
@@ -116,5 +118,69 @@
   } else {
     api("/me").then(result => renderUser(result.user)).catch(() => renderUser(null));
   }
+  async function setupGoogleSignIn() {
+    if (isGitHubPagesPreview || !$("googleSignInWrap") || !$("googleSignInButton")) return;
+    try {
+      const config = await api("/google-config");
+      if (!config.enabled || !config.client_id) return;
+      const renderGoogleButton = () => {
+        if (!window.google?.accounts?.id) return;
+        window.google.accounts.id.initialize({
+          client_id: config.client_id,
+          callback: async (credentialResponse) => {
+            if (!credentialResponse?.credential) {
+              showStatus("Google sign-in credential পাওয়া যায়নি।", true);
+              return;
+            }
+            try {
+              showStatus("Google account যাচাই করা হচ্ছে…");
+              const result = await api("/google", {
+                method: "POST",
+                body: JSON.stringify({ credential: credentialResponse.credential })
+              });
+              renderUser(result.user);
+              window.dispatchEvent(new CustomEvent("tamanna:authenticated", { detail: result.user }));
+              showStatus("Google দিয়ে সফলভাবে লগইন হয়েছে।");
+            } catch (error) {
+              showStatus(error.message, true);
+            }
+          }
+        });
+        $("googleSignInButton").replaceChildren();
+        window.google.accounts.id.renderButton($("googleSignInButton"), {
+          type: "standard",
+          theme: "filled_black",
+          size: "large",
+          shape: "rectangular",
+          text: "continue_with",
+          width: Math.min(340, Math.max(240, $("authPanel").clientWidth - 48))
+        });
+        window.TamannaGoogleSignInReady = true;
+        if (!currentUser) $("googleSignInWrap").hidden = false;
+      };
+      if (window.google?.accounts?.id) {
+        renderGoogleButton();
+        return;
+      }
+      const existing = document.getElementById("google-identity-services");
+      if (existing) {
+        existing.addEventListener("load", renderGoogleButton, { once: true });
+        if (window.google?.accounts?.id) renderGoogleButton();
+        return;
+      }
+      const script = document.createElement("script");
+      script.id = "google-identity-services";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = renderGoogleButton;
+      script.onerror = () => showStatus("Google Sign-In load হয়নি। ইমেইল দিয়ে লগইন করতে পারেন।", true);
+      document.head.appendChild(script);
+    } catch (error) {
+      // Email/password authentication remains available if Google config is absent.
+      console.warn("Google sign-in is not configured:", error.message);
+    }
+  }
+  setupGoogleSignIn();
   window.TamannaAuth = { api, getUser: () => currentUser };
 })();
