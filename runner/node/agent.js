@@ -1,21 +1,16 @@
-import { generateCode } from "./generator.js"
-import { saveCode } from "./generator.js"
-import { gitPush } from "./git.js"
+"use strict";
 
-async function run(){
-
-console.log("Tamanna AI Coding Agent Started")
-
-const idea = "create simple node api server"
-
-const code = await generateCode(idea)
-
-await saveCode("server.js",code)
-
-await gitPush()
-
-console.log("Project Generated")
-
+// Legacy autonomous code-generation agent disabled pending a reviewed local
+// inference adapter and explicit, path-scoped user approval.
+async function run() {
+  throw new Error(
+    "Autonomous code generation is disabled. No files are written and no Git operations are performed."
+  );
 }
 
-run()
+if (require.main === module) {
+  console.error("Disabled: autonomous code generation is not configured.");
+  process.exitCode = 1;
+}
+
+module.exports = { run };
