@@ -13,7 +13,7 @@ class FakeAsyncClient:
 
     def __init__(self, timeout=None, trust_env=True):
         self.timeout = timeout
-        self.trust_env = trust_env
+        type(self).trust_env = trust_env
 
     async def __aenter__(self):
         return self
