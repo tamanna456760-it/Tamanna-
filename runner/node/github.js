@@ -1,11 +1,6 @@
-import simpleGit from "simple-git"
+import { gitPush } from "./git.js";
 
-const git = simpleGit()
-
-export async function githubSync(){
-
-await git.add(".")
-await git.commit("Telegram AI update")
-await git.push()
-
+// Compatibility wrapper: all push policy is enforced in one hardened module.
+export async function githubSync() {
+  return gitPush();
 }
