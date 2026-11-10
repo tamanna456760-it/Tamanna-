@@ -1,9 +1,12 @@
-import { gitPush } from "./git.js";
+"use strict";
 
-// Compatibility wrapper: no implicit staging, commit, or push.
-export async function githubSync() {
-  console.log("GitHub sync check started");
+const { gitPush } = require("./git.js");
+
+// Compatibility wrapper; the underlying sync remains disabled by default
+// and requires an explicit path allowlist and opt-in environment setting.
+async function githubSync() {
   const result = await gitPush();
-  console.log(result.pushed ? "GitHub sync completed" : result.reason);
   return result;
 }
+
+module.exports = { githubSync };
