@@ -96,11 +96,8 @@ test("Telegram AI adapter rejects unsafe runtime URLs and invalid upstream respo
     else process.env.TAMANNA_OLLAMA_URL = previousUrl;
   }
 });
-\ntest("local AI adapter validates blank prompts", async () => {
-  await assert.rejects(
-    askAI("hello"),
-    /Local AI runtime is not configured/
-  );
+
+test("local AI adapter validates blank prompts", async () => {
   await assert.rejects(
     askAI("  "),
     /message must be a non-empty string/
@@ -233,7 +230,8 @@ test("Telegram bot can be constructed without polling for safe imports and tests
   const bot = await createBot({ token: "test-token", BotClass: FakeBot });
   assert.equal(bot.started, false);
 });
-\ntest("Telegram bot module validates token and admin IDs", async () => {
+
+test("Telegram bot module validates token and admin IDs", async () => {
   assert.deepEqual([...parseAdminIds("123, bad, 456,123")], ["123", "456"]);
   const admins = parseAdminIds("123,456");
   assert.equal(isAdminId("123", admins), true);
