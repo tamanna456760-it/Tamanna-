@@ -35,8 +35,14 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install isolated Node runtime dependencies
-        run: npm install --prefix runner/node --no-package-lock --no-audit --no-fund
+      - name: Resolve isolated Node runtime dependencies
+        run: npm install --prefix runner/node --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Install exact resolved dependency tree
+        run: npm ci --prefix runner/node --ignore-scripts --no-audit --no-fund
+
+      - name: Audit production dependencies
+        run: npm audit --prefix runner/node --omit=dev
 
       - name: Check active CommonJS entrypoints
         run: |
