@@ -1,6 +1,10 @@
-import { gitPush } from "./git.js";
+"use strict";
 
-// Compatibility wrapper: all push policy is enforced in one hardened module.
-export async function githubSync() {
+const { gitPush } = require("./git.js");
+
+// Compatibility wrapper: all push policy is enforced by the hardened Git module.
+async function githubSync() {
   return gitPush();
 }
+
+module.exports = { githubSync };
