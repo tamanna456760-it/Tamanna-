@@ -13,6 +13,7 @@ import auto_sync_monitor
 import git_sync
 import synce
 import tamannna_master
+import agent as powerhub_agent
 
 
 class SafeSyncTests(unittest.TestCase):
@@ -67,6 +68,27 @@ class SafeSyncTests(unittest.TestCase):
             mocked_run.call_args.args[0],
             ["printf", "%s", "safe;not-a-shell-command"],
         )
+
+    def test_agent_rejects_shell_operators(self):
+        with self.assertRaises(ValueError):
+            powerhub_agent.command_args("echo ok && touch unsafe")
+        with self.assertRaises(ValueError):
+            powerhub_agent.command_args(["echo", "|", "cat"])
+
+    def test_agent_sync_allowlist_rejects_secrets(self):
+        for path in [".env", "keys/private.pem", "credentials.json", "."]:
+            with self.subTest(path=path):
+                with self.assertRaises(ValueError):
+                    powerhub_agent.safe_relative_paths([path])
+
+    @patch("agent.subprocess.Popen")
+    def test_agent_runs_without_a_shell(self, mocked_popen):
+        process = SimpleNamespace(communicate=lambda timeout=None: ("safe output", None), returncode=0)
+        mocked_popen.return_value = process
+        rc, output = powerhub_agent.run(["printf", "%s", "literal;value"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(output, "safe output")
+        self.assertIs(mocked_popen.call_args.kwargs["shell"], False)
 
     def test_monitor_has_no_automatic_file_mover(self):
         self.assertFalse(hasattr(auto_sync_monitor, "move_file"))
