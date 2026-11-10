@@ -1,15 +1,9 @@
-import simpleGit from 'simple-git'
+import { gitPush } from "./git.js";
 
-const git = simpleGit()
-
-export async function githubSync(){
-
-console.log("GitHub Sync Running")
-
-await git.add('.')
-await git.commit("Tamanna AI Auto Update")
-await git.push()
-
-console.log("GitHub Sync Complete")
-
+// Compatibility wrapper: no implicit staging, commit, or push.
+export async function githubSync() {
+  console.log("GitHub sync check started");
+  const result = await gitPush();
+  console.log(result.pushed ? "GitHub sync completed" : result.reason);
+  return result;
 }
