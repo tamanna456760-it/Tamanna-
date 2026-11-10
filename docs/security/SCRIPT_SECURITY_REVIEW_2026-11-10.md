@@ -207,3 +207,16 @@ Two small Python network diagnostic utilities were found constructing ping comma
 Commits: `f66d97412cdb2ff510f0ef5707b33703a5da53f1` (ping utility), `6d0b287a1e82c73a4b55004fd960943595c02380` (system diagnostic), `858d28dde9b52dcdf0cbbd0a63c21a69a7f066a7` (tests).
 
 The repository-wide search still reports matches in vendored/editor code and other legacy automation. Search matches are not automatically vulnerabilities; inspect ownership and call paths before editing vendor code. CI for these commits is pending at the time of this update.
+
+
+## Node.js Git automation hardening — 2026-11-10
+
+A focused review found three additional Node.js sync modules using broad Git operations:
+
+- `runner/node/git.js` previously ran `git add .`, committed, and pushed unconditionally. It now defaults to no push, requires `TAMANNA_ENABLE_GIT_PUSH=1` and an exact `TAMANNA_SYNC_PATHS` allowlist, rejects common secret paths and unsafe path syntax, requires the `main` branch and an `origin` remote, and stages only changed allowlisted files.
+- `runner/node/github.js` and `runner/node/github-sync.js` previously staged the entire working tree and pushed directly. Both now delegate to the single hardened `gitPush()` policy.
+- `runner/node/ai-sync.js` previously called the OpenAI Chat Completions API every minute and then staged/committed/pushed the entire repository. It is now an API-free, read-only Git status monitor; it does not pull, stage, commit, or push.
+
+Commits: `189cbdd13292791ea868173f53ec0120159996eb` (central Git push policy), `384d1d110c536ae57a7327a4807cb7c0e0dae706` (`github.js`), `a55a2a1896ed60df3a49dbf54a9012ee10ac4d8a` (`github-sync.js`), `4fa66e46b954e85d1e35fafc70f091bb505780c4` (`ai-sync.js`).
+
+The three files were fetched again from `main` and their content SHAs verified. GitHub Actions for the latest commit were queued/pending at review time; no test-pass claim is made. The allowlist is a path-level safeguard, not content inspection: review staged diffs before enabling any push.
