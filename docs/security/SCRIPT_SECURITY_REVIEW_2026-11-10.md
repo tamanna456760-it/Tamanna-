@@ -366,3 +366,21 @@ Commits:
 - `f06acd3` — CI syntax checks.
 
 No host firewall, malware scanner, rootkit detector, or IDS was installed or executed. CI must complete before tests are marked passing.
+
+
+## Telegram bot startup and admin access hardening — 2026-11-10
+
+- Removed module-import side effects: importing `bot.js` no longer requires a Telegram token or starts long polling.
+- Added explicit `createBot()`; polling starts only when the file is run directly or the factory is called with explicit options.
+- Admin IDs are parsed as numeric strings only; `/sync` remains restricted to configured IDs.
+- Added a 4,000-character message limit for Telegram chat input.
+- Added a polling-error handler and avoided logging message contents or tokens.
+- Added regression tests for safe import, admin ID parsing, authorization checks, and missing-token rejection.
+- The bot was not started; no Telegram token was read or sent.
+
+Commits:
+- `4855f79` — explicit Telegram bot startup and admin ID validation.
+- `d6abc50` — Telegram startup safety tests.
+- `8e237b1` — CI validation.
+
+Dependency note: the runtime still needs network-installed packages at deployment time; a dependency lockfile and vulnerability audit remain outstanding. Do not treat npm install with audit disabled as a dependency security audit.
