@@ -33,8 +33,10 @@
 
     <div class="composer-wrap"><div class="typing-area">
       <textarea id="messageInput" rows="1" placeholder="Tamanna AI-কে মেসেজ করুন..." autocomplete="off" aria-label="আপনার মেসেজ"></textarea>
+      <button id="voiceInputButton" type="button" aria-label="কথা বলে লিখুন" title="কথা বলে লিখুন">🎙</button>
+      <button id="speakLatestButton" type="button" aria-label="শেষ উত্তর শুনুন" title="শেষ উত্তর শুনুন">🔊</button>
       <button id="sendButton" type="button" aria-label="মেসেজ পাঠান">↑</button>
-    </div><p class="composer-note">Tamanna AI ভুল করতে পারে। গুরুত্বপূর্ণ তথ্য যাচাই করে নিন।</p></div>
+    </div><p id="voiceStatus" class="voice-status" role="status" aria-live="polite"></p><p class="composer-note">Tamanna AI ভুল করতে পারে। গুরুত্বপূর্ণ তথ্য যাচাই করে নিন।</p></div>
   </div>
 
   <div id="settingsBackdrop" class="settings-backdrop" hidden></div>
@@ -155,83 +157,3 @@
         <select id="localModelSelect" disabled><option value="">প্রথমে status refresh করুন</option></select>
         <button id="saveLocalModel" class="settings-secondary" type="button" disabled>এই Model নির্বাচন করুন</button>
         <p id="modelSelectStatus" class="settings-note" role="status" aria-live="polite">শুধু আগে থেকে installed local model নির্বাচন করা যাবে।</p>
-      </div>
-      <div class="model-download">
-        <label for="downloadModelName">নতুন Local Model Download</label>
-        <input id="downloadModelName" type="text" maxlength="200" autocomplete="off" placeholder="যেমন: qwen2.5:7b">
-        <button id="downloadLocalModel" class="settings-secondary" type="button">Download Model</button>
-        <progress id="modelDownloadProgress" max="100" value="0" aria-label="Model download progress"></progress>
-        <p id="modelDownloadStatus" class="settings-note" role="status" aria-live="polite">Download শুরু হবে শুধু আপনার button চাপার পর। Model size অনুযায়ী সময় ও disk space লাগবে।</p>
-      </div>
-      <div class="settings-actions"><button id="refreshModelHealth" class="settings-secondary" type="button">Status আবার পরীক্ষা করুন</button></div>
-      <p id="modelHealthUpdated" class="settings-note" role="status" aria-live="polite">Status এখনো পরীক্ষা করা হয়নি।</p>
-    </section>
-
-    <section class="settings-group" id="knowledgeManager">
-      <h3>Knowledge Base / জ্ঞানভান্ডার</h3>
-      <p class="settings-note">নিজের TXT, Markdown বা JSON নথি index করুন। Embedding model বদলালে পুরোনো নথির vector এখানে পুনরায় তৈরি করুন।</p>
-      <form id="knowledgeForm" class="auth-form">
-        <label for="knowledgeFilename">নথির নাম</label>
-        <input id="knowledgeFilename" type="text" maxlength="180" required placeholder="notes.md">
-        <label for="knowledgeContent">নথির লেখা</label>
-        <textarea id="knowledgeContent" rows="4" maxlength="1000000" required placeholder="আপনার জ্ঞান বা নথির লেখা এখানে দিন"></textarea>
-        <button type="submit">Knowledge index করুন</button>
-      </form>
-      <div class="settings-actions">
-        <button id="reindexKnowledgeButton" class="settings-secondary" type="button">সব Knowledge পুনরায় index করুন</button>
-      </div>
-      <p id="knowledgeStatus" class="settings-note" role="status" aria-live="polite">Knowledge Base পরিচালনা করতে লগইন করুন।</p>
-      <div id="knowledgeList" class="memory-list" aria-live="polite"></div>
-    </section>
-
-    <section class="settings-group">
-      <h3>Chat</h3>
-      <p class="settings-note">চ্যাট ইতিহাস সার্ভারের SQLite account storage-এ সংরক্ষিত হয়। এই বোতামটি শুধু বর্তমান স্ক্রিন পরিষ্কার করে; সার্ভারে সংরক্ষিত ইতিহাস মুছে দেয় না।</p>
-      <div class="settings-actions"><button id="clearLocalChat" class="settings-secondary" type="button">বর্তমান স্ক্রিন পরিষ্কার</button></div>
-    </section>
-
-    <div class="settings-actions">
-      <button id="resetSettings" class="settings-secondary" type="button">Reset settings</button>
-    </div>
-    <p id="settingsSaveStatus" role="status" aria-live="polite"></p>
-  </aside>
-
-
-  <div id="authBackdrop" class="settings-backdrop" hidden></div>
-  <section id="authPanel" class="settings-panel auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
-    <div class="settings-heading"><h2 id="authTitle">Tamanna AI Account</h2><button id="closeAuth" class="settings-close" type="button" aria-label="বন্ধ করুন">✕</button></div>
-    <p id="authStatus" class="settings-note" role="status" aria-live="polite">অ্যাকাউন্টে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
-    <div class="auth-tabs"><button id="showLogin" type="button" class="settings-secondary">লগইন</button><button id="showSignup" type="button" class="settings-secondary">সাইন আপ</button></div>
-    <form id="loginForm" class="auth-form">
-      <label for="loginEmail">ইমেইল</label><input id="loginEmail" type="email" autocomplete="email" required maxlength="254">
-      <label for="loginPassword">পাসওয়ার্ড</label><input id="loginPassword" type="password" autocomplete="current-password" required maxlength="128">
-      <button type="submit">লগইন</button>
-    </form>
-    <form id="signupForm" class="auth-form" hidden>
-      <label for="signupName">আপনার নাম</label><input id="signupName" type="text" autocomplete="name" required minlength="2" maxlength="80">
-      <label for="signupEmail">ইমেইল</label><input id="signupEmail" type="email" autocomplete="email" required maxlength="254">
-      <label for="signupPassword">পাসওয়ার্ড (কমপক্ষে ১২ অক্ষর)</label><input id="signupPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="128">
-      <button type="submit">অ্যাকাউন্ট তৈরি করুন</button>
-    </form>
-    <div id="accountDetails" hidden>
-      <p id="accountIdentity"></p>
-      <form id="profileForm" class="auth-form"><label for="profileName">নাম পরিবর্তন</label><input id="profileName" type="text" minlength="2" maxlength="80" required><button type="submit">প্রোফাইল সংরক্ষণ</button></form>
-      <form id="changePasswordForm" class="auth-form">
-        <h3>পাসওয়ার্ড পরিবর্তন</h3>
-        <label for="currentPassword">বর্তমান পাসওয়ার্ড</label><input id="currentPassword" type="password" autocomplete="current-password" required maxlength="128">
-        <label for="newPassword">নতুন পাসওয়ার্ড (কমপক্ষে ১২ অক্ষর)</label><input id="newPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="128">
-        <button type="submit">পাসওয়ার্ড পরিবর্তন করুন</button>
-      </form>
-      <button id="logoutButton" class="settings-secondary" type="button">লগআউট</button>
-    </div>
-    <p class="settings-note">পাসওয়ার্ড নিরাপদভাবে হ্যাশ করে সার্ভারে রাখা হয়। পাসওয়ার্ড ব্রাউজারে সংরক্ষণ করা হয় না।</p>
-  </section>
-
-  <script src="/js/auth.js?v=20261106_account_security"></script>
-  <script src="/js/chat.js?v=20261108_conversations"></script>
-  <script src="/js/settings.js?v=20261106_preferences2"></script>
-  <script src="/js/memories.js?v=20261108_memory_dashboard"></script>
-  <script src="/js/knowledge.js?v=20261108_knowledge_dashboard"></script>
-  <script src="/js/model-health.js?v=20261108_recovery_advisor"></script>
-</body>
-</html>
