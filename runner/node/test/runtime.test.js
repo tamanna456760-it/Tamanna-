@@ -7,6 +7,7 @@ const path = require("node:path");
 
 const { validatePath, parseAllowlist } = require("../git.js");
 const { askAI } = require("../ai.js");
+const { safeTokenEqual } = require("../node_server.js");
 
 test("Git sync path policy accepts a safe exact relative path", () => {
   assert.equal(validatePath("docs/STATUS.md"), undefined);
@@ -54,4 +55,10 @@ test("both compatibility launchers use only the available server entrypoint", ()
     assert.match(source, /require\(['"]\.\/server\.js['"]\)/);
     assert.doesNotMatch(source, /\.\/github\/sync\.js|\.\/ai\/ai\.js|\.\/telegram\/bot\.js/);
   }
+});
+
+test("firewall admin token comparison rejects missing and mismatched tokens", () => {
+  assert.equal(safeTokenEqual(undefined, "secret"), false);
+  assert.equal(safeTokenEqual("wrong", "secret"), false);
+  assert.equal(safeTokenEqual("secret", "secret"), true);
 });
