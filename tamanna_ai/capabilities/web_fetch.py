@@ -117,10 +117,11 @@ class SafeWebFetcher:
         if parsed.username or parsed.password:
             raise ValueError("Embedded URL credentials are not allowed")
         try:
-            if parsed.port not in (None, 443):
-                raise ValueError("Only standard HTTPS port 443 is allowed")
+            port = parsed.port
         except ValueError as exc:
             raise ValueError("Invalid URL port") from exc
+        if port not in (None, 443):
+            raise ValueError("Only standard HTTPS port 443 is allowed")
         host = parsed.hostname.rstrip(".").encode("idna").decode("ascii").lower()
         if host == "localhost" or host.endswith(".localhost"):
             raise ValueError("Local hostnames are not allowed")
