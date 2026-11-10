@@ -427,3 +427,14 @@ Fix committed on `main` as `2843c5503c8162bb0a21077bae78d63938cddc80`:
 - The default remains push-disabled; allowlist, main-branch, and secret-path protections remain in place.
 
 A new CI run must verify the change. The failed run remains a failure; it is not retroactively marked as passed.
+
+## Telegram admin ID validation regression — 2026-11-10
+
+The Node Runtime run `42826474099` completed with a test failure after dependency audit (0 vulnerabilities) and all CommonJS syntax checks passed. Sixteen of seventeen tests passed. The failing Telegram admin-ID parser used an over-escaped digit pattern, so valid numeric IDs were rejected and the parser returned an empty set.
+
+Fix committed on `main`:
+- `runner/node/bot.js`: corrected the numeric-string validation regex.
+- Commit: `cbffc688a4f9b2b1f40c4626f68c799d30da39b5`.
+
+A fresh Node Runtime CI run must verify this correction. The prior run remains failed; no Telegram bot was started and no token was accessed.
+
