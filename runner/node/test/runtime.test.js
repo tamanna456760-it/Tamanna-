@@ -6,7 +6,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { validatePath, parseAllowlist } = require("../git.js");
-const { askAI } = require("../ai.js");
+const { askAI, localRuntimeUrl } = require("../ai.js");
 const { safeTokenEqual } = require("../node_server.js");
 const { extractMessage, generateReply, isOriginAllowed } = require("../server.js");
 const { safeKeyEqual, consumeRateLimit } = require("../ai_server.js");
@@ -45,7 +45,58 @@ test("Git sync allowlist trims entries and removes duplicates", () => {
   assert.deepEqual(parseAllowlist(""), []);
 });
 
-test("local AI adapter fails honestly while no local runtime is configured", async () => {
+
+test("Telegram AI adapter sends prompts only to the configured local Ollama runtime", async () => {
+  const previousUrl = process.env.TAMANNA_OLLAMA_URL;
+  const previousModel = process.env.TAMANNA_OLLAMA_MODEL;
+  const previousTimeout = process.env.TAMANNA_OLLAMA_TIMEOUT_MS;
+  process.env.TAMANNA_OLLAMA_URL = "http://127.0.0.1:11434";
+  process.env.TAMANNA_OLLAMA_MODEL = "test-local-model";
+  process.env.TAMANNA_OLLAMA_TIMEOUT_MS = "5000";
+  try {
+    let requestedUrl;
+    let requestedBody;
+    const answer = await askAI("  বাংলায় উত্তর দাও  ", {
+      fetchImpl: async (url, options) => {
+        requestedUrl = url;
+        requestedBody = JSON.parse(options.body);
+        return {
+          ok: true,
+          json: async () => ({ message: { content: "  স্থানীয় মডেল থেকে উত্তর  " } })
+        };
+      }
+    });
+    assert.equal(answer, "স্থানীয় মডেল থেকে উত্তর");
+    assert.equal(requestedUrl, "http://127.0.0.1:11434/api/chat");
+    assert.equal(requestedBody.model, "test-local-model");
+    assert.deepEqual(requestedBody.messages, [{ role: "user", content: "বাংলায় উত্তর দাও" }]);
+    assert.equal(requestedBody.stream, false);
+  } finally {
+    if (previousUrl === undefined) delete process.env.TAMANNA_OLLAMA_URL;
+    else process.env.TAMANNA_OLLAMA_URL = previousUrl;
+    if (previousModel === undefined) delete process.env.TAMANNA_OLLAMA_MODEL;
+    else process.env.TAMANNA_OLLAMA_MODEL = previousModel;
+    if (previousTimeout === undefined) delete process.env.TAMANNA_OLLAMA_TIMEOUT_MS;
+    else process.env.TAMANNA_OLLAMA_TIMEOUT_MS = previousTimeout;
+  }
+});
+
+test("Telegram AI adapter rejects unsafe runtime URLs and invalid upstream responses", async () => {
+  const previousUrl = process.env.TAMANNA_OLLAMA_URL;
+  try {
+    process.env.TAMANNA_OLLAMA_URL = "https://user:password@example.test";
+    assert.throws(() => localRuntimeUrl(), /without credentials/);
+    process.env.TAMANNA_OLLAMA_URL = "http://127.0.0.1:11434";
+    await assert.rejects(
+      askAI("hello", { fetchImpl: async () => ({ ok: false, status: 404 }) }),
+      /HTTP 404/
+    );
+  } finally {
+    if (previousUrl === undefined) delete process.env.TAMANNA_OLLAMA_URL;
+    else process.env.TAMANNA_OLLAMA_URL = previousUrl;
+  }
+});
+\ntest("local AI adapter validates blank prompts", async () => {
   await assert.rejects(
     askAI("hello"),
     /Local AI runtime is not configured/
