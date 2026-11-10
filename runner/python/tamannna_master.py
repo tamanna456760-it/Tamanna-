@@ -2,6 +2,7 @@
 """Explicit Tamanna maintenance commands with shell-free subprocess calls."""
 import datetime
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -134,6 +135,8 @@ def git_sync(repo_path, remote="origin", branch="main", paths=None):
         raise FileNotFoundError(f"Repository not found: {repo}")
     if branch != "main":
         raise ValueError("Only the main branch is permitted")
+    if not isinstance(remote, str) or not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", remote):
+        raise ValueError("Git remote must be a simple configured remote name")
     allowed_paths = _safe_sync_paths(paths)
 
     run(["git", "rev-parse", "--show-toplevel"], cwd=repo)
