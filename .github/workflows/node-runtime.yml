@@ -1,0 +1,51 @@
+name: Tamanna Node Runtime Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "runner/node/**"
+      - ".github/workflows/node-runtime.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "runner/node/**"
+      - ".github/workflows/node-runtime.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-node-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install isolated Node runtime dependencies
+        run: npm install --prefix runner/node --no-package-lock --no-audit --no-fund
+
+      - name: Check active CommonJS entrypoints
+        run: |
+          node --check runner/node/run.js
+          node --check runner/node/run..js
+          node --check runner/node/server.js
+          node --check runner/node/bot.js
+          node --check runner/node/git.js
+          node --check runner/node/github.js
+
+      - name: Run Node runtime safety tests
+        run: npm test --prefix runner/node
