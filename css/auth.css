@@ -1,1 +1,6 @@
 .header-actions{display:flex;align-items:center;gap:8px;float:right;margin-top:-58px;margin-right:22px}.header-action{padding:9px 13px;background:var(--panel2);color:var(--text);border:1px solid var(--border)}.settings-trigger{float:none;margin:0}.auth-tabs{display:flex;gap:8px;margin:18px 0}.auth-tabs button{flex:1}.auth-form{display:flex;flex-direction:column;gap:9px;margin:12px 0 18px}.auth-form label{font-size:.9rem;color:var(--muted)}.auth-form input{width:100%;padding:12px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;font:inherit}.auth-form button{margin-top:8px}.auth-form[hidden],#accountDetails[hidden]{display:none}@media(max-width:600px){.header-actions{margin-top:-53px;margin-right:12px;gap:5px}.header-action{padding:8px 9px;font-size:.85rem}}
+.google-signin-wrap{margin:14px 0 18px;padding:14px 10px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.025)}
+.google-signin-button{display:flex;justify-content:center;min-height:42px}
+.google-signin-divider{display:flex;align-items:center;gap:10px;margin-top:13px;color:var(--muted);font-size:.78rem;text-align:center}
+.google-signin-divider:before,.google-signin-divider:after{content:"";height:1px;flex:1;background:var(--border)}
+#googleSignInWrap[hidden]{display:none}
