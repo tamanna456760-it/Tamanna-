@@ -15,6 +15,7 @@ const { run: runAgent } = require("../agent.js");
 const { generateProject } = require("../generator.js");
 const { collectSystemMetrics, systemMonitor } = require("../monitor.js");
 const { securityScan } = require("../security.js");
+const { parseAdminIds, isAdminId, createBot } = require("../bot.js");
 
 test("Git sync path policy accepts a safe exact relative path", () => {
   assert.equal(validatePath("docs/STATUS.md"), undefined);
@@ -130,4 +131,13 @@ test("security audit reports unverified host checks instead of random results", 
   assert.ok(report.results.some((item) => item.name === "Operating-system firewall" && item.status === "not_checked"));
   assert.ok(report.results.some((item) => item.name === "Malware and rootkit scan" && item.status === "not_checked"));
   assert.ok(report.results.every((item) => !("passed" in item) || typeof item.passed === "boolean"));
+});
+
+test("Telegram bot module can be imported without starting polling or requiring a token", () => {
+  assert.deepEqual([...parseAdminIds("123, bad, 456,123")], ["123", "456"]);
+  const admins = parseAdminIds("123,456");
+  assert.equal(isAdminId("123", admins), true);
+  assert.equal(isAdminId("789", admins), false);
+  assert.equal(isAdminId("123", new Set()), false);
+  assert.throws(() => createBot({ token: "" }), /BOT_TOKEN is required/);
 });
