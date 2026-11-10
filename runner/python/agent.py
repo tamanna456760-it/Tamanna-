@@ -104,8 +104,9 @@ class Agent:
             raise ValueError("interval_seconds must be at least 10")
         self.push_changes = cfg.get("push_changes") is True and cfg.get("allow_git_push") is True
         self.sync_paths = safe_relative_paths(cfg.get("sync_paths", [])) if self.push_changes else []
-        self.fix_cmds = cfg.get("fix_cmds", [])
-        self.build_cmds = cfg.get("build_cmds", [])
+        commands_enabled = cfg.get("allow_commands") is True
+        self.fix_cmds = cfg.get("fix_cmds", []) if commands_enabled else []
+        self.build_cmds = cfg.get("build_cmds", []) if commands_enabled else []
         for command in self.fix_cmds + self.build_cmds:
             command_args(command)
         self.ficar = self._safe_marker(cfg.get("ficar", "ficar"))
@@ -221,7 +222,6 @@ class Agent:
             commit_sha = None
             if build_ok and self.push_changes:
                 self.git("add", "--", *self.sync_paths, check=True)
-                _, staged = self.git("diff", "--cached", "--quiet", check=False)
                 staged_status, _ = self.git("diff", "--cached", "--quiet", check=False)
                 if staged_status == 1:
                     commit_rc, _ = self.git(
