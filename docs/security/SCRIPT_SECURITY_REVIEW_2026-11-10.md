@@ -181,3 +181,16 @@ Additional sync-related files were reviewed and hardened:
 - `tests/test_sync_security.py`: consolidated duplicate test definitions and added regression coverage for Drive default-deny behavior, credential exclusions, local mirror symlink/secret filtering, and disabled destructive sync behavior.
 
 Google Drive sync remains an optional external integration and is not enabled by these code changes. Configure credentials only in the user's local environment or a secret store; never commit them. The repository CI result remains the final check for syntax, imports, and test compatibility.
+
+
+## Drive sync state-file hardening — 2026-11-10
+
+A follow-up review of `runner/python/tamanna_sync.py` found that the configurable local state-file path was not checked against the Google service-account credentials path. A mistaken `TAMANNA_DRIVE_SYNC_STATE` value could therefore overwrite the credentials file after an upload cycle. The state path also lacked an explicit symlink rejection.
+
+- Added `validate_state_file()` to reject symlink state paths, the credentials file itself, paths inside the upload folder, paths that would replace the upload folder, and existing non-regular-file targets.
+- `sync_once()` now validates the state path before loading or writing it.
+- Added regression tests for a valid external state path, credentials overwrite, symlink, and upload-folder containment.
+
+Commits: `886cc0284cbf3081adedec6d37bb4b2bcea8f636` (code), `8c9aa25b45f52352012199d5dfc9c0b28c120b51` (tests).
+
+This is a targeted static hardening change. The new CI runs are queued; no test-pass claim is made until GitHub Actions reports completion. Drive sync remains disabled unless explicitly opted in.
