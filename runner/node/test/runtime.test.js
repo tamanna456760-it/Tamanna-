@@ -133,13 +133,13 @@ test("security audit reports unverified host checks instead of random results", 
   assert.ok(report.results.every((item) => !("passed" in item) || typeof item.passed === "boolean"));
 });
 
-test("Telegram bot module can be imported without starting polling or requiring a token", () => {
+test("Telegram bot module can be imported without starting polling or requiring a token", async () => {
   assert.deepEqual([...parseAdminIds("123, bad, 456,123")], ["123", "456"]);
   const admins = parseAdminIds("123,456");
   assert.equal(isAdminId("123", admins), true);
   assert.equal(isAdminId("789", admins), false);
   assert.equal(isAdminId("123", new Set()), false);
-  assert.rejects(createBot({ token: "" }), /BOT_TOKEN is required/);
+  await assert.rejects(createBot({ token: "" }), /BOT_TOKEN is required/);
 });
 
 test("WebSocket origin allowlist rejects missing and unlisted origins", () => {
