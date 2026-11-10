@@ -29,6 +29,12 @@ def run_check(name, function):
             "status": "ERROR",
             "details": f"{type(exc).__name__}: {exc}",
         }
+def check_configuration():
+    """Load and validate the endpoint configuration without modifying it."""
+    with CONFIG.open("r", encoding="utf-8") as handle:
+        config = json.load(handle)
+    errors = validate_config(config)
+    return {"valid": not errors, "errors": errors}
 def check_unit_tests():
     completed = subprocess.run(
         [
@@ -55,10 +61,7 @@ def check_unit_tests():
     }
 def main():
     checks = [
-        run_check(
-            "configuration",
-            lambda: validate_config(CONFIG),
-        ),
+        run_check("configuration", check_configuration),
         run_check(
             "security_policy",
             lambda: check_policy(CONFIG),
