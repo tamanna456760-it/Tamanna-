@@ -347,3 +347,22 @@ Commits:
 - `5256dc3` expand CI syntax checks.
 
 These legacy modules were not run. This change does not claim all repository automation is disabled; remaining scripts/workflows still require call-graph and permission review. CI must complete before marking tests passed.
+
+
+## Node monitoring and security audit accuracy — 2026-11-10
+
+- Replaced the ESM `monitor.js` implementation (which required an undeclared `systeminformation` dependency) with CommonJS and Node's built-in `os` module.
+- Monitoring now reports real CPU core count, load averages, memory totals/usage, platform, Node version, and uptime.
+- A one-shot metrics snapshot is the default; periodic logging is opt-in and returns a stop function. Timers are unreferenced.
+- Replaced `security.js` random simulated pass/fail outcomes with a deterministic Node runtime configuration audit.
+- Firewall, malware/rootkit, and IDS checks are explicitly `not_checked`; the report no longer pretends these host-level checks were performed.
+- The audit never displays the firewall admin token value.
+- Added tests and CI syntax checks for both modules.
+
+Commits:
+- `174bfcd` — real OS metrics.
+- `66020f5` — honest runtime security audit.
+- `f12d377` — regression tests.
+- `f06acd3` — CI syntax checks.
+
+No host firewall, malware scanner, rootkit detector, or IDS was installed or executed. CI must complete before tests are marked passing.
