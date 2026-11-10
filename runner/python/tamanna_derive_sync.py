@@ -82,8 +82,15 @@ def main():
         raise FileNotFoundError(f"Books folder not found: {books_folder}")
     if not credentials_file.is_file():
         raise FileNotFoundError("Set TAMANNA_GOOGLE_OAUTH_CLIENT to a valid OAuth client JSON file")
-    if token_file.resolve() == credentials_file.resolve() or token_file.resolve() in books_folder.parents:
-        raise ValueError("Token file must be separate from the OAuth client file and books folder")
+    resolved_token = token_file.resolve()
+    resolved_credentials = credentials_file.resolve()
+    if (
+        resolved_token == resolved_credentials
+        or resolved_token in books_folder.parents
+        or books_folder in resolved_token.parents
+        or books_folder in resolved_credentials.parents
+    ):
+        raise ValueError("Token and OAuth client files must be outside the books folder and separate from each other")
 
     service = authenticate_drive(credentials_file.resolve(), token_file.resolve())
     sync_to_drive(service, books_folder)
