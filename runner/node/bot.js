@@ -60,7 +60,7 @@ async function createBot({
     } catch (error) {
       console.error("Telegram AI reply unavailable:", error.message);
       await ctx.reply(
-        "স্থানীয় AI runtime এখনো কনফিগার করা হয়নি। বাহ্যিক AI API বন্ধ আছে।"
+        "স্থানীয় AI runtime পাওয়া যাচ্ছে না। Ollama চালু আছে এবং নির্বাচিত model ইনস্টল করা আছে কি না যাচাই করুন। বাহ্যিক AI API বন্ধ আছে।"
       );
     }
   });
