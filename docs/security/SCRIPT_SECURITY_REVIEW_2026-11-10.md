@@ -60,3 +60,30 @@ Each file needs full-content inspection before any change. Search results alone 
 - No credentials have been tested, rotated, or exposed by this review.
 - No deployment or production configuration was changed.
 - Next safe step: inspect the remaining search hits in batches, then archive originals and propose reviewed replacements with focused tests.
+
+
+## Follow-up inspection — additional scripts
+
+Five additional files were fetched from `main` and inspected:
+
+| Path | Confirmed findings |
+|---|---|
+| `runner/shell/tamanna_ultra_ai.sh` | Reads a GitHub token and inserts it in a remote URL; pushes; flushes iptables and sets INPUT/FORWARD default DROP, allowing loopback and TCP 22 only |
+| `runner/shell/tamanna_ultra_pro.sh` | Same token-in-remote pattern and firewall reset/default DROP pattern |
+| `runner/shell/tamanna_ultra_max.sh` | Token-in-remote pattern and push; no firewall/rsync-delete pattern found in this scan |
+| `runner/shell/tamanna_autonomous.sh` | Token-in-remote pattern and push; firewall reset/default DROP; `rsync -avz --delete` |
+| `runner/shell/tamanna_all_in_one.sh` | Token-in-remote pattern and push |
+
+The scripts were only fetched and statically inspected; none was executed.
+
+## Invocation / reachability caveat
+
+The five script names also appear in `runner/data/manifest.json`, which is a file inventory and not evidence that the scripts are automatically executed. A search of `Main.py` found a legacy Linux-shell route that calls `tamanna_autonomous.shell(...)`; the surrounding source comments explicitly mark that route as disabled. This does not prove every possible execution path is unreachable. A full call-graph and workflow-invocation audit remains outstanding.
+
+## Newly confirmed references
+
+- `runner/shell/tamanna_ultra_ai.sh` blob: `23ee048509269ba5d9a6dc8340063bbd7e28b010`
+- `runner/shell/tamanna_ultra_pro.sh` blob: `8ba78906082cbb9adc4685fbb2cbe13938f67535`
+- `runner/shell/tamanna_ultra_max.sh` blob: `fd2e8df3e8a8e5c4ea32251dc764341b1124578c`
+- `runner/shell/tamanna_autonomous.sh` blob: `c9388afb0896e9392f57553c2ef2a7002171b752`
+- `runner/shell/tamanna_all_in_one.sh` blob: `0855ea1c1601b4351ba8b82bd480c9f5399801fc`
