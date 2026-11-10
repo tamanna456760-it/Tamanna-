@@ -11,8 +11,9 @@ class FakeAsyncClient:
     posted = None
     responses = []
 
-    def __init__(self, timeout=None):
+    def __init__(self, timeout=None, trust_env=True):
         self.timeout = timeout
+        self.trust_env = trust_env
 
     async def __aenter__(self):
         return self
@@ -49,6 +50,7 @@ class OllamaClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload["model"], "qwen2.5:7b")
         self.assertFalse(payload["stream"])
         self.assertEqual(payload["messages"][0]["content"], "Hello")
+        self.assertFalse(FakeAsyncClient.trust_env)
 
 
     async def test_lists_installed_model_sizes_and_quantization(self):
