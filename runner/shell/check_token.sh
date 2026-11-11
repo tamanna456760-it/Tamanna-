@@ -1,12 +1,7 @@
-#!/bin/bash
-
-TOKEN="tamanna"
-
-res=$(curl -s -o /dev/null -w "%{http_code}" \
--H "Authorization: token $TOKEN" https://api.github.com/user)
-
-if [ "$res" = "200" ]; then
-  echo "✅ Token is valid"
-else
-  echo "❌ Token invalid or expired"
-fi
+#!/bin/sh
+# SAFETY HOLD: This legacy script is intentionally disabled.
+# The previous version contained unsafe credential handling, broad code execution,
+# automatic Git remote changes/pushes, or host-level firewall/account mutations.
+# Review docs/security/ETHICAL_HACKING_SYSTEM.md before replacing this guard.
+echo "Tamanna AI security hold: this legacy script is disabled. No changes were made." >&2
+exit 2
