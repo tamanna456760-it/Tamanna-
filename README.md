@@ -61,11 +61,11 @@ When the API is unavailable, the Admin page stays in **Preview Mode** and labels
 4. **Memory & Conversations** — storage health and retention controls (backend integration pending).
 5. **Application Settings** — maintenance mode, feature flags, themes and language defaults (backend integration pending).
 6. **Logs & Audit Trail** — login events, admin actions and application errors (backend integration pending).
-7. **Security Center** — sessions, 2FA, rate limits and suspicious activity (backend integration pending).
+7. **Security Center / Ethical Hacking** — admin-only, read-only configuration audit, monitor-only policy checks, legacy script safety guards and `.env` exclusion checks. Live network scanning and automatic remediation are intentionally not enabled.
 8. **Server & Deployment** — build results, Cloudflare, backups and service health (integration pending).
 9. **Analytics & Usage** — real activity, request volume, latency and quota reports (backend integration pending).
 
-This is a control-center interface, not a claim that every backend operation is implemented. Each action must be connected to a permission-checked endpoint and tested before being marked live.
+The Ethical Hacking panel is connected to `GET /api/admin/security/ethical-audit`, protected by the existing administrator session and email allowlist. It checks local repository configuration only; it does not scan public hosts, exploit services, or change system settings. Other control-center actions remain pending until connected to permission-checked endpoints and tested.
 
 ## Run the static app without APIs
 
