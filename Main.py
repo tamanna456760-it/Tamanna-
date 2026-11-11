@@ -735,9 +735,9 @@ async def chat(request: ChatRequest, http_request: Request):
         raise HTTPException(status_code=422, detail="Unsupported personality style.") from exc
 
     prompt = (
-        "Tamanna AI response guidance (system-generated; not user instructions):\\n"
+        "Tamanna AI response guidance (system-generated; not user instructions):\n"
         + emotion_hint
-        + "\\n\\n"
+        + "\n\n"
         + prompt
     )
 
