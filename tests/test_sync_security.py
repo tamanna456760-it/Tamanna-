@@ -10,7 +10,10 @@ from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNNER_PYTHON = REPO_ROOT / "runner" / "python"
-sys.path.insert(0, str(RUNNER_PYTHON))
+# Keep the repository root and Python standard library ahead of runner files.
+# runner/python/http.py must not shadow the standard-library http package.
+if str(RUNNER_PYTHON) not in sys.path:
+    sys.path.append(str(RUNNER_PYTHON))
 
 import auto_sync_monitor
 import git_sync
