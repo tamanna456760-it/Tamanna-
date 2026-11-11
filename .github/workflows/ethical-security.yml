@@ -19,6 +19,13 @@ on:
     branches: [main]
     paths:
       - "endpoint_security/**"
+      - "tamanna_ai/security/ethical_audit.py"
+      - "tests/test_ethical_audit.py"
+      - "Main.py"
+      - "admin.html"
+      - "js/admin.js"
+      - "css/admin.css"
+      - "README.md"
       - "scripts/check_legacy_shell_safety.py"
       - "docs/security/**"
       - ".github/workflows/ethical-security.yml"
