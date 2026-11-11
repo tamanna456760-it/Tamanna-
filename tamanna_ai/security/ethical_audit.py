@@ -44,12 +44,10 @@ def run_ethical_audit(root: str | Path) -> dict[str, Any]:
             "Destructive enforcement remains disabled."
             if policy.get("valid") else "; ".join(policy.get("violations", [])),
         ))
-    except (OSError, ValueError, TypeError) as exc:
-        checks.append(_check(
-            "endpoint_security_config",
-            False,
-            f"Could not validate security configuration ({type(exc).__name__}).",
-        ))
+    except (OSError, ValueError, TypeError, ImportError) as exc:
+        reason = f"Could not validate security configuration ({type(exc).__name__})."
+        checks.append(_check("endpoint_security_config", False, reason))
+        checks.append(_check("endpoint_security_policy", False, reason))
 
     guard_path = base / "scripts" / "check_legacy_shell_safety.py"
     guard_ok = False
