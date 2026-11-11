@@ -532,6 +532,30 @@ async def admin_overview(request: Request):
     }
 
 
+@app.get("/api/admin/security/ethical-audit")
+async def admin_ethical_security_audit(request: Request):
+    """Run the repository's safe, read-only defensive security audit."""
+    user = current_user(request.cookies.get(COOKIE))
+    if not user:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    allowed_admins = {
+        item.strip().lower()
+        for item in os.getenv("TAMANNA_ADMIN_EMAIL", "").split(",")
+        if item.strip()
+    }
+    if not allowed_admins or user.get("email", "").strip().lower() not in allowed_admins:
+        raise HTTPException(status_code=403, detail="Admin access is not enabled for this account.")
+    try:
+        from tamanna_ai.security.ethical_audit import run_ethical_audit
+        return {"ok": True, "audit": run_ethical_audit(BASE_DIR)}
+    except Exception as exc:
+        # Do not return exception text that could disclose local paths or secrets.
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ethical security audit failed ({type(exc).__name__}).",
+        ) from exc
+
+
 @app.get("/api/status")
 async def status():
 
