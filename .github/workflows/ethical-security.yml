@@ -1,0 +1,54 @@
+name: Tamanna AI Ethical Security Checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "endpoint_security/**"
+      - "scripts/check_legacy_shell_safety.py"
+      - "docs/security/**"
+      - ".github/workflows/ethical-security.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "endpoint_security/**"
+      - "scripts/check_legacy_shell_safety.py"
+      - "docs/security/**"
+      - ".github/workflows/ethical-security.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-ethical-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  defensive-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: endpoint_security/requirements.txt
+      - name: Install endpoint security dependencies
+        run: python -m pip install -r endpoint_security/requirements.txt
+      - name: Validate security configuration
+        run: |
+          python -m json.tool endpoint_security/endpoint_config.json > /dev/null
+          python -m endpoint_security.config_validator
+          python -m endpoint_security.policy_checker
+      - name: Verify legacy scripts remain disabled
+        run: python scripts/check_legacy_shell_safety.py
+      - name: Run monitor-only posture tests
+        run: |
+          python -m unittest \
+            endpoint_security.tests.test_posture_pipeline \
+            endpoint_security.tests.test_posture_integration \
+            -v
