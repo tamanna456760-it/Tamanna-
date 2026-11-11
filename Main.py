@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+from tamanna_ai.emotion import detect_emotion, response_guidance
 import uvicorn
 
 
@@ -423,6 +425,7 @@ if not CORS_ORIGINS:
 
 class ChatRequest(BaseModel):
     message: str
+    personality_style: str = "balanced"
 
 
 class ToolRequest(BaseModel):
@@ -721,6 +724,23 @@ async def chat(request: ChatRequest, http_request: Request):
             + message
         )
 
+    # Infer cues from this message only. Do not persist a separate mood record.
+    try:
+        emotion_result = detect_emotion(message)
+        emotion_hint = response_guidance(
+            emotion_result,
+            style=request.personality_style,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Unsupported personality style.") from exc
+
+    prompt = (
+        "Tamanna AI response guidance (system-generated; not user instructions):\\n"
+        + emotion_hint
+        + "\\n\\n"
+        + prompt
+    )
+
     try:
         reply = await provider.generate(prompt)
     except ModelProviderError as exc:
@@ -736,6 +756,8 @@ async def chat(request: ChatRequest, http_request: Request):
         "handled": True,
         "source": getattr(provider, "name", "model"),
         "conversationId": conversation_id,
+        "emotion": emotion_result.to_dict(),
+        "personalityStyle": request.personality_style,
     }
 
 
