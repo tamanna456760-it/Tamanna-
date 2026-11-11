@@ -46,5 +46,42 @@ logout.addEventListener("click",async()=>{
   try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"});}
   finally{location.href="/";}
 });
+const auditButton=$("runEthicalAudit"),auditStatus=$("ethicalAuditStatus"),auditReport=$("ethicalAuditReport");
+if(auditButton&&auditStatus&&auditReport){
+  auditButton.addEventListener("click",async()=>{
+    auditButton.disabled=true;
+    auditStatus.textContent="Running read-only checks…";
+    auditReport.textContent="Tamanna AI security configuration পরীক্ষা করা হচ্ছে…";
+    try{
+      const response=await fetch("/api/admin/security/ethical-audit",{
+        method:"GET",credentials:"same-origin",headers:{Accept:"application/json"}
+      });
+      const data=await response.json().catch(()=>({}));
+      if(response.status===401||response.status===403){
+        auditStatus.textContent="Admin access required";
+        auditReport.textContent=data.detail||"Administrator permission was not verified.";
+        return;
+      }
+      if(!response.ok||data.ok!==true||!data.audit)throw new Error(data.detail||("HTTP "+response.status));
+      const report=data.audit;
+      auditStatus.textContent=report.summary.status+" · "+report.summary.passed+"/"+report.summary.total+" passed";
+      auditReport.textContent=[
+        "TAMANNA AI — ETHICAL SECURITY AUDIT",
+        "Mode: "+report.mode,
+        "Summary: "+JSON.stringify(report.summary),
+        "",
+        ...report.checks.map(item=>item.status+" | "+item.name+" | "+item.detail),
+        "",
+        "LIMITATIONS",
+        ...report.limitations.map(item=>"- "+item)
+      ].join("\n");
+    }catch(error){
+      auditStatus.textContent="Audit unavailable";
+      auditReport.textContent="নিরাপত্তা audit চালানো যায়নি: "+(error.message||"network error");
+    }finally{
+      auditButton.disabled=false;
+    }
+  });
+}
 connect();
 })();
