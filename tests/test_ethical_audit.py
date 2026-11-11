@@ -11,7 +11,7 @@ class EthicalAuditTests(unittest.TestCase):
             report = run_ethical_audit(Path(directory))
         self.assertEqual(report["mode"], "read_only")
         self.assertEqual(report["summary"]["status"], "REVIEW_REQUIRED")
-        self.assertEqual(report["summary"]["total"], 4)
+        self.assertEqual(report["summary"]["total"], 5)
 
     def test_audit_never_claims_network_scan(self):
         with tempfile.TemporaryDirectory() as directory:
