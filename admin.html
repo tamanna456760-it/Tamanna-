@@ -31,6 +31,12 @@
 <section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">ADMIN ACCOUNT</p><h2>Administrator</h2></div></div><p id="adminName" class="admin-name">Tamanna AI Admin</p><p id="adminEmail" class="admin-email">Tamanna456760@gmail.com</p><p class="security-note">Production access must be verified by FastAPI using the private TAMANNA_ADMIN_EMAIL allowlist. Preview mode does not grant administrator privileges or expose account data.</p><button id="adminLogout" class="logout-button" type="button" hidden>Sign out</button>
 </section>
 </div>
+<section class="panel-card ethical-audit-panel" aria-labelledby="ethicalAuditTitle">
+<p class="eyebrow">DEFENSIVE SECURITY</p><h2 id="ethicalAuditTitle">Ethical Hacking</h2>
+<p class="ethical-audit-copy">নিজের Tamanna AI project-এর read-only security audit চালান। এটি configuration, secret-file exclusions এবং legacy safety guards পরীক্ষা করবে; কোনো host scan, exploit বা system change করবে না।</p>
+<div class="ethical-audit-actions"><button id="runEthicalAudit" class="logout-button" type="button">Run Ethical Security Audit</button><span id="ethicalAuditStatus" class="tool-state">Admin verification required</span></div>
+<pre id="ethicalAuditReport" class="ethical-audit-report" role="status" aria-live="polite">Audit এখনো চালানো হয়নি।</pre>
+</section>
 <section class="panel-card api-checklist"><p class="eyebrow">IMPLEMENTATION PLAN</p><h2>Backend connection checklist</h2><div class="tool-list">
 <div class="tool-row"><div><strong>Admin authentication & role checks</strong><small>Use existing session cookie and email allowlist; add 2FA before production.</small></div><span class="tool-state">Existing / harden</span></div>
 <div class="tool-row"><div><strong>Overview, users, analytics and audit APIs</strong><small>Read-only endpoints first, then permission-checked actions.</small></div><span class="tool-state">Pending</span></div>
