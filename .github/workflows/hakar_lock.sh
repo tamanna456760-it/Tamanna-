@@ -1,14 +1,7 @@
 #!/bin/sh
-# PC Anti-Hacker Lock
-
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT ACCEPT
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-
-systemctl disable bluetooth cups avahi-daemon 2>/dev/null
-systemctl stop bluetooth cups avahi-daemon 2>/dev/null
-
-chmod 700 /root
+# SAFETY HOLD: This legacy script is intentionally disabled.
+# The previous version contained unsafe credential handling, broad code execution,
+# automatic Git remote changes/pushes, or host-level firewall/account mutations.
+# Review docs/security/ETHICAL_HACKING_SYSTEM.md before replacing this guard.
+echo "Tamanna AI security hold: this legacy script is disabled. No changes were made." >&2
+exit 2
