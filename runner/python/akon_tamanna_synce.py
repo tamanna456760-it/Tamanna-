@@ -360,12 +360,14 @@ class AkonBuildSystem:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(python_code)
 
-        # Test the conversion
+        # Validate syntax without executing generated project code.
         try:
-            exec(compile(python_code, str(output_file), "exec"))
-            self.logger.info(f"Akon file built successfully: {file_path}")
-        except Exception as e:
-            self.logger.error(f"Akon build error: {e}")
+            compile(python_code, str(output_file), "exec")
+            self.logger.info(
+                "Akon file syntax validated successfully: %s", file_path
+            )
+        except SyntaxError as e:
+            self.logger.error("Akon build syntax error: %s", e)
 
     def _build_tamanna_file(self, file_path: Path):
         """Build Tamanna file"""
