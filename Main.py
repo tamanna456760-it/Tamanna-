@@ -112,6 +112,21 @@ async def supervisor_network_status(request: Request):
     }
 
 
+@app.get("/api/supervisors/file")
+async def supervisor_file_assignment(request: Request, path: str):
+    """Return the assigned supervisor and five reviewers for one tracked file."""
+    _require_feature_access(request, admin=True)
+    if not path or len(path) > 512 or path.startswith("/") or "\\\\" in path:
+        raise HTTPException(status_code=400, detail="A valid repository-relative file path is required.")
+    from tamanna_ai.supervisors import build_supervisor_registry
+
+    registry = build_supervisor_registry(BASE_DIR)
+    assignment = registry["file_owners"].get(path)
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="File is not tracked in this repository.")
+    return {"path": path, **assignment}
+
+
 @app.on_event("startup")
 def initialize_persistence():
     # Report configuration readiness without ever logging credential values.
