@@ -180,11 +180,15 @@
       if (Number.isFinite(data.size) && data.size > 250000) throw new Error("File is larger than the 250 KB preview limit.");
       if (data.encoding !== "base64" || typeof data.content !== "string" || !data.content) throw new Error("GitHub did not return a supported text preview.");
       const encodedContent = data.content.replace(/\s/g, "");
-      const maxBase64Length = Math.ceil(250000 / 3) * 4;
-      if (encodedContent.length > maxBase64Length) throw new Error("File is larger than the 250 KB preview limit.");
+      if (encodedContent.length % 4 !== 0 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encodedContent)) {
+        throw new Error("GitHub returned invalid Base64 file content.");
+      }
+      const padding = encodedContent.endsWith("==") ? 2 : encodedContent.endsWith("=") ? 1 : 0;
+      const decodedLength = (encodedContent.length / 4) * 3 - padding;
+      if (decodedLength > 250000) throw new Error("File is larger than the 250 KB preview limit.");
       const binary = atob(encodedContent);
       const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-      if (bytes.byteLength > 250000) throw new Error("File is larger than the 250 KB preview limit.");
+      if (bytes.byteLength !== decodedLength) throw new Error("GitHub returned inconsistent file content.");
       const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
       preview.textContent = text;
       setStatus("Read-only preview: " + path + " (" + bytes.byteLength + " bytes).");
