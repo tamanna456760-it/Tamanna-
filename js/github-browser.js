@@ -90,7 +90,6 @@
         commits.append(row);
       });
       await loadTree();
-      if (requestId === repoRequestId) setStatus("Connected to public repository " + currentRepo + ".");
     } catch (error) {
       if (requestId === repoRequestId) setStatus(error.message, true);
     }
