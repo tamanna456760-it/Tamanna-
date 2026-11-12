@@ -96,6 +96,7 @@
   }
   async function loadTree() {
     const requestId = ++treeRequestId;
+    ++fileRequestId;
     const repoSnapshot = currentRepo;
     const branchSnapshot = currentBranch;
     setStatus("Loading repository files…");
@@ -126,6 +127,8 @@
       const up = element("button", "↑ ..", "github-tree-item");
       up.type = "button";
       up.addEventListener("click", () => {
+        ++fileRequestId;
+        preview.textContent = "Choose a file to preview its text.";
         currentPath = currentPath.split("/").slice(0, -1).join("/");
         pathLabel.textContent = currentPath || "/";
         renderTree();
@@ -139,6 +142,8 @@
       button.type = "button";
       button.addEventListener("click", () => {
         if (item.type === "tree") {
+          ++fileRequestId;
+          preview.textContent = "Choose a file to preview its text.";
           currentPath = item.path;
           pathLabel.textContent = currentPath;
           renderTree();
