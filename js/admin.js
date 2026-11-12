@@ -83,5 +83,61 @@ if(auditButton&&auditStatus&&auditReport){
     }
   });
 }
+
+const antivirusForm=$("antivirusForm"),antivirusFile=$("antivirusFile"),antivirusButton=$("antivirusScanButton"),antivirusStatus=$("antivirusScanStatus"),antivirusReport=$("antivirusScanReport");
+if(antivirusForm&&antivirusFile&&antivirusButton&&antivirusStatus&&antivirusReport){
+  antivirusForm.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const file=antivirusFile.files&&antivirusFile.files[0];
+    if(!file){antivirusStatus.textContent="Choose a file first";return;}
+    if(file.size>10*1024*1024){antivirusStatus.textContent="File exceeds 10 MiB limit";antivirusReport.textContent="এই endpoint সর্বোচ্চ 10 MiB ফাইল scan করে।";return;}
+    antivirusButton.disabled=true;
+    antivirusStatus.textContent="Uploading to temporary scanner…";
+    antivirusReport.textContent="ফাইলটি ClamAV দিয়ে পরীক্ষা করা হচ্ছে।";
+    try{
+      const form=new FormData();
+      form.append("file",file,file.name);
+      const response=await fetch("/tamanna-ai/security/antivirus/scan-upload",{
+        method:"POST",credentials:"same-origin",headers:{Accept:"application/json"},body:form
+      });
+      const data=await response.json().catch(()=>({}));
+      if(response.status===401||response.status===403){
+        antivirusStatus.textContent="Admin access required";
+        antivirusReport.textContent=data.detail||"Administrator permission was not verified.";
+        return;
+      }
+      if(response.status===503){
+        const detail=data.detail||{};
+        antivirusStatus.textContent="Scan not verified";
+        antivirusReport.textContent=typeof detail==="string"?detail:JSON.stringify(detail,null,2);
+        return;
+      }
+      if(response.status===413){
+        antivirusStatus.textContent="File too large";
+        antivirusReport.textContent=data.detail||"Maximum upload size is 10 MiB.";
+        return;
+      }
+      if(!response.ok||!data.scan)throw new Error(data.detail||("HTTP "+response.status));
+      const scan=data.scan;
+      antivirusStatus.textContent=scan.status==="clean"?"Clean · ClamAV scan completed":scan.status==="infected"?"Malware detected":"Scan status: "+scan.status;
+      antivirusReport.textContent=[
+        "TAMANNA AI ANTIVIRUS",
+        "File: "+(data.filename||file.name),
+        "Status: "+scan.status,
+        "Message: "+scan.message,
+        "Stored: "+String(data.stored===true),
+        "Executed: "+String(data.executed===true),
+        "",
+        "A clean result is not a guarantee that a file is safe."
+      ].join("\n");
+    }catch(error){
+      antivirusStatus.textContent="Scanner unavailable";
+      antivirusReport.textContent="Antivirus scan চালানো যায়নি: "+(error.message||"network error");
+    }finally{
+      antivirusButton.disabled=false;
+    }
+  });
+}
+
 connect();
 })();
