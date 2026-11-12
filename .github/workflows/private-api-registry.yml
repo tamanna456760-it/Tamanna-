@@ -51,6 +51,20 @@ jobs:
           persist-credentials: false
         continue-on-error: true
 
+      - name: Validate private runtime template with backend loader
+        if: steps.private_config.outcome == 'success'
+        env:
+          TAMANNA_PRIVATE_RUNTIME_CONFIG: private-api-config/config/runtime.example.json
+        run: |
+          python - <<'PY'
+          from tamanna_ai.private_runtime_config import load_private_runtime_config
+          config = load_private_runtime_config()
+          assert config["status"] == "loaded", "Private runtime template did not load"
+          assert config["backend"]["health_path"] == "/health"
+          assert config["admin"]["overview_path"] == "/api/admin/overview"
+          print("Private runtime template passed the backend's real loader validation.")
+          PY
+
       - name: Validate registry structure and source links
         if: steps.private_config.outcome == 'success'
         shell: bash
