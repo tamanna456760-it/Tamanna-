@@ -43,9 +43,36 @@
       if (Number.isFinite(declaredLength) && declaredLength > 8 * 1024 * 1024) {
         throw new Error("GitHub API response exceeds the 8 MB safety limit.");
       }
-      const body = await response.text();
-      if (new TextEncoder().encode(body).byteLength > 8 * 1024 * 1024) {
-        throw new Error("GitHub API response exceeds the 8 MB safety limit.");
+      let body;
+      if (response.body && typeof response.body.getReader === "function") {
+        const reader = response.body.getReader();
+        const chunks = [];
+        let totalBytes = 0;
+        try {
+          while (true) {
+            const part = await reader.read();
+            if (part.done) break;
+            const chunk = part.value instanceof Uint8Array ? part.value : new Uint8Array(part.value);
+            totalBytes += chunk.byteLength;
+            if (totalBytes > 8 * 1024 * 1024) {
+              try { await reader.cancel("Response exceeds the 8 MB safety limit."); } catch (_) { /* Best-effort cancellation. */ }
+              throw new Error("GitHub API response exceeds the 8 MB safety limit.");
+            }
+            chunks.push(chunk);
+          }
+        } finally {
+          reader.releaseLock?.();
+        }
+        const bytes = new Uint8Array(totalBytes);
+        let offset = 0;
+        chunks.forEach(chunk => { bytes.set(chunk, offset); offset += chunk.byteLength; });
+        body = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+      } else {
+        // Compatibility fallback for test doubles and older non-streaming fetch implementations.
+        body = await response.text();
+        if (new TextEncoder().encode(body).byteLength > 8 * 1024 * 1024) {
+          throw new Error("GitHub API response exceeds the 8 MB safety limit.");
+        }
       }
       let data;
       try { data = JSON.parse(body); } catch (_) { data = {}; }
