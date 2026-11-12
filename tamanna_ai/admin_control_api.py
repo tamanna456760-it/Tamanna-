@@ -91,17 +91,15 @@ def admin_analytics(token: str | None = Cookie(default=None, alias=COOKIE)):
         users = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
         sessions = db.execute("SELECT COUNT(*) FROM sessions WHERE expires>?", (int(time.time()),)).fetchone()[0]
         audit_events = db.execute("SELECT COUNT(*) FROM admin_audit_events").fetchone()[0]
-        messages_table = db.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages'"
-        ).fetchone()
-        messages = 0
-        if messages_table:
-            messages = db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+    from tamanna_ai.persistence.database import database, Message
+    from sqlalchemy import func, select
+    with database.Session() as session:
+        messages = session.scalar(select(func.count()).select_from(Message)) or 0
     return {"ok": True, "analytics": {
         "registered_users": users, "active_sessions": sessions,
         "chat_messages": messages, "admin_audit_events": audit_events,
         "measured_at": datetime.now(timezone.utc).isoformat(),
-    }, "source": "local_database"}
+    }, "source": "authentication_and_application_databases"}
 
 
 @router.get("/settings")
