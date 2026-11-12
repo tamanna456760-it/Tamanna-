@@ -31,6 +31,40 @@
 <section class="panel-card"><div class="panel-heading"><div><p class="eyebrow">ADMIN ACCOUNT</p><h2>Administrator</h2></div></div><p id="adminName" class="admin-name">Tamanna AI Admin</p><p id="adminEmail" class="admin-email">Tamanna456760@gmail.com</p><p class="security-note">Production access must be verified by FastAPI using the private TAMANNA_ADMIN_EMAIL allowlist. Preview mode does not grant administrator privileges or expose account data.</p><button id="adminLogout" class="logout-button" type="button" hidden>Sign out</button>
 </section>
 </div>
+<section class="panel-card github-browser-panel" aria-labelledby="githubBrowserTitle">
+  <p class="eyebrow">SOURCE CONTROL · READ ONLY</p>
+  <h2 id="githubBrowserTitle">GitHub Repository Browser</h2>
+  <p class="ethical-audit-copy">Public repository, branches, recent commits এবং text files এখানে দেখা যাবে। এই browser কোনো GitHub token নেয় না, কোনো private repository খোলে না এবং code write/push/delete করে না।</p>
+  <div class="github-browser-controls">
+    <label for="githubRepo">Repository (owner/name)</label>
+    <input id="githubRepo" type="text" value="tamanna456760-it/Tamanna-" autocomplete="off" spellcheck="false">
+    <button id="githubLoadRepo" class="logout-button" type="button">Load repository</button>
+    <button id="githubOpenRepo" class="logout-button" type="button">Open on GitHub</button>
+    <label for="githubBranch">Branch</label>
+    <select id="githubBranch"></select>
+    <span id="githubBrowserStatus" role="status" aria-live="polite">Connecting to GitHub…</span>
+  </div>
+  <div class="github-browser-layout">
+    <div><h3>Files <small id="githubCurrentPath">/</small></h3><nav id="githubFileTree" class="github-file-tree" aria-label="Repository files"></nav></div>
+    <div><h3>File preview</h3><pre id="githubFilePreview" class="ethical-audit-report">Choose a file to preview its text.</pre></div>
+  </div>
+  <h3>Recent commits</h3><ul id="githubRecentCommits" class="github-recent-commits"></ul>
+  <style>
+    .github-browser-controls{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:16px 0}
+    .github-browser-controls label{font-size:.85rem;color:var(--muted)}
+    .github-browser-controls input,.github-browser-controls select{min-width:150px;max-width:100%;padding:10px;color:var(--text);background:#10182c;border:1px solid var(--border);border-radius:9px}
+    .github-browser-controls input{flex:1}
+    #githubBrowserStatus{flex-basis:100%;font-size:.85rem;color:var(--muted)}
+    #githubBrowserStatus[data-state="error"]{color:#ff9aa5}
+    .github-browser-layout{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,1.5fr);gap:16px}
+    .github-file-tree{display:flex;flex-direction:column;gap:5px;max-height:420px;overflow:auto}
+    .github-tree-item{width:100%;text-align:left;padding:8px 10px;background:#17213a;border:1px solid var(--border);font-size:.82rem;overflow-wrap:anywhere}
+    #githubFilePreview{min-height:240px;max-height:420px;overflow:auto;white-space:pre;overflow-wrap:normal}
+    .github-recent-commits{padding-left:20px}.github-recent-commits li{margin:8px 0}.github-recent-commits a{color:#bcb6ff}.github-recent-commits small{display:block;color:var(--muted)}
+    @media(max-width:700px){.github-browser-layout{grid-template-columns:1fr}.github-browser-controls .logout-button{flex:1}}
+  </style>
+</section>
+
 <section class="panel-card ethical-audit-panel" aria-labelledby="ethicalAuditTitle">
 <p class="eyebrow">DEFENSIVE SECURITY</p><h2 id="ethicalAuditTitle">Ethical Hacking</h2>
 <p class="ethical-audit-copy">নিজের Tamanna AI project-এর read-only security audit চালান। এটি configuration, secret-file exclusions এবং legacy safety guards পরীক্ষা করবে; কোনো host scan, exploit বা system change করবে না।</p>
@@ -58,5 +92,5 @@
 </div></section>
 </section>
 </main>
-<script src="/js/admin.js?v=20261112_antivirus"></script>
+<script src="/js/admin.js?v=20261112_antivirus"></script>\n<script src="/js/github-browser.js?v=20261112_readonly"></script>
 </body></html>
