@@ -3048,6 +3048,9 @@ try:
     from tamanna_ai.api.routes import api_router as tamanna_package_api_router
     app.include_router(tamanna_package_api_router)
     print("[TAMANNA AI API] Chat, model, conversation, knowledge and memory APIs registered.")
+    from tamanna_ai.admin_control_api import router as tamanna_admin_control_router
+    app.include_router(tamanna_admin_control_router)
+    print("[TAMANNA ADMIN API] Users, analytics, settings, memory summary, audit, sessions and deployment APIs registered.")
 except Exception as tamanna_auth_error:
     print("[TAMANNA AUTH] Integration failed:", type(tamanna_auth_error).__name__, tamanna_auth_error)
 # ============================================================
