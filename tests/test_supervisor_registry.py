@@ -31,7 +31,8 @@ def test_dedicated_teams_have_five_specialists_each(tmp_path):
     registry = build_supervisor_registry(tmp_path)
     teams = registry["cross_cutting_teams"]
     assert set(teams) == {"defense", "server_operations"}
-    assert len(teams["defense"]["specialists"]) == 5
+    assert len(teams["defense"]["specialists"]) == 100
+    assert teams["defense"]["specialists_count"] == 100
     assert len(teams["server_operations"]["specialists"]) == 5
     assert registry["runtime"]["workers_started"] is False
 
