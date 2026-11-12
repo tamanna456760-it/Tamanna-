@@ -207,3 +207,22 @@ test('ignores a pending file preview after navigating to another folder', async 
   assert.equal(el.githubCurrentPath.textContent, 'src');
   assert.equal(el.githubFilePreview.textContent, 'Choose a file to preview its text.');
 });
+
+
+test('does not turn untrusted commit URLs into clickable links', async () => {
+  const fixture = apiFixture();
+  const fetchImpl = async url => {
+    const result = await fixture(url);
+    if (url.includes('/commits?') && result.ok) {
+      const items = await result.json();
+      items[0].html_url = 'javascript:alert(1)';
+      return response(200, items);
+    }
+    return result;
+  };
+  const el = harness(fetchImpl);
+  await settle();
+  const link = el.githubRecentCommits.children[0].children[0];
+  assert.equal(link.href, undefined);
+  assert.equal(link.target, undefined);
+});
