@@ -227,3 +227,13 @@ test('does not turn untrusted commit URLs into clickable links', async () => {
   assert.equal(link.href, undefined);
   assert.equal(link.target, undefined);
 });
+
+
+test('resets the displayed folder path when switching repositories', async () => {
+  const el = harness(apiFixture());
+  await settle();
+  el.githubCurrentPath.textContent = 'src';
+  el.githubRepo.value = 'example/new-project';
+  el.githubLoadRepo.dispatch('click');
+  assert.equal(el.githubCurrentPath.textContent, '/');
+});
