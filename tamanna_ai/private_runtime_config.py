@@ -11,7 +11,8 @@ import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
-DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "private-runtime.json"
+# The package lives directly under the repository root.
+DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "private-runtime.json"
 MAX_CONFIG_BYTES = 64 * 1024
 _SECRET_KEY = re.compile(r"(?:secret|token|password|credential|api[_-]?key|private[_-]?key)", re.I)
 
@@ -65,10 +66,7 @@ def load_private_runtime_config(path: str | Path | None = None) -> dict:
         return {
             "status": "not_configured",
             "loaded": False,
-            "backend": {
-                "base_url": "",
-                "health_path": "/health",
-            },
+            "backend": {"base_url": "", "health_path": "/health"},
             "admin": {"overview_path": "/api/admin/overview"},
             "timeouts": {"connect_seconds": 5, "read_seconds": 20},
         }
@@ -84,14 +82,11 @@ def load_private_runtime_config(path: str | Path | None = None) -> dict:
     if not isinstance(data, dict) or data.get("schema_version") != 1:
         raise PrivateRuntimeConfigError("Unsupported private runtime config schema.")
     _reject_secret_fields(data)
-    backend = data.get("backend")
-    admin = data.get("admin")
-    timeouts = data.get("timeouts")
+    backend, admin, timeouts = data.get("backend"), data.get("admin"), data.get("timeouts")
     if not all(isinstance(section, dict) for section in (backend, admin, timeouts)):
         raise PrivateRuntimeConfigError("backend, admin, and timeouts sections are required objects.")
 
-    connect = timeouts.get("connect_seconds", 5)
-    read = timeouts.get("read_seconds", 20)
+    connect, read = timeouts.get("connect_seconds", 5), timeouts.get("read_seconds", 20)
     if isinstance(connect, bool) or not isinstance(connect, int) or not 1 <= connect <= 30:
         raise PrivateRuntimeConfigError("timeouts.connect_seconds must be an integer from 1 to 30.")
     if isinstance(read, bool) or not isinstance(read, int) or not 1 <= read <= 120:
