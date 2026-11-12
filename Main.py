@@ -95,6 +95,23 @@ def _require_feature_access(request: Request, *, admin: bool = False, write: boo
     return user
 
 
+@app.get("/api/supervisors/status")
+async def supervisor_network_status(request: Request):
+    """Admin-only, read-only overview of repository supervisor coverage."""
+    _require_feature_access(request, admin=True)
+    from tamanna_ai.supervisors import build_supervisor_registry
+
+    registry = build_supervisor_registry(BASE_DIR)
+    return {
+        "mode": registry["mode"],
+        "section_count": registry["section_count"],
+        "tracked_file_count": registry["tracked_file_count"],
+        "specialists_per_section": registry["specialists_per_section"],
+        "sections": list(registry["sections"].values()),
+        "permissions": registry["permissions"],
+    }
+
+
 @app.on_event("startup")
 def initialize_persistence():
     # Report configuration readiness without ever logging credential values.
