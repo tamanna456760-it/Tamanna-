@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from tamanna_ai.emotion import detect_emotion, response_guidance
 from tamanna_ai.private_runtime_config import (
@@ -28,7 +28,12 @@ import uvicorn
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=False)
 
-from tamanna_ai.authentication.router import COOKIE, check_origin, current_user
+from tamanna_ai.authentication.router import (
+    COOKIE,
+    check_origin,
+    current_user,
+    rate_limit_user_action,
+)
 
 from tamanna_ai.persistence.database import (
     database,
@@ -441,8 +446,8 @@ if not CORS_ORIGINS:
 # ============================================================
 
 class ChatRequest(BaseModel):
-    message: str
-    personality_style: str = "balanced"
+    message: str = Field(min_length=1, max_length=20000)
+    personality_style: str = Field(default="balanced", min_length=1, max_length=40)
 
 
 class ToolRequest(BaseModel):
@@ -736,6 +741,9 @@ def generate_reply(message):
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest, http_request: Request):
+    # Chat uses an HttpOnly session cookie, so reject untrusted browser origins
+    # and throttle authenticated generation requests before calling the model.
+    check_origin(http_request)
     message = request.message.strip()
     if not message:
         return {"reply": "দয়া করে একটি মেসেজ লিখুন।"}
@@ -744,6 +752,7 @@ async def chat(request: ChatRequest, http_request: Request):
     if not auth_user:
         raise HTTPException(status_code=401, detail="Sign in required.")
     user_id = database.ensure_user(auth_user["email"], auth_user.get("name", ""))
+    rate_limit_user_action(user_id, "chat", limit=30, window_seconds=60)
     conversation_id = f"user-{user_id}"
 
     try:
