@@ -28,7 +28,7 @@
   }
   function validRepo(value) {
     const parts = value.split("/");
-    const validPart = /^[A-Za-z0-9](?:[A-Za-z0-9_.-]{0,98}[A-Za-z0-9])?$/;
+    const validPart = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/;
     return parts.length === 2 && parts.every(part => validPart.test(part));
   }
   async function github(path) {
