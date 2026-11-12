@@ -334,23 +334,29 @@ test('cancels oversized streamed GitHub API responses without content-length', a
   let cancelled = false;
   let reads = 0;
   const chunk = new Uint8Array(5 * 1024 * 1024);
-  const fetchImpl = async () => ({
-    ok: true,
-    status: 200,
-    headers: { get: () => null },
-    body: {
-      getReader() {
-        return {
-          async read() {
-            reads += 1;
-            return reads <= 2 ? { done: false, value: chunk } : { done: true };
-          },
-          async cancel() { cancelled = true; },
-          releaseLock() {}
-        };
-      }
+  const normalFetch = apiFixture();
+  const fetchImpl = async url => {
+    if (url.includes('/branches?')) {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        body: {
+          getReader() {
+            return {
+              async read() {
+                reads += 1;
+                return reads <= 2 ? { done: false, value: chunk } : { done: true };
+              },
+              async cancel() { cancelled = true; },
+              releaseLock() {}
+            };
+          }
+        }
+      };
     }
-  });
+    return normalFetch(url);
+  };
   const el = harness(fetchImpl);
   await settle();
   assert.equal(el.githubBrowserStatus.dataset.state, 'error');
