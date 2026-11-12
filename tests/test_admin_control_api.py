@@ -14,6 +14,10 @@ def admin_client(monkeypatch, tmp_path):
     database = tmp_path / "admin-api.sqlite3"
     monkeypatch.setattr(auth, "DB", database)
     import tamanna_ai.admin_control_api as admin_api
+    from tamanna_ai.persistence.database import Database
+    app_database = Database("sqlite:///" + str(tmp_path / "application.sqlite3"))
+    app_database.init()
+    monkeypatch.setattr(admin_api, "database", app_database)
     monkeypatch.setattr(admin_api, "AUTH_DB", database)
     monkeypatch.setattr(admin_api, "current_user", lambda token: {
         "id": 1, "email": "admin@example.test", "name": "Admin"
