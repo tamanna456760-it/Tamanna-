@@ -14,7 +14,7 @@ def _scan(tmp_path, source):
 def test_secret_scanner_ignores_commented_api_examples(tmp_path):
     source = (
         '# client = APIClient(api_key='
-        '"your_weather_key")\\n'
+        '"your_weather_key")\n'
     )
     findings = _scan(tmp_path, source)
     assert not [
@@ -26,7 +26,7 @@ def test_secret_scanner_ignores_commented_api_examples(tmp_path):
 def test_secret_scanner_ignores_known_fake_test_key(tmp_path):
     source = (
         'client = GeminiClient(api_key='
-        '"ignored-test-key")\\n'
+        '"ignored-test-key")\n'
     )
     findings = _scan(tmp_path, source)
     assert not [
@@ -38,7 +38,7 @@ def test_secret_scanner_ignores_known_fake_test_key(tmp_path):
 def test_secret_scanner_still_flags_non_placeholder_values(tmp_path):
     source = (
         "API_" "KEY = "
-        '"possibly-real-secret-value-123"\\n'
+        '"possibly-real-secret-value-123"\n'
     )
     findings = _scan(tmp_path, source)
     assert [
