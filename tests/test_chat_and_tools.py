@@ -51,7 +51,10 @@ def test_chat_api_uses_mock_and_preserves_reply_shape(monkeypatch, tmp_path):
         response = client.post("/api/chat", json={"message": "hello"})
         assert response.status_code == 200, response.text
         payload = response.json()
-        assert payload["reply"] == "Mock response: hello"
+        # The chat route prepends system-generated emotion guidance before inference.
+        # The mock echoes its full prompt, so verify that guidance and the user message survive.
+        assert payload["reply"].startswith("Mock response: Tamanna AI response guidance")
+        assert payload["reply"].endswith("\n\nhello")
         assert payload["response"] == payload["reply"]
         assert payload["handled"] is True
         assert payload["source"] == "mock"
