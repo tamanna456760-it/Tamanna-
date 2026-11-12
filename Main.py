@@ -10,6 +10,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from tamanna_ai.emotion import detect_emotion, response_guidance
+from tamanna_ai.config.private_runtime import (
+    PrivateRuntimeConfigError,
+    load_private_runtime_config,
+    private_runtime_summary,
+)
+
+PRIVATE_RUNTIME_CONFIG = None
 import uvicorn
 
 
@@ -82,6 +89,16 @@ def _require_feature_access(request: Request, *, admin: bool = False, write: boo
 @app.on_event("startup")
 def initialize_persistence():
     # Report configuration readiness without ever logging credential values.
+    global PRIVATE_RUNTIME_CONFIG
+    try:
+        PRIVATE_RUNTIME_CONFIG = load_private_runtime_config()
+    except PrivateRuntimeConfigError as exc:
+        # Fail closed when an explicitly installed private config is malformed.
+        raise RuntimeError("Private runtime configuration is invalid; startup refused.") from exc
+    if PRIVATE_RUNTIME_CONFIG["loaded"]:
+        print("[CONFIG] Private TI-SERVER runtime config: loaded and validated.")
+    else:
+        print("[CONFIG] Private TI-SERVER runtime config: not installed; safe defaults active.")
     session_secret_ready = len(os.getenv("TAMANNA_SESSION_SECRET", "").strip()) >= 32
     model_provider = os.getenv("TAMANNA_MODEL_PROVIDER", "ollama").strip().lower()
     ollama_url = os.getenv("TAMANNA_OLLAMA_URL", "http://127.0.0.1:11434").strip()
@@ -528,6 +545,7 @@ async def admin_overview(request: Request):
             "model_provider": os.getenv("TAMANNA_MODEL_PROVIDER", "ollama"),
             "database": os.getenv("TAMANNA_DATABASE_URL", "sqlite:///data/tamanna.sqlite3"),
             "environment": os.getenv("TAMANNA_ENV", "production"),
+            "private_config": private_runtime_summary(PRIVATE_RUNTIME_CONFIG),
         },
     }
 
