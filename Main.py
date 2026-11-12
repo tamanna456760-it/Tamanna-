@@ -108,7 +108,9 @@ async def supervisor_network_status(request: Request):
         "tracked_file_count": registry["tracked_file_count"],
         "specialists_per_section": registry["specialists_per_section"],
         "sections": list(registry["sections"].values()),
+        "cross_cutting_teams": registry["cross_cutting_teams"],
         "permissions": registry["permissions"],
+        "runtime": registry["runtime"],
     }
 
 
