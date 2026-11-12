@@ -138,6 +138,14 @@ Validate configuration locally:
 
 The strict check requires a strong session secret, a supported local model-provider configuration, a database URL, and exact trusted CORS origins. It does not require a Gemini/GPT API key.
 
+## Private TI-SERVER runtime configuration
+
+The backend reads a non-secret local copy of `TI-SERVER/config/runtime.example.json` at startup. It never fetches the private repository from the browser or contacts GitHub at runtime. To install from a trusted checkout of `TI-SERVER`:
+
+    python scripts/install_private_runtime_config.py --source ../TI-SERVER/config/runtime.example.json
+
+The installer validates the file and writes `config/private-runtime.json` with mode `0600`. To use a protected path outside the checkout, pass `--destination /etc/tamanna/private-runtime.json` and set `TAMANNA_PRIVATE_RUNTIME_CONFIG=/etc/tamanna/private-runtime.json` in the service environment. Restart the backend. An authenticated Admin overview then reports `system.private_config.status` as `loaded` or `not_configured`; this reports configuration parsing only, not a live connectivity check. Invalid installed config fails startup closed. Keep all credentials in `.env` or the host secret store, never in the private runtime JSON.
+
 ## Safety and access control
 
 - Admin authorization must be enforced by the backend on every protected request.
