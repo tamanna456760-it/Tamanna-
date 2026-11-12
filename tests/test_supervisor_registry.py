@@ -7,9 +7,10 @@ def test_every_file_has_one_section_owner_and_five_specialist_reviewers(tmp_path
 
     registry = build_supervisor_registry(tmp_path)
 
-    assert registry["tracked_file_count"] == 2
+    assert registry["tracked_file_count"] == 3
     assert registry["specialists_per_section"] == 5
-    assert set(registry["file_owners"]) == {"Main.py", "tamanna_ai/security/audit.py"}
+    assert set(registry["file_owners"]) == {"Main.py", "tamanna_ai/security/audit.py", ".github/workflows/ci.yml"}
+    assert registry["file_owners"][".github/workflows/ci.yml"]["section_supervisor"] == "supervisor_ci"
     for owner in registry["file_owners"].values():
         assert owner["section_supervisor"].startswith("supervisor_")
         assert len(owner["specialist_reviewers"]) == 5
