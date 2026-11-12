@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from tamanna_ai.config.private_runtime import (
+from tamanna_ai.private_runtime_config import (
     PrivateRuntimeConfigError,
     load_private_runtime_config,
     private_runtime_summary,
