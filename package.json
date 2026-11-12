@@ -19,7 +19,8 @@
     "api:dev": "cd cloudflare/backend && uv run pywrangler dev",
     "api:deploy": "cd cloudflare/backend && uv run pywrangler deploy",
     "api:db:create": "cd cloudflare/backend && npx wrangler d1 create tamanna-ai-db",
-    "api:db:migrate": "cd cloudflare/backend && npx wrangler d1 execute tamanna-ai-db --remote --file=./schema.sql"
+    "api:db:migrate": "cd cloudflare/backend && npx wrangler d1 execute tamanna-ai-db --remote --file=./schema.sql",
+    "test:github-browser": "node --test tests/github-browser.test.js"
   },
   "engines": {
     "node": ">=20"
