@@ -34,7 +34,7 @@ jobs:
         run: npm run check
 
       - name: Run JavaScript tests (including GitHub browser integration)
-        run: npm test
+        run: npm run test:github-browser
 
       - name: Build website
         run: npm run build
