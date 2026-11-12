@@ -116,7 +116,7 @@ async def supervisor_network_status(request: Request):
 async def supervisor_file_assignment(request: Request, path: str):
     """Return the assigned supervisor and five reviewers for one tracked file."""
     _require_feature_access(request, admin=True)
-    if not path or len(path) > 512 or path.startswith("/") or "\\\\" in path:
+    if not path or len(path) > 512 or path.startswith("/") or "\\" in path or ".." in Path(path).parts:
         raise HTTPException(status_code=400, detail="A valid repository-relative file path is required.")
     from tamanna_ai.supervisors import build_supervisor_registry
 
