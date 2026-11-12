@@ -141,3 +141,37 @@ test('reports GitHub API rate limiting without requesting credentials', async ()
   assert.equal(el.githubBrowserStatus.dataset.state, 'error');
   assert.match(el.githubBrowserStatus.textContent, /rate limit reached/i);
 });
+
+
+test('ignores a slower response from a previously selected repository', async () => {
+  let releaseOldRepo;
+  const oldRepoInfo = new Promise(resolve => { releaseOldRepo = resolve; });
+  const fetchImpl = async url => {
+    if (url === 'https://api.github.com/repos/tamanna456760-it/Tamanna-') {
+      return { ok: true, status: 200, json: () => oldRepoInfo };
+    }
+    if (url === 'https://api.github.com/repos/example/new-project') {
+      return response(200, { private: false, default_branch: 'main' });
+    }
+    if (url.includes('/branches?')) return response(200, [{ name: 'main' }]);
+    if (url.includes('/commits?')) return response(200, []);
+    if (url.includes('/branches/main')) {
+      return response(200, { commit: { commit: { tree: { sha: 'new-tree' } } } });
+    }
+    if (url.includes('/git/trees/')) {
+      return response(200, { truncated: false, tree: [{ path: 'NEW.md', type: 'blob' }] });
+    }
+    throw new Error('Unexpected GitHub API request: ' + url);
+  };
+
+  const el = harness(fetchImpl);
+  el.githubRepo.value = 'example/new-project';
+  el.githubLoadRepo.dispatch('click');
+  await settle();
+  releaseOldRepo({ private: false, default_branch: 'main' });
+  await settle();
+
+  assert.match(el.githubBrowserStatus.textContent, /Loaded 1 paths from main/);
+  assert.equal(el.githubFileTree.children.length, 1);
+  assert.match(el.githubFileTree.children[0].textContent, /NEW\.md/);
+});
