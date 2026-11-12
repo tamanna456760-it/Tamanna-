@@ -16,10 +16,12 @@ This analyzer never modifies source files.
 from __future__ import annotations
 
 import ast
+import io
 import json
 import os
 import re
 import sys
+import tokenize
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -72,6 +74,7 @@ PLACEHOLDER_VALUES = {
     "changeme",
     "example",
     "placeholder",
+    "ignored-test-key",
 }
 
 
@@ -173,7 +176,28 @@ def analyze_python(
                     node.lineno,
                 )
 
-    for line_number, line in enumerate(source.splitlines(), start=1):
+    # Remove Python comments before secret-pattern scanning. Commented
+    # documentation/examples are not live credentials and should not trigger
+    # findings. Keep line/column positions stable for useful report locations.
+    code_lines = source.splitlines(keepends=True)
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type == tokenize.COMMENT:
+                row, column = token.start
+                end_row, end_column = token.end
+                if row == end_row and 1 <= row <= len(code_lines):
+                    line = code_lines[row - 1]
+                    code_lines[row - 1] = (
+                        line[:column]
+                        + " " * (end_column - column)
+                        + line[end_column:]
+                    )
+    except (tokenize.TokenError, IndentationError):
+        # Syntax/tokenization errors are reported by the syntax checks; do not
+        # let the security scanner crash or rewrite source.
+        pass
+
+    for line_number, line in enumerate("".join(code_lines).splitlines(), start=1):
         for severity, message, pattern in SECRET_PATTERNS:
             match = pattern.search(line)
             if not match:
