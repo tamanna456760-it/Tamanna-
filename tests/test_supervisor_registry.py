@@ -6,6 +6,8 @@ def test_every_file_has_one_section_owner_and_five_specialist_reviewers(tmp_path
     (tmp_path / "Main.py").write_text("pass\n")
     (tmp_path / ".github" / "workflows").mkdir(parents=True)
     (tmp_path / ".github" / "workflows" / "ci.yml").write_text("name: ci\n")
+    (tmp_path / "deploy").mkdir()
+    (tmp_path / "deploy" / "service.yml").write_text("service: api\\n")
 
     registry = build_supervisor_registry(tmp_path)
 
