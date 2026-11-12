@@ -7,7 +7,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from tamanna_ai.config.private_runtime import load_private_runtime_config
+from tamanna_ai.private_runtime_config import load_private_runtime_config
 
 ROOT = Path(__file__).resolve().parents[1]
 
