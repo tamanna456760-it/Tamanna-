@@ -32,17 +32,36 @@
     return parts.length === 2 && parts.every(part => validPart.test(part));
   }
   async function github(path) {
-    const response = await fetch("https://api.github.com" + path, {
-      headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" }
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      if (response.status === 403 || response.status === 429) {
-        throw new Error("GitHub API rate limit reached. Wait and retry; no token is stored by this browser.");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch("https://api.github.com" + path, {
+        headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+        signal: controller.signal
+      });
+      const declaredLength = Number(response.headers?.get("content-length"));
+      if (Number.isFinite(declaredLength) && declaredLength > 8 * 1024 * 1024) {
+        throw new Error("GitHub API response exceeds the 8 MB safety limit.");
       }
-      throw new Error(data.message || ("GitHub API returned HTTP " + response.status));
+      const body = await response.text();
+      if (new TextEncoder().encode(body).byteLength > 8 * 1024 * 1024) {
+        throw new Error("GitHub API response exceeds the 8 MB safety limit.");
+      }
+      let data;
+      try { data = JSON.parse(body); } catch (_) { data = {}; }
+      if (!response.ok) {
+        if (response.status === 403 || response.status === 429) {
+          throw new Error("GitHub API rate limit reached. Wait and retry; no token is stored by this browser.");
+        }
+        throw new Error(data.message || ("GitHub API returned HTTP " + response.status));
+      }
+      return data;
+    } catch (error) {
+      if (error.name === "AbortError") throw new Error("GitHub API request timed out after 15 seconds.");
+      throw error;
+    } finally {
+      clearTimeout(timeout);
     }
-    return data;
   }
   function element(tag, text, className) {
     const node = document.createElement(tag);
