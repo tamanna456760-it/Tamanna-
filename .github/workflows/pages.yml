@@ -35,7 +35,13 @@ jobs:
       - name: Validate server entry points
         run: npm run check
 
-      - name: Run JavaScript tests (including GitHub browser integration)
+      - name: Install isolated Node runtime dependencies
+        run: npm install --prefix runner/node --ignore-scripts --no-audit --no-fund
+
+      - name: Run full Node.js test suite
+        run: npm test
+
+      - name: Run GitHub Browser integration tests
         run: npm run test:github-browser
 
       - name: Build website
