@@ -91,7 +91,9 @@
     tree.replaceChildren();
     preview.textContent = "Choose a file to preview its text.";
     try {
-      const data = await github("/repos/" + currentRepo + "/git/trees/" + encodeURIComponent(currentBranch) + "?recursive=1");
+      const branchInfo = await github("/repos/" + currentRepo + "/branches/" + encodeURIComponent(currentBranch));
+      const treeSha = branchInfo.commit.commit.tree.sha;
+      const data = await github("/repos/" + currentRepo + "/git/trees/" + encodeURIComponent(treeSha) + "?recursive=1");
       if (data.truncated) setStatus("GitHub returned a truncated file tree; showing available entries.", true);
       treeItems = (data.tree || []).filter(item => item.type === "blob" || item.type === "tree");
       renderTree();
