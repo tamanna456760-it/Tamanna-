@@ -34,3 +34,19 @@ def test_dedicated_teams_have_five_specialists_each(tmp_path):
     assert len(teams["defense"]["specialists"]) == 5
     assert len(teams["server_operations"]["specialists"]) == 5
     assert registry["runtime"]["workers_started"] is False
+
+def test_defense_team_has_exactly_100_specialists_in_ten_squads(tmp_path):
+    from tamanna_ai.supervisors.registry import DEFENSE_SPECIALISTS, DEFENSE_SQUADS
+    registry = build_supervisor_registry(tmp_path)
+    defense = registry["cross_cutting_teams"]["defense"]
+    assert len(DEFENSE_SPECIALISTS) == 100
+    assert len(DEFENSE_SQUADS) == 10
+    assert all(len(squad["agents"]) == 10 for squad in DEFENSE_SQUADS)
+    assert defense["specialists_count"] == 100
+    assert defense["supervisor_id"] == "supervisor_defense"
+    assert registry["permissions"]["production_changes_require_separate_human_approval"] is True
+
+
+def test_defense_team_is_not_authorized_to_counterattack(tmp_path):
+    from tamanna_ai.supervisors.registry import DEFENSE_SPECIALISTS
+    assert all(capability == "defensive_analysis" for _role, _description, capability in DEFENSE_SPECIALISTS)
