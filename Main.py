@@ -71,6 +71,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Optional Codex CLI bridge; disabled unless explicitly enabled in the private environment.
+from tamanna_ai.integrations.codex_bridge import router as codex_bridge_router
+app.include_router(codex_bridge_router)
+
 
 def _require_feature_access(request: Request, *, admin: bool = False, write: bool = False):
     if write:
