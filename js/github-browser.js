@@ -59,6 +59,7 @@
     if (!validRepo(value)) { setStatus("Enter a public repository as owner/name.", true); return; }
     currentRepo = value;
     currentPath = "";
+    if (pathLabel) pathLabel.textContent = "/";
     tree.replaceChildren();
     preview.textContent = "Choose a file to preview its text.";
     commits.replaceChildren();
