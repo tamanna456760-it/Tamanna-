@@ -1,9 +1,11 @@
 """Tests for private TI-SERVER runtime configuration loading."""
 import json
+from pathlib import Path
 
 import pytest
 
 from tamanna_ai.private_runtime_config import (
+    DEFAULT_CONFIG_PATH,
     PrivateRuntimeConfigError,
     load_private_runtime_config,
     private_runtime_summary,
@@ -101,3 +103,8 @@ def test_rejects_unknown_schema_and_invalid_json(tmp_path):
     path.write_text("{invalid", encoding="utf-8")
     with pytest.raises(PrivateRuntimeConfigError, match="valid UTF-8 JSON"):
         load_private_runtime_config(path)
+
+
+def test_default_config_path_is_inside_repository_root():
+    repository_root = Path(__file__).resolve().parents[1]
+    assert DEFAULT_CONFIG_PATH == repository_root / "config" / "private-runtime.json"
