@@ -7,11 +7,17 @@ on:
       - ".github/workflows/private-api-registry.yml"
       - "tamanna_ai/**"
       - "Main.py"
+      - "tests/**"
+      - "scripts/install_private_runtime_config.py"
+      - ".gitignore"
   pull_request:
     branches: [main]
     paths:
       - "tamanna_ai/**"
       - "Main.py"
+      - "tests/**"
+      - "scripts/install_private_runtime_config.py"
+      - ".gitignore"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +29,16 @@ jobs:
     steps:
       - name: Checkout backend
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test private runtime config loader
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          python -m pytest -q tests/test_private_runtime_config.py
 
       - name: Checkout private API registry when read token is configured
         id: private_config
@@ -74,6 +90,28 @@ jobs:
           assert policy.get("secrets_in_repository") is False
           assert policy.get("browser_may_read_private_config") is False
           print(f"Validated {len(services)} entries; {len(seen)} implemented route declarations; no credentials detected.")
+          PY
+
+      - name: Validate private runtime config template
+        if: steps.private_config.outcome == 'success'
+        run: |
+          python - <<'PY'
+          import json
+          import pathlib
+          import re
+          path = pathlib.Path("private-api-config/config/runtime.example.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert data.get("schema_version") == 1
+          assert isinstance(data.get("backend"), dict)
+          assert isinstance(data.get("admin"), dict)
+          assert isinstance(data.get("timeouts"), dict)
+          assert data["backend"].get("health_path", "").startswith("/")
+          assert data["admin"].get("overview_path", "").startswith("/")
+          assert 1 <= data["timeouts"].get("connect_seconds", 0) <= 30
+          assert 1 <= data["timeouts"].get("read_seconds", 0) <= 120
+          serialized = path.read_text(encoding="utf-8")
+          assert not re.search(r'"(?:api[_-]?key|token|password|secret|private[_-]?key)"\\s*:', serialized, re.I)
+          print("Private runtime template schema and secret-field checks passed.")
           PY
 
       - name: Explain required repository secret when private checkout is unavailable
