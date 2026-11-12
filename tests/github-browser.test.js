@@ -37,11 +37,13 @@ const ids = [
   'githubLoadRepo', 'githubOpenRepo'
 ];
 
-function response(status, data) {
+function response(status, data, headers = {}) {
+  const body = JSON.stringify(data);
   return {
     ok: status >= 200 && status < 300,
     status,
-    json: async () => data
+    headers: { get: name => headers[name.toLowerCase()] || null },
+    text: async () => body
   };
 }
 
@@ -60,6 +62,10 @@ function harness(fetchImpl) {
     Uint8Array,
     TextDecoder,
     URL,
+    TextEncoder,
+    AbortController,
+    setTimeout,
+    clearTimeout,
     encodeURIComponent,
     console
   };
@@ -294,4 +300,31 @@ test('rejects dot-segment repository names before making an API request', async 
   assert.equal(requestCount, requestsBeforeInvalidInput);
   assert.equal(el.githubBrowserStatus.dataset.state, 'error');
   assert.match(el.githubBrowserStatus.textContent, /owner\/name/);
+});
+
+test('rejects oversized GitHub API responses before JSON parsing', async () => {
+  const fetchImpl = async () => ({
+    ok: true,
+    status: 200,
+    headers: { get: name => name === 'content-length' ? String(9 * 1024 * 1024) : null },
+    text: async () => { throw new Error('body should not be read'); }
+  });
+  const el = harness(fetchImpl);
+  await settle();
+  assert.equal(el.githubBrowserStatus.dataset.state, 'error');
+  assert.match(el.githubBrowserStatus.textContent, /8 MB safety limit/);
+});
+
+test('rejects oversized chunked GitHub API responses without content-length', async () => {
+  const oversizedBody = ' '.repeat(8 * 1024 * 1024 + 1);
+  const fetchImpl = async () => ({
+    ok: true,
+    status: 200,
+    headers: { get: () => null },
+    text: async () => oversizedBody
+  });
+  const el = harness(fetchImpl);
+  await settle();
+  assert.equal(el.githubBrowserStatus.dataset.state, 'error');
+  assert.match(el.githubBrowserStatus.textContent, /8 MB safety limit/);
 });
