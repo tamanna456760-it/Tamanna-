@@ -22,7 +22,7 @@ class AntivirusScannerTests(unittest.TestCase):
 
     @patch("endpoint_security.antivirus.subprocess.run")
     @patch("endpoint_security.antivirus.shutil.which", return_value="/usr/bin/clamscan")
-    def test_clean_file(self, _which, run):
+    def test_clean_file(self, run, _which):
         run.return_value = Mock(returncode=0, stdout="sample: OK", stderr="")
         result = AntivirusScanner().scan_file(self.sample)
         self.assertEqual(result["status"], "clean")
@@ -30,7 +30,7 @@ class AntivirusScannerTests(unittest.TestCase):
 
     @patch("endpoint_security.antivirus.subprocess.run")
     @patch("endpoint_security.antivirus.shutil.which", return_value="/usr/bin/clamscan")
-    def test_infected_file(self, _which, run):
+    def test_infected_file(self, run, _which):
         run.return_value = Mock(
             returncode=1,
             stdout="sample: Eicar-Test-Signature FOUND",
