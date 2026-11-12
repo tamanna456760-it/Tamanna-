@@ -136,6 +136,23 @@ test('blocks files larger than the 250 KB preview limit', async () => {
   assert.equal(el.githubFilePreview.textContent, 'Preview unavailable.');
 });
 
+test('blocks oversized base64 content when API omits the size field', async () => {
+  const normalFetch = apiFixture();
+  const oversized = Buffer.alloc(250001, 120).toString('base64');
+  const fetchImpl = async url => {
+    if (url.includes('/contents/README.md?')) {
+      return response(200, { type: 'file', encoding: 'base64', content: oversized });
+    }
+    return normalFetch(url);
+  };
+  const el = harness(fetchImpl);
+  await settle();
+  el.githubFileTree.children.find(button => button.textContent.includes('README.md')).dispatch('click');
+  await settle();
+  assert.match(el.githubBrowserStatus.textContent, /250 KB preview limit/);
+  assert.equal(el.githubFilePreview.textContent, 'Preview unavailable.');
+});
+
 test('reports GitHub API rate limiting without requesting credentials', async () => {
   const el = harness(async () => response(403, { message: 'API rate limit exceeded' }));
   await settle();
@@ -236,4 +253,23 @@ test('resets the displayed folder path when switching repositories', async () =>
   el.githubRepo.value = 'example/new-project';
   el.githubLoadRepo.dispatch('click');
   assert.equal(el.githubCurrentPath.textContent, '/');
+});
+
+
+test('rejects dot-segment repository names before making an API request', async () => {
+  let requestCount = 0;
+  const fixture = apiFixture();
+  const fetchImpl = async url => {
+    requestCount += 1;
+    return fixture(url);
+  };
+  const el = harness(fetchImpl);
+  await settle();
+  const requestsBeforeInvalidInput = requestCount;
+  el.githubRepo.value = '../other/repo';
+  el.githubLoadRepo.dispatch('click');
+  await settle();
+  assert.equal(requestCount, requestsBeforeInvalidInput);
+  assert.equal(el.githubBrowserStatus.dataset.state, 'error');
+  assert.match(el.githubBrowserStatus.textContent, /owner\/name/);
 });
