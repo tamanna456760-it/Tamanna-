@@ -46,13 +46,17 @@ function response(status, data) {
 }
 
 function harness(fetchImpl) {
+  let decodeCalls = 0;
   const elements = Object.fromEntries(ids.map(id => [id, new FakeElement(id)]));
   elements.githubRepo.value = 'tamanna456760-it/Tamanna-';
   const context = {
     document: { getElementById: id => elements[id] || null, createElement: tag => new FakeElement(tag) },
     window: { open() {} },
     fetch: fetchImpl,
-    atob: value => Buffer.from(value, 'base64').toString('binary'),
+    atob: value => {
+      decodeCalls += 1;
+      return Buffer.from(value, 'base64').toString('binary');
+    },
     Uint8Array,
     TextDecoder,
     URL,
@@ -60,6 +64,7 @@ function harness(fetchImpl) {
     console
   };
   vm.runInNewContext(source, context, { filename: 'github-browser.js' });
+  Object.defineProperty(elements, 'decodeCalls', { get: () => decodeCalls });
   return elements;
 }
 
@@ -151,6 +156,23 @@ test('blocks oversized base64 content when API omits the size field', async () =
   await settle();
   assert.match(el.githubBrowserStatus.textContent, /250 KB preview limit/);
   assert.equal(el.githubFilePreview.textContent, 'Preview unavailable.');
+  assert.equal(el.decodeCalls, 0, 'oversized Base64 must be rejected before atob decoding');
+});
+
+test('rejects malformed Base64 before decoding', async () => {
+  const normalFetch = apiFixture();
+  const fetchImpl = async url => {
+    if (url.includes('/contents/README.md?')) {
+      return response(200, { type: 'file', encoding: 'base64', content: '%%%=' });
+    }
+    return normalFetch(url);
+  };
+  const el = harness(fetchImpl);
+  await settle();
+  el.githubFileTree.children.find(button => button.textContent.includes('README.md')).dispatch('click');
+  await settle();
+  assert.match(el.githubBrowserStatus.textContent, /invalid Base64/i);
+  assert.equal(el.decodeCalls, 0);
 });
 
 test('reports GitHub API rate limiting without requesting credentials', async () => {
