@@ -2,52 +2,56 @@
 
 ## Team layout
 
-Every detected repository section receives one section lead plus five specialists:
-- Architecture: design consistency and cross-module compatibility.
-- Implementation: code creation and upgrades, restricted to a new isolated Git worktree.
-- Testing: regression, syntax, build, and test evidence.
-- Security: privacy, access control, vulnerability, and threat review.
-- Operations: runtime reliability and recovery review.
+Every detected repository section receives one section lead plus five specialists for architecture, implementation, testing, security, and operations.
 
-Two dedicated cross-cutting teams also cover the repository:
+The cross-cutting teams include the dedicated Server Operations Team and the **100-agent Cyber Defense & Incident Response Team**.
 
-### Defense and Security Team
-One team lead and five specialists: threat detection, hardening, vulnerability management, incident response, and recovery integrity. Security-sensitive files are routed to this team in addition to their section team.
+## 100-agent Cyber Defense Team
 
-### Server Operations Team
-One team lead and five specialists: health monitoring, deployment planning, infrastructure review, backup/restore validation, and reliability. Server, deployment, firewall, Cloudflare, and infrastructure files are routed to this team in addition to their section team.
+The Cyber Defense Team has one lead and exactly 100 specialist agents, organized into ten squads of ten:
 
-## Live execution
+1. Network defense and segmentation
+2. Identity, authentication, and access governance
+3. Application security and secure coding
+4. Cloud, container, and infrastructure defense
+5. Endpoint, host, and malware defense
+6. Data protection, privacy, and database security
+7. Threat intelligence and detection engineering
+8. Incident response and forensics
+9. Business continuity and recovery
+10. Security assurance, safe testing, and remediation verification
 
-Authenticated administrators can submit a task to `POST /api/supervisors/run` with `team_id` and `prompt`. The runtime launches six separate Codex CLI invocations: one team lead and five specialists. Read-only tasks use six read-only workers in parallel.
+Its mission is maximum defensive capability: detect intrusions, assess indicators, protect accounts and systems, contain incidents, preserve evidence, close vulnerabilities, and restore trusted services.
 
-A write task requires all three controls:
-- Request fields `write_access=true` and `confirm_write=true`.
-- Server setting `TAMANNA_CODEX_WRITE_ENABLED=true`.
-- Server setting `TAMANNA_CODEX_ENABLED=true`.
+**No retaliatory hacking:** this team must not break into an attacker's device or network, steal credentials, deploy malware, disrupt third-party services, or perform unauthorized counterattacks. It may block traffic and accounts on systems the organization controls, isolate affected assets, preserve forensic evidence, and coordinate lawful reporting.
 
-Write tasks create a new local Git branch and isolated worktree. Only the Implementation specialist receives workspace-write; the team lead and remaining four specialists review read-only after implementation. The worktree and branch are retained for inspection. Workers do not push to GitHub, merge, deploy, restart services, or alter privileged infrastructure.
+The 100-agent team is read-only and analysis-only. It cannot directly change production controls or perform remediation writes. Findings requiring code changes are handed to the separately approved implementation workflow.
+
+## On-demand execution
+
+Authenticated administrators can submit a task to `POST /api/supervisors/run` with `team_id` and `prompt`. The Defense Team launches one lead plus 100 specialist Codex CLI workers on demand. At most five workers run concurrently to limit resource pressure. All 101 workers use read-only sandbox mode.
+
+Other teams continue to use their own lead and five specialists. Write tasks for those teams require explicit request confirmation and server-side enablement; they run in a new isolated Git branch/worktree with only the Implementation specialist allowed to write. No worker can push, merge, deploy, or change privileged server controls.
 
 ## File assignment
 
-The registry is generated from `git ls-files` at runtime. Each tracked file receives one section supervisor, five section reviewers, and optional Defense/Server Operations cross-team routing. New tracked files are assigned automatically.
+The registry is generated from `git ls-files`. Each tracked file receives one section supervisor, five section reviewers, and relevant cross-team routing.
 
-## Accuracy and permissions
+## Security and permissions
 
-- Read-only inspection is the default.
-- Each worker must inspect source and distinguish verified evidence from assumptions.
+- Read-only is the default.
+- Defensive actions are limited to systems and accounts the organization owns or is authorized to administer.
+- No counterattacks, unauthorized access, credential theft, malware deployment, destructive actions, or denial-of-service activity.
+- Evidence must be preserved; conclusions must distinguish verified facts from hypotheses.
 - No worker may claim tests passed unless it ran them and observed success.
-- Writes are isolated in a newly created branch/worktree; no direct writes to the active checkout.
-- GitHub pushes require a separately configured scoped credential and approval.
-- Merge, production deployment, service restarts, database migrations, DNS/firewall/TLS changes, and destructive operations require separate human approval.
-- Supervisors cannot grant themselves permissions, change protected-branch rules, disable security controls, or erase audit records.
-- Worker output is bounded and task execution is rate-limited; structured run summaries are emitted to the server logger.
+- Production changes, firewall/DNS/TLS changes, account disabling, service restarts, database migrations, and deployment require separate human approval.
+- Supervisors cannot grant themselves permissions, disable controls, or erase audit records.
 
 ## API
 
 Authenticated administrators can call:
-- `GET /api/supervisors/status` for section coverage, dedicated teams, permissions, and runtime state.
-- `GET /api/supervisors/file?path=relative/path` for the owner and reviewers assigned to one tracked file.
-- `POST /api/supervisors/run` to execute one selected six-worker team.
+- `GET /api/supervisors/status` for team coverage and runtime configuration.
+- `GET /api/supervisors/file?path=relative/path` for file ownership and reviewers.
+- `POST /api/supervisors/run` to execute a selected team. Use `team_id: "defense"` for the 100-agent defensive team.
 
-The read endpoints do not expose file contents or secrets. The run endpoint requires an authenticated administrator and an enabled Codex CLI runtime.
+Execution requires an enabled and authenticated Codex CLI runtime. A configured team roster does not mean workers are running before a task is submitted.
