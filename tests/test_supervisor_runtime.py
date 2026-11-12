@@ -6,7 +6,8 @@ def test_all_six_agents_get_readonly_reviewer_or_writer_policy(tmp_path):
     registry = build_supervisor_registry(tmp_path)
     name, specialists = _team_definition(registry, "defense")
     assert name == "Tamanna Defense and Security Team"
-    assert len(specialists) == 5
+    assert len(specialists) == 100
+    assert all(capability == "defensive_analysis" for _role, _responsibility, capability in specialists)
     writer = _agent_prompt(name, "implementation", "code changes", "Fix a bug", True)
     reviewer = _agent_prompt(name, "security", "security review", "Review a bug", False)
     assert "sole implementation worker" in writer
