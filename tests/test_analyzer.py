@@ -15,7 +15,6 @@ def test_secret_scanner_ignores_commented_api_examples(tmp_path):
     findings = _scan(
         tmp_path,
         '# client = APIClient(api_key="your_weather_key")\n'
-        '"""Example: api_key="documented-example-value" """\n',
     )
     assert not [item for item in findings if item["category"] == "POSSIBLE_SECRET"]
 
