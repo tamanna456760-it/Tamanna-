@@ -1,0 +1,82 @@
+name: Private API Registry Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/private-api-registry.yml"
+      - "tamanna_ai/**"
+      - "Main.py"
+  pull_request:
+    branches: [main]
+    paths:
+      - "tamanna_ai/**"
+      - "Main.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-private-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+
+      - name: Checkout private API registry when read token is configured
+        id: private_config
+        uses: actions/checkout@v4
+        with:
+          repository: tamanna456760-it/TI-SERVER
+          ref: main
+          path: private-api-config
+          token: ${{ secrets.TI_SERVER_READ_TOKEN }}
+          persist-credentials: false
+        continue-on-error: true
+
+      - name: Validate registry structure and source links
+        if: steps.private_config.outcome == 'success'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import pathlib
+          import re
+
+          path = pathlib.Path("private-api-config/config/api-registry.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert data.get("schema_version") == 2, "Unsupported registry schema"
+          services = data.get("services")
+          assert isinstance(services, list) and services, "Registry has no services"
+          seen = set()
+          for item in services:
+              assert isinstance(item, dict), "Service entry must be an object"
+              status = item.get("status")
+              assert status in {"planned", "implemented_unverified", "source_confirmed_not_live_tested", "verified"}, f"Invalid status: {status}"
+              method, route = item.get("method", ""), item.get("path", "")
+              if status == "planned":
+                  assert not method and not route, "Planned entries must not advertise an implemented route"
+                  continue
+              assert method in {"GET", "POST", "PUT", "PATCH", "DELETE"}, f"Invalid method: {method}"
+              assert route.startswith("/"), f"Invalid route: {route}"
+              key = (method, route)
+              assert key not in seen, f"Duplicate route: {method} {route}"
+              seen.add(key)
+              url = item.get("source_url", "")
+              assert url.startswith("https://github.com/tamanna456760-it/Tamanna-/blob/main/"), f"Missing or untrusted source URL for {route}"
+              assert item.get("auth"), f"Missing auth policy for {route}"
+          serialized = path.read_text(encoding="utf-8")
+          forbidden = [r"gh[pousr]_[A-Za-z0-9_]{20,}", r"AKIA[0-9A-Z]{16}", r"-----BEGIN (?:RSA |EC )?PRIVATE KEY-----"]
+          for pattern in forbidden:
+              assert not re.search(pattern, serialized), f"Possible credential material detected: {pattern}"
+          policy = data.get("security_policy", {})
+          assert policy.get("secrets_in_repository") is False
+          assert policy.get("browser_may_read_private_config") is False
+          print(f"Validated {len(services)} entries; {len(seen)} implemented route declarations; no credentials detected.")
+          PY
+
+      - name: Explain required repository secret when private checkout is unavailable
+        if: steps.private_config.outcome != 'success'
+        run: |
+          echo "::warning::Private API registry checkout was skipped or failed. Add a fine-grained read-only token as the TI_SERVER_READ_TOKEN Actions secret in this repository to enable validation."
