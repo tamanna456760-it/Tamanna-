@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from tamanna_ai.emotion import detect_emotion, response_guidance
-from tamanna_ai.config.private_runtime import (
+from tamanna_ai.private_runtime_config import (
     PrivateRuntimeConfigError,
     load_private_runtime_config,
     private_runtime_summary,
