@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+      - feature/github-browser-readonly
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -28,6 +32,9 @@ jobs:
 
       - name: Validate server entry points
         run: npm run check
+
+      - name: Run JavaScript tests (including GitHub browser integration)
+        run: npm test
 
       - name: Build website
         run: npm run build
