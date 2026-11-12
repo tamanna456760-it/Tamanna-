@@ -55,6 +55,7 @@ function harness(fetchImpl) {
     atob: value => Buffer.from(value, 'base64').toString('binary'),
     Uint8Array,
     TextDecoder,
+    URL,
     encodeURIComponent,
     console
   };
