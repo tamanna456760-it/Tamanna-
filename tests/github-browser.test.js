@@ -260,7 +260,7 @@ test('does not turn untrusted commit URLs into clickable links', async () => {
   const fetchImpl = async url => {
     const result = await fixture(url);
     if (url.includes('/commits?') && result.ok) {
-      const items = await result.json();
+      const items = JSON.parse(await result.text());
       items[0].html_url = 'javascript:alert(1)';
       return response(200, items);
     }
