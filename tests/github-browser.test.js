@@ -43,6 +43,21 @@ function response(status, data, headers = {}) {
     ok: status >= 200 && status < 300,
     status,
     headers: { get: name => headers[name.toLowerCase()] || null },
+    body: {
+      getReader() {
+        const bytes = new TextEncoder().encode(body);
+        let sent = false;
+        return {
+          async read() {
+            if (sent) return { done: true };
+            sent = true;
+            return { done: false, value: bytes };
+          },
+          async cancel() {},
+          releaseLock() {}
+        };
+      }
+    },
     text: async () => body
   };
 }
@@ -315,16 +330,31 @@ test('rejects oversized GitHub API responses before JSON parsing', async () => {
   assert.match(el.githubBrowserStatus.textContent, /8 MB safety limit/);
 });
 
-test('rejects oversized chunked GitHub API responses without content-length', async () => {
-  const oversizedBody = ' '.repeat(8 * 1024 * 1024 + 1);
+test('cancels oversized streamed GitHub API responses without content-length', async () => {
+  let cancelled = false;
+  let reads = 0;
+  const chunk = new Uint8Array(5 * 1024 * 1024);
   const fetchImpl = async () => ({
     ok: true,
     status: 200,
     headers: { get: () => null },
-    text: async () => oversizedBody
+    body: {
+      getReader() {
+        return {
+          async read() {
+            reads += 1;
+            return reads <= 2 ? { done: false, value: chunk } : { done: true };
+          },
+          async cancel() { cancelled = true; },
+          releaseLock() {}
+        };
+      }
+    }
   });
   const el = harness(fetchImpl);
   await settle();
   assert.equal(el.githubBrowserStatus.dataset.state, 'error');
   assert.match(el.githubBrowserStatus.textContent, /8 MB safety limit/);
+  assert.equal(cancelled, true, 'stream must be cancelled immediately after crossing the limit');
+  assert.equal(reads, 2, 'reader must stop after the chunk that crosses the limit');
 });
