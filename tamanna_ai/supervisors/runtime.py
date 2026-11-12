@@ -8,7 +8,6 @@ import shutil
 import subprocess
 import uuid
 from pathlib import Path
-from typing import Dict, List
 
 from fastapi import APIRouter, Cookie, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -18,7 +17,6 @@ from tamanna_ai.integrations.codex_bridge import (
     _admin_user,
     _workspace,
     check_origin,
-    current_user,
     rate_limit_user_action,
 )
 from tamanna_ai.supervisors.registry import (
@@ -31,7 +29,15 @@ from tamanna_ai.supervisors.registry import (
 router = APIRouter(prefix="/api/supervisors", tags=["supervisors"])
 LOGGER = logging.getLogger("tamanna.supervisors")
 MAX_OUTPUT = 12000
-TIMEOUT_SECONDS = max(60, min(900, int(os.getenv("TAMANNA_SUPERVISOR_TIMEOUT", "600"))))
+def _timeout_seconds() -> int:
+    try:
+        value = int(os.getenv("TAMANNA_SUPERVISOR_TIMEOUT", "600"))
+    except (TypeError, ValueError):
+        value = 600
+    return max(60, min(900, value))
+
+
+TIMEOUT_SECONDS = _timeout_seconds()
 
 
 class SupervisorRunRequest(BaseModel):
