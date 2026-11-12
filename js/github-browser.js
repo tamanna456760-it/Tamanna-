@@ -18,6 +18,9 @@
   let currentBranch = "main";
   let currentPath = "";
   let treeItems = [];
+  let repoRequestId = 0;
+  let treeRequestId = 0;
+  let fileRequestId = 0;
 
   function setStatus(message, error = false) {
     status.textContent = message;
@@ -49,6 +52,9 @@
     return path.split("/").map(encodeURIComponent).join("/");
   }
   async function loadRepo() {
+    const requestId = ++repoRequestId;
+    ++treeRequestId;
+    ++fileRequestId;
     const value = repoInput.value.trim();
     if (!validRepo(value)) { setStatus("Enter a public repository as owner/name.", true); return; }
     currentRepo = value;
@@ -63,6 +69,7 @@
         github("/repos/" + currentRepo + "/branches?per_page=100"),
         github("/repos/" + currentRepo + "/commits?per_page=6")
       ]);
+      if (requestId !== repoRequestId) return;
       if (repoInfo.private) throw new Error("This browser only supports public repositories.");
       branchSelect.replaceChildren();
       branchData.forEach(item => {
@@ -83,22 +90,31 @@
         commits.append(row);
       });
       await loadTree();
-      setStatus("Connected to public repository " + currentRepo + ".");
-    } catch (error) { setStatus(error.message, true); }
+      if (requestId === repoRequestId) setStatus("Connected to public repository " + currentRepo + ".");
+    } catch (error) {
+      if (requestId === repoRequestId) setStatus(error.message, true);
+    }
   }
   async function loadTree() {
+    const requestId = ++treeRequestId;
+    const repoSnapshot = currentRepo;
+    const branchSnapshot = currentBranch;
     setStatus("Loading repository files…");
     tree.replaceChildren();
     preview.textContent = "Choose a file to preview its text.";
     try {
-      const branchInfo = await github("/repos/" + currentRepo + "/branches/" + encodeURIComponent(currentBranch));
+      const branchInfo = await github("/repos/" + repoSnapshot + "/branches/" + encodeURIComponent(branchSnapshot));
+      if (requestId !== treeRequestId || repoSnapshot !== currentRepo || branchSnapshot !== currentBranch) return;
       const treeSha = branchInfo.commit.commit.tree.sha;
-      const data = await github("/repos/" + currentRepo + "/git/trees/" + encodeURIComponent(treeSha) + "?recursive=1");
+      const data = await github("/repos/" + repoSnapshot + "/git/trees/" + encodeURIComponent(treeSha) + "?recursive=1");
+      if (requestId !== treeRequestId || repoSnapshot !== currentRepo || branchSnapshot !== currentBranch) return;
       if (data.truncated) setStatus("GitHub returned a truncated file tree; showing available entries.", true);
       treeItems = (data.tree || []).filter(item => item.type === "blob" || item.type === "tree");
       renderTree();
       if (!data.truncated) setStatus("Loaded " + treeItems.length + " paths from " + currentBranch + ".");
-    } catch (error) { setStatus(error.message, true); }
+    } catch (error) {
+      if (requestId === treeRequestId && repoSnapshot === currentRepo && branchSnapshot === currentBranch) setStatus(error.message, true);
+    }
   }
   function renderTree() {
     tree.replaceChildren();
@@ -134,10 +150,14 @@
     if (!children.length) tree.append(element("p", "No files in this folder."));
   }
   async function loadFile(path) {
+    const requestId = ++fileRequestId;
+    const repoSnapshot = currentRepo;
+    const branchSnapshot = currentBranch;
     setStatus("Fetching " + path + "…");
     preview.textContent = "Loading file…";
     try {
-      const data = await github("/repos/" + currentRepo + "/contents/" + encodePath(path) + "?ref=" + encodeURIComponent(currentBranch));
+      const data = await github("/repos/" + repoSnapshot + "/contents/" + encodePath(path) + "?ref=" + encodeURIComponent(branchSnapshot));
+      if (requestId !== fileRequestId || repoSnapshot !== currentRepo || branchSnapshot !== currentBranch) return;
       if (Array.isArray(data) || data.type !== "file") throw new Error("This item is not a regular file.");
       if (data.size > 250000) throw new Error("File is larger than the 250 KB preview limit.");
       if (data.encoding !== "base64" || !data.content) throw new Error("GitHub did not return a supported text preview.");
@@ -146,7 +166,12 @@
       const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
       preview.textContent = text;
       setStatus("Read-only preview: " + path + " (" + data.size + " bytes).");
-    } catch (error) { preview.textContent = "Preview unavailable."; setStatus(error.message, true); }
+    } catch (error) {
+      if (requestId === fileRequestId && repoSnapshot === currentRepo && branchSnapshot === currentBranch) {
+        preview.textContent = "Preview unavailable.";
+        setStatus(error.message, true);
+      }
+    }
   }
   $("githubLoadRepo")?.addEventListener("click", loadRepo);
   branchSelect.addEventListener("change", () => {
