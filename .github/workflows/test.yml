@@ -2,7 +2,7 @@ name: Tamanna Python CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -43,7 +43,7 @@ jobs:
       - name: Compile project modules
         run: |
           set -euo pipefail
-          python -m compileall -q Main.py run_server.py data modules tests scripts Tamanna-.sln 2>/dev/null || true
+          python -m compileall -q Main.py run_server.py tamanna_ai data modules tests scripts
 
       - name: Run test suite
         run: |
