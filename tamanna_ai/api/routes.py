@@ -3,12 +3,15 @@
 import asyncio
 import json
 import os
+import tempfile
 import unicodedata
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Cookie, HTTPException, Request
+from fastapi import APIRouter, Cookie, File, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
+
+from endpoint_security.antivirus import AntivirusScanner
 from pydantic import BaseModel, Field
 
 from tamanna_ai.authentication.router import COOKIE, check_origin, require_user, rate_limit_user_action
@@ -393,6 +396,70 @@ async def select_model(
             detail="Model selection সংরক্ষণ করা যায়নি।",
         ) from exc
     return {"ok": True, "selected_model": model_name, "restart_required": False}
+
+
+
+
+@api_router.post("/security/antivirus/scan-upload")
+async def antivirus_scan_upload(
+    request: Request,
+    file: UploadFile = File(...),
+    token: str | None = Cookie(default=None, alias=COOKIE),
+):
+    """Scan an admin-uploaded file with ClamAV without storing or executing it."""
+    check_origin(request)
+    user = _require_model_admin(token)
+    rate_limit_user_action(user["id"], "antivirus_scan", limit=10, window_seconds=60)
+
+    max_upload_bytes = 10 * 1024 * 1024
+    safe_filename = Path((file.filename or "upload").replace("\\", "/")).name
+    try:
+        with tempfile.TemporaryDirectory(prefix="tamanna-antivirus-") as temp_dir:
+            scan_path = Path(temp_dir) / "upload.bin"
+            total_bytes = 0
+            try:
+                with scan_path.open("wb") as destination:
+                    while True:
+                        chunk = await file.read(64 * 1024)
+                        if not chunk:
+                            break
+                        total_bytes += len(chunk)
+                        if total_bytes > max_upload_bytes:
+                            raise HTTPException(
+                                status_code=413,
+                                detail="File exceeds the 10 MiB antivirus scan limit.",
+                            )
+                        destination.write(chunk)
+            finally:
+                await file.close()
+
+            if total_bytes == 0:
+                raise HTTPException(status_code=422, detail="Uploaded file is empty.")
+
+            result = AntivirusScanner(
+                timeout_seconds=120,
+                max_file_size_bytes=max_upload_bytes,
+            ).scan_file(scan_path)
+    except HTTPException:
+        raise
+    except OSError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Temporary scan file could not be prepared.",
+        ) from exc
+
+    if result["status"] in {"engine_unavailable", "error"}:
+        raise HTTPException(
+            status_code=503,
+            detail={"message": "Antivirus scan could not be verified.", "scan": result},
+        )
+    return {
+        "ok": result["status"] == "clean",
+        "filename": safe_filename,
+        "scan": result,
+        "stored": False,
+        "executed": False,
+    }
 
 
 @api_router.post("/knowledge/import")
