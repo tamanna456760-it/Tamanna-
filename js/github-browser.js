@@ -27,7 +27,9 @@
     status.dataset.state = error ? "error" : "ok";
   }
   function validRepo(value) {
-    return /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value);
+    const parts = value.split("/");
+    const validPart = /^[A-Za-z0-9](?:[A-Za-z0-9_.-]{0,98}[A-Za-z0-9])?$/;
+    return parts.length === 2 && parts.every(part => validPart.test(part));
   }
   async function github(path) {
     const response = await fetch("https://api.github.com" + path, {
@@ -175,13 +177,17 @@
       const data = await github("/repos/" + repoSnapshot + "/contents/" + encodePath(path) + "?ref=" + encodeURIComponent(branchSnapshot));
       if (requestId !== fileRequestId || repoSnapshot !== currentRepo || branchSnapshot !== currentBranch) return;
       if (Array.isArray(data) || data.type !== "file") throw new Error("This item is not a regular file.");
-      if (data.size > 250000) throw new Error("File is larger than the 250 KB preview limit.");
-      if (data.encoding !== "base64" || !data.content) throw new Error("GitHub did not return a supported text preview.");
-      const binary = atob(data.content.replace(/\s/g, ""));
+      if (Number.isFinite(data.size) && data.size > 250000) throw new Error("File is larger than the 250 KB preview limit.");
+      if (data.encoding !== "base64" || typeof data.content !== "string" || !data.content) throw new Error("GitHub did not return a supported text preview.");
+      const encodedContent = data.content.replace(/\s/g, "");
+      const maxBase64Length = Math.ceil(250000 / 3) * 4;
+      if (encodedContent.length > maxBase64Length) throw new Error("File is larger than the 250 KB preview limit.");
+      const binary = atob(encodedContent);
       const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+      if (bytes.byteLength > 250000) throw new Error("File is larger than the 250 KB preview limit.");
       const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
       preview.textContent = text;
-      setStatus("Read-only preview: " + path + " (" + data.size + " bytes).");
+      setStatus("Read-only preview: " + path + " (" + bytes.byteLength + " bytes).");
     } catch (error) {
       if (requestId === fileRequestId && repoSnapshot === currentRepo && branchSnapshot === currentBranch) {
         preview.textContent = "Preview unavailable.";
