@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import os
 import subprocess
-from collections import Counter
 from pathlib import Path
 from typing import Dict, List
 
