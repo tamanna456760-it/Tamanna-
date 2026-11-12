@@ -11,6 +11,9 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Cookie, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import func, select
+
+from tamanna_ai.persistence.database import database, Memory, Message
 
 from tamanna_ai.authentication.router import (
     COOKIE, DB as AUTH_DB, check_origin, current_user, rate_limit_user_action,
@@ -91,8 +94,7 @@ def admin_analytics(token: str | None = Cookie(default=None, alias=COOKIE)):
         users = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
         sessions = db.execute("SELECT COUNT(*) FROM sessions WHERE expires>?", (int(time.time()),)).fetchone()[0]
         audit_events = db.execute("SELECT COUNT(*) FROM admin_audit_events").fetchone()[0]
-    from tamanna_ai.persistence.database import database, Message
-    from sqlalchemy import func, select
+    database.init()
     with database.Session() as session:
         messages = session.scalar(select(func.count()).select_from(Message)) or 0
     return {"ok": True, "analytics": {
@@ -152,10 +154,8 @@ def update_admin_settings(payload: AppSettingsUpdate, request: Request,
 @router.get("/memory/summary")
 def admin_memory_summary(token: str | None = Cookie(default=None, alias=COOKIE)):
     _admin(token)
-    from tamanna_ai.persistence.database import database
+    database.init()
     with database.Session() as session:
-        from tamanna_ai.persistence.database import Memory
-        from sqlalchemy import func, select
         count = session.scalar(select(func.count()).select_from(Memory)) or 0
     return {"ok": True, "memory": {"records": count, "source": "application_database"}}
 
