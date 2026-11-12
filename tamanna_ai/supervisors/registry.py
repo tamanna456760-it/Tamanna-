@@ -39,7 +39,9 @@ SECTION_RULES = (
 )
 
 def _section_for(path: str):
-    normalized = path.replace(os.sep, "/").lstrip("./")
+    normalized = path.replace(os.sep, "/")
+    if normalized.startswith("./"):
+        normalized = normalized[2:]
     for prefixes, key, label in SECTION_RULES:
         if normalized.startswith(prefixes):
             return key, label
