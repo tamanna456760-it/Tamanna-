@@ -37,7 +37,7 @@ jobs:
 
       - name: Test private runtime config loader
         run: |
-          python -m pip install --disable-pip-version-check pytest
+          python -m pip install --disable-pip-version-check -r requirements-test.txt
           python -m pytest -q tests/test_private_runtime_config.py
 
       - name: Checkout private API registry when read token is configured
