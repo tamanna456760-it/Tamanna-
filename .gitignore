@@ -37,6 +37,10 @@ api/token.txt
 *.p12
 *.pfx
 
+# Private deployment configuration (non-secret but environment-specific)
+config/private-runtime.json
+**/private-runtime.json
+
 # Local databases and runtime output
 *.sqlite
 *.sqlite3
