@@ -37,6 +37,20 @@
 <div class="ethical-audit-actions"><button id="runEthicalAudit" class="logout-button" type="button">Run Ethical Security Audit</button><span id="ethicalAuditStatus" class="tool-state">Admin verification required</span></div>
 <pre id="ethicalAuditReport" class="ethical-audit-report" role="status" aria-live="polite">Audit এখনো চালানো হয়নি।</pre>
 </section>
+
+<section class="panel-card antivirus-panel" aria-labelledby="antivirusTitle">
+  <p class="eyebrow">MALWARE DEFENSE</p>
+  <h2 id="antivirusTitle">Tamanna AI Antivirus</h2>
+  <p class="ethical-audit-copy">Admin হিসেবে একটি ফাইল আপলোড করে ClamAV দিয়ে scan করুন। ফাইলটি temporary storage-এ scan হবে; সংরক্ষণ বা execute করা হবে না। ClamAV অনুপস্থিত থাকলে scan verified হবে না।</p>
+  <form id="antivirusForm" class="antivirus-form">
+    <label for="antivirusFile">যে ফাইলটি scan করতে চান</label>
+    <input id="antivirusFile" name="file" type="file" required>
+    <button id="antivirusScanButton" class="logout-button" type="submit">Scan uploaded file</button>
+    <span id="antivirusScanStatus" class="tool-state">Admin verification required</span>
+  </form>
+  <pre id="antivirusScanReport" class="ethical-audit-report" role="status" aria-live="polite">এখনো কোনো ফাইল scan করা হয়নি।</pre>
+</section>
+
 <section class="panel-card api-checklist"><p class="eyebrow">IMPLEMENTATION PLAN</p><h2>Backend connection checklist</h2><div class="tool-list">
 <div class="tool-row"><div><strong>Admin authentication & role checks</strong><small>Use existing session cookie and email allowlist; add 2FA before production.</small></div><span class="tool-state">Existing / harden</span></div>
 <div class="tool-row"><div><strong>Overview, users, analytics and audit APIs</strong><small>Read-only endpoints first, then permission-checked actions.</small></div><span class="tool-state">Pending</span></div>
@@ -44,5 +58,5 @@
 </div></section>
 </section>
 </main>
-<script src="/js/admin.js?v=20261106_preview"></script>
+<script src="/js/admin.js?v=20261112_antivirus"></script>
 </body></html>
