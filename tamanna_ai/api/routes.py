@@ -440,6 +440,7 @@ async def antivirus_scan_upload(
                 timeout_seconds=120,
                 max_file_size_bytes=max_upload_bytes,
             ).scan_file(scan_path)
+            result.pop("path", None)
     except HTTPException:
         raise
     except OSError as exc:
