@@ -94,7 +94,6 @@ def admin_analytics(token: str | None = Cookie(default=None, alias=COOKIE)):
         users = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
         sessions = db.execute("SELECT COUNT(*) FROM sessions WHERE expires>?", (int(time.time()),)).fetchone()[0]
         audit_events = db.execute("SELECT COUNT(*) FROM admin_audit_events").fetchone()[0]
-    database.init()
     with database.Session() as session:
         messages = session.scalar(select(func.count()).select_from(Message)) or 0
     return {"ok": True, "analytics": {
