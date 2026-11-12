@@ -129,6 +129,9 @@ async def supervisor_file_assignment(request: Request, path: str):
     return {"path": path, **assignment}
 
 
+from tamanna_ai.supervisors.runtime import router as supervisor_runtime_router
+app.include_router(supervisor_runtime_router)
+
 @app.on_event("startup")
 def initialize_persistence():
     # Report configuration readiness without ever logging credential values.
