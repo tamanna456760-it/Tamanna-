@@ -110,7 +110,7 @@ jobs:
           assert 1 <= data["timeouts"].get("connect_seconds", 0) <= 30
           assert 1 <= data["timeouts"].get("read_seconds", 0) <= 120
           serialized = path.read_text(encoding="utf-8")
-          assert not re.search(r'"(?:api[_-]?key|token|password|secret|private[_-]?key)"\\s*:', serialized, re.I)
+          assert not re.search(r'"(?:api[_-]?key|token|password|secret|private[_-]?key)"\s*:', serialized, re.I)
           print("Private runtime template schema and secret-field checks passed.")
           PY
 
