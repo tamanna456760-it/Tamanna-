@@ -13,8 +13,10 @@ on:
 permissions:
   contents: read
 
+# Keep validation runs isolated per branch/PR so a feature push cannot cancel
+# the protected main-branch validation run.
 concurrency:
-  group: tamanna-static-validation
+  group: tamanna-static-validation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
