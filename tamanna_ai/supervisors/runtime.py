@@ -28,7 +28,8 @@ from tamanna_ai.supervisors.registry import (
 
 router = APIRouter(prefix="/api/supervisors", tags=["supervisors"])
 LOGGER = logging.getLogger("tamanna.supervisors")
-MAX_OUTPUT = 12000
+MAX_OUTPUT = 3000
+DEFENSE_MAX_PARALLEL = 5
 def _timeout_seconds() -> int:
     try:
         value = int(os.getenv("TAMANNA_SUPERVISOR_TIMEOUT", "600"))
@@ -118,6 +119,8 @@ async def _execute_team(payload: SupervisorRunRequest) -> dict:
     executable = shutil.which("codex")
     if not executable:
         raise HTTPException(status_code=503, detail="Codex CLI is not installed in the backend runtime.")
+    if payload.team_id == "defense" and payload.write_access:
+        raise HTTPException(status_code=403, detail="The 100-agent Cyber Defense Team is analysis-only; remediation must go through a separately approved implementation team and branch.")
     if payload.write_access:
         if not payload.confirm_write:
             raise HTTPException(status_code=400, detail="Explicit write confirmation is required.")
@@ -175,10 +178,13 @@ async def _execute_team(payload: SupervisorRunRequest) -> dict:
         else:
             prompts = [lead_prompt] + specialist_prompts
             roles = ["team_lead"] + [role for role, _r, _c in specialists]
-            completed = await asyncio.gather(*[
-                asyncio.to_thread(_run_one, executable, worktree, prompt, "read-only")
-                for prompt in prompts
-            ])
+            semaphore = asyncio.Semaphore(DEFENSE_MAX_PARALLEL if payload.team_id == "defense" else 5)
+
+            async def run_bounded(prompt: str):
+                async with semaphore:
+                    return await asyncio.to_thread(_run_one, executable, worktree, prompt, "read-only")
+
+            completed = await asyncio.gather(*(run_bounded(prompt) for prompt in prompts))
             results = [{"role": role, **result} for role, result in zip(roles, completed)]
 
         status = await asyncio.to_thread(_git, worktree, "status", "--short")
@@ -193,6 +199,8 @@ async def _execute_team(payload: SupervisorRunRequest) -> dict:
             "team_id": payload.team_id,
             "team_name": team_name,
             "workers_started": len(results),
+            "agent_count_including_lead": len(results),
+            "max_parallel_workers": DEFENSE_MAX_PARALLEL if payload.team_id == "defense" else 5,
             "workers_completed": len(results),
             "results": results,
             "sandbox": "workspace-write + read-only reviews" if payload.write_access else "read-only",
@@ -200,6 +208,7 @@ async def _execute_team(payload: SupervisorRunRequest) -> dict:
             "worktree": str(worktree) if payload.write_access else None,
             "changed_files": [line for line in changed.stdout.splitlines() if line],
             "working_tree_status": [line for line in status.stdout.splitlines() if line],
+            "defensive_only": payload.team_id == "defense",
             "github_push": False,
             "production_deployment": False,
         }
