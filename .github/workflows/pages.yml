@@ -1,4 +1,4 @@
-name: Validate Tamanna Static Website (Cloudflare deploys production)
+name: Validate Tamanna Static Website (artifact only; no production deploy)
 
 on:
   push:
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Build and validate Cloudflare artifact
+    name: Build and validate static website artifact
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
