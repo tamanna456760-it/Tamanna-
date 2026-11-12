@@ -3108,6 +3108,14 @@ except Exception as tamanna_auth_error:
 # ============================================================
 
 # ============================================================
+# Register the on-demand Codex supervisor worker runtime.
+try:
+    from tamanna_ai.supervisors.runtime import router as tamanna_supervisor_runtime_router
+    app.include_router(tamanna_supervisor_runtime_router)
+    print("[TAMANNA SUPERVISORS] Runtime API registered: /api/supervisors/run")
+except Exception as tamanna_supervisor_runtime_error:
+    raise RuntimeError("Tamanna supervisor runtime failed to load") from tamanna_supervisor_runtime_error
+
 # TAMANNA PRIVILEGED API ACCESS CONTROL
 # Sensitive write/execute routes require an authenticated account;
 # server/code execution routes additionally require TAMANNA_ADMIN_EMAIL.
