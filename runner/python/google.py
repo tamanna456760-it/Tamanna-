@@ -375,7 +375,7 @@ CREDENTIALS_EXAMPLE = {
     "type": "service_account",
     "project_id": "your-project-id",
     "private_key_id": "key-id",
-    "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+    "private_key": "REPLACE_WITH_YOUR_SERVICE_ACCOUNT_PRIVATE_KEY",
     "client_email": "service-account@your-project.iam.gserviceaccount.com",
     "client_id": "client-id",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
