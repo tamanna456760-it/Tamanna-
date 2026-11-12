@@ -126,8 +126,9 @@ def analyze_python(
         )
         return
 
+    tree: ast.AST | None = None
     try:
-        ast.parse(source, filename=str(path))
+        tree = ast.parse(source, filename=str(path))
     except SyntaxError as exc:
         add_finding(
             findings,
@@ -138,33 +139,41 @@ def analyze_python(
             exc.lineno,
         )
 
+    # Inspect parsed call nodes rather than raw source lines. This avoids
+    # flagging strings, comments, and regex examples that only mention
+    # eval()/exec() as executable code.
+    if tree is not None:
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+
+            function_name = (
+                node.func.id
+                if isinstance(node.func, ast.Name)
+                else node.func.attr
+                if isinstance(node.func, ast.Attribute)
+                else None
+            )
+            if function_name == "eval":
+                add_finding(
+                    findings,
+                    path,
+                    "MEDIUM",
+                    "DYNAMIC_EXECUTION",
+                    "Review eval(); untrusted input must never be evaluated.",
+                    node.lineno,
+                )
+            elif function_name == "exec":
+                add_finding(
+                    findings,
+                    path,
+                    "MEDIUM",
+                    "DYNAMIC_EXECUTION",
+                    "Review exec(); dynamic code execution is risky.",
+                    node.lineno,
+                )
+
     for line_number, line in enumerate(source.splitlines(), start=1):
-        stripped = line.strip()
-
-        # Skip empty lines and ordinary comments.
-        if not stripped or stripped.startswith("#"):
-            continue
-
-        if re.search(r"\beval\s*\(", line):
-            add_finding(
-                findings,
-                path,
-                "MEDIUM",
-                "DYNAMIC_EXECUTION",
-                "Review eval(); untrusted input must never be evaluated.",
-                line_number,
-            )
-
-        if re.search(r"\bexec\s*\(", line):
-            add_finding(
-                findings,
-                path,
-                "MEDIUM",
-                "DYNAMIC_EXECUTION",
-                "Review exec(); dynamic code execution is risky.",
-                line_number,
-            )
-
         for severity, message, pattern in SECRET_PATTERNS:
             match = pattern.search(line)
             if not match:
