@@ -175,3 +175,35 @@ test('ignores a slower response from a previously selected repository', async ()
   assert.equal(el.githubFileTree.children.length, 1);
   assert.match(el.githubFileTree.children[0].textContent, /NEW\.md/);
 });
+
+
+test('ignores a pending file preview after navigating to another folder', async () => {
+  let releaseFile;
+  const pendingFile = new Promise(resolve => { releaseFile = resolve; });
+  const normalFetch = apiFixture();
+  const fetchImpl = async url => {
+    if (url.includes('/contents/README.md?')) {
+      return { ok: true, status: 200, json: () => pendingFile };
+    }
+    return normalFetch(url);
+  };
+
+  const el = harness(fetchImpl);
+  await settle();
+  const readme = el.githubFileTree.children.find(button => button.textContent.includes('README.md'));
+  const folder = el.githubFileTree.children.find(button => button.textContent.includes('src'));
+  readme.dispatch('click');
+  folder.dispatch('click');
+  await settle();
+
+  releaseFile({
+    type: 'file',
+    size: 11,
+    encoding: 'base64',
+    content: Buffer.from('Old preview', 'utf8').toString('base64')
+  });
+  await settle();
+
+  assert.equal(el.githubCurrentPath.textContent, 'src');
+  assert.equal(el.githubFilePreview.textContent, 'Choose a file to preview its text.');
+});
