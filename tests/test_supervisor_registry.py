@@ -4,6 +4,8 @@ def test_every_file_has_one_section_owner_and_five_specialist_reviewers(tmp_path
     (tmp_path / "tamanna_ai" / "security").mkdir(parents=True)
     (tmp_path / "tamanna_ai" / "security" / "audit.py").write_text("pass\n")
     (tmp_path / "Main.py").write_text("pass\n")
+    (tmp_path / ".github" / "workflows").mkdir(parents=True)
+    (tmp_path / ".github" / "workflows" / "ci.yml").write_text("name: ci\n")
 
     registry = build_supervisor_registry(tmp_path)
 
