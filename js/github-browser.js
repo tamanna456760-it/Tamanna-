@@ -83,9 +83,20 @@
       commitData.forEach(item => {
         const row = element("li");
         const link = element("a", item.commit.message.split("\n")[0]);
-        link.href = item.html_url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
+        let commitUrl;
+        try {
+          const parsedUrl = new URL(item.html_url);
+          if (parsedUrl.protocol === "https:" && parsedUrl.hostname === "github.com") commitUrl = parsedUrl.href;
+        } catch (_) { /* Untrusted or malformed link: keep the commit title as plain text. */ }
+        if (commitUrl) {
+          link.href = commitUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        } else {
+          link.removeAttribute?.("href");
+          link.removeAttribute?.("target");
+          link.removeAttribute?.("rel");
+        }
         row.append(link, element("small", " · " + item.sha.slice(0, 7) + " · " + (item.commit.author?.date || "")));
         commits.append(row);
       });
