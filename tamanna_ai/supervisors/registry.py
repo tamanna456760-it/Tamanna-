@@ -17,12 +17,177 @@ SECTION_SPECIALISTS = (
     ("operations", "Review runtime health, reliability, and recovery", "review_operations"),
 )
 
-DEFENSE_SPECIALISTS = (
-    ("threat_detection", "Identify suspicious behavior and security events", "analyze_security_events"),
-    ("hardening", "Review secure configuration and defensive controls", "propose_hardening"),
-    ("vulnerability_management", "Triage dependency and code vulnerabilities", "triage_vulnerabilities"),
-    ("incident_response", "Prepare containment and incident response recommendations", "recommend_incident_response"),
-    ("recovery_integrity", "Verify backups, integrity, and recovery readiness", "verify_recovery"),
+DEFENSE_SQUADS = [
+    {
+        "id": "network",
+        "mission": "Network segmentation, firewall policy, and exposure",
+        "agents": [
+            "Firewall rule auditor",
+            "Network flow anomaly analyst",
+            "Port exposure reviewer",
+            "Private network boundary reviewer",
+            "DNS integrity analyst",
+            "TLS endpoint verifier",
+            "VPN access reviewer",
+            "Egress policy analyst",
+            "Network configuration drift detector",
+            "DDoS resilience planner"
+        ]
+    },
+    {
+        "id": "identity",
+        "mission": "Identity, authentication, and access governance",
+        "agents": [
+            "Authentication flow reviewer",
+            "Session security analyst",
+            "MFA policy reviewer",
+            "Privilege escalation detector",
+            "Role-based access reviewer",
+            "OAuth and token hygiene analyst",
+            "Credential leak detector",
+            "Account takeover signal analyst",
+            "Service identity reviewer",
+            "Access revocation verifier"
+        ]
+    },
+    {
+        "id": "application",
+        "mission": "Application security and secure coding",
+        "agents": [
+            "Input validation reviewer",
+            "Injection risk analyst",
+            "XSS and browser security reviewer",
+            "CSRF protection reviewer",
+            "SSRF risk analyst",
+            "Path traversal reviewer",
+            "Deserialization safety analyst",
+            "Upload handling reviewer",
+            "API authorization reviewer",
+            "Secure coding coach"
+        ]
+    },
+    {
+        "id": "cloud",
+        "mission": "Cloud, container, and infrastructure defense",
+        "agents": [
+            "Container isolation reviewer",
+            "Image provenance analyst",
+            "Kubernetes policy reviewer",
+            "Cloud IAM analyst",
+            "Secret mount reviewer",
+            "Infrastructure-as-code auditor",
+            "Metadata endpoint risk analyst",
+            "Runtime configuration reviewer",
+            "Supply chain integrity analyst",
+            "Cloud perimeter reviewer"
+        ]
+    },
+    {
+        "id": "endpoint",
+        "mission": "Endpoint, host, and malware defense",
+        "agents": [
+            "Endpoint telemetry analyst",
+            "Malware behavior triage analyst",
+            "Persistence indicator reviewer",
+            "Process anomaly analyst",
+            "Host hardening reviewer",
+            "File integrity monitor analyst",
+            "Patch posture reviewer",
+            "EDR coverage analyst",
+            "Suspicious binary triage analyst",
+            "Endpoint containment planner"
+        ]
+    },
+    {
+        "id": "data",
+        "mission": "Data protection, privacy, and database security",
+        "agents": [
+            "Database permission reviewer",
+            "Encryption-at-rest reviewer",
+            "Encryption-in-transit reviewer",
+            "Backup confidentiality analyst",
+            "PII exposure reviewer",
+            "Data exfiltration signal analyst",
+            "Retention policy reviewer",
+            "Database audit analyst",
+            "Key management reviewer",
+            "Restore integrity verifier"
+        ]
+    },
+    {
+        "id": "threat_intel",
+        "mission": "Threat intelligence and detection engineering",
+        "agents": [
+            "Threat intelligence curator",
+            "IOC validation analyst",
+            "TTP mapping analyst",
+            "Detection rule author",
+            "SIEM correlation analyst",
+            "Log anomaly investigator",
+            "Phishing indicator analyst",
+            "Brand impersonation monitor",
+            "Attack surface mapper",
+            "Threat hunting planner"
+        ]
+    },
+    {
+        "id": "incident",
+        "mission": "Incident response and forensics",
+        "agents": [
+            "Incident triage coordinator",
+            "Timeline reconstruction analyst",
+            "Evidence preservation officer",
+            "Log chain-of-custody reviewer",
+            "Containment decision analyst",
+            "Impact assessment analyst",
+            "Root cause analyst",
+            "Incident communications planner",
+            "Regulatory escalation analyst",
+            "Post-incident review analyst"
+        ]
+    },
+    {
+        "id": "resilience",
+        "mission": "Business continuity and recovery",
+        "agents": [
+            "Disaster recovery planner",
+            "Ransomware recovery analyst",
+            "Immutable backup reviewer",
+            "Recovery time objective analyst",
+            "Recovery point objective analyst",
+            "Failover readiness reviewer",
+            "Service dependency mapper",
+            "Resilience test designer",
+            "Business continuity reviewer",
+            "Recovery validation analyst"
+        ]
+    },
+    {
+        "id": "assurance",
+        "mission": "Security governance, testing, and assurance",
+        "agents": [
+            "Security baseline auditor",
+            "Dependency vulnerability analyst",
+            "SBOM integrity reviewer",
+            "CI pipeline security reviewer",
+            "Code signing verifier",
+            "Policy compliance analyst",
+            "Penetration test scope planner",
+            "Safe validation test designer",
+            "Security metrics analyst",
+            "Remediation verification auditor"
+        ]
+    }
+]
+
+DEFENSE_SPECIALISTS = tuple(
+    (
+        f"{squad['id']}_{index:02d}",
+        f"{agent}: {squad['mission']}. Defensive assessment only; provide evidence, severity, and safe remediation guidance.",
+        "defensive_analysis",
+    )
+    for squad in DEFENSE_SQUADS
+    for index, agent in enumerate(squad["agents"], start=1)
 )
 
 SERVER_SPECIALISTS = (
@@ -143,7 +308,7 @@ def build_supervisor_registry(repository_root: str | Path) -> dict:
         }
 
     return {
-        "mode": "registry_only",
+        "mode": "registry_with_on_demand_defense_workers",
         "repository": root.name,
         "section_count": len(sections),
         "tracked_file_count": len(file_owners),
