@@ -23,4 +23,4 @@ These are **supervisor roles and routing records**, not five newly running indep
 
 ## API
 
-Authenticated administrators can call `GET /api/supervisors/status` for section and file coverage counts. The endpoint does not expose file contents, secrets, or execute supervisor tasks.
+Authenticated administrators can call `GET /api/supervisors/status` for section and file coverage counts, and `GET /api/supervisors/file?path=relative/path` to inspect the owner and five specialist reviewers for one tracked file. These endpoints do not expose file contents or secrets, and do not execute supervisor tasks.
