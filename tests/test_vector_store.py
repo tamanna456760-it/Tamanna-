@@ -272,3 +272,47 @@ def test_bilingual_retrieval_benchmark_reports_ranking_metrics(tmp_path):
     for language, expected_count in expected_language_counts.items():
         assert report["by_language"][language]["cases"] == expected_count
     assert all("language" in result and "latency_ms" in result for result in report["results"])
+
+
+@pytest.mark.parametrize(
+    ("language", "document", "query", "source"),
+    [
+        (
+            "English",
+            "Tamanna knowledge retrieval preserves English source evidence.",
+            "knowledge retrieval English source evidence",
+            "english-guide.md",
+        ),
+        (
+            "Hindi",
+            "तमन्ना ज्ञान खोज हिंदी स्रोत की जानकारी सुरक्षित रखती है।",
+            "हिंदी स्रोत की जानकारी",
+            "hindi-guide.md",
+        ),
+        (
+            "Arabic",
+            "يحافظ استرجاع المعرفة في تمنا على معلومات المصدر العربي.",
+            "معلومات المصدر العربي",
+            "arabic-guide.md",
+        ),
+    ],
+)
+def test_multilingual_unicode_retrieval_for_english_hindi_and_arabic(
+    tmp_path, language, document, query, source
+):
+    from tamanna_ai.knowledge.vector_store import LocalFeatureEmbedder
+
+    store = VectorKnowledgeStore(
+        LocalFeatureEmbedder(), tmp_path / f"{language.lower()}-retrieval.sqlite3"
+    )
+    assert store.index_text(
+        document, owner_id="multilingual-user", source=source, title=language
+    ) == 1
+
+    results = store.search(query, owner_id="multilingual-user")
+
+    assert results, f"No retrieval result for {language}"
+    assert results[0]["source"] == source
+    assert results[0]["title"] == language
+    assert results[0]["score"] > 0
+
