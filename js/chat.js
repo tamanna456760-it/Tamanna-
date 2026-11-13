@@ -134,8 +134,11 @@
       });
       waiting.querySelector(".message-text").textContent =
         typeof payload.response === "string" ? payload.response : "Tamanna AI উত্তর দেয়নি।";
-      if (payload.conversation_id) setConversation(payload.conversation_id);
-      await refreshConversations();
+      if (payload.conversation_id) {
+        setConversation(payload.conversation_id);
+        if (guestMode) sessionStorage.setItem("tamannaGuestConversation", payload.conversation_id);
+      }
+      if (!guestMode) await refreshConversations();
     } catch (error) {
       waiting.querySelector(".message-text").textContent =
         "উত্তর পাওয়া যায়নি: " + error.message +
@@ -189,6 +192,7 @@
   sendButton.addEventListener("click", sendMessage);
   newChatButton?.addEventListener("click", () => {
     setConversation(null);
+    sessionStorage.removeItem("tamannaGuestConversation");
     if (conversationSelect) conversationSelect.value = "";
     chatBox.replaceChildren();
     addMessage("assistant", "নতুন কথোপকথন শুরু হলো। কীভাবে সাহায্য করতে পারি?");
@@ -226,5 +230,6 @@
     chatBox.replaceChildren();
     addMessage("assistant", "আপনি লগআউট করেছেন। আবার চ্যাট করতে লগইন করুন।");
   });
-  if (window.TamannaAuth?.getUser()) refreshConversations();\n  else {\n    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");\n    if (guestConversation) openConversation(guestConversation);\n  }
+  if (window.TamannaAuth?.getUser()) refreshConversations();
+  else {\n    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");\n    if (guestConversation) openConversation(guestConversation);\n  }
 })();
