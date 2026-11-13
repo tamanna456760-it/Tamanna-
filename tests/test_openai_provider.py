@@ -1,4 +1,6 @@
 """Regression tests for the server-side OpenAI provider."""
+import asyncio
+
 import httpx
 import pytest
 
@@ -30,8 +32,7 @@ def test_openai_provider_rejects_missing_key(monkeypatch):
         get_model_provider()
 
 
-@pytest.mark.asyncio
-async def test_openai_client_posts_to_responses_api_and_extracts_text(monkeypatch):
+def test_openai_client_posts_to_responses_api_and_extracts_text(monkeypatch):
     captured = {}
 
     class FakeAsyncClient:
@@ -65,7 +66,7 @@ async def test_openai_client_posts_to_responses_api_and_extracts_text(monkeypatc
 
     monkeypatch.setattr("tamanna_ai.integrations.openai.httpx.AsyncClient", FakeAsyncClient)
     client = OpenAIClient(api_key="test-key", model="gpt-5.5")
-    answer = await client.generate("Say hello")
+    answer = asyncio.run(client.generate("Say hello"))
 
     assert answer == "Hello Tamanna"
     assert captured["url"] == "https://api.openai.com/v1/responses"
@@ -76,8 +77,7 @@ async def test_openai_client_posts_to_responses_api_and_extracts_text(monkeypatc
     assert captured["client_options"]["follow_redirects"] is False
 
 
-@pytest.mark.asyncio
-async def test_openai_client_rejects_empty_output(monkeypatch):
+def test_openai_client_rejects_empty_output(monkeypatch):
     class FakeAsyncClient:
         def __init__(self, **kwargs):
             pass
@@ -95,11 +95,10 @@ async def test_openai_client_rejects_empty_output(monkeypatch):
 
     monkeypatch.setattr("tamanna_ai.integrations.openai.httpx.AsyncClient", FakeAsyncClient)
     with pytest.raises(OpenAIError, match="no text output"):
-        await OpenAIClient(api_key="test-key").generate("test")
+        asyncio.run(OpenAIClient(api_key="test-key").generate("test"))
 
 
-@pytest.mark.asyncio
-async def test_openai_client_does_not_leak_provider_error_body(monkeypatch):
+def test_openai_client_does_not_leak_provider_error_body(monkeypatch):
     class FakeAsyncClient:
         def __init__(self, **kwargs):
             pass
@@ -119,5 +118,5 @@ async def test_openai_client_does_not_leak_provider_error_body(monkeypatch):
 
     monkeypatch.setattr("tamanna_ai.integrations.openai.httpx.AsyncClient", FakeAsyncClient)
     with pytest.raises(OpenAIError) as error:
-        await OpenAIClient(api_key="test-key").generate("test")
+        asyncio.run(OpenAIClient(api_key="test-key").generate("test"))
     assert "sensitive provider diagnostic body" not in str(error.value)
