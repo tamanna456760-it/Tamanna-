@@ -39,6 +39,11 @@
       <input id="browserSearch" type="search" placeholder="ওয়েবে খুঁজুন…" autocomplete="off">
       <button id="browserSearchButton" type="button">Search</button>
     </form>
+    <div class="browser-navigation-row" aria-label="Browser navigation">
+      <button id="browserBack" type="button" class="browser-secondary" disabled aria-label="Back">←</button>
+      <button id="browserForward" type="button" class="browser-secondary" disabled aria-label="Forward">→</button>
+      <button id="browserReload" type="button" class="browser-secondary" disabled aria-label="Reload">↻ Reload</button>
+    </div>
     <p id="browserStatus" class="browser-status" role="status" aria-live="polite">শুধু HTTPS website খোলা যাবে। Search নতুন tab-এ খুলবে।</p>
     <iframe id="browserFrame" title="Tamanna AI secure web page preview" src="about:blank" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-forms allow-scripts allow-popups"></iframe>
     <p class="browser-footnote">সীমাবদ্ধতা: কিছু website iframe-এ খোলা বন্ধ রাখে। এই preview বাইরের page-এর content পড়ে না এবং login/password share করে না। এমন site-এর জন্য New tab ব্যবহার করুন।</p>
