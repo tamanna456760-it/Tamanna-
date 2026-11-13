@@ -99,7 +99,8 @@
       return;
     }
     try {
-      const result = await api("/conversations/" + encodeURIComponent(id));
+      const guestMode = !window.TamannaAuth?.getUser();
+      const result = await api((guestMode ? "/guest/conversations/" : "/conversations/") + encodeURIComponent(id));
       chatBox.replaceChildren();
       (result.messages || []).slice().reverse().forEach((pair) => {
         if (pair.user !== undefined) addMessage("user", pair.user);
@@ -225,5 +226,5 @@
     chatBox.replaceChildren();
     addMessage("assistant", "আপনি লগআউট করেছেন। আবার চ্যাট করতে লগইন করুন।");
   });
-  if (window.TamannaAuth?.getUser()) refreshConversations();\n  else {\n    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");\n    if (guestConversation) setConversation(guestConversation);\n  }
+  if (window.TamannaAuth?.getUser()) refreshConversations();\n  else {\n    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");\n    if (guestConversation) openConversation(guestConversation);\n  }
 })();
