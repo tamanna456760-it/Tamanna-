@@ -1626,18 +1626,43 @@ try:
     from data.self_healing.engine import self_healing
 
     @app.get("/api/linux/shell/status")
-    async def linux_shell_status():
+    async def linux_shell_status(request: Request):
+        _require_feature_access(request, admin=True)
         return {
             "online": True,
             "project_root": str(shell_bridge.root),
-            "mode": "controlled"
+            "mode": "controlled-read-only",
+            "note": "GitHub Actions runners are temporary; this is the server workspace."
         }
 
     @app.post("/api/linux/shell")
-    async def linux_shell(payload: dict):
+    async def linux_shell(payload: dict, request: Request):
+        _require_feature_access(request, admin=True, write=True)
         command = str(payload.get("command", "")).strip()
-
         return shell_bridge.run(command)
+
+    @app.get("/api/workspace/status")
+    async def workspace_status(request: Request):
+        _require_feature_access(request, admin=True)
+        from data.linux.workspace import ROOT
+        return {"online": True, "root": str(ROOT), "max_text_bytes": 512000,
+                "actions": ["list", "read", "write", "mkdir", "move", "remove"]}
+
+    @app.post("/api/workspace/file")
+    async def workspace_file(payload: dict, request: Request):
+        action = str(payload.get("action", "")).strip().lower()
+        write_actions = {"write", "mkdir", "move", "remove"}
+        _require_feature_access(request, admin=True, write=action in write_actions)
+        try:
+            from data.linux.workspace import operate
+            return operate(
+                action=action,
+                path=str(payload.get("path", "")),
+                destination=str(payload.get("destination", "")),
+                content=payload.get("content", ""),
+            )
+        except (ValueError, OSError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/self-healing/status")
     async def self_healing_status():
