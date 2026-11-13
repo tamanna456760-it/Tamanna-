@@ -144,3 +144,21 @@ test('tracks browser back, forward, reload and truncates forward history after n
   assert.equal(elements.browserForward.disabled, true);
   assert.equal(elements.browserFrame.src, 'https://three.example/');
 });
+
+
+test('caps browser history at 50 entries while keeping the newest page reachable', () => {
+  const { elements } = harness();
+  for (let i = 0; i < 55; i++) {
+    elements.browserAddress.value = 'https://page' + i + '.example';
+    elements.browserGo.dispatch('click');
+  }
+  assert.equal(elements.browserFrame.src, 'https://page54.example/');
+  let backCount = 0;
+  while (!elements.browserBack.disabled && backCount < 60) {
+    elements.browserBack.dispatch('click');
+    backCount++;
+  }
+  assert.equal(backCount, 49);
+  assert.equal(elements.browserFrame.src, 'https://page5.example/');
+  assert.equal(elements.browserBack.disabled, true);
+});
