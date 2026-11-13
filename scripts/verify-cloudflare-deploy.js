@@ -16,6 +16,7 @@ const requiredFiles = [
   'js/auth.js',
   'js/chat.js',
   'js/settings.js',
+  'js/tamanna-browser.js',
 ];
 
 function fail(message) {
