@@ -21,15 +21,29 @@ def test_tamanna_echo_requires_login(monkeypatch):
     assert response.json()["detail"] == "Sign in required."
 
 
-def test_chat_route_requires_login():
+def test_guest_chat_route_does_not_require_login():
     app = FastAPI()
     app.add_middleware(TamannaAccessControl)
 
     @app.post("/api/chat")
     def chat():
-        return {"ok": True}
+        return {"ok": True, "mode": "guest"}
 
     response = TestClient(app).post("/api/chat", json={"message": "hello"})
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True, "mode": "guest"}
+
+
+def test_privileged_chat_master_route_still_requires_login():
+    app = FastAPI()
+    app.add_middleware(TamannaAccessControl)
+
+    @app.post("/api/chat/master")
+    def chat_master():
+        return {"ok": True}
+
+    response = TestClient(app).post("/api/chat/master", json={"message": "hello"})
 
     assert response.status_code == 401
     assert response.json()["detail"] == "Sign in required."
