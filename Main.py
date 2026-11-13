@@ -448,6 +448,7 @@ if not CORS_ORIGINS:
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=20000)
     personality_style: str = Field(default="balanced", min_length=1, max_length=40)
+    conversation_id: str | None = Field(default=None, min_length=1, max_length=64)
 
 
 class ToolRequest(BaseModel):
@@ -748,19 +749,25 @@ async def chat(request: ChatRequest, http_request: Request):
     if not message:
         return {"reply": "দয়া করে একটি মেসেজ লিখুন।"}
 
+    # Guest chat is available without signup or third-party AI credentials.
+    # Authenticated users retain private, persistent account history.
     auth_user = current_user(http_request.cookies.get(COOKIE))
-    if not auth_user:
-        raise HTTPException(status_code=401, detail="Sign in required.")
-    user_id = database.ensure_user(auth_user["email"], auth_user.get("name", ""))
-    rate_limit_user_action(user_id, "chat", limit=30, window_seconds=60)
-    conversation_id = f"user-{user_id}"
+    user_id = None
+    if auth_user:
+        user_id = database.ensure_user(auth_user["email"], auth_user.get("name", ""))
+        rate_limit_user_action(user_id, "chat", limit=30, window_seconds=60)
+        conversation_id = f"user-{user_id}"
+    else:
+        # A client-generated opaque ID keeps guest turns isolated; guest history
+        # is held in the browser and is not written to the account database.
+        conversation_id = "guest-" + (request.conversation_id or secrets.token_urlsafe(18))
 
     try:
         provider = get_model_provider()
     except ModelConfigurationError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    previous_turns = database_load_history(conversation_id=conversation_id)[-10:]
+    previous_turns = database_load_history(conversation_id=conversation_id)[-10:] if user_id else []
     prompt = message
     if previous_turns:
         context_lines = []
@@ -800,7 +807,8 @@ async def chat(request: ChatRequest, http_request: Request):
         print("[TAMANNA AI] Model request failed:", type(exc).__name__)
         raise HTTPException(status_code=502, detail="AI model provider failed.") from exc
 
-    save_chat(message, reply, conversation_id, user_id)
+    if user_id:
+        save_chat(message, reply, conversation_id, user_id)
     return {
         "reply": reply,
         "response": reply,
