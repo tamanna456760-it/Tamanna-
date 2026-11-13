@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/github-browser-readonly
+      - feature/tamanna-web-browser
   pull_request:
     branches:
       - main
