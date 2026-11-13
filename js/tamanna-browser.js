@@ -14,12 +14,33 @@
   const frame = $("browserFrame");
   const searchInput = $("browserSearch");
   const searchButton = $("browserSearchButton");
+  const backButton = $("browserBack");
+  const forwardButton = $("browserForward");
+  const reloadButton = $("browserReload");
   const status = $("browserStatus");
   if (!panel || !toggle || !address || !frame || !status) return;
 
   function setStatus(message, error = false) {
     status.textContent = message;
     status.dataset.state = error ? "error" : "ok";
+  }
+
+  const historyEntries = [];
+  let historyIndex = -1;
+
+  function updateNavigationButtons() {
+    if (backButton) backButton.disabled = historyIndex <= 0;
+    if (forwardButton) forwardButton.disabled = historyIndex < 0 || historyIndex >= historyEntries.length - 1;
+    if (reloadButton) reloadButton.disabled = historyIndex < 0;
+  }
+
+  function loadHistoryEntry(index) {
+    if (index < 0 || index >= historyEntries.length) return;
+    historyIndex = index;
+    address.value = historyEntries[historyIndex];
+    frame.src = historyEntries[historyIndex];
+    updateNavigationButtons();
+    setStatus("Browser history থেকে page load হচ্ছে…");
   }
 
   function safeUrl(value) {
@@ -84,6 +105,9 @@
   go?.addEventListener("click", () => navigate(false));
   newTab?.addEventListener("click", () => navigate(true));
   searchButton?.addEventListener("click", searchWeb);
+  backButton?.addEventListener("click", () => loadHistoryEntry(historyIndex - 1));
+  forwardButton?.addEventListener("click", () => loadHistoryEntry(historyIndex + 1));
+  reloadButton?.addEventListener("click", () => loadHistoryEntry(historyIndex));
   address.addEventListener("keydown", event => {
     if (event.key === "Enter") navigate(false);
   });
