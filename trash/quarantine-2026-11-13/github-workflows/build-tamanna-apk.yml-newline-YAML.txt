@@ -1,0 +1,41 @@
+Original path: .github/workflows/build-tamanna-apk.yml
+YAML
+Original blob SHA: 17d357eb2e5232ae5605fc6445cf1fa48bf89908
+Quarantine date: 2026-11-13
+Reason: Legacy APK workflow has a newline/extra suffix in its filename and therefore is not a GitHub Actions workflow; current APK workflow is separately validated.
+
+--- PRESERVED ORIGINAL CONTENT ---
+name: Build Tamanna APK
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Grant Permission
+      run: chmod +x gradlew
+
+    - name: Build APK
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: tamanna-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
