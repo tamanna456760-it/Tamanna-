@@ -120,6 +120,7 @@
   panel.addEventListener("keydown", event => {
     if (event.key === "Escape") hidePanel();
   });
+  updateNavigationButtons();
   window.TamannaBrowser = Object.freeze({
     open: showPanel,
     close: hidePanel,
