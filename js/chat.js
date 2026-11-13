@@ -63,7 +63,7 @@
   function setConversation(id) {
     conversationId = id || null;
     if (conversationSelect) conversationSelect.value = conversationId || "";
-    if (deleteButton) deleteButton.disabled = !conversationId;
+    if (deleteButton) { deleteButton.disabled = !conversationId; deleteButton.hidden = !window.TamannaAuth?.getUser(); }
   }
 
   async function refreshConversations() {
