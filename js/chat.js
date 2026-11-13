@@ -32,7 +32,7 @@
   }
 
   async function api(path, options = {}) {
-    const response = await fetch("/tamanna-ai" + path, {
+    const response = await fetch(path, {
       credentials: "same-origin",
       ...options,
       headers: { Accept: "application/json", "Content-Type": "application/json", ...(options.headers || {}) }
