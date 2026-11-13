@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/navbar";
 import Home from "./pages/Home";
 import Chat from "./pages/chat";
+import Login from "./pages/Login";
 import "./apps.css";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </main>
       </div>
