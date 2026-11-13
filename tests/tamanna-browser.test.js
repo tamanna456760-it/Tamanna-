@@ -28,7 +28,8 @@ class FakeElement {
 
 function harness() {
   const ids = ['tamannaBrowserPanel', 'openBrowser', 'closeBrowser', 'browserAddress',
-    'browserGo', 'browserNewTab', 'browserFrame', 'browserSearch', 'browserSearchButton', 'browserStatus',\n    'browserBack', 'browserForward', 'browserReload'];
+    'browserGo', 'browserNewTab', 'browserFrame', 'browserSearch', 'browserSearchButton', 'browserStatus',
+    'browserBack', 'browserForward', 'browserReload'];
   const elements = Object.fromEntries(ids.map(id => [id, new FakeElement(id)]));
   const opened = [];
   const context = {
