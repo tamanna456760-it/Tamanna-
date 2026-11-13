@@ -228,8 +228,11 @@
     setConversation(null);
     if (conversationSelect) conversationSelect.replaceChildren();
     chatBox.replaceChildren();
-    addMessage("assistant", "আপনি লগআউট করেছেন। আবার চ্যাট করতে লগইন করুন।");
+    addMessage("assistant", "আপনি লগআউট করেছেন। এখন অতিথি হিসেবে চ্যাট চালিয়ে যেতে পারেন।");
   });
   if (window.TamannaAuth?.getUser()) refreshConversations();
-  else {\n    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");\n    if (guestConversation) openConversation(guestConversation);\n  }
+  else {
+    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");
+    if (guestConversation) openConversation(guestConversation);
+  }
 })();
