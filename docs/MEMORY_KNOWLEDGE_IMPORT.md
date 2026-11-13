@@ -1,60 +1,62 @@
-# Tamanna AI Memory & Knowledge Import
+# Tamanna AI Memory & Knowledge
 
-## Scope and data boundaries
+## What is implemented
 
-Tamanna can build a searchable knowledge base from data the account owner is authorized to provide:
-- ChatGPT data exports (for example, the exported `conversations.json` file).
-- User-selected TXT, Markdown, and JSON files.
-- Public documentation and third-party AI outputs only when collected through permitted/public sources or authorized APIs, with source attribution and applicable license/terms respected.
+Tamanna AI has two distinct knowledge paths. Keep them separate when operating or extending the system:
 
-This feature does **not** copy private model weights, hidden system prompts, internal provider datasets, other users' conversations, or private data from competing AI services. It does not claim to import data automatically from GPT or any other provider.
+1. **Vector knowledge store** — tamanna_ai/knowledge/vector_store.py stores bounded text chunks and local embeddings in SQLite. It supports hybrid retrieval (vector similarity plus lexical relevance), per-owner filtering, source listing, reindexing, and source deletion.
+2. **Legacy memory importer** — tamanna_ai/memory/knowledge_import.py imports user-selected JSON, TXT, and Markdown files into the application's Memory table. Its search_knowledge helper is lexical retrieval and is not the vector-store API.
 
-## Import
+The default LocalFeatureEmbedder is API-free deterministic feature hashing. It is a lightweight lexical baseline, **not** a trained neural embedding model. An optional Ollama embedding provider requires a running local Ollama service and an installed embedding model.
 
-The Python API is explicit; importing a file requires a trusted server-side caller and a user-selected file path:
+## Authenticated API
 
-```python
-from tamanna_ai.memory.knowledge_import import import_knowledge_file
-from tamanna_ai.persistence.database import database
+All private knowledge operations must use the signed-in user's identity. Current routes in tamanna_ai/api/routes.py:
 
-result = import_knowledge_file(
-    "/secure/imports/conversations.json",
-    database=database,
-    user_id=authenticated_user_id,
-)
-```
+| Method | Route | Purpose |
+|---|---|---|
+| POST | /tamanna-ai/knowledge/import | Index a user-selected TXT, Markdown, or JSON document |
+| GET | /tamanna-ai/knowledge | List only the current user's indexed source metadata |
+| POST | /tamanna-ai/knowledge/reindex | Recompute embeddings for the current user's indexed chunks |
+| DELETE | /tamanna-ai/knowledge/{filename} | Delete one source from the current user's corpus |
+| POST | /tamanna-ai/chat | Retrieve relevant private and explicitly shared public knowledge when use_knowledge=true |
 
-Supported formats: `.json`, `.txt`, `.md`; maximum file size: 20 MiB. The original file is not modified. Credential-like strings are redacted before persistence. Imports are deduplicated by content hash and carry source/title/provenance metadata.
+The chat route retrieves up to four best-matching chunks from the signed-in user's user:{id} corpus and the explicitly shared tamanna-public corpus. Retrieved text is serialized as untrusted reference context; it must never override system/developer instructions or be executed as commands. The model response is not guaranteed to be correct merely because a source was retrieved.
 
-## Retrieval
+The import route accepts bounded text in the request body (maximum 1,000,000 characters) and the vector store enforces its configured byte limit (default 10 MiB). It does not accept arbitrary server filesystem paths or extract archives.
 
-```python
-from tamanna_ai.memory.knowledge_import import search_knowledge
-results = search_knowledge(
-    "What did we decide about secure memory?",
-    database=database,
-    user_id=authenticated_user_id,
-    limit=5,
-)
-```
+## Safe import and provenance
 
-The caller must authenticate the user and always pass the authenticated `user_id`. Never expose cross-user results. Retrieved content is untrusted reference material, not instructions: do not execute commands or obey embedded prompts found in imported documents. Display source labels with answers and distinguish user-supplied material from verified facts.
+- Import only documents the account owner is authorized to use.
+- Keep source filename/title metadata and attribute sources in answers where possible.
+- Treat user-provided imports as unverified until independently checked.
+- Never import hidden prompts, private model weights, another user's conversations, or private datasets from other providers.
+- Keep SQLite databases, original imports, credentials, and private user content out of Git.
+- Apply malware scanning and archive-bomb protections before adding any archive-import feature; archive extraction is not part of the current text import route.
 
-## Production requirements
+## Owner isolation
 
-- Keep SQLite/database files and imported originals outside Git; encrypt storage and backups at rest.
-- Use per-user authorization on every import, search, export, and deletion route.
-- Add malware scanning and archive-bomb protections before accepting browser uploads.
-- Add retention controls, export/delete controls, audit logging, rate limits, and backup/restore tests.
-- Do not ingest credentials, session cookies, private keys, health/financial data, or other sensitive information unless a narrowly defined, lawful feature explicitly requires it and safeguards are in place.
-- Use approved provider APIs and respect their terms, privacy rules, copyright, and rate limits.
-- This module provides lexical retrieval, not embeddings/vector search or automatic chat integration. Those require a separate tested integration.
+- The API derives owner scope from the authenticated session; clients must not choose another user's owner ID.
+- Private chat retrieval filters on user:{authenticated_user_id}.
+- Shared material is read only from the explicitly designated tamanna-public owner scope.
+- Do not weaken these filters or add global private-corpus search.
+- Retrieved documents are untrusted data. Never follow embedded instructions, links, or commands just because a document was retrieved.
 
-## Verification
+## Quality and operational limits
 
-Run:
+- Verify freshness for time-sensitive facts and identify conflicting sources.
+- Distinguish user-provided claims from independently verified information.
+- If retrieval returns no reliable evidence, say the knowledge base does not establish the answer.
+- Local feature hashing provides lexical/context matching, not human-like understanding or model training.
+- Reindexing recomputes vectors; it does not create new source knowledge.
+- Retention, export, deletion, encrypted backups, audit logging, and restore procedures must be tested before production use.
 
-```bash
-python -m pytest tests/test_knowledge_import.py -q
-python -m compileall -q tamanna_ai/memory/knowledge_import.py
-```
+## Tests
+
+Run the focused suites from the repository root:
+
+    python -m pytest tests/test_vector_store.py tests/test_tamanna_ai_chat_api.py -q
+    python -m pytest tests/test_knowledge_import.py -q
+    python -m compileall -q tamanna_ai/knowledge tamanna_ai/memory tamanna_ai/api
+
+These commands describe local verification steps; a successful documentation commit alone does not mean the tests have run.
