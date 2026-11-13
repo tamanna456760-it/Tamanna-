@@ -55,6 +55,35 @@ def test_origin_allowlist_is_exact(monkeypatch):
     assert getattr(exc.value, "status_code", None) == 403
 
 
+def test_allowlisted_github_pages_origin_can_use_guest_chat_only(monkeypatch):
+    monkeypatch.setenv(
+        "TAMANNA_CORS_ORIGINS",
+        "https://www.bd-king-r7.com,https://tamanna456760-it.github.io",
+    )
+    request = SimpleNamespace(headers={
+        "sec-fetch-site": "cross-site",
+        "origin": "https://tamanna456760-it.github.io",
+    })
+    assert auth.check_origin(request, allow_cross_site=True) is None
+    with pytest.raises(Exception) as exc:
+        auth.check_origin(request)
+    assert getattr(exc.value, "status_code", None) == 403
+
+
+def test_guest_chat_cross_site_origin_must_be_exactly_allowlisted(monkeypatch):
+    monkeypatch.setenv(
+        "TAMANNA_CORS_ORIGINS",
+        "https://tamanna456760-it.github.io",
+    )
+    request = SimpleNamespace(headers={
+        "sec-fetch-site": "cross-site",
+        "origin": "https://tamanna456760-it.github.io.evil.test",
+    })
+    with pytest.raises(Exception) as exc:
+        auth.check_origin(request, allow_cross_site=True)
+    assert getattr(exc.value, "status_code", None) == 403
+
+
 def test_request_body_limit_returns_413():
     app = FastAPI()
     app.add_middleware(RequestSizeLimitMiddleware, max_bytes=1024)
