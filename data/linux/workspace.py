@@ -39,6 +39,8 @@ def resolve(relative: str, *, allow_missing: bool = False) -> Path:
 
 def operate(action: str, path: str = "", destination: str = "", content: str = "") -> dict:
     action = str(action).lower().strip()
+    if action == "list" and not str(path or "").strip():
+        path = "."
     target = resolve(path, allow_missing=action in {"write", "mkdir", "move"})
     if action in {"write", "mkdir", "move", "remove"} and target == ROOT:
         raise WorkspaceError("The project root itself cannot be modified or removed.")
