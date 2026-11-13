@@ -45,9 +45,8 @@
     try {
       const url = safeUrl(address.value);
       if (openInNewTab) {
-        const opened = window.open(url.href, "_blank", "noopener,noreferrer");
-        if (!opened) setStatus("Popup বন্ধ আছে। Browser permission দিন অথবা Go চাপুন।", true);
-        else setStatus("নতুন tab-এ website খোলা হয়েছে।");
+        window.open(url.href, "_blank", "noopener,noreferrer");
+        setStatus("নতুন tab খোলার অনুরোধ পাঠানো হয়েছে। Popup বন্ধ থাকলে browser permission দিন।");
       } else {
         frame.src = url.href;
         setStatus("Website load হচ্ছে। কিছু site iframe embedding বন্ধ রাখতে পারে; তখন Open in new tab ব্যবহার করুন।");
@@ -65,9 +64,8 @@
       return;
     }
     const url = "https://duckduckgo.com/?q=" + encodeURIComponent(query);
-    const opened = window.open(url, "_blank", "noopener,noreferrer");
-    if (!opened) setStatus("Popup বন্ধ আছে। Search tab খোলার অনুমতি দিন।", true);
-    else setStatus("DuckDuckGo search নতুন tab-এ খোলা হয়েছে।");
+    window.open(url, "_blank", "noopener,noreferrer");
+    setStatus("DuckDuckGo search নতুন tab-এ খোলার অনুরোধ পাঠানো হয়েছে। Popup বন্ধ থাকলে browser permission দিন।");
   }
 
   function showPanel() {
