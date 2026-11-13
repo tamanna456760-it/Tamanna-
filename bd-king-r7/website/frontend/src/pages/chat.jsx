@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User, Bot, Copy, Download, Trash2, LogOut, ShieldCheck } from "lucide-react";
+import { Send, User, Bot, Copy, Download, Trash2 } from "lucide-react";
 import axios from "axios";
 import "./chat.css";
 
@@ -130,7 +130,7 @@ const Chat = () => {
 
   const sendMessage = async () => {
     const messageText = input.trim();
-    if (!messageText || isLoading || !user) return;
+    if (!messageText || isLoading) return;
     const userMessage = {
       id: Date.now(),
       content: messageText,
@@ -143,21 +143,18 @@ const Chat = () => {
     try {
       const response = await api.post("/api/chat", {
         message: messageText,
-        conversationId,
+        conversation_id: conversationId,
         context: messages.slice(-10),
       });
       setMessages((previous) => [...previous, {
         id: Date.now() + 1,
-        content: response.data.response,
+        content: response.data.response || response.data.reply || "Tamanna AI returned an empty response.",
         role: "assistant",
         timestamp: new Date(),
       }]);
-      setConversationId(response.data.conversationId);
+      setConversationId(response.data.conversationId || response.data.conversation_id || conversationId);
     } catch (error) {
-      if (error.response?.status === 401) {
-        setUser(null);
-        setAuthError("Your session expired. Please sign in again.");
-      } else {
+      {
         setMessages((previous) => [...previous, {
           id: Date.now() + 1,
           content: errorText(error),
@@ -206,53 +203,6 @@ const Chat = () => {
     return <div className="chat-auth-loading" role="status">Checking your Tamanna AI session…</div>;
   }
 
-  if (!user) {
-    return (
-      <section className="chat-auth-page">
-        <div className="chat-auth-card">
-          <div className="chat-auth-brand"><span className="chat-auth-logo">T</span><span>Tamanna AI</span></div>
-          <div className="chat-auth-heading">
-            <ShieldCheck size={22} />
-            <h1>{authMode === "signup" ? "Create your account" : "Welcome back"}</h1>
-            <p>{authMode === "signup" ? "Sign up to start a private conversation." : "Sign in to continue to your private chat."}</p>
-          </div>
-          <div className="chat-auth-tabs" role="tablist" aria-label="Account access">
-            <button type="button" role="tab" aria-selected={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => { setAuthMode("login"); setAuthError(""); }}>Log in</button>
-            <button type="button" role="tab" aria-selected={authMode === "signup"} className={authMode === "signup" ? "active" : ""} onClick={() => { setAuthMode("signup"); setAuthError(""); }}>Sign up</button>
-          </div>
-          {GOOGLE_CLIENT_ID ? (
-            <div className="chat-google-wrap">
-              <div className="chat-auth-divider"><span>or continue with Google</span></div>
-              <div ref={googleButtonRef} className="chat-google-button" />
-            </div>
-          ) : (
-            <p className="chat-google-setup">Google sign-in needs the same OAuth Client ID in VITE_GOOGLE_CLIENT_ID (frontend) and GOOGLE_CLIENT_ID (server). Email login is ready now.</p>
-          )}
-          <form className="chat-auth-form" onSubmit={submitAuth}>
-            {authMode === "signup" && (
-              <label>
-                Full name
-                <input autoComplete="name" value={authForm.name} onChange={(event) => setAuthForm({ ...authForm, name: event.target.value })} minLength={2} maxLength={80} required placeholder="Your name" />
-              </label>
-            )}
-            <label>
-              Gmail or email address
-              <input type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" autoComplete="email" value={authForm.email} onChange={(event) => setAuthForm({ ...authForm, email: event.target.value })} maxLength={254} required placeholder="you@gmail.com" />
-            </label>
-            <label>
-              Password
-              <input type="password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} minLength={authMode === "signup" ? 12 : 1} maxLength={128} required placeholder={authMode === "signup" ? "At least 12 characters" : "Your password"} />
-            </label>
-            {authError && <p className="chat-auth-error" role="alert">{authError}</p>}
-            <button className="chat-auth-submit" type="submit" disabled={authBusy}>
-              {authBusy ? "Please wait…" : authMode === "signup" ? "Create account" : "Log in to Tamanna AI"}
-            </button>
-          </form>
-          <p className="chat-auth-note">Use your Gmail address or any valid email. New accounts are signed in automatically after signup.</p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <div className="chat-page">
@@ -260,12 +210,12 @@ const Chat = () => {
         <div className="chat-header">
           <div className="chat-title-group">
             <h1>Chat with Tamanna AI</h1>
-            <span className="chat-account"><span className="chat-online-dot" />{user.name} · {user.email}</span>
+            <span className="chat-account"><span className="chat-online-dot" />{user ? user.name + " · " + user.email : "Guest chat · no login required"}</span>
           </div>
           <div className="chat-actions">
             <button onClick={exportConversation} className="btn btn-secondary" disabled={messages.length === 0}><Download size={16} />Export</button>
             <button onClick={clearConversation} className="btn btn-secondary" disabled={messages.length === 0}><Trash2 size={16} />Clear</button>
-            <button onClick={logout} className="btn btn-secondary"><LogOut size={16} />Log out</button>
+            {!user && <a className="btn btn-secondary" href="/login">Log in</a>}
           </div>
         </div>
         <div className="chat-messages">
