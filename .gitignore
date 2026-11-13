@@ -41,7 +41,7 @@ api/token.txt
 config/private-runtime.json
 **/private-runtime.json
 
-# Local databases and runtime output
+# Local databases and runtime output\ndata/github-knowledge/\n
 *.sqlite
 *.sqlite3
 *.db
