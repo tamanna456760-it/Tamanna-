@@ -69,7 +69,11 @@
         window.open(url.href, "_blank", "noopener,noreferrer");
         setStatus("নতুন tab খোলার অনুরোধ পাঠানো হয়েছে। Popup বন্ধ থাকলে browser permission দিন।");
       } else {
+        historyEntries.splice(historyIndex + 1);
+        historyEntries.push(url.href);
+        historyIndex = historyEntries.length - 1;
         frame.src = url.href;
+        updateNavigationButtons();
         setStatus("Website load হচ্ছে। কিছু site iframe embedding বন্ধ রাখতে পারে; তখন Open in new tab ব্যবহার করুন।");
       }
     } catch (error) {
