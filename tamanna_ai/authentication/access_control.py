@@ -30,7 +30,7 @@ READ_ROUTES = {
 ADMIN_READ_ROUTES = READ_ROUTES - {"/api/history"}
 
 USER_ROUTES = {
-    "/api/chat", "/api/chat/master", *READ_ROUTES,
+    "/api/chat/master", *READ_ROUTES,
     "/api/skills/create", "/api/skills/test", "/api/skills/refine",
     "/api/code-builder/propose", "/api/code-builder/inspect", "/api/code-builder/plan",
     "/api/self-improvement/analyze", "/api/self-healing/diagnose",
