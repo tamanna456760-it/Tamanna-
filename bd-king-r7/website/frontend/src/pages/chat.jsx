@@ -12,8 +12,6 @@ function errorText(error) {
   return "Request failed. Please try again.";
 }
 
-const GOOGLE_CLIENT_ID = import.meta.env?.VITE_GOOGLE_CLIENT_ID || "";
-
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -21,12 +19,7 @@ const Chat = () => {
   const [conversationId, setConversationId] = useState(null);
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
-  const [authMode, setAuthMode] = useState("login");
-  const [authForm, setAuthForm] = useState({ name: "", email: "", password: "" });
-  const [authBusy, setAuthBusy] = useState(false);
-  const [authError, setAuthError] = useState("");
   const messagesEndRef = useRef(null);
-  const googleButtonRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -41,92 +34,11 @@ const Chat = () => {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    if (!authReady || user || !GOOGLE_CLIENT_ID) return undefined;
-    let active = true;
-    const renderGoogleButton = () => {
-      if (!active || !window.google?.accounts?.id || !googleButtonRef.current) return;
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: async (credentialResponse) => {
-          if (!credentialResponse?.credential) {
-            setAuthError("Google did not return a sign-in credential.");
-            return;
-          }
-          setAuthBusy(true);
-          setAuthError("");
-          try {
-            const response = await api.post("/api/auth/google", {
-              credential: credentialResponse.credential,
-            });
-            setUser(response.data.user);
-          } catch (error) {
-            setAuthError(errorText(error));
-          } finally {
-            setAuthBusy(false);
-          }
-        },
-      });
-      window.google.accounts.id.renderButton(googleButtonRef.current, {
-        type: "standard",
-        theme: "filled_black",
-        size: "large",
-        shape: "rectangular",
-        text: "continue_with",
-        width: 340,
-      });
-    };
-    const existing = document.getElementById("google-identity-services");
-    if (window.google?.accounts?.id) {
-      renderGoogleButton();
-    } else if (existing) {
-      existing.addEventListener("load", renderGoogleButton, { once: true });
-    } else {
-      const script = document.createElement("script");
-      script.id = "google-identity-services";
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = renderGoogleButton;
-      script.onerror = () => setAuthError("Google sign-in could not load. Use email login instead.");
-      document.head.appendChild(script);
-    }
-    return () => { active = false; };
-  }, [authReady, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const submitAuth = async (event) => {
-    event.preventDefault();
-    if (authBusy) return;
-    setAuthBusy(true);
-    setAuthError("");
-    try {
-      const endpoint = authMode === "signup" ? "/api/auth/signup" : "/api/auth/login";
-      const payload = authMode === "signup"
-        ? { name: authForm.name.trim(), email: authForm.email.trim(), password: authForm.password }
-        : { email: authForm.email.trim(), password: authForm.password };
-      const response = await api.post(endpoint, payload);
-      setUser(response.data.user);
-      setAuthForm({ name: "", email: "", password: "" });
-    } catch (error) {
-      setAuthError(errorText(error));
-    } finally {
-      setAuthBusy(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await api.post("/api/auth/logout");
-    } finally {
-      setUser(null);
-      setMessages([]);
-      setConversationId(null);
-    }
-  };
 
   const sendMessage = async () => {
     const messageText = input.trim();
