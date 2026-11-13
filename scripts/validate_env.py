@@ -31,16 +31,38 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
     ollama_configured = (
         parsed_ollama_url.scheme in {"http", "https"}
         and bool(parsed_ollama_url.netloc)
+        and not parsed_ollama_url.username
+        and not parsed_ollama_url.password
         and bool(ollama_model)
         and len(ollama_model) <= 200
     )
-    provider_configured = (
-        provider == "ollama" and ollama_configured
-    ) or (
-        provider == "mock" and environment == "test"
+
+    openai_key = value("OPENAI_API_KEY")
+    openai_model = value("TAMANNA_OPENAI_MODEL", "gpt-5.5")
+    openai_base_url = value("TAMANNA_OPENAI_BASE_URL", "https://api.openai.com/v1")
+    parsed_openai_url = urlparse(openai_base_url)
+    openai_configured = (
+        bool(openai_key)
+        and len(openai_key) <= 512
+        and not any(ch.isspace() for ch in openai_key)
+        and bool(openai_model)
+        and len(openai_model) <= 100
+        and parsed_openai_url.scheme == "https"
+        and bool(parsed_openai_url.netloc)
+        and not parsed_openai_url.username
+        and not parsed_openai_url.password
     )
 
-    cors_origins = [origin.strip() for origin in value("TAMANNA_CORS_ORIGINS").split(",") if origin.strip()]
+    provider_configured = (
+        (provider == "ollama" and ollama_configured)
+        or (provider == "openai" and openai_configured)
+        or (provider == "mock" and environment == "test")
+    )
+
+    cors_origins = [
+        origin.strip() for origin in value("TAMANNA_CORS_ORIGINS").split(",")
+        if origin.strip()
+    ]
     cookie_secure = value("TAMANNA_COOKIE_SECURE", "1").lower() not in {"0", "false", "no"}
     production_transport_secure = (
         environment != "production"
@@ -57,12 +79,12 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
     )
 
     session_secret = value("TAMANNA_SESSION_SECRET")
-    # Length alone accepts predictable values such as 48 repeated characters.
-    # Require a reasonably varied secret while keeping the value itself private.
     session_secret_configured = (
         len(session_secret) >= 32
         and len(set(session_secret)) >= 12
-        and session_secret.lower() not in {"changeme", "change-me", "your-secret", "replace-me", "placeholder"}
+        and session_secret.lower() not in {
+            "changeme", "change-me", "your-secret", "replace-me", "placeholder"
+        }
     )
 
     checks = {
@@ -75,11 +97,13 @@ def validate_env(env_file: Path, strict: bool = False) -> dict:
     missing = [name for name, ok in checks.items() if not ok]
     warnings = []
     if not checks["session_secret"]:
-        warnings.append("Set TAMANNA_SESSION_SECRET to a random, varied value of at least 32 characters; avoid placeholders or repeated characters.")
+        warnings.append(
+            "Set TAMANNA_SESSION_SECRET to a random, varied value of at least 32 characters."
+        )
     if not checks["model_provider"]:
         warnings.append(
-            "Use TAMANNA_MODEL_PROVIDER=ollama with a valid local Ollama URL/model; "
-            "mock is allowed only when TAMANNA_ENV=test."
+            "Configure the selected provider: Ollama URL/model, OpenAI API key/model/HTTPS URL, "
+            "or mock only when TAMANNA_ENV=test."
         )
     if not checks["database_url"]:
         warnings.append("Set TAMANNA_DATABASE_URL or use the built-in SQLite default.")
@@ -112,7 +136,7 @@ def main() -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Require a strong session secret, supported local model provider, database URL, and trusted CORS origins.",
+        help="Require a strong session secret, supported model provider, database URL, and trusted CORS origins.",
     )
     args = parser.parse_args()
     report = validate_env(args.env_file, strict=args.strict)
