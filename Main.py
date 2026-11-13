@@ -760,6 +760,9 @@ async def chat(request: ChatRequest, http_request: Request):
         rate_limit_user_action(user_id, "chat", limit=30, window_seconds=60)
         conversation_id = f"user-{user_id}"
     else:
+        # Guest requests are rate-limited by client address without requiring an account.
+        client_host = getattr(getattr(http_request, "client", None), "host", None) or "unknown"
+        rate_limit_user_action("guest:" + client_host, "guest_chat", limit=20, window_seconds=60)
         # A client-generated opaque ID keeps guest turns isolated; guest history
         # is held in the browser and is not written to the account database.
         conversation_id = "guest-" + (request.conversation_id or uuid.uuid4().hex)
