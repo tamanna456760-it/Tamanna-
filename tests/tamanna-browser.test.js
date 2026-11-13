@@ -28,7 +28,7 @@ class FakeElement {
 
 function harness() {
   const ids = ['tamannaBrowserPanel', 'openBrowser', 'closeBrowser', 'browserAddress',
-    'browserGo', 'browserNewTab', 'browserFrame', 'browserSearch', 'browserSearchButton', 'browserStatus'];
+    'browserGo', 'browserNewTab', 'browserFrame', 'browserSearch', 'browserSearchButton', 'browserStatus',\n    'browserBack', 'browserForward', 'browserReload'];
   const elements = Object.fromEntries(ids.map(id => [id, new FakeElement(id)]));
   const opened = [];
   const context = {
@@ -114,4 +114,32 @@ test('does not misreport a popup as blocked when noopener returns null', () => {
   elements.browserSearchButton.dispatch('click');
   assert.equal(elements.browserStatus.dataset.state, 'ok');
   assert.match(elements.browserStatus.textContent, /অনুরোধ পাঠানো হয়েছে/);
+});
+
+
+test('tracks browser back, forward, reload and truncates forward history after new navigation', () => {
+  const { elements } = harness();
+  assert.equal(elements.browserBack.disabled, true);
+  assert.equal(elements.browserForward.disabled, true);
+  elements.browserAddress.value = 'https://one.example';
+  elements.browserGo.dispatch('click');
+  assert.equal(elements.browserBack.disabled, true);
+  assert.equal(elements.browserForward.disabled, true);
+  assert.equal(elements.browserReload.disabled, false);
+  elements.browserAddress.value = 'https://two.example/path';
+  elements.browserGo.dispatch('click');
+  assert.equal(elements.browserBack.disabled, false);
+  elements.browserBack.dispatch('click');
+  assert.equal(elements.browserFrame.src, 'https://one.example/');
+  assert.equal(elements.browserAddress.value, 'https://one.example/');
+  assert.equal(elements.browserForward.disabled, false);
+  elements.browserForward.dispatch('click');
+  assert.equal(elements.browserFrame.src, 'https://two.example/path');
+  elements.browserReload.dispatch('click');
+  assert.equal(elements.browserFrame.src, 'https://two.example/path');
+  elements.browserBack.dispatch('click');
+  elements.browserAddress.value = 'https://three.example';
+  elements.browserGo.dispatch('click');
+  assert.equal(elements.browserForward.disabled, true);
+  assert.equal(elements.browserFrame.src, 'https://three.example/');
 });
