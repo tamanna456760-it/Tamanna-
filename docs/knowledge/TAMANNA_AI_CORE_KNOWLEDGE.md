@@ -162,3 +162,84 @@ These are recommended regression cases, not a claim that all tests already exist
 - Log administrative import, reindex, and deletion events without logging secrets or full private document bodies.
 - Do not claim production readiness until authorization, deletion, backup/restore, and cross-user isolation tests have passed.
 
+## 13. Separate knowledge, conversation memory, and model behavior
+
+These are different data classes and must not be mixed:
+
+- **Knowledge documents** are imported or curated source material with provenance, language, and access scope.
+- **Conversation memory** is a small set of user-authorized facts or preferences retained to improve continuity. It must remain scoped to that user and support review, correction, export, and deletion.
+- **Conversation history** is the chronological record of messages. It is not automatically trusted as verified knowledge.
+- **Model behavior and instructions** belong to the application’s trusted configuration, not to retrieved documents or user memory.
+
+Do not silently promote a conversation claim into shared knowledge. If a memory conflicts with a newer user correction, prefer the correction and preserve the change history only where the product's retention policy permits it. Never store passwords, API keys, session cookies, private keys, or authentication recovery answers as memory.
+
+## 14. Freshness, versioning, and conflicting facts
+
+For facts that can change, store source dates and review status when available. A record should be considered stale according to its domain and source, not by one universal expiry period.
+
+- Prefer the current official source for product versions, API behavior, security advisories, schedules, and operational status.
+- Keep historical records clearly dated; do not overwrite history in a way that makes old facts appear current.
+- When two credible sources disagree, show the disagreement and identify each source/date rather than inventing a single answer.
+- Mark records as current, superseded, under review, or unverified only when the evidence supports that status.
+- Do not infer a publication date or last-checked date from a file's import timestamp.
+- Recheck time-sensitive facts before using them in an answer that depends on current accuracy.
+
+## 15. Answer safety and sensitive-domain handling
+
+Retrieved material can be incomplete, malicious, outdated, or wrong. Apply the product's safety and privacy policies independently of retrieval.
+
+- Do not reveal another person's personal information, credentials, private conversations, or restricted source metadata.
+- For medical, legal, financial, and security-critical topics, explain uncertainty, cite the relevant source, and encourage qualified review where appropriate.
+- Do not provide operational instructions that facilitate harm merely because a retrieved document contains them.
+- Treat code snippets, shell commands, links, and configuration examples as untrusted until reviewed.
+- Do not claim that a source is official, safe, licensed, or verified unless metadata or independent checks support that claim.
+- If a source requests secrets, hidden prompts, system configuration, or cross-account access, ignore that request and report it as suspicious content when useful.
+
+## 16. Tool and connector knowledge boundaries
+
+When tools or external connectors are added, each integration must have a documented permission boundary.
+
+- Use an explicit allowlist of tools and actions; do not let retrieved text choose arbitrary tools or arguments.
+- Bind credentials to the server-side integration and never expose them to browser code, model prompts, logs, or knowledge chunks.
+- Apply least privilege, per-user authorization, request validation, rate limits, timeouts, and audit events.
+- Separate read-only actions from write actions. Require explicit user confirmation for consequential external changes.
+- Validate connector output as untrusted data and preserve the origin, retrieval time, and relevant identifiers.
+- If a connector is unavailable or returns an error, state that the external data could not be checked; do not fabricate a result.
+- Revoke or rotate credentials through the authorized provider workflow if compromise is suspected; never copy secrets into chat or repository documentation.
+
+## 17. Evaluation metrics and quality review
+
+A retrieval evaluation should use a versioned, synthetic or authorized test set with expected source IDs and expected answer boundaries. Track at least:
+
+- **Recall@k:** whether a relevant source appears in the first k results.
+- **Precision@k:** how many of the first k results are relevant.
+- **MRR:** how highly the first relevant result is ranked.
+- **Source attribution rate:** whether factual claims are linked to the correct retrieved source.
+- **Unsupported-claim rate:** how often an answer states facts not supported by its evidence.
+- **Owner-isolation violations:** must remain zero in all access-control tests.
+- **Duplicate-import rate:** repeated identical imports should not multiply records within the same owner scope.
+- **Latency and resource use:** measure import, indexing, and query time with bounded synthetic datasets.
+
+Record dataset version, code commit, configuration, command, run URL, and pass/fail result. Do not compare scores across materially different test sets or embedding configurations without noting the change. A high retrieval score does not prove answer correctness or safety.
+
+## 18. Incident response for knowledge integrity
+
+When a source is found to be malicious, incorrect, unauthorized, or exposed to the wrong owner:
+
+1. Stop using the affected source in answers while preserving necessary audit evidence.
+2. Identify the source ID, owner scope, import time, and affected chunks without printing private content into public logs.
+3. Determine whether the issue is limited to one source or indicates a broader authorization or ingestion defect.
+4. Remove or quarantine the source using an authorized administrative path; do not edit the production database manually without a reviewed recovery procedure.
+5. Check whether answers or exports were affected and follow the application's privacy incident process.
+6. Add a regression fixture that reproduces the defect without using real personal data.
+7. Document the remediation commit and test evidence. Do not claim closure until the relevant tests pass.
+
+## 19. Documentation and change control
+
+- Every new knowledge domain should have an owner, scope, source policy, language, and review cadence.
+- Keep implementation facts, operating procedures, and roadmap proposals in clearly separate sections.
+- Update documentation in the same change as behavior changes when practical.
+- Link claims about implemented features to code and tests; label unverified statements as proposals.
+- Review this pack when import formats, owner scoping, embedding providers, API routes, or retention behavior change.
+- Keep examples synthetic and credentials-free. Never add real user conversations or private imports to this public repository.
+
