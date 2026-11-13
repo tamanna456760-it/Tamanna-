@@ -112,11 +112,77 @@
     }
   }
 
+  async function runWorkspaceCommand(prompt) {
+    const shellMatch = prompt.match(/^!shell\\s+([\\s\\S]+)$/i);
+    const fileMatch = prompt.match(/^!file\\s+(list|read|write|mkdir|move|remove)(?:\\s+([\\s\\S]*))?$/i);
+    if (!shellMatch && !fileMatch) return false;
+
+    const resultMessage = addMessage("assistant", "Workspace command চলছে…");
+    try {
+      let result;
+      if (shellMatch) {
+        result = await api("/api/linux/shell", {
+          method: "POST",
+          body: JSON.stringify({ command: shellMatch[1].trim() })
+        });
+      } else {
+        const action = fileMatch[1].toLowerCase();
+        const rest = fileMatch[2] || "";
+        const firstLine = rest.split(/\\r?\\n/, 1)[0].trim();
+        let path = firstLine;
+        let destination = "";
+        let content = "";
+        if (action === "write") {
+          const newline = rest.search(/\\r?\\n/);
+          if (newline < 0) throw new Error("ব্যবহার: !file write path/to/file.py তারপর নতুন লাইনে file content দিন।");
+          path = firstLine;
+          content = rest.slice(newline).replace(/^\\r?\\n/, "");
+        } else if (action === "move") {
+          const parts = firstLine.split(/\\s+->\\s+/);
+          if (parts.length !== 2) throw new Error("ব্যবহার: !file move old/path -> new/path");
+          path = parts[0].trim();
+          destination = parts[1].trim();
+        }
+        if (!path && action !== "list") throw new Error("ফাইল/ফোল্ডারের path দিন।");
+        if (action === "remove" && !window.confirm("এই project path স্থায়ীভাবে মুছে ফেলবেন?\\n" + path)) {
+          resultMessage.querySelector(".message-text").textContent = "Remove বাতিল করা হয়েছে।";
+          return true;
+        }
+        result = await api("/api/workspace/file", {
+          method: "POST",
+          body: JSON.stringify({ action, path, destination, content })
+        });
+      }
+      resultMessage.querySelector(".message-text").textContent = JSON.stringify(result, null, 2);
+    } catch (error) {
+      resultMessage.querySelector(".message-text").textContent =
+        "Workspace command ব্যর্থ: " + error.message +
+        "। এই সুবিধার জন্য admin login প্রয়োজন।";
+      resultMessage.querySelector(".message-text").classList.add("tamanna-error");
+    }
+    return true;
+  }
+
   async function sendMessage() {
     const prompt = input.value.trim();
     if (!prompt || busy) return;
     if (isGitHubPagesPreview) {
       addMessage("assistant", "এই GitHub Pages preview-তে AI request পাঠানো হচ্ছে না। Backend host ও নিরাপদ API route সংযুক্ত হলে chat চালু হবে।");
+      return;
+    }
+    if (/^!(shell|file)\\s/i.test(prompt)) {
+      addMessage("user", prompt);
+      input.value = "";
+      input.style.height = "auto";
+      busy = true;
+      sendButton.disabled = true;
+      try { await runWorkspaceCommand(prompt); }
+      finally {
+        busy = false;
+        sendButton.disabled = false;
+        sendButton.textContent = "↑";
+        input.focus();
+      }
       return;
     }
     addMessage("user", prompt);
