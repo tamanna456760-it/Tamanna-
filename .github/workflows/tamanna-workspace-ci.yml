@@ -7,12 +7,14 @@ on:
       - "Main.py"
       - "js/chat.js"
       - "data/linux/workspace.py"
+      - "data/linux/powershell_bridge.py"
       - ".github/workflows/tamanna-workspace-ci.yml"
   pull_request:
     paths:
       - "Main.py"
       - "js/chat.js"
       - "data/linux/workspace.py"
+      - "data/linux/powershell_bridge.py"
   workflow_dispatch:
 
 permissions:
@@ -31,7 +33,7 @@ jobs:
         with:
           node-version: "22"
       - name: Compile Python integration
-        run: python -m py_compile Main.py data/linux/workspace.py
+        run: python -m py_compile Main.py data/linux/workspace.py data/linux/powershell_bridge.py
       - name: Check chat JavaScript syntax
         run: node --check js/chat.js
       - name: Test workspace path protections
@@ -52,5 +54,15 @@ jobs:
               pass
           else:
               raise AssertionError("project root removal unexpectedly allowed")
-          print("workspace confinement checks passed")
+          from data.linux.powershell_bridge import PowerShellBridge
+          bridge = PowerShellBridge()
+          for command in ("Remove-Item *", "Invoke-Expression 'whoami'", "Get-Content ../../etc/passwd"):
+              try:
+                  bridge._build(command)
+              except ValueError:
+                  pass
+              else:
+                  raise AssertionError(f"unsafe PowerShell command unexpectedly allowed: {command}")
+          assert bridge._build("Get-Date") == "Get-Date"
+          print("workspace and PowerShell confinement checks passed")
           PY
