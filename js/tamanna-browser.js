@@ -71,6 +71,7 @@
       } else {
         historyEntries.splice(historyIndex + 1);
         historyEntries.push(url.href);
+        if (historyEntries.length > 50) historyEntries.shift();
         historyIndex = historyEntries.length - 1;
         frame.src = url.href;
         updateNavigationButtons();
