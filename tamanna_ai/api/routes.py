@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import secrets
 import tempfile
 import unicodedata
 import uuid
@@ -16,7 +17,7 @@ from fastapi.responses import StreamingResponse
 from endpoint_security.antivirus import AntivirusScanner
 from pydantic import BaseModel, Field
 
-from tamanna_ai.authentication.router import COOKIE, check_origin, require_user, rate_limit_user_action, secret as auth_secret
+from tamanna_ai.authentication.router import COOKIE, check_origin, require_user, rate_limit_user_action
 from tamanna_ai.knowledge.vector_store import (
     EmbeddingError,
     OllamaEmbeddingProvider,
@@ -793,6 +794,32 @@ async def chat(payload: ChatRequest, request: Request, token: str | None = Cooki
 # distinct synthetic owner in the existing SQLite store; no shared guest inbox.
 _GUEST_COOKIE = "tamanna_guest"
 _GUEST_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+_GUEST_SECRET_PATH = Path(__file__).resolve().parents[2] / "data" / ".guest_cookie_secret"
+
+
+def _guest_signing_key() -> bytes:
+    configured = os.getenv("TAMANNA_GUEST_SECRET", "").strip()
+    if configured:
+        if len(configured) < 32:
+            raise HTTPException(status_code=503, detail="Guest session configuration is invalid.")
+        return configured.encode("utf-8")
+    _GUEST_SECRET_PATH.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with _GUEST_SECRET_PATH.open("x", encoding="utf-8") as handle:
+            handle.write(secrets.token_urlsafe(48))
+        try:
+            _GUEST_SECRET_PATH.chmod(0o600)
+        except OSError:
+            pass
+    except FileExistsError:
+        pass
+    try:
+        key = _GUEST_SECRET_PATH.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        raise HTTPException(status_code=503, detail="Guest session storage is unavailable.") from exc
+    if len(key) < 32:
+        raise HTTPException(status_code=503, detail="Guest session storage is invalid.")
+    return key.encode("utf-8")
 
 
 def _guest_owner_id(token: str | None) -> str | None:
@@ -801,7 +828,7 @@ def _guest_owner_id(token: str | None) -> str | None:
     guest_id, signature = token.rsplit(".", 1)
     if len(guest_id) != 32 or not all(ch in "0123456789abcdef" for ch in guest_id):
         return None
-    expected = hmac.new(auth_secret(), ("guest:" + guest_id).encode(), hashlib.sha256).hexdigest()
+    expected = hmac.new(_guest_signing_key(), ("guest:" + guest_id).encode(), hashlib.sha256).hexdigest()
     return guest_id if hmac.compare_digest(signature, expected) else None
 
 
@@ -842,7 +869,7 @@ async def guest_chat(
     if guest_id is None:
         guest_id = uuid.uuid4().hex
         signature = hmac.new(
-            auth_secret(), ("guest:" + guest_id).encode(), hashlib.sha256
+            _guest_signing_key(), ("guest:" + guest_id).encode(), hashlib.sha256
         ).hexdigest()
         response.set_cookie(
             _GUEST_COOKIE, guest_id + "." + signature,
