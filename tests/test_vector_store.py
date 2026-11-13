@@ -1,3 +1,5 @@
+import pytest
+
 from tamanna_ai.knowledge.vector_store import VectorKnowledgeStore, chunk_text
 
 
