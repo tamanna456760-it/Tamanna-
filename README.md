@@ -93,6 +93,14 @@ Install Ollama on the same server as Tamanna AI, then pull a model that fits the
 
 Set `TAMANNA_MODEL_PROVIDER=ollama`, `TAMANNA_OLLAMA_URL=http://127.0.0.1:11434`, and `TAMANNA_OLLAMA_MODEL=qwen2.5:7b` in the private environment. Keep Ollama bound to localhost or a protected private network; do not expose port 11434 directly to the public internet. The selected model's quality and speed depend on its weights and available hardware. This connector does not claim Tamanna has trained its own foundation model.
 
+## GitHub Knowledge (API-free sync)
+
+The public GitHub repository can be used as a knowledge source without a GitHub API token or hosted AI API. On the same machine as the FastAPI backend, run:
+
+    python scripts/sync_github_knowledge.py
+
+This clones/fetches the public repository over ordinary Git HTTPS and indexes Markdown, RST, and TXT documents into the shared `tamanna-public` SQLite corpus using local feature embeddings. The existing RAG chat route can retrieve this shared corpus. Natural-language generation still requires a running local Ollama model; GitHub is the knowledge source, not an AI model. The sync script is not automatically running on GitHub Pages or on a VPS until it is deployed and scheduled there. See [GitHub Knowledge Sync](docs/knowledge/GITHUB_SYNC.md) for limits and setup.
+
 ## Run the FastAPI backend separately
 
 Requirements: Python 3.12 or newer.
