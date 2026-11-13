@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Union
 
 ROOT = Path(__file__).resolve().parents[2]
 MAX_TIMEOUT = 20
@@ -16,7 +17,7 @@ MAX_OUTPUT = 12_000
 
 
 class PowerShellBridge:
-    def __init__(self, root: str | Path = ROOT):
+    def __init__(self, root: Union[str, Path] = ROOT):
         self.root = Path(root).resolve()
         self.executable = shutil.which("pwsh")
 
