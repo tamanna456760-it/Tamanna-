@@ -32,12 +32,16 @@ def resolve(relative: str, *, allow_missing: bool = False) -> Path:
         target.relative_to(ROOT)
     except ValueError as exc:
         raise WorkspaceError("Path escapes the project workspace.") from exc
+    if any(part in BLOCKED_PARTS or part.startswith(".env.") for part in target.relative_to(ROOT).parts):
+        raise WorkspaceError("This protected path cannot be accessed.")
     return target
 
 
 def operate(action: str, path: str = "", destination: str = "", content: str = "") -> dict:
     action = str(action).lower().strip()
     target = resolve(path, allow_missing=action in {"write", "mkdir", "move"})
+    if action in {"write", "mkdir", "move", "remove"} and target == ROOT:
+        raise WorkspaceError("The project root itself cannot be modified or removed.")
     if action == "list":
         if not target.is_dir():
             raise WorkspaceError("Path is not a directory.")
