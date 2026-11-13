@@ -1641,6 +1641,24 @@ try:
         command = str(payload.get("command", "")).strip()
         return shell_bridge.run(command)
 
+    @app.get("/api/powershell/status")
+    async def powershell_status(request: Request):
+        _require_feature_access(request, admin=True)
+        from data.linux.powershell_bridge import powershell_bridge
+        return {
+            "online": True,
+            "available": bool(powershell_bridge.executable),
+            "engine": "PowerShell 7 (pwsh)",
+            "mode": "controlled-read-only",
+            "note": "File edits use the confined /api/workspace/file operations."
+        }
+
+    @app.post("/api/powershell")
+    async def powershell_run(payload: dict, request: Request):
+        _require_feature_access(request, admin=True, write=True)
+        from data.linux.powershell_bridge import powershell_bridge
+        return powershell_bridge.run(str(payload.get("command", "")).strip())
+
     @app.get("/api/workspace/status")
     async def workspace_status(request: Request):
         _require_feature_access(request, admin=True)
