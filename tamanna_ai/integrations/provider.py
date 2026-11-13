@@ -5,6 +5,7 @@ import os
 from typing import AsyncIterator, Protocol
 
 from .ollama import OllamaClient, OllamaError
+from .openai import OpenAIClient, OpenAIError
 from .model_settings import get_selected_model
 
 
@@ -65,6 +66,25 @@ class OllamaProvider:
             raise ModelProviderError(str(exc)) from exc
 
 
+class OpenAIProvider:
+    """Uses the OpenAI Responses API with a server-side API key."""
+    name = "openai"
+
+    def __init__(self):
+        try:
+            self.client = OpenAIClient()
+        except (TypeError, ValueError) as exc:
+            raise ModelConfigurationError(
+                f"Invalid OpenAI configuration: {exc}"
+            ) from exc
+
+    async def generate(self, prompt: str) -> str:
+        try:
+            return await self.client.generate(prompt)
+        except (OpenAIError, ValueError) as exc:
+            raise ModelProviderError(str(exc)) from exc
+
+
 class MockProvider:
     """Deterministic provider allowed only in an explicit test environment."""
     name = "mock"
@@ -91,8 +111,10 @@ def get_model_provider() -> ModelProvider:
             raise ModelConfigurationError(
                 f"Invalid local model configuration: {exc}"
             ) from exc
+    if provider == "openai":
+        return OpenAIProvider()
     raise ModelConfigurationError(
-        "Unsupported model provider. Use 'ollama' for local inference or 'mock' in tests."
+        "Unsupported model provider. Use 'ollama', 'openai', or 'mock' in tests."
     )
 
 
@@ -101,6 +123,7 @@ __all__ = [
     "ModelProviderError",
     "ModelProvider",
     "OllamaProvider",
+    "OpenAIProvider",
     "MockProvider",
     "get_model_provider",
 ]
