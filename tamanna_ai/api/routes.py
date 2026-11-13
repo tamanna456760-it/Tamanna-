@@ -805,6 +805,26 @@ def _guest_owner_id(token: str | None) -> str | None:
     return guest_id if hmac.compare_digest(signature, expected) else None
 
 
+@api_router.get("/guest/conversations/{conversation_id}")
+async def guest_conversation(
+    conversation_id: str,
+    guest_token: str | None = Cookie(default=None, alias=_GUEST_COOKIE),
+):
+    """Load only the conversation owned by this browser's signed guest identity."""
+    guest_id = _guest_owner_id(guest_token)
+    if guest_id is None:
+        raise HTTPException(status_code=401, detail="Guest session expired. Start a new chat.")
+    persistent_user_id = database.ensure_user(
+        "guest-" + guest_id + "@guest.invalid", "Guest"
+    )
+    history = database.load_history(
+        conversation_id=conversation_id, user_id=persistent_user_id, limit_pairs=100
+    )
+    if not history:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    return {"ok": True, "conversation_id": conversation_id, "messages": history}
+
+
 @api_router.post("/guest/chat", response_model=ChatResponse)
 async def guest_chat(
     payload: ChatRequest,
