@@ -111,6 +111,18 @@ DOCUMENTS = [
         "Continuous integration runs automated tests, static checks, security scans, "
         "and build validation for every relevant commit.",
     ),
+    (
+        "hindi-knowledge.md",
+        "हिंदी ज्ञान खोज",
+        "हिंदी भाषा में ज्ञान दस्तावेज़, प्रश्न और उत्तर खोजे जा सकते हैं। "
+        "देवनागरी यूनिकोड और मात्रा को सुरक्षित रखना महत्वपूर्ण है।",
+    ),
+    (
+        "arabic-knowledge.md",
+        "البحث في المعرفة العربية",
+        "يمكن البحث في مستندات المعرفة باللغة العربية. "
+        "يجب الحفاظ على حروف العربية والتشكيل واتجاه الكتابة من اليمين إلى اليسار.",
+    ),
 ]
 
 CASES = [
@@ -129,11 +141,13 @@ CASES = [
     {"query": "ব্যবহারকারীর ব্যক্তিগত নথি এবং memory isolation", "relevant": "user-isolation.md", "language": "mixed"},
     {"query": "Ollama model RAM GPU context length", "relevant": "ollama-memory.md", "language": "en"},
     {"query": "CI automated tests security scan build validation", "relevant": "ci-workflow.md", "language": "en"},
+    {"query": "हिंदी भाषा ज्ञान दस्तावेज़ खोज", "relevant": "hindi-knowledge.md", "language": "hi"},
+    {"query": "البحث عن مستندات المعرفة العربية", "relevant": "arabic-knowledge.md", "language": "ar"},
 ]
 
 
 def evaluate(store: VectorKnowledgeStore, *, top_k: int = 3) -> dict:
-    """Return hit-rate and mean reciprocal rank for the fixed bilingual cases."""
+    """Return hit-rate and mean reciprocal rank for the fixed multilingual cases."""
     if not 1 <= top_k <= 20:
         raise ValueError("top_k must be between 1 and 20")
 
