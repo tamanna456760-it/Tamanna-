@@ -104,3 +104,14 @@ test('browser preview is sandboxed and documents the GitHub repository browser l
   assert.match(html, /href="\/admin\.html#github-browser-panel"/);
   assert.match(html, /tamanna-browser\.js/);
 });
+
+
+test('does not misreport a popup as blocked when noopener returns null', () => {
+  const { elements } = harness();
+  elements.browserSearch.value = 'privacy test';
+  // Browsers may return null for window.open when noopener is requested,
+  // even when the user-initiated tab was opened successfully.
+  elements.browserSearchButton.dispatch('click');
+  assert.equal(elements.browserStatus.dataset.state, 'ok');
+  assert.match(elements.browserStatus.textContent, /অনুরোধ পাঠানো হয়েছে/);
+});
