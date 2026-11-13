@@ -164,20 +164,22 @@ def rate_limit_user_action(user_id, action, limit=30, window_seconds=60):
         )
 
 
-def check_origin(request):
-    # Fetch Metadata protects cookie-authenticated mutations when a browser
-    # omits Origin but explicitly identifies the request as cross-site.
+def check_origin(request, *, allow_cross_site=False):
+    # Cross-site browser requests remain blocked by default. The public guest
+    # chat route may opt in, but only for an exact, explicitly allowlisted Origin.
     fetch_site = request.headers.get("sec-fetch-site", "").strip().lower()
     origin = request.headers.get("origin")
-    # Same-site is not necessarily same-origin: a hostile sibling subdomain
-    # can still cause cookie-authenticated requests. Require an explicit
-    # allowlisted Origin whenever the browser reports same-site without one.
-    if fetch_site == "cross-site" or (fetch_site == "same-site" and not origin):
+    if fetch_site == "cross-site" and not (allow_cross_site and origin):
+        raise HTTPException(403, "Unverified cross-origin browser requests are not allowed.")
+    if fetch_site == "same-site" and not origin:
         raise HTTPException(403, "Unverified cross-origin browser requests are not allowed.")
     if origin:
-        allowed = [x.strip().rstrip("/") for x in os.getenv("TAMANNA_CORS_ORIGINS",
-          "https://www.bd-king-r7.com").split(",") if x.strip()]
-        if origin.rstrip("/") not in allowed: raise HTTPException(403, "Untrusted request origin.")
+        allowed = [x.strip().rstrip("/") for x in os.getenv(
+            "TAMANNA_CORS_ORIGINS",
+            "https://www.bd-king-r7.com,https://tamanna456760-it.github.io",
+        ).split(",") if x.strip()]
+        if origin.rstrip("/") not in allowed:
+            raise HTTPException(403, "Untrusted request origin.")
 
 def set_cookie(response, token):
     response.set_cookie(COOKIE, token, max_age=LIFETIME, httponly=True,
