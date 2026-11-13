@@ -114,16 +114,18 @@
 
   async function runWorkspaceCommand(prompt) {
     const shellMatch = prompt.match(/^!shell\\s+([\\s\\S]+)$/i);
+    const powershellMatch = prompt.match(/^!ps\\s+([\\s\\S]+)$/i);
     const fileMatch = prompt.match(/^!file\\s+(list|read|write|mkdir|move|remove)(?:\\s+([\\s\\S]*))?$/i);
-    if (!shellMatch && !fileMatch) return false;
+    if (!shellMatch && !powershellMatch && !fileMatch) return false;
 
     const resultMessage = addMessage("assistant", "Workspace command চলছে…");
     try {
       let result;
-      if (shellMatch) {
-        result = await api("/api/linux/shell", {
+      if (shellMatch || powershellMatch) {
+        const command = (shellMatch ? shellMatch[1] : powershellMatch[1]).trim();
+        result = await api(shellMatch ? "/api/linux/shell" : "/api/powershell", {
           method: "POST",
-          body: JSON.stringify({ command: shellMatch[1].trim() })
+          body: JSON.stringify({ command })
         });
       } else {
         const action = fileMatch[1].toLowerCase();
@@ -170,7 +172,7 @@
       addMessage("assistant", "এই GitHub Pages preview-তে AI request পাঠানো হচ্ছে না। Backend host ও নিরাপদ API route সংযুক্ত হলে chat চালু হবে।");
       return;
     }
-    if (/^!(shell|file)\\s/i.test(prompt)) {
+    if (/^!(shell|ps|file)\\s/i.test(prompt)) {
       addMessage("user", prompt);
       input.value = "";
       input.style.height = "auto";
