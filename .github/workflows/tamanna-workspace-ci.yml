@@ -1,0 +1,56 @@
+name: Tamanna Workspace Integration CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Main.py"
+      - "js/chat.js"
+      - "data/linux/workspace.py"
+      - ".github/workflows/tamanna-workspace-ci.yml"
+  pull_request:
+    paths:
+      - "Main.py"
+      - "js/chat.js"
+      - "data/linux/workspace.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile Python integration
+        run: python -m py_compile Main.py data/linux/workspace.py
+      - name: Check chat JavaScript syntax
+        run: node --check js/chat.js
+      - name: Test workspace path protections
+        run: |
+          python - <<'PY'
+          from data.linux.workspace import operate, WorkspaceError
+          assert operate("list", ".")["ok"] is True
+          for path in ("../outside", ".env", ".git/config"):
+              try:
+                  operate("read", path)
+              except (WorkspaceError, OSError):
+                  pass
+              else:
+                  raise AssertionError(f"protected path unexpectedly allowed: {path}")
+          try:
+              operate("remove", ".")
+          except WorkspaceError:
+              pass
+          else:
+              raise AssertionError("project root removal unexpectedly allowed")
+          print("workspace confinement checks passed")
+          PY
