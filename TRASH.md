@@ -38,6 +38,7 @@
 
 - Repository tree inspected: **2,847 files** at the reviewed commit.
 - Quarantine candidates recorded: **8**.
-- Files deleted or moved: **0**.
+- Files quarantined under `trash/quarantine-2026-11-13/`: **3** (misplaced Bitbucket pipeline, newline-suffixed legacy APK workflow, and Dart snippet stored as a workflow-like file). Original contents and source paths are preserved in the quarantine copies and Git history.
+- The five `.bad` PowerHub scripts were **not** moved because repository configuration and legacy helper scripts reference them; inspect and replace those references before quarantine.
 - Runtime configuration and backup preserved.
-- Next safe step: dependency/reference scan, then move only confirmed unused candidates into `trash/` while preserving their original contents and paths in Git history.
+- Remaining work: continue dependency/reference audit before moving any other candidates.
