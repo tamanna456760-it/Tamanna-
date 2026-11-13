@@ -243,3 +243,120 @@ When a source is found to be malicious, incorrect, unauthorized, or exposed to t
 - Review this pack when import formats, owner scoping, embedding providers, API routes, or retention behavior change.
 - Keep examples synthetic and credentials-free. Never add real user conversations or private imports to this public repository.
 
+## 20. Source authority and evidence hierarchy
+
+Choose sources according to the question being answered. No single ranking is correct for every domain, but use these defaults:
+
+1. Current official documentation, standards, legislation, or first-party product notices.
+2. Maintainer-controlled source code, release notes, and reproducible tests for repository behavior.
+3. Peer-reviewed research and recognized technical standards for scientific or engineering claims.
+4. Reputable independent reporting and expert analysis for context and comparison.
+5. User-provided notes and community discussions as attributed, potentially unverified context.
+
+A source's authority is domain-specific. Repository code is strong evidence of current implementation but is not necessarily evidence of legal compliance or production deployment. A README can describe intended behavior that the code does not yet implement. Check dates, versions, and scope before treating a source as current.
+
+## 21. Document parsing and chunk design
+
+Chunking should preserve meaning and enough context to make each retrieved passage understandable.
+
+- Prefer document headings, paragraphs, list boundaries, and table rows over arbitrary character cuts.
+- Keep heading paths and source identifiers with each chunk so a result can be traced back to its location.
+- Avoid splitting a sentence, code block, table row, or numbered procedure when a safe boundary is available.
+- Use bounded chunk size and overlap; measure the effect on retrieval quality instead of assuming that larger chunks are always better.
+- Store original text separately from normalized text where feasible.
+- Preserve language, encoding, and document structure; do not silently translate imported content.
+- Treat OCR output, extracted tables, and parser warnings as lower-confidence content until reviewed.
+- Reject malformed or unsupported files safely and report the reason without exposing server paths or internal exceptions.
+
+## 22. Search result ranking and answer construction
+
+A search result should be selected because it is relevant to the question, not merely because it shares common words.
+
+- Apply authorization and owner filters before ranking or returning results.
+- Combine lexical, full-text, and vector signals only when their score ranges and failure modes are understood.
+- Consider source authority, freshness, language match, and document section context as separate ranking signals.
+- Deduplicate repeated chunks from the same source in the final context while retaining their source references.
+- Set a retrieval threshold using a representative evaluation set; do not invent universal confidence percentages.
+- If no result meets the threshold, say that the indexed sources do not establish the answer.
+- Keep answer length proportional to evidence and distinguish direct evidence from reasonable inference.
+- Include source title and relevant section or link when the interface supports citations.
+
+## 23. Data retention, export, and deletion
+
+Knowledge retention must be explicit and understandable to the account owner.
+
+- Define retention separately for original uploads, extracted text, chunks, embeddings, audit metadata, and backups.
+- Provide an authenticated export path that includes source metadata and a clear explanation of what is excluded.
+- Deletion must cover source records, chunks, derived embeddings, cached retrieval results, and relevant search indexes.
+- Document backup retention: deletion from the live database may not immediately erase immutable backups.
+- Test deletion and restoration using disposable fixtures before relying on the procedure for real accounts.
+- Do not promise immediate or permanent erasure unless every relevant storage layer and backup policy supports that claim.
+- Keep audit records minimal; record the action and source identifier without copying the private document body.
+
+## 24. Capacity planning and performance
+
+Plan capacity using measured workload rather than a headline record count.
+
+- Measure average and maximum document size, chunk count per document, embedding dimensions, index size, and metadata overhead.
+- Benchmark import throughput, query latency, concurrent requests, database lock behavior, and memory use.
+- Test at progressively larger synthetic dataset sizes, including 1,000, 10,000, and 100,000 records where practical.
+- Include cold-start and warm-cache measurements and report the hardware, database settings, and embedding provider.
+- Use pagination and bounded result counts for source lists and administrative views.
+- Apply queueing or backpressure to expensive imports; do not allow unlimited concurrent indexing jobs.
+- Set operational limits from measured server capacity and provide safe failure messages when limits are reached.
+- Do not describe the knowledge store as unlimited or production-scalable until load tests and recovery tests support that claim.
+
+## 25. Backup, restore, and migration procedure
+
+A backup is useful only if it can be restored and validated.
+
+1. Define which database, source files, metadata, indexes, and configuration are included.
+2. Encrypt backups and restrict access to the minimum authorized operators.
+3. Record backup time, schema version, application commit, and integrity-check result.
+4. Restore into an isolated test environment; never test recovery by overwriting production data.
+5. Verify record counts, source-to-chunk relationships, owner boundaries, and representative retrieval results.
+6. Test schema migrations against both a fresh database and a copy of the previous supported schema.
+7. Keep a documented rollback or forward-recovery plan for failed migrations.
+8. Record restore duration and any data-loss window; do not claim a recovery objective that has not been measured.
+
+## 26. Operational readiness checklist
+
+Before describing a knowledge feature as ready for real users, verify each applicable item with a reproducible test or operational record:
+
+- Authentication and owner isolation are enforced at every API boundary.
+- Import validation, file limits, secret redaction, and parser error handling are tested.
+- Duplicate and concurrent imports behave predictably.
+- Retrieval returns relevant passages with correct source attribution.
+- Unsupported languages and malformed text fail safely without corrupting stored data.
+- Source deletion, export, backup, and restore have been exercised.
+- Logs avoid credentials and unnecessary private content.
+- Rate limits, timeouts, database errors, and service unavailability are handled safely.
+- CI results are green for the exact commit being evaluated.
+- Any known limitations are visible to operators and users.
+
+A checklist item is not complete merely because it appears in documentation. Record its test, evidence, date, and commit. Mark untested items as pending.
+
+## 27. User feedback and knowledge correction
+
+User feedback can identify missing, confusing, or outdated information, but it is not automatic proof that a factual claim is wrong.
+
+- Allow users to report an incorrect answer, stale source, missing citation, or retrieval mismatch.
+- Capture the affected answer reference and source identifier without requiring users to submit sensitive personal data.
+- Route corrections to an authorized reviewer before changing shared knowledge.
+- Keep the original source and correction history where policy permits, so changes remain auditable.
+- Never let one user's feedback directly edit another user's private knowledge.
+- Add a synthetic regression case after a confirmed defect is corrected.
+- Track recurring feedback themes to prioritize documentation and retrieval improvements.
+
+## 28. Accessibility and multilingual user experience
+
+Knowledge quality includes whether users can read and navigate the answer.
+
+- Preserve the user's requested language and use clear, consistent terminology.
+- Support right-to-left layout for Arabic at the interface layer; text retrieval alone does not provide RTL layout.
+- Do not mix left-to-right code, URLs, and identifiers into Arabic sentences in ways that make them unreadable; render technical tokens distinctly.
+- Use readable headings, lists, and source labels rather than long unstructured paragraphs.
+- Explain technical terms briefly when the intended audience may not know them.
+- Do not claim a language is fully supported based only on Unicode tokenization; evaluate retrieval quality, answer quality, and interface rendering separately.
+- Keep translations faithful to the source and identify machine-generated translations when they have not been reviewed.
+
