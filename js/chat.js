@@ -118,10 +118,6 @@
       addMessage("assistant", "এই GitHub Pages preview-তে AI request পাঠানো হচ্ছে না। Backend host ও নিরাপদ API route সংযুক্ত হলে chat চালু হবে।");
       return;
     }
-    if (!window.TamannaAuth?.getUser()) {
-      addMessage("assistant", "চ্যাট করতে প্রথমে লগইন করুন। উপরের লগইন বোতাম চাপুন।");
-      return;
-    }
     addMessage("user", prompt);
     input.value = "";
     input.style.height = "auto";
@@ -130,7 +126,8 @@
     sendButton.textContent = "অপেক্ষা করুন…";
     const waiting = addMessage("assistant", "স্থানীয় AI মডেল উত্তর তৈরি করছে…");
     try {
-      const payload = await api("/chat", {
+      const guestMode = !window.TamannaAuth?.getUser();
+      const payload = await api(guestMode ? "/guest/chat" : "/chat", {
         method: "POST",
         body: JSON.stringify({ prompt, conversation_id: conversationId, use_knowledge: true })
       });
@@ -228,5 +225,5 @@
     chatBox.replaceChildren();
     addMessage("assistant", "আপনি লগআউট করেছেন। আবার চ্যাট করতে লগইন করুন।");
   });
-  if (window.TamannaAuth?.getUser()) refreshConversations();
+  if (window.TamannaAuth?.getUser()) refreshConversations();\n  else {\n    const guestConversation = sessionStorage.getItem("tamannaGuestConversation");\n    if (guestConversation) setConversation(guestConversation);\n  }
 })();
