@@ -412,7 +412,7 @@ from urllib.parse import urlsplit
 
 _raw_cors_origins = os.getenv(
     "TAMANNA_CORS_ORIGINS",
-    "https://www.bd-king-r7.com",
+    "https://www.bd-king-r7.com,https://tamanna456760-it.github.io",
 )
 CORS_ORIGINS = []
 for _origin in _raw_cors_origins.split(","):
@@ -746,7 +746,7 @@ def generate_reply(message):
 async def chat(request: ChatRequest, http_request: Request):
     # Chat uses an HttpOnly session cookie, so reject untrusted browser origins
     # and throttle authenticated generation requests before calling the model.
-    check_origin(http_request)
+    check_origin(http_request, allow_cross_site=True)
     message = request.message.strip()
     if not message:
         return {"reply": "দয়া করে একটি মেসেজ লিখুন।"}
