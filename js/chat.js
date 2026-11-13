@@ -196,16 +196,26 @@
     const waiting = addMessage("assistant", "স্থানীয় AI মডেল উত্তর তৈরি করছে…");
     try {
       const guestMode = !window.TamannaAuth?.getUser();
-      const payload = await api(guestMode ? "/guest/chat" : "/chat", {
+      // FastAPI exposes one canonical POST /api/chat route for guests and signed-in users.
+      // Its request model expects "message", and its response uses "reply".
+      const guestConversationId = conversationId ||
+        sessionStorage.getItem("tamannaGuestConversation") ||
+        (guestMode && window.crypto?.randomUUID ? window.crypto.randomUUID() : null);
+      const payload = await api("/api/chat", {
         method: "POST",
-        body: JSON.stringify({ prompt, conversation_id: conversationId, use_knowledge: true })
+        body: JSON.stringify({
+          message: prompt,
+          conversation_id: guestConversationId,
+          context: []
+        })
       });
+      const answer = typeof payload.reply === "string" ? payload.reply :
+        (typeof payload.response === "string" ? payload.response : "");
       waiting.querySelector(".message-text").textContent =
-        typeof payload.response === "string" ? payload.response : "Tamanna AI উত্তর দেয়নি।";
-      if (payload.conversation_id) {
-        setConversation(payload.conversation_id);
-        if (guestMode) sessionStorage.setItem("tamannaGuestConversation", payload.conversation_id);
-      }
+        answer || "Tamanna AI উত্তর দেয়নি।";
+      const returnedId = payload.conversationId || payload.conversation_id;
+      if (guestMode && returnedId) sessionStorage.setItem("tamannaGuestConversation", returnedId);
+      if (!guestMode && returnedId) setConversation(returnedId);
       if (!guestMode) await refreshConversations();
     } catch (error) {
       waiting.querySelector(".message-text").textContent =
