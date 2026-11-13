@@ -127,3 +127,31 @@ def test_history_endpoint_requires_authentication():
     from Main import app
     response = TestClient(app).get("/api/history")
     assert response.status_code == 401
+
+
+
+def test_guest_chat_api_works_without_login_from_github_pages_origin(monkeypatch, tmp_path):
+    monkeypatch.setenv("TAMANNA_ENV", "test")
+    monkeypatch.setenv("TAMANNA_MODEL_PROVIDER", "mock")
+    monkeypatch.setenv(
+        "TAMANNA_CORS_ORIGINS",
+        "https://www.bd-king-r7.com,https://bd-king-r7.com,https://tamanna456760-it.github.io",
+    )
+    from Main import app
+
+    _configure_chat_test_auth(monkeypatch, tmp_path)
+    origin = "https://tamanna456760-it.github.io"
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/chat",
+            json={"message": "Please reply to a guest."},
+            headers={"Origin": origin},
+        )
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["source"] == "mock"
+    assert payload["handled"] is True
+    assert payload["conversationId"].startswith("guest-")
+    assert "Please reply to a guest." in payload["reply"]
+    assert response.headers["access-control-allow-origin"] == origin
