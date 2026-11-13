@@ -33,7 +33,7 @@
     if (url.username || url.password) throw new Error("URL-এর মধ্যে username/password গ্রহণ করা হয় না।");
     const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
     if (!host || host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") ||
-        host === "0.0.0.0" || host === "::1" || host === "::" ||
+        host === "0.0.0.0" || host === "::1" || host === "::" || host.includes(":") || /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.endsWith(".internal") || host.endsWith(".home.arpa") ||
         /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) ||
         /^169\.254\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host)) {
       throw new Error("Local বা private network address এই browser-এ অনুমোদিত নয়।");
