@@ -11,7 +11,7 @@ Tamanna AI is one product made of independently deployable components. Keep sour
 |---|---|---|
 | Tamanna- | Product app, shared AI modules, chat/admin frontend, Android source, tests, docs and CI | Production secrets or VPS runtime data |
 | Tamanna-server | Central API/server runtime, database adapters, model runtime, security, operations and deployment | Public website source/assets |
-| tamanna-wabside | Public website and links to app/admin | AI model runtime, private database or server secrets |
+| tamanna-website | Public website and links to app/admin | AI model runtime, private database or server secrets |
 
 The server is the system of record for users, conversations, settings and audit events. Clients call it over HTTPS. GitHub stores source and build history; GitHub Pages is static hosting, not an AI inference server.
 
@@ -145,7 +145,7 @@ Use an HTTPS reverse proxy, strict trusted origins, backend-only model endpoint 
 4. Consolidate duplicated workflows only after comparing triggers, permissions, secrets and job coverage.
 5. Quarantine misplaced/obsolete files under trash/ only after reference scans and tests; do not delete backups or runtime configuration by guess.
 6. Align Tamanna-server with central API ownership and connect clients only through documented HTTPS contracts.
-7. Keep website source in tamanna-wabside; publish static app assets separately from backend deployment.
+7. Keep website source in tamanna-website; publish static app assets separately from backend deployment.
 8. Run Python, Node, Android debug/release, Docker and deployment smoke tests independently. Record results and blockers.
 
 ## 10. Definition of done
