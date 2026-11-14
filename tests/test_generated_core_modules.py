@@ -104,3 +104,11 @@ def test_training_dataset_inspector_does_not_train_or_modify(tmp_path):
     assert result["accepted"] == 1
     assert result["duplicates"] == 1
     assert result["model_training_performed"] is False
+
+
+def test_backup_rejects_non_object_manifest(tmp_path):
+    archive = tmp_path / "bad-manifest.zip"
+    with zipfile.ZipFile(archive, "w") as item:
+        item.writestr("MANIFEST.json", "[]")
+    with pytest.raises(ValueError, match="JSON object"):
+        inspect_backup(archive)

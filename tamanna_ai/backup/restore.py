@@ -20,8 +20,13 @@ def inspect_backup(archive_path: str | Path) -> dict[str, Any]:
             raise ValueError("Archive contains duplicate entry names")
         if "MANIFEST.json" not in names:
             raise ValueError("Backup manifest is missing")
-        manifest = json.loads(archive.read("MANIFEST.json"))
-        rows = manifest.get("files") if isinstance(manifest, dict) else None
+        try:
+            manifest = json.loads(archive.read("MANIFEST.json"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError("Backup manifest is not valid JSON") from exc
+        if not isinstance(manifest, dict):
+            raise ValueError("Backup manifest must be a JSON object")
+        rows = manifest.get("files")
         if manifest.get("version") != 1 or not isinstance(rows, list):
             raise ValueError("Unsupported or invalid backup manifest")
         listed = set()
