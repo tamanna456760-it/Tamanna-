@@ -68,3 +68,20 @@ A follow-up cleanup was committed on 2026-11-15.
 The wider repository still contains legacy/mixed-purpose directories and 102 build/generated-looking tracked paths. These require a separate per-project dependency review; they were not bulk-moved because some may be required by the nested .NET/Android projects or legacy runtime. The next cleanup pass should classify these before moving them.
 
 **Post-change CI:** GitHub Actions runs were created for the cleanup commit, but the observed runs were queued/in progress at the time of this update. Runtime tests and build success are not yet confirmed.
+
+
+## 2026-11-15 whole-repository inventory update
+
+Fresh recursive GitHub tree inspection (main branches):
+
+| Repository | Tracked paths | Broad generated/runtime pattern matches | Notes |
+|---|---:|---:|---|
+| `Tamanna-` | 3,314 | 238 | Includes nested .NET/Android build trees, logs, databases, bytecode and other mixed legacy paths; pattern matches include directories and are not a deletion list |
+| `Tamanna-server` | 292 | 34 | Root-level .NET binaries/MSBuild outputs, Python bytecode and a tracked report database need dependency review |
+| `tamanna-website` | 31 | 0 | Static site structure is already separated into HTML, CSS, JS, assets and tests |
+
+The expected website repository name was corrected from `tamanna-wabside` to the existing `tamanna-website` in the architecture and repository-structure documents. The `Tamanna-server` boundary document now records that `Wabsite/` remains a deployment copy because deployment documentation references it. Do not remove that copy until synchronization and deployment references are verified.
+
+A malformed escaped-newline entry in the main repository `.gitignore` was corrected in commit `54eed4d3156a0bee564928f9bbc44b744d019bdb`; the `data/github-knowledge/` runtime directory now has its own ignore rule.
+
+**Important:** the broad generated/runtime counts are triage signals, not proof that every matched path is disposable. No source tree, .NET/Android build output, database, backup archive, runtime config or production file was bulk-moved in this pass. All existing quarantine content remains preserved. CI for these latest documentation/configuration commits must be checked separately before calling the changes validated.
