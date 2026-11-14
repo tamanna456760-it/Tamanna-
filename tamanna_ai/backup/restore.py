@@ -1,6 +1,5 @@
 """Validate and restore Tamanna ZIP backups with a dry-run default."""
 from __future__ import annotations
-
 import hashlib
 import json
 import stat
@@ -8,10 +7,8 @@ import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-
 def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
-
 
 def inspect_backup(archive_path: str | Path) -> dict[str, Any]:
     path = Path(archive_path)
@@ -19,48 +16,46 @@ def inspect_backup(archive_path: str | Path) -> dict[str, Any]:
         names = archive.namelist()
         if len(names) > 10000:
             raise ValueError("Backup contains too many entries")
+        if len(names) != len(set(names)):
+            raise ValueError("Archive contains duplicate entry names")
         if "MANIFEST.json" not in names:
             raise ValueError("Backup manifest is missing")
         manifest = json.loads(archive.read("MANIFEST.json"))
-        rows = manifest.get("files")
+        rows = manifest.get("files") if isinstance(manifest, dict) else None
         if manifest.get("version") != 1 or not isinstance(rows, list):
             raise ValueError("Unsupported or invalid backup manifest")
         listed = set()
         total = 0
         checked = []
         for row in rows:
+            if not isinstance(row, dict):
+                raise ValueError("Invalid backup manifest row")
             name = row.get("path")
             if not isinstance(name, str):
                 raise ValueError("Invalid backup path")
             relative = PurePosixPath(name)
-            if relative.is_absolute() or not relative.parts or any(part in {"", ".", ".."} for part in relative.parts):
+            if (relative.is_absolute() or not relative.parts
+                    or any(part in {"", ".", ".."} for part in relative.parts)
+                    or "\\" in name or ":" in name):
                 raise ValueError("Unsafe path in backup")
             if name in listed or name == "MANIFEST.json":
                 raise ValueError("Duplicate or reserved path in backup")
             listed.add(name)
             info = archive.getinfo(name)
-            mode = info.external_attr >> 16
-            if stat.S_ISLNK(mode):
+            if stat.S_ISLNK(info.external_attr >> 16):
                 raise ValueError("Symbolic links are not allowed in backups")
             total += info.file_size
             if info.file_size > 256 * 1024 * 1024 or total > 1024 * 1024 * 1024:
                 raise ValueError("Backup exceeds restore size limits")
-            data = archive.read(name)
-            if _digest(data) != row.get("sha256"):
-                raise ValueError(f"Checksum mismatch: {name}")
+            if _digest(archive.read(name)) != row.get("sha256"):
+                raise ValueError("Checksum mismatch: " + name)
             checked.append(name)
         if set(names) != listed | {"MANIFEST.json"}:
             raise ValueError("Archive contains unmanifested entries")
     return {"status": "valid", "files": checked, "total_bytes": total}
 
-
-def restore_backup(
-    archive_path: str | Path,
-    destination: str | Path,
-    *,
-    dry_run: bool = True,
-    overwrite: bool = False,
-) -> dict[str, Any]:
+def restore_backup(archive_path: str | Path, destination: str | Path, *, dry_run: bool = True,
+                   overwrite: bool = False) -> dict[str, Any]:
     """Validate first. Actual extraction requires explicit dry_run=False."""
     report = inspect_backup(archive_path)
     target = Path(destination).expanduser().resolve()
@@ -82,6 +77,5 @@ def restore_backup(
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_bytes(archive.read(name))
     return {**report, "dry_run": False, "destination": str(target), "restored": len(report["files"])}
-
 
 __all__ = ["inspect_backup", "restore_backup"]
