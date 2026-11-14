@@ -114,8 +114,11 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Gradle
+      - name: Set up Gradle 8.4
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.4"
+          validate-wrappers: false
 
       - name: Build Android variants
         working-directory: bd-king-r7/IT/tamannna-android
@@ -123,8 +126,9 @@ jobs:
           test -f settings.gradle
           test -f app/build.gradle
           test -f gradle/wrapper/gradle-wrapper.properties
-          chmod +x gradlew
-          ./gradlew --no-daemon --stacktrace assembleDebug assembleRelease
+          grep -q 'gradle-8.4-bin.zip' gradle/wrapper/gradle-wrapper.properties
+          gradle --version
+          gradle --no-daemon --stacktrace assembleDebug assembleRelease
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
@@ -167,6 +171,11 @@ jobs:
         env:
           GITHUB_PAGES_BASE_PATH: Tamanna-
         run: npm run build
+
+      - name: Validate frontend imports and entry points
+        run: |
+          node scripts/check-import-case.js
+          npm run check
 
       - name: Run Node.js tests
         run: npm test
