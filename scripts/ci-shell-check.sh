@@ -8,7 +8,8 @@ cd "$ROOT"
 
 echo "=== Tamanna AI Shell Environment ==="
 printf 'User: '; id -un
-printf 'OS: '; . /etc/os-release && echo "$PRETTY_NAME"
+OS_NAME="$(sed -n 's/^PRETTY_NAME="\{0,1\}\(.*\)"\{0,1\}$/\1/p' /etc/os-release | head -n 1)"
+printf 'OS: %s\n' "${OS_NAME:-unknown}"
 printf 'Kernel: '; uname -sr
 printf 'Bash: %s\n' "$BASH_VERSION"
 printf 'Python: '; python3 --version
