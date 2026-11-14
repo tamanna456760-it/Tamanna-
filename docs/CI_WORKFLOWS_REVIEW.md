@@ -68,8 +68,8 @@
 
 ## 2026-11-15 directory placement finding
 
-A fresh GitHub tree inspection found 136 entries directly under .github/workflows/: 65 YAML workflow definitions and 71 non-YAML files. The non-YAML entries include Java, Python, shell, batch, JavaScript, HTML, JSON, Dart, text and Markdown files.
+A fresh GitHub tree inspection found 136 entries directly under `.github/workflows/`: 65 YAML workflow definitions and 71 non-YAML files. The 71 non-YAML files were subsequently moved intact to `trash/quarantine-2026-11-15/.github/workflows/`, with original paths and blob SHAs recorded in `trash/quarantine-2026-11-15/MANIFEST.md`.
 
-The directory is therefore not yet conventionally organized. Do not bulk-move these files: first trace every workflow run/uses reference, script invocation, import, package script and documentation link. Move verified helper files to .github/scripts/ or their owning source directory, preserving original paths in a quarantine manifest. Then validate the affected workflows before removing the old copies.
+**Current verified placement:** 65 `.yml`/`.yaml` workflow definitions remain in `.github/workflows/`; zero non-YAML files remain directly in that directory. The five legacy shell safety checks were updated to inspect their preserved quarantine copies. No workflow was disabled or deleted in this cleanup.
 
-No workflow was disabled or moved as part of this audit. The 65 YAML files still require a trigger/permission/job/artifact comparison before consolidation. See [Repository Audit 2026-11-15](REPOSITORY_AUDIT_2026-11-15.md).
+The remaining 65 YAML files still require a trigger/permission/job/artifact comparison before any consolidation or disabling. See [Repository Audit 2026-11-15](REPOSITORY_AUDIT_2026-11-15.md).
