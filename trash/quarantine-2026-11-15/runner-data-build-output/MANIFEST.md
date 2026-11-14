@@ -13,8 +13,12 @@ Files below were moved out of `runner/data/` because their names and contents id
 | `runner/data/project.assets.json` | `trash/quarantine-2026-11-15/runner-data-build-output/project.assets.json` | `ec1d7db8aafc424889fc329bf52bb0981b034f41` |
 | `runner/data/staticwebassets.build.json` | `trash/quarantine-2026-11-15/runner-data-build-output/staticwebassets.build.json` | `ec05ca3bbd5427189dea946ecb46299d629c1d70` |
 
+| `runner/data/ config.json` | `trash/quarantine-2026-11-15/runner-data-build-output/leading-space-profile-duplicate.json` | `b0aec432d99ee1b07d5a2be9fa589e7028199456` |
+
 All file blobs are preserved unchanged. Restore by moving each file back to its original path if a verified workflow requires it.
 
 ## Malformed Python path repair
 
 `runner/python/AI_CHAT\\chat_server.py` used a literal backslash in the filename. It was moved to `runner/python/AI_CHAT/chat_server.py` without changing its blob (`13345d63a6016274f4e344f973a6210294aca4d2`).
+
+The leading-space JSON file was an exact duplicate of `runner/data/profile.json` (same blob SHA `b0aec432d99ee1b07d5a2be9fa589e7028199456`) and was quarantined to remove the malformed path without losing data.
