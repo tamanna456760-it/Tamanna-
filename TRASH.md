@@ -42,3 +42,12 @@
 - The five `.bad` PowerHub scripts were **not** moved because repository configuration and legacy helper scripts reference them; inspect and replace those references before quarantine.
 - Runtime configuration and backup preserved.
 - Remaining work: continue dependency/reference audit before moving any other candidates.
+
+
+## 5. Quarantine update — 2026-11-15
+
+- Moved **71 non-YAML files** out of `.github/workflows/` into `trash/quarantine-2026-11-15/.github/workflows/`, preserving their original relative paths and blob contents.
+- Left **65 YAML workflow definitions** in `.github/workflows/`.
+- Updated `scripts/check_legacy_shell_safety.py` to validate the preserved quarantine copies of five guarded legacy scripts.
+- Full path and blob-SHA inventory: [quarantine manifest](trash/quarantine-2026-11-15/MANIFEST.md).
+- No permanent deletion was performed. Do not restore archived scripts to active execution without review.
