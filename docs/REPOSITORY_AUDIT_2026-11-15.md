@@ -53,3 +53,18 @@ The former docs/system_architecture.mmd was a stale plain-text folder sketch. It
 ## Verification status
 
 GitHub tree and documentation writes were inspected. No Python test suite, Node build, Android build, Docker runtime or live server test was executed in this audit. Therefore runtime and deployment status remain unverified.
+
+
+## Update — workflow directory cleanup
+
+A follow-up cleanup was committed on 2026-11-15.
+
+- Moved all 71 non-YAML files from `.github/workflows/` to `trash/quarantine-2026-11-15/.github/workflows/` without changing their blob contents.
+- Confirmed that 65 YAML workflow definitions remain in `.github/workflows/` and zero non-YAML files remain there.
+- Updated `scripts/check_legacy_shell_safety.py` to validate the preserved quarantine copies of its five guarded shell files.
+- Added a path/SHA inventory at `trash/quarantine-2026-11-15/MANIFEST.md` and updated `TRASH.md`.
+- No source file was permanently deleted.
+
+The wider repository still contains legacy/mixed-purpose directories and 102 build/generated-looking tracked paths. These require a separate per-project dependency review; they were not bulk-moved because some may be required by the nested .NET/Android projects or legacy runtime. The next cleanup pass should classify these before moving them.
+
+**Post-change CI:** GitHub Actions runs were created for the cleanup commit, but the observed runs were queued/in progress at the time of this update. Runtime tests and build success are not yet confirmed.
