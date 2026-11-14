@@ -64,3 +64,12 @@
 - `.github/workflows/smart-analyzer.yml`
 
 **No workflow was deleted or disabled in this change.** The list is a review inventory, not a claim that every listed workflow is functionally duplicate.
+
+
+## 2026-11-15 directory placement finding
+
+A fresh GitHub tree inspection found 136 entries directly under .github/workflows/: 65 YAML workflow definitions and 71 non-YAML files. The non-YAML entries include Java, Python, shell, batch, JavaScript, HTML, JSON, Dart, text and Markdown files.
+
+The directory is therefore not yet conventionally organized. Do not bulk-move these files: first trace every workflow run/uses reference, script invocation, import, package script and documentation link. Move verified helper files to .github/scripts/ or their owning source directory, preserving original paths in a quarantine manifest. Then validate the affected workflows before removing the old copies.
+
+No workflow was disabled or moved as part of this audit. The 65 YAML files still require a trigger/permission/job/artifact comparison before consolidation. See [Repository Audit 2026-11-15](REPOSITORY_AUDIT_2026-11-15.md).
