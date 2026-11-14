@@ -193,3 +193,4 @@ Run locally as a static preview without APIs, or run FastAPI when private config
 - [System architecture](docs/ARCHITECTURE.md) — product boundaries, request flow, security invariants and deployment profiles.
 - [Repository structure](docs/REPOSITORY_STRUCTURE.md) — canonical folder ownership, naming rules and safe migration checklist.
 - [Architecture diagram](docs/system_architecture.mmd) — Mermaid system topology.
+- [Repository audit](docs/REPOSITORY_AUDIT_2026-11-15.md) — verified tree findings and remaining cleanup phases.
