@@ -1,0 +1,138 @@
+name: Tamanna AI Quality Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-ai-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-validation:
+    name: YAML, JSON and Python validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-test.txt
+
+      - name: Validate GitHub workflow YAML
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          files = sorted(
+              p for p in Path(".github/workflows").rglob("*")
+              if p.is_file() and p.suffix.lower() in {".yml", ".yaml"}
+          )
+          if not files:
+              raise SystemExit("No GitHub Actions YAML files found")
+          for path in files:
+              with path.open(encoding="utf-8") as stream:
+                  yaml.load(stream, Loader=yaml.BaseLoader)
+              print(f"YAML OK: {path}")
+          PY
+
+      - name: Validate JSON files
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          ignored = {".git", ".venv", "venv", "node_modules", "build", "dist"}
+          files = [
+              p for p in Path(".").rglob("*.json")
+              if not any(part in ignored for part in p.parts)
+          ]
+          failures = []
+          for path in files:
+              try:
+                  json.loads(path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  failures.append(f"{path}: {exc}")
+          if failures:
+              raise SystemExit("\n".join(failures))
+          print(f"Validated {len(files)} JSON files")
+          PY
+
+      - name: Compile core Python entry points
+        run: |
+          python -m py_compile Main.py main.py
+          if [ -d tamanna_ai ]; then python -m compileall -q tamanna_ai; fi
+          if [ -d core ]; then python -m compileall -q core; fi
+          if [ -d scripts ]; then python -m compileall -q scripts; fi
+
+      - name: Run Python tests when present
+        shell: bash
+        run: |
+          if [ -d tests ] && find tests -type f -name 'test_*.py' -print -quit | grep -q .; then
+            python -m pytest -q tests
+          else
+            echo "No pytest test files found; Python compilation checks passed."
+          fi
+
+      - name: Check shell script syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+            echo "Shell syntax OK: $file"
+          done < <(find . -path './.git' -prune -o -path './node_modules' -prune -o -type f -name '*.sh' -print0)
+
+  android-build:
+    name: Android Debug and Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Android variants
+        working-directory: bd-king-r7/IT/tamannna-android
+        run: |
+          test -f settings.gradle
+          test -f app/build.gradle
+          test -f gradle/wrapper/gradle-wrapper.properties
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace assembleDebug assembleRelease
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: tamanna-android-apks
+          path: |
+            bd-king-r7/IT/tamannna-android/app/build/outputs/apk/debug/*.apk
+            bd-king-r7/IT/tamannna-android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 14
