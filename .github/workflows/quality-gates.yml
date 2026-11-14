@@ -103,16 +103,34 @@ jobs:
   android-build:
     name: Android Debug and Release APK
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Verify canonical Android project
+        run: |
+          set -euo pipefail
+          test -f tamanna-ai-app/settings.gradle
+          test -f tamanna-ai-app/build.gradle
+          test -f tamanna-ai-app/app/build.gradle
+          test -f tamanna-ai-app/app/src/main/AndroidManifest.xml
+          test -f tamanna-ai-app/app/src/build/java/com/tamanna/ai/TamannaWebActivity.kt
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android compile SDK
+        run: |
+          set -euo pipefail
+          sdkmanager --install "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager --list_installed | grep -E 'platforms;android-34|build-tools;34.0.0'
 
       - name: Set up Gradle 8.4
         uses: gradle/actions/setup-gradle@v4
@@ -121,14 +139,10 @@ jobs:
           validate-wrappers: false
 
       - name: Build Android variants
-        working-directory: bd-king-r7/IT/tamannna-android
+        working-directory: tamanna-ai-app
         run: |
-          test -f settings.gradle
-          test -f app/build.gradle
-          test -f gradle/wrapper/gradle-wrapper.properties
-          grep -q 'gradle-8.4-bin.zip' gradle/wrapper/gradle-wrapper.properties
           gradle --version
-          gradle --no-daemon --stacktrace assembleDebug assembleRelease
+          gradle --no-daemon --stacktrace -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true assembleDebug assembleRelease
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
@@ -136,11 +150,10 @@ jobs:
         with:
           name: tamanna-android-apks
           path: |
-            bd-king-r7/IT/tamannna-android/app/build/outputs/apk/debug/*.apk
-            bd-king-r7/IT/tamannna-android/app/build/outputs/apk/release/*.apk
+            tamanna-ai-app/app/build/outputs/apk/debug/*.apk
+            tamanna-ai-app/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
-
 
   frontend-build:
     name: Frontend build and Node.js tests
