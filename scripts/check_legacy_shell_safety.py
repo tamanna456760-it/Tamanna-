@@ -39,11 +39,11 @@ QUARANTINED = (
     "runner/shell/tamanna_ultra_all_in_one.sh",
     "runner/shell/tamanna_ultra_mobile_alert.sh",
     "runner/shell/check_token.sh",
-    ".github/workflows/hakar_lock.sh",
-    ".github/workflows/tamanna_defender.sh",
-    ".github/workflows/tamanna_syber_shield.sh",
-    ".github/workflows/tamanna_ultra_defense.sh",
-    ".github/workflows/tamanna_auto_defender.sh",
+    "trash/quarantine-2026-11-15/.github/workflows/hakar_lock.sh",
+    "trash/quarantine-2026-11-15/.github/workflows/tamanna_defender.sh",
+    "trash/quarantine-2026-11-15/.github/workflows/tamanna_syber_shield.sh",
+    "trash/quarantine-2026-11-15/.github/workflows/tamanna_ultra_defense.sh",
+    "trash/quarantine-2026-11-15/.github/workflows/tamanna_auto_defender.sh",
 )
 
 
