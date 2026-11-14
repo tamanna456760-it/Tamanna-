@@ -136,3 +136,45 @@ jobs:
             bd-king-r7/IT/tamannna-android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
+
+
+  frontend-build:
+    name: Frontend build and Node.js tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+            echo "JavaScript syntax OK: $file"
+          done < <(find js scripts -type f -name '*.js' -print0 2>/dev/null)
+
+      - name: Build GitHub Pages project site
+        env:
+          GITHUB_PAGES_BASE_PATH: Tamanna-
+        run: npm run build
+
+      - name: Run Node.js tests
+        run: npm test
+
+      - name: Upload static site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamanna-ai-static-site
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
