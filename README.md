@@ -186,3 +186,10 @@ The installer validates the file and writes `config/private-runtime.json` with m
 The current Cloudflare configuration describes a static-assets Worker. It can serve the chat and Admin interface, but it does not automatically proxy /api/* to FastAPI. Until backend hosting and secure routing are configured, treat the deployed Admin interface as a preview. Login, AI chat, user management and live monitoring are not guaranteed to work there.
 
 Run locally as a static preview without APIs, or run FastAPI when private configuration is ready. Production deployment and live admin functionality require separate end-to-end verification.
+
+
+## Architecture and repository layout
+
+- [System architecture](docs/ARCHITECTURE.md) — product boundaries, request flow, security invariants and deployment profiles.
+- [Repository structure](docs/REPOSITORY_STRUCTURE.md) — canonical folder ownership, naming rules and safe migration checklist.
+- [Architecture diagram](docs/system_architecture.mmd) — Mermaid system topology.
