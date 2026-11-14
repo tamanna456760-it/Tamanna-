@@ -78,7 +78,7 @@ jobs:
 
       - name: Compile core Python entry points
         run: |
-          python -m py_compile Main.py main.py
+          python -m py_compile Main.py run_server.py
           if [ -d tamanna_ai ]; then python -m compileall -q tamanna_ai; fi
           if [ -d core ]; then python -m compileall -q core; fi
           if [ -d scripts ]; then python -m compileall -q scripts; fi
