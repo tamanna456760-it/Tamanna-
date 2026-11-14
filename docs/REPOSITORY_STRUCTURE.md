@@ -6,7 +6,7 @@ This is the target layout and migration contract. It does not claim that every d
 
 - Tamanna-: app source, shared AI package, frontend preview, Android source, tests, docs and CI.
 - Tamanna-server: central backend/server implementation and operational deployment.
-- tamanna-wabside: public website only.
+- tamanna-website: public website only.
 
 Never copy secrets, production data, local databases or generated model files between repositories.
 
