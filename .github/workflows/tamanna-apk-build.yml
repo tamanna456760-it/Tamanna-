@@ -15,6 +15,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  python-regression:
+    name: Python full regression suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install test and runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-test.txt
+      - name: Compile core Python application and tests
+        run: python -m compileall -q tamanna_ai tests Main.py
+      - name: Run Python regression tests
+        run: python -m pytest -q
+
   build:
     name: Build Debug and Release APKs
     runs-on: ubuntu-latest
@@ -33,6 +56,7 @@ jobs:
           test -f tamanna-ai-app/build.gradle
           test -f tamanna-ai-app/app/build.gradle
           test -f tamanna-ai-app/app/src/main/AndroidManifest.xml
+          test -f tamanna-ai-app/app/src/main/res/drawable/tamanna_app_icon.xml
           test -f tamanna-ai-app/app/src/build/java/com/tamanna/ai/TamannaWebActivity.kt
           echo "Android project: tamanna-ai-app"
           grep -E "^(android.useAndroidX|android.enableJetifier)=true$" tamanna-ai-app/gradle.properties
@@ -94,6 +118,10 @@ jobs:
           } >> "$GITHUB_ENV"
           echo "release_signing=signed" >> "$GITHUB_OUTPUT"
           echo "Release signing keystore prepared in runner temporary storage."
+
+      - name: Run Android unit tests and lint
+        working-directory: tamanna-ai-app
+        run: gradle --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true testDebugUnitTest lintDebug
 
       - name: Build debug APK
         working-directory: tamanna-ai-app
