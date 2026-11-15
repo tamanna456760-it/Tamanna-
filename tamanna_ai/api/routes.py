@@ -935,3 +935,40 @@ async def guest_chat(
 __all__ = [
     "api_router", "ChatRequest", "ChatResponse", "KnowledgeImportRequest", "MemoryRequest",
 ]
+
+
+class CodingAssistantRequest(BaseModel):
+    """Bounded, text-only input for the authenticated Coding Assistant."""
+    feature: str = Field(default="", max_length=12000)
+    code: str = Field(default="", max_length=40000)
+    code_prefix: str = Field(default="", max_length=20000)
+    error_report: str = Field(default="", max_length=12000)
+    source_code: str = Field(default="", max_length=40000)
+    language: str = Field(default="auto", max_length=80)
+    framework: str = Field(default="", max_length=100)
+    project_context: str = Field(default="", max_length=8000)
+    requirements: list[str] = Field(default_factory=list, max_length=20)
+    instruction: str = Field(default="", max_length=2000)
+    runtime: str = Field(default="", max_length=200)
+    expected_behavior: str = Field(default="", max_length=2000)
+    actual_behavior: str = Field(default="", max_length=2000)
+    file_path: str = Field(default="", max_length=500)
+
+
+@api_router.post("/coding/{action}")
+async def coding_assistant(action: str, payload: CodingAssistantRequest, request: Request, token: str | None = Cookie(default=None, alias=COOKIE)):
+    """Run a bounded Coding Assistant workflow for an authenticated user."""
+    check_origin(request)
+    user = require_user(token)
+    rate_limit_user_action(user["id"], "coding_assistant", limit=12, window_seconds=60)
+    from tamanna_ai.capabilities.assistant import CapabilityAssistant
+    from tamanna_ai.modules.coding_assistant import CodingAssistantModule
+    try:
+        result = await CodingAssistantModule(CapabilityAssistant()).execute(action, payload.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ModelConfigurationError, ModelProviderError) as exc:
+        raise HTTPException(status_code=503, detail="Tamanna AI local model is unavailable.") from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail="Coding Assistant could not complete this request.") from exc
+    return {"ok": True, "module": "coding", "action": action.strip().lower(), "result": result, "executed": False, "verified": False}
