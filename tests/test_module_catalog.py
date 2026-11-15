@@ -33,3 +33,12 @@ def test_registry_rejects_empty_names():
         pass
     else:
         raise AssertionError("empty module names must be rejected")
+
+
+
+def test_coding_module_is_exported_and_catalog_includes_completion():
+    from tamanna_ai.modules import CodingAssistantModule
+
+    assert CodingAssistantModule.__name__ == "CodingAssistantModule"
+    coding = {item["name"]: item for item in list_modules(ModuleRegistry())}["coding"]
+    assert {"generate", "complete", "explain", "review", "debug", "refactor"} <= set(coding["actions"])
