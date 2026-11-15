@@ -82,3 +82,14 @@ PowerHub manages:
 ---
 
 # 🖥️ BD-KING-R7 TERMINAL STATUS
+
+
+---
+
+## Legacy TI-PULS entrypoint status
+
+The incomplete file formerly stored at `bd-king-r7/IT/main py` has been preserved byte-for-byte at `trash/quarantine-2026-11-16/bd-king-r7/IT/main py`.
+
+It was quarantined because its import statement was syntactically invalid and repository search did not locate the referenced `utils.logger.setup_logger` implementation or several imported TI-PULS modules as independent implementations. It is not the active Tamanna AI server entrypoint; the active application uses `Main.py` / `run_server.py`.
+
+Do not restore or execute the quarantined prototype until its complete dependencies and tests are reconstructed.
