@@ -2,6 +2,8 @@
 const $=id=>document.getElementById(id);
 const banner=$("modeBanner"),status=$("systemStatus"),logout=$("adminLogout");
 function setPreview(reason){
+  window.TamannaAdminVerified=false;
+  $("adminContent").hidden=true;
   banner.textContent="PREVIEW MODE — Admin interface is running without a backend API. Live data and management actions are disabled. "+reason;
   banner.classList.add("preview");
   status.textContent="API not connected";
@@ -12,6 +14,8 @@ function setPreview(reason){
   logout.hidden=true;
 }
 function setLive(data){
+  $("adminContent").hidden=false;
+  window.TamannaAdminVerified=true;
   const admin=data.admin||{},system=data.system||{};
   $("adminIdentity").textContent=admin.email||"Administrator";
   $("adminName").textContent=admin.name||"Administrator";
@@ -25,6 +29,7 @@ function setLive(data){
   status.textContent="● Backend connected";
   status.classList.add("online");
   logout.hidden=false;
+  window.dispatchEvent(new Event("tamanna:admin-verified"));
 }
 async function connect(){
   try{
@@ -32,6 +37,7 @@ async function connect(){
     const data=await response.json().catch(()=>({}));
     if(response.status===401||response.status===403){
       banner.textContent=response.status===401?"Admin sign-in required. Open User Chat, sign in with the allowlisted account, then revisit /admin.":"Access denied. This signed-in account is not authorized as an administrator.";
+      window.TamannaAdminVerified=false;
       banner.classList.add("error");status.textContent="Access denied";$("adminContent").hidden=true;return;
     }
     if(!response.ok)throw new Error(data.detail||("HTTP "+response.status));
