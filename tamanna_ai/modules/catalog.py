@@ -25,7 +25,7 @@ class ModuleSpec:
 
 BUILTIN_MODULES: tuple[ModuleSpec, ...] = (
     ModuleSpec("conversation", "Conversation & SMS", "Conversation support and SMS drafting; delivery requires an SMS provider.", ("chat", "draft_sms"), provider_required=True),
-    ModuleSpec("coding", "Coding Assistant", "Code generation, explanation, review, debugging and refactoring.", ("generate", "explain", "review", "debug", "refactor")),
+    ModuleSpec("coding", "Coding Assistant", "Code generation, explanation, review, debugging and refactoring.", ("generate", "complete", "explain", "review", "debug", "refactor")),
     ModuleSpec("file_management", "File Management", "Project file discovery and safe file-operation planning.", ("list", "search", "plan_create", "plan_edit", "plan_move"), requires_approval=True),
     ModuleSpec("web_research", "Web Search", "Search the web and collect source references when a provider is configured.", ("search", "collect_sources"), status="provider_required", provider_required=True),
     ModuleSpec("weather", "Weather", "Weather forecasts and current conditions through a configured weather provider.", ("current", "forecast"), status="provider_required", provider_required=True),
