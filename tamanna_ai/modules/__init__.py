@@ -2,6 +2,7 @@
 
 from .registry import ModuleRegistry, module_registry
 from .catalog import BUILTIN_MODULES, ModuleSpec, list_modules, load_builtin_modules
+from .coding_assistant import CodingAssistantModule
 
 __all__ = [
     "ModuleRegistry",
@@ -10,4 +11,5 @@ __all__ = [
     "BUILTIN_MODULES",
     "load_builtin_modules",
     "list_modules",
+    "CodingAssistantModule",
 ]
