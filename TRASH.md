@@ -51,3 +51,14 @@
 - Updated `scripts/check_legacy_shell_safety.py` to validate the preserved quarantine copies of five guarded legacy scripts.
 - Full path and blob-SHA inventory: [quarantine manifest](trash/quarantine-2026-11-15/MANIFEST.md).
 - No permanent deletion was performed. Do not restore archived scripts to active execution without review.
+
+
+## 6. Quarantine update — 2026-11-16
+
+- Original path: `bd-king-r7/IT/main py`
+- Quarantine path: `trash/quarantine-2026-11-16/bd-king-r7/IT/main py`
+- Original and quarantine blob SHA: `2d09068ff181bd5cd9e602af25387fa197660406` (content verified identical).
+- Reason: the file had a Python parse error at the import `from utils.logger setup_logger`; repository code search found no matching `utils.logger` module or `setup_logger` definition, and the imported TI-PULS modules `core.ai_engine`, `modules.analytics`, `modules.automation`, and `modules.monitoring` were not found as independent implementations. The file is a standalone, incomplete legacy entrypoint, not the active Tamanna application entrypoint.
+- Action: preserved the complete original under `trash/` and removed the malformed source path from the active tree. No file content was permanently deleted.
+- Commits: quarantine copy `31138d07075db93f9524afe816398794f14bdf17`; source-path removal `f5bb6f6aba5584bb44af71fa78c5f114a0b920f1`.
+- Validation status: content equality verified through GitHub fetch. Full CI/build has not yet been run for this move; do not treat it as fully tested until the new Actions runs complete.
