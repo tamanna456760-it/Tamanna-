@@ -3,6 +3,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const refreshButton = $("refreshModelHealth");
+  const hasAdminAccess = () => window.TamannaAdminVerified === true;
   const updated = $("modelHealthUpdated");
   const modelSelect = $("localModelSelect");
   const saveModelButton = $("saveLocalModel");
@@ -83,7 +84,7 @@
   }
 
   benchmarkButton?.addEventListener("click", async () => {
-    if (!window.TamannaAuth?.getUser()) {
+    if (!hasAdminAccess()) {
       set("benchmarkStatus", "Benchmark চালাতে প্রথমে লগইন করুন।");
       return;
     }
@@ -138,7 +139,7 @@
   async function refreshBenchmarkHistory() {
     const list = $("benchmarkHistoryList");
     if (!list) return;
-    if (!window.TamannaAuth?.getUser()) {
+    if (!hasAdminAccess()) {
       set("benchmarkHistoryStatus", "ইতিহাস দেখতে admin account-এ লগইন করুন।");
       list.replaceChildren();
       return;
@@ -389,7 +390,7 @@
     const list = $("modelResourceList");
     const button = $("refreshModelResources");
     if (!list) return;
-    if (!window.TamannaAuth?.getUser()) {
+    if (!hasAdminAccess()) {
       list.replaceChildren();
       set("modelResourceStatus", "Resource তথ্য দেখতে admin account-এ লগইন করুন।");
       if (button) button.disabled = true;
@@ -434,7 +435,7 @@
     const button = $("refreshModelRecovery");
     const actions = $("modelRecoveryActions");
     if (!actions) return;
-    if (!window.TamannaAuth?.getUser()) {
+    if (!hasAdminAccess()) {
       actions.replaceChildren();
       set("modelRecoveryStatus", "Recovery diagnostics দেখতে admin account-এ লগইন করুন।");
       if (button) button.disabled = true;
@@ -469,13 +470,13 @@
 
 
   async function refreshMetrics() {
-    const user = window.TamannaAuth?.getUser();
+    const user = hasAdminAccess();
     if (!user) {
       set("metricCpu", "লগইন প্রয়োজন");
       set("metricRam", "লগইন প্রয়োজন");
       set("metricDisk", "লগইন প্রয়োজন");
       set("metricGpu", "লগইন প্রয়োজন");
-      set("metricsUpdated", "Metrics দেখতে account-এ লগইন করুন।");
+      set("metricsUpdated", "Metrics দেখতে admin permission প্রয়োজন।");
       return;
     }
     try {
@@ -547,7 +548,7 @@
       set("healthEmbeddingStatus", embeddingReady ? "Ready" : "Unavailable");
       set("healthEmbeddingDetail", embedding.model || embedding.provider || "Not configured");
 
-      if (window.TamannaAuth?.getUser()) {
+      if (hasAdminAccess()) {
         try {
           const knowledge = await getJson("/tamanna-ai/knowledge");
           const documents = Array.isArray(knowledge.documents) ? knowledge.documents : [];
@@ -580,7 +581,7 @@
   }
 
   downloadButton?.addEventListener("click", async () => {
-    if (!window.TamannaAuth?.getUser()) {
+    if (!hasAdminAccess()) {
       if (downloadStatus) downloadStatus.textContent = "Model download করতে প্রথমে লগইন করুন।";
       return;
     }
@@ -646,7 +647,7 @@
   });
 
   saveModelButton?.addEventListener("click", async () => {
-    if (!window.TamannaAuth?.getUser()) {
+    if (!hasAdminAccess()) {
       if (modelSelectStatus) modelSelectStatus.textContent = "Model পরিবর্তনের জন্য প্রথমে লগইন করুন।";
       return;
     }
@@ -702,12 +703,13 @@
   window.setInterval(() => {
     if (document.visibilityState === "visible") refreshMetrics();
   }, 15000);
-  window.addEventListener("tamanna:authenticated", refresh);
-  window.addEventListener("tamanna:authenticated", refreshBenchmarkHistory);
-  window.addEventListener("tamanna:loggedout", () => {
-    set("healthKnowledgeStatus", "লগইন প্রয়োজন");
-    set("healthKnowledgeDetail", "Private index শুধু account owner দেখতে পারবেন");
-  });
-  refresh();
-  refreshBenchmarkHistory();
+  if (hasAdminAccess()) {
+    refresh();
+    refreshBenchmarkHistory();
+  } else {
+    window.addEventListener("tamanna:admin-verified", () => {
+      refresh();
+      refreshBenchmarkHistory();
+    }, { once: true });
+  }
 })();
