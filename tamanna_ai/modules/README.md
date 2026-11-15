@@ -13,7 +13,7 @@ for module in list_modules():
 ## Included modules
 
 - Conversation & SMS (SMS delivery needs an SMS provider)
-- Coding assistant
+- Coding assistant (generate, complete, explain, review, debug and refactor; authenticated API route `POST /tamanna-ai/coding/{action}`)
 - File management (sensitive changes require approval)
 - Web search and research (live search needs a configured provider)
 - Weather (needs a weather provider)
@@ -22,5 +22,6 @@ for module in list_modules():
 - System diagnostics (read-only; no arbitrary shell execution)
 - Research and knowledge retrieval
 
-The catalog describes capabilities and integration requirements. It does not
-pretend external providers are connected or execute sensitive actions.
+The Coding Assistant reuses `CapabilityAssistant` and the configured local model provider. Requests are authenticated, rate-limited and bounded. Generated code is an untrusted proposal: the module never executes code, invokes a shell, edits project files or deploys changes.
+
+The catalog describes capabilities and integration requirements. It does not pretend external providers are connected or execute sensitive actions.
