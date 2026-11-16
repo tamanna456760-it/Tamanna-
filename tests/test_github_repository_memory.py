@@ -9,7 +9,7 @@ from scripts.index_github_repository_memory import (
     load_inventory,
     render_inventory,
 )
-from scripts.sync_github_repositories import build_public_inventory
+from scripts.sync_github_repositories import build_inventory, build_public_inventory, write_inventory
 
 
 def write_inventory(tmp_path, repositories):
@@ -33,6 +33,35 @@ def test_public_inventory_excludes_private_repository_names_and_descriptions():
     assert [item["full_name"] for item in result["repositories"]] == ["owner/public"]
     assert "secret-project" not in json.dumps(result)
     assert "private marker" not in json.dumps(result)
+
+
+def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_path):
+    repository_root = tmp_path / "checkout"
+    repository_root.mkdir()
+    items = [
+        {"full_name": "owner/public", "private": False},
+        {"full_name": "owner/private", "private": True, "description": "private marker"},
+    ]
+    inventory = build_inventory(items, include_private=True)
+    assert inventory["repository_count"] == 2
+
+    with pytest.raises(ValueError, match="absolute path"):
+        write_inventory(inventory, "private.json", private=True, repo_root=repository_root)
+    with pytest.raises(ValueError, match="outside the Git repository"):
+        write_inventory(
+            inventory,
+            repository_root / "private.json",
+            private=True,
+            repo_root=repository_root,
+        )
+
+    destination = tmp_path / "private-store" / "repositories.json"
+    written = write_inventory(
+        inventory, destination, private=True, repo_root=repository_root
+    )
+    assert written == destination
+    assert written.stat().st_mode & 0o777 == 0o600
+    assert "private marker" in written.read_text(encoding="utf-8")
 
 
 def test_load_inventory_deduplicates_and_allowlists_fields(tmp_path):
