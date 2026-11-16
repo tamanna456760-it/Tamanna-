@@ -28,6 +28,9 @@ jobs:
           TAMANNA_GITHUB_TOKEN: ${{ secrets.TAMANNA_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: python3 scripts/sync_github_repositories.py
 
+      - name: Validate public repository inventory
+        run: python3 scripts/index_github_repository_memory.py --validate-only
+
       - name: Commit updated repository memory
         run: |
           git config user.name "github-actions[bot]"
