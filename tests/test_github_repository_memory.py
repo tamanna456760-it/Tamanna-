@@ -81,7 +81,7 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
 
 
 def test_load_inventory_deduplicates_and_allowlists_fields(tmp_path):
-    path = write_repository_inventory(tmp_path, [
+    path = write_inventory(tmp_path, [
         {
             "full_name": "owner/Project",
             "name": "Project",
@@ -102,7 +102,7 @@ def test_load_inventory_deduplicates_and_allowlists_fields(tmp_path):
 
 
 def test_rejects_invalid_schema_and_bad_repository_entries(tmp_path):
-    path = write_repository_inventory(tmp_path, [{"full_name": "../invalid"}])
+    path = write_inventory(tmp_path, [{"full_name": "../invalid"}])
     with pytest.raises(ValueError, match="valid owner/name"):
         load_inventory(path)
 
@@ -112,7 +112,7 @@ def test_rejects_invalid_schema_and_bad_repository_entries(tmp_path):
 
 
 def test_rejects_symlink_inventory(tmp_path):
-    actual = write_repository_inventory(tmp_path, [])
+    actual = write_inventory(tmp_path, [])
     link = tmp_path / "linked.json"
     link.symlink_to(actual)
     with pytest.raises(ValueError, match="non-symlink"):
@@ -120,7 +120,7 @@ def test_rejects_symlink_inventory(tmp_path):
 
 
 def test_index_inventory_requires_owner_and_is_idempotent(tmp_path):
-    inventory_path = write_repository_inventory(tmp_path, [
+    inventory_path = write_inventory(tmp_path, [
         {
             "full_name": "owner/private-project",
             "name": "private-project",
