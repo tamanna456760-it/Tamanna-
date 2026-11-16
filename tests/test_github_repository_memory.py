@@ -65,6 +65,9 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
         )
 
     destination = tmp_path / "private-store" / "repositories.json"
+    destination.parent.mkdir(parents=True)
+    destination.write_text("{}", encoding="utf-8")
+    destination.chmod(0o644)
     written = write_inventory(
         inventory, destination, private=True, repo_root=repository_root
     )
