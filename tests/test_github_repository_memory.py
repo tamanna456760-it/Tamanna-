@@ -9,6 +9,7 @@ from scripts.index_github_repository_memory import (
     load_inventory,
     render_inventory,
 )
+from scripts.sync_github_repositories import build_public_inventory
 
 
 def write_inventory(tmp_path, repositories):
@@ -20,6 +21,18 @@ def write_inventory(tmp_path, repositories):
         "repositories": repositories,
     }), encoding="utf-8")
     return path
+
+
+def test_public_inventory_excludes_private_repository_names_and_descriptions():
+    result = build_public_inventory([
+        {"full_name": "owner/public", "private": False, "description": "Public project"},
+        {"full_name": "owner/secret-project", "private": True, "description": "private marker"},
+    ])
+
+    assert result["repository_count"] == 1
+    assert [item["full_name"] for item in result["repositories"]] == ["owner/public"]
+    assert "secret-project" not in json.dumps(result)
+    assert "private marker" not in json.dumps(result)
 
 
 def test_load_inventory_deduplicates_and_allowlists_fields(tmp_path):
