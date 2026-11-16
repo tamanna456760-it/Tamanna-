@@ -37,9 +37,14 @@ jobs:
 
       - name: Verify canonical domain configuration
         run: |
-          test "$(tr -d '\r\n' < CNAME)" = "www.bd-king-r7.com"
+          if [ -f CNAME ]; then
+            test "$(tr -d '\r\n' < CNAME)" = "www.bd-king-r7.com"
+            echo "PASS: optional custom-domain CNAME is valid"
+          else
+            echo "INFO: no custom domain configured; Cloudflare workers.dev remains the deployment target"
+          fi
           grep -q '"directory": "./dist"' wrangler.jsonc
-          echo "PASS: canonical hostname and Wrangler asset directory"
+          echo "PASS: Wrangler asset directory"
 
       - name: Upload website build artifact
         uses: actions/upload-artifact@v4
