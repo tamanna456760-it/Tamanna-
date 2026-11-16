@@ -118,10 +118,10 @@ def main():
                 # to commit exactly one generated, public-only inventory file.
                 # Its write scope is documented and the staged path is allowlisted.
                 if (
-                    pattern == r"contents:\\s*write"
+                    pattern == r"contents:\s*write"
                     and rel == ".github/workflows/sync-github-memory.yml"
-                    and re.search(r"git\\s+add\\s+memory/github_repositories\\.json", content)
-                    and re.search(r"permissions:\\s*\\n\\s*contents:\\s*write", content)
+                    and re.search(r"git\s+add\s+memory/github_repositories\.json", content)
+                    and re.search(r"permissions:\s*\n\s*contents:\s*write", content)
                 ):
                     continue
                 findings.append((
