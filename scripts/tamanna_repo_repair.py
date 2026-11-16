@@ -112,11 +112,22 @@ def main():
                     ))
 
             for severity, pattern in RISK_PATTERNS:
-                if re.search(pattern, content, flags=re.IGNORECASE):
-                    findings.append((
-                        severity, rel,
-                        f"Review required for pattern: {pattern}"
-                    ))
+                if not re.search(pattern, content, flags=re.IGNORECASE):
+                    continue
+                # This single workflow needs the short-lived repository GITHUB_TOKEN
+                # to commit exactly one generated, public-only inventory file.
+                # Its write scope is documented and the staged path is allowlisted.
+                if (
+                    pattern == r"contents:\\s*write"
+                    and rel == ".github/workflows/sync-github-memory.yml"
+                    and re.search(r"git\\s+add\\s+memory/github_repositories\\.json", content)
+                    and re.search(r"permissions:\\s*\\n\\s*contents:\\s*write", content)
+                ):
+                    continue
+                findings.append((
+                    severity, rel,
+                    f"Review required for pattern: {pattern}"
+                ))
 
             # A quick YAML syntax check when PyYAML is installed.
             try:
