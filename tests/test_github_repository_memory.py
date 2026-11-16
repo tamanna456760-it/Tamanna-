@@ -9,7 +9,7 @@ from scripts.index_github_repository_memory import (
     load_inventory,
     render_inventory,
 )
-from scripts.sync_github_repositories import build_inventory, build_public_inventory, write_inventory
+from scripts.sync_github_repositories import (\n    build_inventory, build_public_inventory,\n    write_inventory as write_repository_inventory,\n)
 
 
 def write_inventory(tmp_path, repositories):
@@ -46,9 +46,9 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
     assert inventory["repository_count"] == 2
 
     with pytest.raises(ValueError, match="absolute path"):
-        write_inventory(inventory, "private.json", private=True, repo_root=repository_root)
+        write_repository_inventory(inventory, "private.json", private=True, repo_root=repository_root)
     with pytest.raises(ValueError, match="outside the Git repository"):
-        write_inventory(
+        write_repository_inventory(
             inventory,
             repository_root / "private.json",
             private=True,
@@ -60,7 +60,7 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
     symlink_path = tmp_path / "private-link.json"
     symlink_path.symlink_to(symlink_target)
     with pytest.raises(ValueError, match="symlink"):
-        write_inventory(
+        write_repository_inventory(
             inventory, symlink_path, private=True, repo_root=repository_root
         )
 
@@ -68,7 +68,7 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
     destination.parent.mkdir(parents=True)
     destination.write_text("{}", encoding="utf-8")
     destination.chmod(0o644)
-    written = write_inventory(
+    written = write_repository_inventory(
         inventory, destination, private=True, repo_root=repository_root
     )
     assert written == destination
@@ -77,7 +77,7 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
 
 
 def test_load_inventory_deduplicates_and_allowlists_fields(tmp_path):
-    path = write_inventory(tmp_path, [
+    path = write_repository_inventory(tmp_path, [
         {
             "full_name": "owner/Project",
             "name": "Project",
@@ -98,7 +98,7 @@ def test_load_inventory_deduplicates_and_allowlists_fields(tmp_path):
 
 
 def test_rejects_invalid_schema_and_bad_repository_entries(tmp_path):
-    path = write_inventory(tmp_path, [{"full_name": "../invalid"}])
+    path = write_repository_inventory(tmp_path, [{"full_name": "../invalid"}])
     with pytest.raises(ValueError, match="valid owner/name"):
         load_inventory(path)
 
@@ -108,7 +108,7 @@ def test_rejects_invalid_schema_and_bad_repository_entries(tmp_path):
 
 
 def test_rejects_symlink_inventory(tmp_path):
-    actual = write_inventory(tmp_path, [])
+    actual = write_repository_inventory(tmp_path, [])
     link = tmp_path / "linked.json"
     link.symlink_to(actual)
     with pytest.raises(ValueError, match="non-symlink"):
@@ -116,7 +116,7 @@ def test_rejects_symlink_inventory(tmp_path):
 
 
 def test_index_inventory_requires_owner_and_is_idempotent(tmp_path):
-    inventory_path = write_inventory(tmp_path, [
+    inventory_path = write_repository_inventory(tmp_path, [
         {
             "full_name": "owner/private-project",
             "name": "private-project",
