@@ -9,7 +9,11 @@ from scripts.index_github_repository_memory import (
     load_inventory,
     render_inventory,
 )
-from scripts.sync_github_repositories import (\n    build_inventory, build_public_inventory,\n    write_inventory as write_repository_inventory,\n)
+from scripts.sync_github_repositories import (
+    build_inventory,
+    build_public_inventory,
+    write_inventory as write_repository_inventory,
+)
 
 
 def write_inventory(tmp_path, repositories):
