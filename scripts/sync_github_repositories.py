@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Sync public GitHub repository metadata into Tamanna AI's public inventory.
+"""Sync GitHub repository metadata into public or private Tamanna inventories.
 
-Private repository metadata is deliberately excluded: this file is committed
-to the repository and may be publicly readable. Never stores tokens or secrets.
+The default output is committed to this repository and therefore excludes
+private repositories. Private mode requires an explicit absolute output path
+outside the Git checkout and writes it with owner-only filesystem permissions.
+Never stores the GitHub token in either inventory.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -15,7 +18,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 API = "https://api.github.com"
-OUT = Path("memory/github_repositories.json")
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "memory" / "github_repositories.json"
 
 
 def request_page(url: str, token: str) -> list[dict]:
@@ -39,10 +43,13 @@ def request_page(url: str, token: str) -> list[dict]:
     return payload
 
 
-def build_public_inventory(items: list[dict]) -> dict:
+def build_inventory(items: list[dict], *, include_private: bool = False) -> dict:
     repos: dict[str, dict] = {}
     for item in items:
-        if not isinstance(item, dict) or item.get("private") is True:
+        if not isinstance(item, dict):
+            continue
+        is_private = item.get("private") is True
+        if is_private and not include_private:
             continue
         full_name = item.get("full_name")
         if not isinstance(full_name, str) or not full_name.strip():
@@ -52,23 +59,59 @@ def build_public_inventory(items: list[dict]) -> dict:
             "full_name": full_name,
             "name": item.get("name"),
             "owner": (item.get("owner") or {}).get("login"),
-            "private": False,
+            "private": is_private,
             "archived": bool(item.get("archived")),
             "default_branch": item.get("default_branch"),
             "html_url": item.get("html_url"),
             "description": item.get("description"),
             "updated_at": item.get("updated_at"),
         }
+    scope = "all accessible repositories" if include_private else "public repositories only"
     return {
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "source": "GitHub REST API /user/repos (public repositories only)",
+        "source": f"GitHub REST API /user/repos ({scope})",
         "repository_count": len(repos),
         "repositories": sorted(repos.values(), key=lambda x: x["full_name"].casefold()),
     }
 
 
+def build_public_inventory(items: list[dict]) -> dict:
+    """Backward-compatible public-only inventory builder."""
+    return build_inventory(items, include_private=False)
+
+
+def write_inventory(
+    payload: dict, output: str | Path, *, private: bool = False,
+    repo_root: str | Path = ROOT,
+) -> Path:
+    destination = Path(output)
+    if private and not destination.is_absolute():
+        raise ValueError("Private inventory output must be an absolute path outside the repository")
+    destination = destination.resolve()
+    root = Path(repo_root).resolve()
+    if private and (destination == root or root in destination.parents):
+        raise ValueError("Private inventory must be stored outside the Git repository")
+    if destination.is_symlink():
+        raise ValueError("Inventory output cannot be a symlink")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    if private:
+        destination.chmod(0o600)
+    return destination
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", default=str(OUT))
+    parser.add_argument(
+        "--include-private", action="store_true",
+        help="Include private repositories; requires an absolute output outside the Git checkout",
+    )
+    args = parser.parse_args()
     token = os.environ.get("TAMANNA_GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if not token:
         print("Missing TAMANNA_GITHUB_TOKEN or GITHUB_TOKEN", file=sys.stderr)
@@ -76,22 +119,31 @@ def main() -> int:
 
     items: list[dict] = []
     page = 1
-    while True:
-        batch = request_page(
-            f"{API}/user/repos?visibility=all&affiliation=owner,collaborator,organization_member"
-            f"&per_page=100&page={page}&sort=full_name&direction=asc",
-            token,
+    try:
+        while True:
+            batch = request_page(
+                f"{API}/user/repos?visibility=all&affiliation=owner,collaborator,organization_member"
+                f"&per_page=100&page={page}&sort=full_name&direction=asc",
+                token,
+            )
+            items.extend(batch)
+            if len(batch) < 100:
+                break
+            page += 1
+        payload = build_inventory(items, include_private=args.include_private)
+        destination = write_inventory(
+            payload, args.output, private=args.include_private
         )
-        items.extend(batch)
-        if len(batch) < 100:
-            break
-        page += 1
+    except (OSError, ValueError, RuntimeError) as exc:
+        print(f"Repository inventory sync failed: {exc}", file=sys.stderr)
+        return 1
 
-    payload = build_public_inventory(items)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Indexed {payload['repository_count']} public repositories into {OUT}")
-    print("Private repositories were excluded from this public, committed inventory.")
+    visibility = "all accessible" if args.include_private else "public"
+    print(f"Indexed {payload['repository_count']} {visibility} repositories into {destination}")
+    if not args.include_private:
+        print("Private repositories were excluded from the public, committed inventory.")
+    else:
+        print("Private inventory saved with mode 0600 outside the Git checkout.")
     return 0
 
 
