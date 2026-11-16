@@ -55,6 +55,15 @@ def test_private_inventory_requires_outside_repo_and_owner_only_permissions(tmp_
             repo_root=repository_root,
         )
 
+    symlink_target = tmp_path / "outside.json"
+    symlink_target.write_text("{}", encoding="utf-8")
+    symlink_path = tmp_path / "private-link.json"
+    symlink_path.symlink_to(symlink_target)
+    with pytest.raises(ValueError, match="symlink"):
+        write_inventory(
+            inventory, symlink_path, private=True, repo_root=repository_root
+        )
+
     destination = tmp_path / "private-store" / "repositories.json"
     written = write_inventory(
         inventory, destination, private=True, repo_root=repository_root
