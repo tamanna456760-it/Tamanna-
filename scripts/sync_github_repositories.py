@@ -102,7 +102,7 @@ def write_inventory(
     with os.fdopen(descriptor, "w", encoding="utf-8") as output_file:
         if private:
             os.fchmod(output_file.fileno(), 0o600)
-        output_file.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n")
+        output_file.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
     return destination
 
 
