@@ -95,12 +95,14 @@ def write_inventory(
     if private and (destination == root or root in destination.parents):
         raise ValueError("Private inventory must be stored outside the Git repository")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
     if private:
-        destination.chmod(0o600)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(destination, flags, 0o600 if private else 0o666)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as output_file:
+        if private:
+            os.fchmod(output_file.fileno(), 0o600)
+        output_file.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n")
     return destination
 
 
