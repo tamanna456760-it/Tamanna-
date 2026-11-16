@@ -61,12 +61,12 @@ The account inventory workflow is separate from the public source-code RAG sync:
 1. `scripts/sync_github_repositories.py` uses a GitHub token to enumerate repositories visible to that token.
 2. Because `memory/github_repositories.json` is committed to this repository, the workflow filters out every private repository before writing the file. Private names, URLs and descriptions must never be committed to a public repository.
 3. `scripts/index_github_repository_memory.py --validate-only` validates the public inventory in CI without requiring a database.
-4. To index an inventory into a backend database, run the indexer on the backend host with `TAMANNA_GITHUB_MEMORY_OWNER_ID` set to the authenticated administrator's internal owner ID and `TAMANNA_KNOWLEDGE_DB` pointing to the persistent knowledge database. The indexer requires an explicit owner ID and does not write to the shared `tamanna-public` corpus.
+4. To index an inventory into a backend database, run the indexer on the backend host with `TAMANNA_GITHUB_MEMORY_OWNER_ID` set to the authenticated administrator's internal owner ID and `TAMANNA_KNOWLEDGE_DB` pointing to the persistent knowledge database. The indexer requires an explicit owner ID in the same `user:<numeric-user-id>` format used by the authenticated RAG route, so only that logged-in user can retrieve it. It does not write to the shared `tamanna-public` corpus.
 
 Example (backend host only):
 
 ```bash
-TAMANNA_GITHUB_MEMORY_OWNER_ID="<internal-admin-owner-id>" \
+TAMANNA_GITHUB_MEMORY_OWNER_ID="user:<internal-admin-user-id>" \
 TAMANNA_KNOWLEDGE_DB="/var/lib/tamanna/knowledge_vectors.sqlite3" \
 python scripts/index_github_repository_memory.py
 ```
