@@ -41,7 +41,7 @@
             android:layout_height="48dp"
             android:src="@android:drawable/ic_menu_send"
             android:background="#8b5cf6"
-            android:tint="#ffffff"
+            app:tint="#ffffff"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
