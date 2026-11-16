@@ -71,7 +71,20 @@ TAMANNA_KNOWLEDGE_DB="/var/lib/tamanna/knowledge_vectors.sqlite3" \
 python scripts/index_github_repository_memory.py
 ```
 
-For private repositories, do not use the committed public inventory. Generate a separate inventory in a private backend-only location with a token that has only the required repository read access, then pass that private file using `--index-file /secure/path/repositories.json`. Keep the file outside the Git checkout, restrict filesystem permissions, and never upload it as a public artifact. The indexer still requires the explicit owner ID.
+For private repositories, the sync script has a dedicated safe mode. Run it only on the backend host with a token that has the minimum required repository read access:
+
+```bash
+python scripts/sync_github_repositories.py \
+  --include-private \
+  --output /var/lib/tamanna/private/github_repositories.json
+
+TAMANNA_GITHUB_MEMORY_OWNER_ID="user:<internal-admin-user-id>" \
+TAMANNA_KNOWLEDGE_DB="/var/lib/tamanna/knowledge_vectors.sqlite3" \
+python scripts/index_github_repository_memory.py \
+  --index-file /var/lib/tamanna/private/github_repositories.json
+```
+
+Private mode requires an absolute output path outside the Git checkout and writes the file with mode `0600`. Never commit or upload that file. Supply the GitHub token through a protected environment file or secret manager, not a command-line argument. The indexer still requires the explicit owner ID.
 
 The scheduled GitHub workflow polls every six hours; it is not an instantaneous repository-created webhook. It only sees repositories visible to the configured token. Set `TAMANNA_GITHUB_TOKEN` as an Actions secret with the minimum read-only repository/account scope needed. The built-in workflow token may see only the current repository. The workflow's `GITHUB_TOKEN` permission to write is limited to committing the public inventory in this repository.
 
