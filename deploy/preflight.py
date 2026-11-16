@@ -12,7 +12,6 @@ REQUIRED_FILES = (
     "index.html",
     "Main.py",
     "run_server.py",
-    "CNAME",
     ".github/workflows/deploy.yml",
     ".github/workflows/pages.yml",
 )
@@ -29,12 +28,17 @@ def main() -> None:
         if not path.is_file():
             fail(f"Required file missing: {relative}")
 
-    cname = (ROOT / "CNAME").read_text(
-        encoding="utf-8"
-    ).strip().lower()
-
-    if cname != EXPECTED_HOST:
-        fail(f"CNAME must contain exactly {EXPECTED_HOST}")
+    cname_path = ROOT / "CNAME"
+    if cname_path.is_file():
+        cname = cname_path.read_text(encoding="utf-8").strip().lower()
+        if cname != EXPECTED_HOST:
+            fail(f"CNAME must contain exactly {EXPECTED_HOST} when configured")
+        print(f"PASS: Optional CNAME targets {EXPECTED_HOST}.")
+    else:
+        print(
+            "INFO: CNAME is absent; custom-domain ownership/DNS is not assumed. "
+            "Project Pages and workers.dev builds remain valid."
+        )
 
     package_json = ROOT / "package.json"
     if package_json.is_file():
@@ -44,7 +48,6 @@ def main() -> None:
             fail(f"Invalid package.json: {exc}")
 
     print("PASS: Required files exist.")
-    print(f"PASS: CNAME targets {EXPECTED_HOST}.")
     print("PASS: Deployment preflight completed.")
     print(
         "NOTE: DNS, domain ownership, GitHub Pages settings and TLS "
