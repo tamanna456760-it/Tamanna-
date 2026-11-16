@@ -10,7 +10,6 @@ const MAX_ASSET_BYTES = 25 * 1024 * 1024;
 const requiredFiles = [
   'index.html',
   '404.html',
-  'CNAME',
   '.nojekyll',
   'css/style.css',
   'js/auth.js',
@@ -69,9 +68,15 @@ function main() {
     }
   }
 
-  const hostname = fs.readFileSync(path.join(dist, 'CNAME'), 'utf8').trim();
-  if (hostname !== 'www.bd-king-r7.com') {
-    fail('dist/CNAME must contain exactly www.bd-king-r7.com.');
+  const cnamePath = path.join(dist, 'CNAME');
+  if (fs.existsSync(cnamePath)) {
+    const hostname = fs.readFileSync(cnamePath, 'utf8').trim();
+    if (hostname !== 'www.bd-king-r7.com') {
+      fail('dist/CNAME must contain exactly www.bd-king-r7.com when configured.');
+    }
+    console.log('PASS: Optional custom-domain CNAME is valid.');
+  } else {
+    console.log('INFO: No CNAME configured; this build targets the Cloudflare workers.dev hostname.');
   }
 
   const files = walk(dist);
@@ -96,7 +101,7 @@ function main() {
 
   const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
   console.log('PASS: Wrangler config targets ./dist (not repository root).');
-  console.log('PASS: Required website files and custom domain are present.');
+  console.log('PASS: Required website files are present.');
   console.log(`PASS: ${files.length} static files checked; no file exceeds 25 MiB.`);
   console.log('PASS: No security/threat-intelligence reports found in deployment assets.');
   console.log(`Deployment payload: ${(totalBytes / 1024 / 1024).toFixed(2)} MiB`);
