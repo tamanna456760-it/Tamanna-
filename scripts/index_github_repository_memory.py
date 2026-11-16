@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -41,7 +42,10 @@ def load_inventory(path: str | Path = DEFAULT_INDEX) -> dict[str, Any]:
         if not isinstance(item, dict):
             raise ValueError("Each repository entry must be an object")
         full_name = item.get("full_name")
-        if not isinstance(full_name, str) or not full_name.strip() or "/" not in full_name:
+        if not isinstance(full_name, str) or not re.fullmatch(
+            r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9_.-]{1,100}",
+            full_name,
+        ):
             raise ValueError("Each repository needs a valid owner/name full_name")
         key = full_name.casefold()
         if key in seen:
