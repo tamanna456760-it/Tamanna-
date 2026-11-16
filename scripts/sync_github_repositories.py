@@ -88,12 +88,12 @@ def write_inventory(
     destination = Path(output)
     if private and not destination.is_absolute():
         raise ValueError("Private inventory output must be an absolute path outside the repository")
+    if destination.is_symlink():
+        raise ValueError("Inventory output cannot be a symlink")
     destination = destination.resolve()
     root = Path(repo_root).resolve()
     if private and (destination == root or root in destination.parents):
         raise ValueError("Private inventory must be stored outside the Git repository")
-    if destination.is_symlink():
-        raise ValueError("Inventory output cannot be a symlink")
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
