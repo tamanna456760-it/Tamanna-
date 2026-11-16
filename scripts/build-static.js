@@ -10,7 +10,6 @@ const requiredFiles = [
   'admin.html',
   'css/admin.css',
   'js/admin.js',
-  'CNAME',
   'css/style.css',
   'js/auth.js',
   'js/chat.js',
@@ -31,9 +30,12 @@ for (const relative of requiredFiles) {
 // A project-site deployment must not publish CNAME: that file binds a
 // custom domain and conflicts with the /<repository>/ GitHub Pages URL.
 const isProjectPagesBuild = Boolean((process.env.GITHUB_PAGES_BASE_PATH || '').trim());
-const hostname = fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim();
-if (!isProjectPagesBuild && hostname !== 'www.bd-king-r7.com') {
-  fail('CNAME must contain exactly www.bd-king-r7.com');
+const cnamePath = path.join(root, 'CNAME');
+const hostname = fs.existsSync(cnamePath)
+  ? fs.readFileSync(cnamePath, 'utf8').trim()
+  : '';
+if (!isProjectPagesBuild && hostname && hostname !== 'www.bd-king-r7.com') {
+  fail('CNAME must contain exactly www.bd-king-r7.com when configured.');
 }
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -54,8 +56,11 @@ fs.rmSync(output, { recursive: true, force: true });
 fs.mkdirSync(output, { recursive: true });
 fs.mkdirSync(path.join(output, 'admin'), { recursive: true });
 
-for (const file of ['index.html', 'admin.html', '404.html', 'CNAME']) {
+for (const file of ['index.html', 'admin.html', '404.html']) {
   fs.copyFileSync(path.join(root, file), path.join(output, file));
+}
+if (hostname && !isProjectPagesBuild) {
+  fs.copyFileSync(cnamePath, path.join(output, 'CNAME'));
 }
 // Cloudflare static assets can now resolve the clean /admin path.
 fs.copyFileSync(path.join(root, 'admin.html'), path.join(output, 'admin', 'index.html'));
@@ -106,7 +111,7 @@ if (basePath) {
 
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
 const outputRequiredFiles = ['index.html', 'admin.html', 'admin/index.html', '404.html', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js'];
-if (!basePath) outputRequiredFiles.push('CNAME');
+if (!basePath && hostname) outputRequiredFiles.push('CNAME');
 for (const relative of outputRequiredFiles) {
   if (!fs.existsSync(path.join(output, relative))) {
     fail(`Build output is incomplete: dist/${relative}`);
@@ -118,4 +123,4 @@ if (basePath && fs.existsSync(path.join(output, 'CNAME'))) {
 
 console.log('PASS: Static website build completed.');
 console.log('Output: dist/');
-console.log(`Target: ${basePath ? 'GitHub Pages project site' : hostname}`);
+console.log(`Target: ${basePath ? 'GitHub Pages project site' : (hostname || 'Cloudflare workers.dev (no custom domain configured)')}`);
