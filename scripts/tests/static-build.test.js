@@ -24,3 +24,19 @@ test("GitHub Pages build emits chat/admin pages and required assets without cust
   }
   assert.equal(fs.existsSync(path.join(root, "dist", "CNAME")), false);
 });
+
+
+test("Cloudflare build and payload validation work without an unverified custom domain", () => {
+  const build = spawnSync(process.execPath, [path.join(root, "scripts/build-static.js")], {
+    cwd: root,
+    encoding: "utf8",
+    env: { ...process.env, GITHUB_PAGES_BASE_PATH: "" },
+  });
+  assert.equal(build.status, 0, `${build.stdout}\\n${build.stderr}`);
+  const verify = spawnSync(process.execPath, [path.join(root, "scripts/verify-cloudflare-deploy.js")], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  assert.equal(verify.status, 0, `${verify.stdout}\\n${verify.stderr}`);
+  assert.match(verify.stdout, /No CNAME configured/);
+});
