@@ -48,41 +48,7 @@ jobs:
           TASK: ${{ inputs.task }}
         run: |
           set -euo pipefail
-
-          case "$TASK" in
-            system-info)
-              df -h
-              free -h
-              ;;
-            python-check)
-              python3 -m compileall -q .
-              echo "Python syntax compilation passed."
-              ;;
-            tests)
-              if [[ ! -d tests ]]; then
-                echo "::error::No tests/ directory exists in this repository."
-                exit 1
-              fi
-              python3 -m pip install --disable-pip-version-check pytest
-              python3 -m pytest -q
-              ;;
-            repository-audit)
-              echo "Tracked environment files (must be empty):"
-              tracked_env="$(git ls-files | grep -E '(^|/)\.env($|\.)' || true)"
-              if [[ -n "$tracked_env" ]]; then
-                printf '%s\n' "$tracked_env"
-                echo "::error::Tracked .env file(s) detected. Review and remove secrets safely."
-                exit 1
-              fi
-              echo "No tracked .env files detected."
-              echo "Working tree status:"
-              git status --short
-              ;;
-            *)
-              echo "::error::Unsupported task: $TASK"
-              exit 2
-              ;;
-          esac
+          bash scripts/tamanna-linux-terminal.sh "$TASK"
 
       - name: Upload execution summary
         if: always()
