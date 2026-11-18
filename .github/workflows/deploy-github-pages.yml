@@ -39,6 +39,10 @@ jobs:
         run: |
           test -s dist/index.html
           test -s dist/admin/index.html
+          test -s dist/repository-admin/index.html
+          test -s dist/repository-admin/assets/admin.css
+          test -s dist/repository-admin/assets/admin.js
+          node --check repository-admin/assets/admin.js
           test -s dist/css/style.css
           test -s dist/js/chat.js
           grep -q '="/Tamanna-/css/' dist/index.html
