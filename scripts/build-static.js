@@ -65,6 +65,12 @@ if (hostname && !isProjectPagesBuild) {
 // Cloudflare static assets can now resolve the clean /admin path.
 fs.copyFileSync(path.join(root, 'admin.html'), path.join(output, 'admin', 'index.html'));
 
+// The repository inspector is a separate, read-only administration workspace.
+const repositoryAdmin = path.join(root, 'repository-admin');
+if (fs.existsSync(repositoryAdmin)) {
+  fs.cpSync(repositoryAdmin, path.join(output, 'repository-admin'), { recursive: true });
+}
+
 for (const directory of ['css', 'js', 'assets', 'static']) {
   const source = path.join(root, directory);
   if (fs.existsSync(source) && fs.statSync(source).isDirectory()) {
@@ -80,7 +86,7 @@ if (basePath && !/^\/[A-Za-z0-9._-]+$/.test(basePath)) {
   fail('GITHUB_PAGES_BASE_PATH must be one safe repository path segment, e.g. /Tamanna-.');
 }
 if (basePath) {
-  const htmlFiles = ['index.html', 'admin.html', '404.html', 'admin/index.html'];
+  const htmlFiles = ['index.html', 'admin.html', '404.html', 'admin/index.html', 'repository-admin/index.html'];
   const staticPrefixes = ['/css/', '/js/', '/assets/', '/static/', '/admin/'];
   for (const relative of htmlFiles) {
     const target = path.join(output, relative);
@@ -110,7 +116,7 @@ if (basePath) {
 }
 
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
-const outputRequiredFiles = ['index.html', 'admin.html', 'admin/index.html', '404.html', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js'];
+const outputRequiredFiles = ['index.html', 'admin.html', 'admin/index.html', 'repository-admin/index.html', 'repository-admin/assets/admin.css', 'repository-admin/assets/admin.js', '404.html', '.nojekyll', 'css/style.css', 'css/admin.css', 'js/chat.js', 'js/admin.js'];
 if (!basePath && hostname) outputRequiredFiles.push('CNAME');
 for (const relative of outputRequiredFiles) {
   if (!fs.existsSync(path.join(output, relative))) {
