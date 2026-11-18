@@ -1,0 +1,99 @@
+name: Tamanna Linux Terminal
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Select a safe task for the temporary GitHub-hosted Linux runner"
+        required: true
+        type: choice
+        options:
+          - system-info
+          - python-check
+          - tests
+          - repository-audit
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tamanna-linux-terminal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terminal:
+    name: Tamanna Linux Terminal
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Initialize terminal
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Tamanna Linux Terminal"
+          echo "Runner: ${RUNNER_OS}"
+          echo "Workspace: ${GITHUB_WORKSPACE}"
+          uname -a
+          python3 --version
+          git --version
+
+      - name: Execute selected task
+        shell: bash
+        env:
+          TASK: ${{ inputs.task }}
+        run: |
+          set -euo pipefail
+
+          case "$TASK" in
+            system-info)
+              df -h
+              free -h
+              ;;
+            python-check)
+              python3 -m compileall -q .
+              echo "Python syntax compilation passed."
+              ;;
+            tests)
+              if [[ ! -d tests ]]; then
+                echo "::error::No tests/ directory exists in this repository."
+                exit 1
+              fi
+              python3 -m pip install --disable-pip-version-check pytest
+              python3 -m pytest -q
+              ;;
+            repository-audit)
+              echo "Tracked environment files (must be empty):"
+              tracked_env="$(git ls-files | grep -E '(^|/)\.env($|\.)' || true)"
+              if [[ -n "$tracked_env" ]]; then
+                printf '%s\n' "$tracked_env"
+                echo "::error::Tracked .env file(s) detected. Review and remove secrets safely."
+                exit 1
+              fi
+              echo "No tracked .env files detected."
+              echo "Working tree status:"
+              git status --short
+              ;;
+            *)
+              echo "::error::Unsupported task: $TASK"
+              exit 2
+              ;;
+          esac
+
+      - name: Upload execution summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Tamanna Linux Terminal"
+            echo "- Task: ${{ inputs.task }}"
+            echo "- Ref: ${GITHUB_REF}"
+            echo "- Runner: ${RUNNER_OS}"
+            echo "- Result: see job steps above"
+            echo ""
+            echo "GitHub-hosted runners are temporary; this is not a persistent VPS shell."
+          } >> "$GITHUB_STEP_SUMMARY"
