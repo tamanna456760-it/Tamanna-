@@ -194,3 +194,13 @@ Run locally as a static preview without APIs, or run FastAPI when private config
 - [Repository structure](docs/REPOSITORY_STRUCTURE.md) — canonical folder ownership, naming rules and safe migration checklist.
 - [Architecture diagram](docs/system_architecture.mmd) — Mermaid system topology.
 - [Repository audit](docs/REPOSITORY_AUDIT_2026-11-15.md) — verified tree findings and remaining cleanup phases.
+
+
+## Separate administration workspaces
+
+- **Repository Code Admin:** [Open repository inventory](https://tamanna456760-it.github.io/Tamanna-/repository-admin/). It reads the public GitHub main-branch tree and provides file search, size/type inventory and architecture hints. It does not edit repository files.
+- **Tamanna AI Admin:** [Open the website AI admin panel](https://tamanna456760-it.github.io/tamanna-website/admin/). Chat and administration remain separate.
+- **Tamanna Server Admin:** served by the deployed server at `/admin/`; see [server panel documentation](https://github.com/tamanna456760-it/Tamanna-server/blob/main/docs/SERVER_ADMIN_PANEL.md).
+- **Private profile data:** kept only in the private `TI-SERVER` repository. Public repositories contain no owner address or confidential profile values.
+
+The panels currently expose only verified/static or read-only health information. Privileged actions and live telemetry require authenticated backend APIs and are not represented as implemented until tested.
